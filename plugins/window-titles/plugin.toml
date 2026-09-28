@@ -1,0 +1,19 @@
+[plugin]
+id = "window-titles"
+name = "Window titles"
+version = "0.1.0"
+api = 1
+description = "One key shows or hides a title bar on every window"
+
+[packages]
+pacman = ["hyprland"]
+
+[settings]
+key = "SUPER + T"
+# Bar height in logical pixels.
+height = 20
+
+[[targets]]
+template = "titles.lua.tmpl"
+output = "~/.config/hypr/myarch/titles.lua"
+reload = "hyprctl reload >/dev/null"
