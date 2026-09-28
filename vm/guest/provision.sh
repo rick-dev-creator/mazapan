@@ -36,6 +36,30 @@ for f in /etc/skel/.[!.]*; do
   [[ -e /home/$user/${f##*/} ]] || install -o "$user" -g "$user" -m 644 "$f" "/home/$user/"
 done
 
+# Quickshell's network module talks to NetworkManager; the cloud image
+# ships systemd-networkd. The switch drops the network for a moment, which
+# can take an SSH session (and this script) down with it, so it runs
+# detached from us.
+log "network: NetworkManager"
+install -Dm644 "$here/wifi-lab/unmanaged.conf" /etc/NetworkManager/conf.d/myarch-wifi-lab.conf
+if ! systemctl is-active -q NetworkManager; then
+  systemctl disable systemd-networkd.service systemd-networkd.socket 2>/dev/null || true
+  systemctl enable NetworkManager
+  systemd-run --quiet --on-active=2 --unit=myarch-network-switch \
+    sh -c 'systemctl stop systemd-networkd.socket systemd-networkd.service; systemctl start NetworkManager'
+fi
+
+# Two test Wi-Fi networks on simulated radios (mac80211_hwsim), so the
+# network widget has something real to scan and join. VM only.
+log "wifi test lab"
+install -Dm644 -t /etc/myarch-wifi-lab "$here/wifi-lab/lab.conf" "$here/wifi-lab/open.conf" "$here/wifi-lab/dnsmasq.conf"
+install -Dm644 -t /etc/systemd/system "$here/wifi-lab/myarch-wifi-lab.service"
+systemctl daemon-reload
+systemctl enable --now myarch-wifi-lab.service
+
+log "bluetooth"
+systemctl enable --now bluetooth.service
+
 log "autologin on tty1"
 install -d /etc/systemd/system/getty@tty1.service.d
 cat > /etc/systemd/system/getty@tty1.service.d/autologin.conf <<EOF

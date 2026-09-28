@@ -11,6 +11,9 @@
 #   vm/vm run <cmd>   run a command inside the guest's Hyprland session
 #   vm/vm exec <cmd>  launch an app through Hyprland (outlives the SSH call)
 #   vm/vm key <combo> press keys as the guest keyboard, e.g. meta_l-equal
+#   vm/vm mouse ...   move / press / drag the guest pointer, in guest pixels:
+#                     move X Y | down | up | click X Y | rclick X Y | mclick X Y
+#                     | wheel X Y up|down [notches] | drag X1 Y1 X2 Y2 [ms]
 #   vm/vm shot [file] screenshot of the guest desktop (default vm/.state/shot.png)
 #   vm/vm stop        power off
 #   vm/vm reset       throw away the overlay and seed: fresh first boot
@@ -88,10 +91,12 @@ boot() {
     -nic "user,model=virtio-net-pci,hostfwd=tcp:127.0.0.1:$ssh_port-:22" \
     -virtfs "local,path=$repo,mount_tag=myarch,security_model=none,id=myarch" \
     -device virtio-tablet-pci -device virtio-keyboard-pci \
+    -audiodev pipewire,id=snd0 -device ich9-intel-hda -device hda-duplex,audiodev=snd0 \
     -device "virtio-vga-gl,xres=$w,yres=$h" \
     "${display[@]}" \
     -serial "file:$state/serial.log" \
     -monitor "unix:$state/monitor.sock,server,nowait" \
+    -qmp "unix:$state/qmp.sock,server,nowait" \
     -pidfile "$pidfile" \
     >"$state/qemu.log" 2>&1
   sleep 1
@@ -153,6 +158,74 @@ PY
   done
 }
 
+# The guest pointer is an absolute tablet: QMP input-send-event with x/y in
+# 0..32767 across the guest screen, so guest pixels are scaled by its size.
+cmd_mouse() {
+  running || die "VM is not running"
+  local size
+  size=$(cmd_run 'hyprctl monitors -j | jq -r ".[0] | \"\(.width) \(.height)\""')
+  python3 - "$state/qmp.sock" $size "$@" <<'PY'
+import json, socket, sys, time
+
+sock_path, width, height, cmd, *args = sys.argv[1:]
+width, height = int(width), int(height)
+s = socket.socket(socket.AF_UNIX)
+s.connect(sock_path)
+f = s.makefile("rw")
+f.readline()  # greeting
+
+def qmp(execute, arguments=None):
+    msg = {"execute": execute}
+    if arguments:
+        msg["arguments"] = arguments
+    f.write(json.dumps(msg) + "\n")
+    f.flush()
+    while True:
+        reply = json.loads(f.readline())
+        if "return" in reply or "error" in reply:
+            return reply
+
+def send(*events):
+    qmp("input-send-event", {"events": list(events)})
+
+def move(x, y):
+    send({"type": "abs", "data": {"axis": "x", "value": round(float(x) * 32767 / width)}},
+         {"type": "abs", "data": {"axis": "y", "value": round(float(y) * 32767 / height)}})
+
+def button(down, which="left"):
+    send({"type": "btn", "data": {"down": down, "button": which}})
+
+qmp("qmp_capabilities")
+if cmd == "move":
+    move(*args)
+elif cmd == "down":
+    button(True)
+elif cmd == "up":
+    button(False)
+elif cmd in ("click", "rclick", "mclick"):
+    which = {"click": "left", "rclick": "right", "mclick": "middle"}[cmd]
+    move(*args); time.sleep(0.05); button(True, which); time.sleep(0.05); button(False, which)
+elif cmd == "wheel":
+    x, y, direction = args[:3]
+    notches = int(args[3]) if len(args) > 3 else 1
+    move(x, y); time.sleep(0.05)
+    for _ in range(notches):
+        button(True, "wheel-" + direction); button(False, "wheel-" + direction); time.sleep(0.08)
+elif cmd == "drag":
+    x1, y1, x2, y2 = map(float, args[:4])
+    ms = float(args[4]) if len(args) > 4 else 600
+    steps = max(2, int(ms / 16))
+    move(x1, y1); time.sleep(0.1); button(True); time.sleep(0.15)
+    for i in range(1, steps + 1):
+        t = i / steps
+        move(x1 + (x2 - x1) * t, y1 + (y2 - y1) * t)
+        time.sleep(ms / 1000 / steps)
+    time.sleep(0.15); button(False)
+else:
+    sys.exit(f"unknown mouse command: {cmd}")
+PY
+}
+
 cmd_shot() {
   local out="${1:-$state/shot.png}"
   cmd_run grim - > "$out"
@@ -180,7 +253,7 @@ cmd_destroy() {
 }
 
 case "${1:-}" in
-  create|start|headless|wait|ssh|provision|run|exec|key|shot|stop|reset|destroy)
+  create|start|headless|wait|ssh|provision|run|exec|key|mouse|shot|stop|reset|destroy)
     c=$1; shift; "cmd_$c" "$@" ;;
-  *) sed -n '2,19s/^# \{0,1\}//p' "$0"; exit 1 ;;
+  *) sed -n '2,22s/^# \{0,1\}//p' "$0"; exit 1 ;;
 esac

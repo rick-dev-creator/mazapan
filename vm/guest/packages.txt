@@ -28,12 +28,20 @@ adw-gtk-theme
 qt6ct
 
 # Desktop plumbing
+networkmanager
+bluez
+bluez-utils
 wl-clipboard
 grim
 wf-recorder
 pipewire
 wireplumber
 pipewire-pulse
+
+# Dev VM test lab: simulated Wi-Fi access points (see wifi-lab/)
+hostapd
+dnsmasq
+iw
 
 # Fonts
 noto-fonts

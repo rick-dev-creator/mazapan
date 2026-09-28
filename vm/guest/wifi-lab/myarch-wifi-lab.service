@@ -1,0 +1,19 @@
+# myarch dev VM: two test Wi-Fi networks on simulated radios, so the
+# network widget can scan, connect and show signal without real hardware.
+# wlan0 is the client (managed by NetworkManager); wlan1 and wlan2 are the
+# access points (NetworkManager is told to leave them alone).
+[Unit]
+Description=myarch Wi-Fi test lab (mac80211_hwsim access points)
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+ExecStartPre=/usr/bin/modprobe mac80211_hwsim radios=3
+ExecStartPre=/usr/bin/sh -c 'for i in 1 2; do ip link set wlan$i up; ip addr replace 10.42.$i.1/24 dev wlan$i; done'
+ExecStartPre=/usr/bin/sh -c 'dnsmasq --conf-file=/etc/myarch-wifi-lab/dnsmasq.conf --pid-file=/run/myarch-wifi-lab-dnsmasq.pid'
+ExecStart=/usr/bin/hostapd /etc/myarch-wifi-lab/lab.conf /etc/myarch-wifi-lab/open.conf
+ExecStopPost=/usr/bin/sh -c 'kill $(cat /run/myarch-wifi-lab-dnsmasq.pid) 2>/dev/null || true'
+
+[Install]
+WantedBy=multi-user.target
