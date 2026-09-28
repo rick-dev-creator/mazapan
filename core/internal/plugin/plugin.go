@@ -44,6 +44,29 @@ type Plugin struct {
 	// `myarch doctor` runs them on demand; `myarch update` runs them after
 	// updating and rolls back when one fails.
 	Checks []Check `toml:"checks"`
+
+	// Actions are what the plugin lets you do: the command palette lists
+	// every plugin's, each with the command it runs and its keybinding.
+	Actions []Action `toml:"actions"`
+}
+
+type Action struct {
+	// Name, Run and Key are rendered as templates: the name can be
+	// translated, the command and key can come from settings.
+	Name string `toml:"name"`
+	// Run is a shell command, shown next to the action so it can be
+	// learned. Empty for a keybinding that only makes sense as a key (a
+	// mouse drag, "hold to…").
+	Run string `toml:"run"`
+	// Key is the keybinding that does the same, as the plugin binds it
+	// ("SUPER + SHIFT + M"). Listing it here is how the palette knows every
+	// keybinding: the list is always right.
+	Key string `toml:"key"`
+	// Terminal: run it in a terminal, for commands that ask or print
+	// (myarch update).
+	Terminal bool `toml:"terminal"`
+	// Keywords help find it: other words people use for it.
+	Keywords string `toml:"keywords"`
 }
 
 type Check struct {
@@ -182,6 +205,11 @@ func load(path string) (*Plugin, error) {
 	for i, c := range p.Checks {
 		if c.Name == "" || c.Run == "" {
 			return nil, fmt.Errorf("%s: checks[%d] needs name and run", path, i)
+		}
+	}
+	for i, a := range p.Actions {
+		if a.Name == "" || (a.Run == "" && a.Key == "") {
+			return nil, fmt.Errorf("%s: actions[%d] needs a name, and run or key", path, i)
 		}
 	}
 	for i, t := range p.Targets {

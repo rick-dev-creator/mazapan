@@ -17,3 +17,9 @@ height = 20
 template = "titles.lua.tmpl"
 output = "~/.config/hypr/myarch/titles.lua"
 reload = "hyprctl reload >/dev/null"
+
+[[actions]]
+name = "{{t \"toggle\"}}"
+run = "hyprctl eval 'myarch_titles_toggle()'"
+key = "{{.Settings.key}}"
+keywords = "{{t \"toggle.kw\"}}"

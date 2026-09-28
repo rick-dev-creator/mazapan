@@ -36,6 +36,10 @@ for f in /etc/skel/.[!.]*; do
   [[ -e /home/$user/${f##*/} ]] || install -o "$user" -g "$user" -m 644 "$f" "/home/$user/"
 done
 
+# myarch as built from the mounted repo, on everyone's PATH: the desktop
+# runs it too (the command palette's actions), not just shells.
+ln -sf "/home/$user/my-arch/bin/myarch" /usr/local/bin/myarch
+
 # Quickshell's network module talks to NetworkManager; the cloud image
 # ships systemd-networkd. The switch drops the network for a moment, which
 # can take an SSH session (and this script) down with it, so it runs

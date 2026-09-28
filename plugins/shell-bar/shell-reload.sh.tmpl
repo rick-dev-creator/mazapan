@@ -4,4 +4,10 @@
 # reloaded lives in one place.
 qs ipc -c myarch call myarch reload >/dev/null 2>&1 && exit 0
 qs kill -c myarch >/dev/null 2>&1
+# A shell being killed still counts for a moment: started now, the new one
+# would take it for a running copy (--no-duplicate) and leave no bar.
+for _ in $(seq 30); do
+  qs list -c myarch 2>&1 | grep -q "Process ID" || break
+  sleep 0.1
+done
 hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch --no-duplicate")' >/dev/null

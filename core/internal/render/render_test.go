@@ -84,3 +84,30 @@ func TestChecksAreRendered(t *testing.T) {
 		t.Fatalf("check = %+v", c)
 	}
 }
+
+func TestActionsAreSeenByEveryTemplate(t *testing.T) {
+	dir := t.TempDir()
+	os.MkdirAll(filepath.Join(dir, "a", "locales"), 0o755)
+	os.WriteFile(filepath.Join(dir, "a", "locales", "en.toml"), []byte("open = 'Open monitors'\n"), 0o644)
+	a := &plugin.Plugin{Dir: filepath.Join(dir, "a"), Actions: []plugin.Action{
+		{Name: `{{t "open"}}`, Run: "qs ipc call x", Key: "{{.Settings.key}}"},
+		// Its key unbound in config.toml, and no command: left out.
+		{Name: "only a key", Key: "{{.Settings.other}}"},
+	}}
+	a.Meta.ID = "a"
+	a.Settings = map[string]any{"key": "SUPER + M", "other": ""}
+	// "palette" sorts before nothing in particular: it must see a's
+	// actions whatever the order.
+	os.MkdirAll(filepath.Join(dir, "palette"), 0o755)
+	os.WriteFile(filepath.Join(dir, "palette", "p.tmpl"), []byte(`{{json .Actions}}`), 0o644)
+	pal := &plugin.Plugin{Dir: filepath.Join(dir, "palette"), Targets: []plugin.Target{{Template: "p.tmpl", Output: filepath.Join(dir, "out")}}}
+	pal.Meta.ID = "palette"
+	out, err := All([]*plugin.Plugin{pal, a}, testTheme(), nil, "en")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := `[{"plugin":"a","name":"Open monitors","run":"qs ipc call x","key":"SUPER + M"}]`
+	if got := string(out.Files[0].Content); got != want {
+		t.Fatalf("got %s\nwant %s", got, want)
+	}
+}

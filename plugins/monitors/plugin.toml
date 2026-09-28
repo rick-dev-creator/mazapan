@@ -32,3 +32,9 @@ reload = "sh ~/.local/share/myarch/bin/shell-reload"
 template = "Widget.qml.tmpl"
 output = "~/.config/quickshell/myarch/widgets/right/05-monitors.qml"
 reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[actions]]
+name = "{{t \"open\"}}"
+run = "qs ipc -c myarch call myarch panel monitors"
+key = "{{.Settings.key}}"
+keywords = "{{t \"open.kw\"}}"

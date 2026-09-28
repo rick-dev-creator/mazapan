@@ -67,14 +67,16 @@ local function remove_all()
   ours = {}
 end
 
-hl.bind("{{.Settings.key}}", function()
+-- Also a command: `hyprctl eval 'myarch_titles_toggle()'`.
+function myarch_titles_toggle()
   on = not on
   if on then
     for _, w in ipairs(hl.get_windows() or {}) do add(w) end
   else
     remove_all()
   end
-end)
+end
+hl.bind("{{.Settings.key}}", myarch_titles_toggle)
 
 hl.on("window.open", function(w)
   if on and w then add(w) end

@@ -27,3 +27,5 @@
 "unsupported" = "Not supported, left off: %1."
 "unreadable" = "Can't read ~/.config/myarch/monitors.json (%1): fix it or move it away before saving, so no profile is lost."
 "nothing_visible" = "At least one screen has to stay on and not be a mirror."
+"open" = "Arrange monitors"
+"open.kw" = "displays screens resolution scale arrange"

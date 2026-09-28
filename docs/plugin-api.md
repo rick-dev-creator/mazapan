@@ -67,6 +67,29 @@ Checks run one after the other and may fix what they look at on the way,
 as long as they report the result: the bar's check restarts the bar when
 Quickshell was updated underneath it, then checks it loaded.
 
+## Actions
+
+What a plugin lets you do, for the command palette (`SUPER + Space`):
+
+```toml
+[[actions]]
+name = "{{t \"open\"}}"                             # rendered: translatable
+run = "qs ipc -c myarch call myarch panel monitors"   # the command it runs
+key = "{{.Settings.key}}"                             # its keybinding
+terminal = false                                      # run it in a terminal
+keywords = "displays screens resolution"              # other words for it
+```
+
+`run` is a shell command, and the palette shows it next to the action: the
+point is that people learn it. When the plugin's keybinding calls a Lua
+function, expose that function as a global and make `run` call it through
+`hyprctl eval` (see `columns`: `myarch_columns.equal()`), so the key and
+the command do exactly the same thing. An action with a `key` and no `run`
+is a keybinding that only makes sense as a key ("SUPER + 1…0"). Every
+keybinding a plugin binds should be one of its actions: that's how the
+palette's list of keys stays right. `terminal = true` is for commands that
+ask or print (`myarch update`); the terminal stays open afterwards.
+
 ## Settings
 
 A plugin declares its settings with defaults; people override them in
@@ -140,6 +163,7 @@ missing token fails the render instead of producing an empty value.
 | `.Settings`    | the plugin's settings, defaults merged with config.toml |
 | `.Lang`        | the language, as a POSIX locale name: `es_MX`, `en` |
 | `.LangCode`    | just the language: `es`, `en`                   |
+| `.Actions`     | every plugin's actions, rendered: `.Plugin`, `.Name`, `.Run`, `.Key`, `.Terminal`, `.Keywords` |
 
 Functions:
 
@@ -157,6 +181,7 @@ Functions:
 | `t "today"`                | `hoy` (this plugin's text)    |
 | `tq "today"`               | `"hoy"` (quoted for QML/Lua)  |
 | `under "~/.config/hypr/myarch/"` | every plugin output below that path |
+| `json .Actions`            | a JSON value, also a valid QML/JS literal |
 
 `under` is how an entry point includes fragments without knowing which
 plugins exist: `hypr-base` loads every file other plugins generate under

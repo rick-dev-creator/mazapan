@@ -39,6 +39,9 @@ Rectangle {
 
     Text {
       text: row.glyph
+      // One width for every glyph, so titles line up.
+      Layout.preferredWidth: 18
+      horizontalAlignment: Text.AlignHCenter
       color: row.active ? Theme.accentText : Theme.fgMuted
       font.family: Theme.fontMono
       font.pointSize: 12

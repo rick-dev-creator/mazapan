@@ -173,14 +173,24 @@ local function resize(sign)
   hl.dispatch(hl.dsp.layout(string.format("colresize %s%.4f", sign, STEP)))
 end
 
-hl.bind("{{.Settings.key}}", function() arrange("equal") end)
-hl.bind("{{.Settings.phone_key}}", function()
-  local ws = hl.get_active_workspace()
-  arrange(ws and mode[ws.id] == "phone" and "equal" or "phone")
-end)
-hl.bind("{{.Settings.focus_key}}", focus)
-hl.bind("{{.Settings.grow_key}}", function() resize("+") end, { repeating = true })
-hl.bind("{{.Settings.shrink_key}}", function() resize("-") end, { repeating = true })
+-- The same as commands (`hyprctl eval 'myarch_columns.equal()'`): the
+-- command palette runs and shows these.
+myarch_columns = {
+  equal = function() arrange("equal") end,
+  phone = function()
+    local ws = hl.get_active_workspace()
+    arrange(ws and mode[ws.id] == "phone" and "equal" or "phone")
+  end,
+  focus = focus,
+  grow = function() resize("+") end,
+  shrink = function() resize("-") end,
+}
+
+hl.bind("{{.Settings.key}}", myarch_columns.equal)
+hl.bind("{{.Settings.phone_key}}", myarch_columns.phone)
+hl.bind("{{.Settings.focus_key}}", myarch_columns.focus)
+hl.bind("{{.Settings.grow_key}}", myarch_columns.grow, { repeating = true })
+hl.bind("{{.Settings.shrink_key}}", myarch_columns.shrink, { repeating = true })
 hl.bind("{{.Settings.move_left_key}}", hl.dsp.layout("swapcol l"))
 hl.bind("{{.Settings.move_right_key}}", hl.dsp.layout("swapcol r"))
 {{- if .Settings.auto}}

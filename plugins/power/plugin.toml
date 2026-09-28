@@ -1,0 +1,56 @@
+[plugin]
+id = "power"
+name = "Power"
+version = "0.1.0"
+api = 1
+description = "Lock, suspend, log out, reboot and shut down: a button in the bar, the palette, and a lock screen in the theme"
+
+[packages]
+pacman = ["quickshell", "hyprlock"]
+
+[settings]
+# Locks the screen.
+lock_key = "SUPER + L"
+# The button in the middle of the bar, next to the clock.
+bar = true
+
+[[targets]]
+template = "Power.qml.tmpl"
+output = "~/.config/quickshell/myarch/widgets/center/30-power.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "hyprlock.conf.tmpl"
+output = "~/.config/hypr/hyprlock.conf"
+
+[[targets]]
+template = "power.lua.tmpl"
+output = "~/.config/hypr/myarch/power.lua"
+reload = "hyprctl reload >/dev/null"
+
+# The same commands the button runs (see Power.qml.tmpl).
+[[actions]]
+name = "{{t \"lock\"}}"
+run = "pidof hyprlock || hyprlock"
+key = "{{.Settings.lock_key}}"
+keywords = "{{t \"lock.kw\"}}"
+
+[[actions]]
+name = "{{t \"suspend\"}}"
+run = "(pidof hyprlock || hyprlock &); sleep 1; systemctl suspend"
+keywords = "{{t \"suspend.kw\"}}"
+
+[[actions]]
+name = "{{t \"logout\"}}"
+run = "hyprctl dispatch 'hl.dsp.exit()'"
+keywords = "{{t \"logout.kw\"}}"
+
+[[actions]]
+name = "{{t \"reboot\"}}"
+run = "systemctl reboot"
+keywords = "{{t \"reboot.kw\"}}"
+
+[[actions]]
+name = "{{t \"poweroff\"}}"
+run = "systemctl poweroff"
+keywords = "{{t \"poweroff.kw\"}}"

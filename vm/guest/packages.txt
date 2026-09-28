@@ -47,3 +47,4 @@ iw
 # Fonts
 noto-fonts
 ttf-jetbrains-mono-nerd
+hyprlock

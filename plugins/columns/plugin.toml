@@ -44,3 +44,43 @@ min_width = 400
 template = "columns.lua.tmpl"
 output = "~/.config/hypr/myarch/columns.lua"
 reload = "hyprctl reload >/dev/null"
+
+[[actions]]
+name = "{{t \"equal\"}}"
+run = "hyprctl eval 'myarch_columns.equal()'"
+key = "{{.Settings.key}}"
+keywords = "{{t \"equal.kw\"}}"
+
+[[actions]]
+name = "{{t \"phone\"}}"
+run = "hyprctl eval 'myarch_columns.phone()'"
+key = "{{.Settings.phone_key}}"
+keywords = "{{t \"phone.kw\"}}"
+
+[[actions]]
+name = "{{t \"focus\"}}"
+run = "hyprctl eval 'myarch_columns.focus()'"
+key = "{{.Settings.focus_key}}"
+keywords = "{{t \"focus.kw\"}}"
+
+[[actions]]
+name = "{{t \"grow\"}}"
+run = "hyprctl eval 'myarch_columns.grow()'"
+key = "{{.Settings.grow_key}}"
+keywords = "{{t \"grow.kw\"}}"
+
+[[actions]]
+name = "{{t \"shrink\"}}"
+run = "hyprctl eval 'myarch_columns.shrink()'"
+key = "{{.Settings.shrink_key}}"
+keywords = "{{t \"shrink.kw\"}}"
+
+[[actions]]
+name = "{{t \"move_left\"}}"
+run = "hyprctl dispatch 'hl.dsp.layout(\"swapcol l\")'"
+key = "{{.Settings.move_left_key}}"
+
+[[actions]]
+name = "{{t \"move_right\"}}"
+run = "hyprctl dispatch 'hl.dsp.layout(\"swapcol r\")'"
+key = "{{.Settings.move_right_key}}"

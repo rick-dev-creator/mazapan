@@ -3,6 +3,7 @@ package render
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"math"
 	"os"
@@ -19,8 +20,19 @@ import (
 
 // Output is everything the plugins produce for one theme and language.
 type Output struct {
-	Files  []File
-	Checks []Check
+	Files   []File
+	Checks  []Check
+	Actions []Action
+}
+
+// Action is one plugin action, rendered: what the command palette lists.
+type Action struct {
+	Plugin   string `json:"plugin"`
+	Name     string `json:"name"`
+	Run      string `json:"run,omitempty"`
+	Key      string `json:"key,omitempty"`
+	Terminal bool   `json:"terminal,omitempty"`
+	Keywords string `json:"keywords,omitempty"`
 }
 
 // Check is one plugin check, rendered.
@@ -48,6 +60,8 @@ type Data struct {
 	Settings map[string]any // plugin defaults merged with config overrides
 	Lang     string         // POSIX locale name: "es_MX", "en"
 	LangCode string         // just the language: "es", "en"
+	// Every plugin's actions, rendered: what a command palette lists.
+	Actions []Action
 }
 
 // ExpandHome turns a leading "~/" into the user's home directory.
@@ -80,8 +94,18 @@ func All(plugins []*plugin.Plugin, t *theme.Theme, overrides map[string]map[stri
 
 	home, _ := os.UserHomeDir()
 	out := &Output{}
+	code, _, _ := strings.Cut(lang, "_")
+
+	// First every plugin's checks and actions, so that templates can see
+	// all the actions (the command palette lists them).
+	type prepared struct {
+		p    *plugin.Plugin
+		tmpl *template.Template
+		data Data
+	}
+	var ready []prepared
 	for _, p := range plugins {
-		if len(p.Targets) == 0 && len(p.Checks) == 0 {
+		if len(p.Targets) == 0 && len(p.Checks) == 0 && len(p.Actions) == 0 {
 			continue
 		}
 		cat, err := locale.Load(p.ID(), p.Dir, lang)
@@ -100,24 +124,7 @@ func All(plugins []*plugin.Plugin, t *theme.Theme, overrides map[string]map[stri
 		if err != nil {
 			return nil, err
 		}
-		code, _, _ := strings.Cut(lang, "_")
 		data := Data{Theme: t, Plugin: p.ID(), Home: home, Settings: settings, Lang: lang, LangCode: code}
-		for _, tg := range p.Targets {
-			var buf bytes.Buffer
-			if err := tmpl.ExecuteTemplate(&buf, tg.Template, data); err != nil {
-				return nil, fmt.Errorf("plugin %s: %w", p.ID(), err)
-			}
-			reload, err := renderString(tmpl, tg.Reload, data)
-			if err != nil {
-				return nil, fmt.Errorf("plugin %s: reload: %w", p.ID(), err)
-			}
-			out.Files = append(out.Files, File{
-				Plugin:  p.ID(),
-				Path:    ExpandHome(tg.Output),
-				Content: buf.Bytes(),
-				Reload:  reload,
-			})
-		}
 		for _, c := range p.Checks {
 			name, err := renderString(tmpl, c.Name, data)
 			if err != nil {
@@ -132,6 +139,42 @@ func All(plugins []*plugin.Plugin, t *theme.Theme, overrides map[string]map[stri
 				timeout = 15
 			}
 			out.Checks = append(out.Checks, Check{Plugin: p.ID(), Name: name, Run: run, Timeout: timeout, Session: c.Session})
+		}
+		for n, a := range p.Actions {
+			var fields [4]string
+			for i, src := range []string{a.Name, a.Run, a.Key, a.Keywords} {
+				if fields[i], err = renderString(tmpl, src, data); err != nil {
+					return nil, fmt.Errorf("plugin %s: actions[%d]: %w", p.ID(), n, err)
+				}
+			}
+			// A key set to "" in config.toml unbinds it: an action with
+			// neither a command nor a key left has nothing to offer.
+			if strings.TrimSpace(fields[1]) == "" && strings.TrimSpace(fields[2]) == "" {
+				continue
+			}
+			out.Actions = append(out.Actions, Action{Plugin: p.ID(), Name: fields[0], Run: fields[1],
+				Key: fields[2], Terminal: a.Terminal, Keywords: fields[3]})
+		}
+		ready = append(ready, prepared{p, tmpl, data})
+	}
+
+	for _, r := range ready {
+		r.data.Actions = out.Actions
+		for _, tg := range r.p.Targets {
+			var buf bytes.Buffer
+			if err := r.tmpl.ExecuteTemplate(&buf, tg.Template, r.data); err != nil {
+				return nil, fmt.Errorf("plugin %s: %w", r.p.ID(), err)
+			}
+			reload, err := renderString(r.tmpl, tg.Reload, r.data)
+			if err != nil {
+				return nil, fmt.Errorf("plugin %s: reload: %w", r.p.ID(), err)
+			}
+			out.Files = append(out.Files, File{
+				Plugin:  r.p.ID(),
+				Path:    ExpandHome(tg.Output),
+				Content: buf.Bytes(),
+				Reload:  reload,
+			})
 		}
 	}
 	return out, nil
@@ -212,6 +255,12 @@ func funcs(t *theme.Theme, outputs []string, cat *locale.Catalog) template.FuncM
 			return fmt.Sprintf("mass = 1, stiffness = %.2f, dampening = %.2f", omega*omega, 2*damping*omega)
 		},
 		"num": func(f float64) string { return strconv.FormatFloat(f, 'f', -1, 64) },
+		// json .Actions -> a JSON value, which is also a valid QML/JS
+		// literal: data for a template's code.
+		"json": func(v any) (string, error) {
+			b, err := json.Marshal(v)
+			return string(b), err
+		},
 		// camel "bg_alt" -> "bgAlt"  (QML/JS property names)
 		"camel": func(s string) string {
 			parts := strings.Split(s, "_")

@@ -57,6 +57,14 @@ vm/vm run 'cd core && go test ./... && go build -o ../bin/myarch ./cmd/myarch'
 vm/vm run 'myarch apply'
 ```
 
+The desktop runs `myarch` too (the command palette's actions), so it has
+to be on the PATH of the graphical session, not just your shell's. The dev
+VM links it into `/usr/local/bin`; on your own machine:
+
+```sh
+sudo ln -sf "$PWD/bin/myarch" /usr/local/bin/myarch
+```
+
 ## Monitors
 
 Profiles live in `~/.config/myarch/monitors.json`: which screens, where,
@@ -78,6 +86,23 @@ is which. Pick mode, scale, rotation, VRR, 10-bit and mirroring, try the
 layout (it goes back on its own after 15 s unless you keep it; what a
 screen can't do, like 10-bit on some GPUs, is switched back off and
 reported) and save it as a profile.
+
+## Command palette
+
+`SUPER + Space`, or the Arch logo at the start of the bar, searches
+everything at once: open windows, installed apps,
+and every plugin's actions and keybindings. Each result shows the command
+it runs (`$ hyprctl eval 'myarch_columns.equal()'`) and its key: you start
+by clicking and end up knowing the command. ↑↓ to pick, ↵ to run, `ctrl+c`
+copies the command, `>` searches only actions and keys. The keybindings
+come from the plugins that bind them, so the list is always right.
+
+## Power
+
+The ⏻ button next to the clock: lock, suspend, log out, reboot and shut
+down, each with its command; the last three ask for a second click.
+`SUPER + L` locks. The lock screen (hyprlock) is in the theme: the time,
+the date, and a prompt. All of them are in the palette too.
 
 ## Dev VM
 

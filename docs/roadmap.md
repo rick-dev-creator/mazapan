@@ -13,7 +13,7 @@ Suggested start: 1, 2 and 3.
 |---|------|-------|
 | 1 | Updates you can trust | **Done** (2026-09-28); follow-ups listed below |
 | 2 | Monitors | **Done** (2026-09-28); follow-ups listed below |
-| 3 | One command palette | not started |
+| 3 | One command palette | **Done** (2026-09-28): first version; follow-ups listed below |
 | 4 | Themes | partly: semantic tokens with shape and motion |
 | 5 | Hardware | not started |
 | 6 | An agent-native system | not started |
@@ -114,13 +114,26 @@ shell's own notification daemon).
 **Omarchy today.** 14 separate menus (keybindings, clipboard, emoji, share,
 capture…); the keybinding list is parsed out of the config.
 
-**Much better.**
-- A single palette that searches apps, windows, every plugin's actions,
-  settings and files at once.
-- Every action shows the command it runs: the "learn to be the hacker"
-  mode — you start by feeling like one and end up being one.
-- Keybindings listed from the plugins that define them, so the list is
-  always right.
+**Much better.** *Done* — plugin `palette` (`SUPER + Space`, or the Arch
+logo at the start of the bar):
+- One palette that searches open windows, installed apps, and every
+  plugin's actions and keybindings at once (fuzzy; letters scattered
+  across unrelated words don't count; `>` for actions and keys only).
+- Every result shows the command it runs: the "learn to be the hacker"
+  mode — you start by feeling like one and end up being one. `ctrl+c`
+  copies it. Keybindings that call Lua are exposed as `hyprctl eval`
+  commands, so the key and the command do exactly the same.
+- Keybindings listed from the plugins that define them (`[[actions]]` in
+  plugin.toml, rendered and handed to every template as `.Actions`), so
+  the list is always right. Commands that ask or print (`myarch update`,
+  `doctor`, `rollback`…) open in a terminal that stays.
+- Audited once (9 findings, all fixed). Tested in the dev VM: open with
+  the key, search, run an action, launch a terminal app, launch
+  an app, run a terminal action, copy a command, close with SUPER + Q.
+
+**Follow-ups.** Files (plocate/fd) and settings (needs `myarch set`);
+remembering what you pick often; plugin actions with arguments; a check
+that every `hl.bind` has its action.
 
 ## 4. Themes
 
