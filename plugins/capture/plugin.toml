@@ -1,0 +1,46 @@
+[plugin]
+id = "capture"
+name = "Capture"
+version = "0.1.0"
+api = 1
+description = "One capture overlay: pick a region or a window on a frozen screen, then copy, save, copy its text (OCR), annotate or record it"
+
+[packages]
+# OCR in another language needs its data too: tesseract-data-spa, -fra…
+pacman = ["grim", "wl-clipboard", "tesseract", "tesseract-data-eng", "wf-recorder"]
+
+[settings]
+# Opens the capture overlay; while recording, stops the recording.
+key = "Print"
+# Where screenshots and recordings go.
+pictures = "~/Pictures/Screenshots"
+videos = "~/Videos/Recordings"
+# Record the sound too (the default output).
+audio = false
+
+[[targets]]
+template = "capture.lua.tmpl"
+output = "~/.config/hypr/myarch/capture.lua"
+reload = "hyprctl reload >/dev/null"
+
+[[targets]]
+template = "Capture.qml.tmpl"
+output = "~/.config/quickshell/myarch/panels/capture.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+# The recording, in the bar while it lasts: click to stop.
+[[targets]]
+template = "Recording.qml.tmpl"
+output = "~/.config/quickshell/myarch/widgets/center/40-recording.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[actions]]
+name = "{{t \"act.capture\"}}"
+run = "qs ipc -c myarch call myarch panel capture"
+key = "{{.Settings.key}}"
+keywords = "{{t \"act.capture.kw\"}}"
+
+[[actions]]
+name = "{{t \"act.stop\"}}"
+run = "kill -INT \"$(cut -d' ' -f1 \"${XDG_RUNTIME_DIR}/myarch-capture/recording\")\""
+keywords = "{{t \"act.stop.kw\"}}"

@@ -50,3 +50,8 @@ ttf-jetbrains-mono-nerd
 hyprlock
 neovim
 btop
+grim
+tesseract
+tesseract-data-eng
+tesseract-data-spa
+wf-recorder

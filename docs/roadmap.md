@@ -18,7 +18,7 @@ Suggested start: 1, 2 and 3.
 | 5 | Hardware | not started |
 | 6 | An agent-native system | not started |
 | 7 | Plugins | partly: typed settings, localization, clean removal, checks |
-| 8 | Capture | not started |
+| 8 | Capture | **Done** (2026-09-29); follow-ups listed below |
 
 ## 1. Updates you can trust
 
@@ -274,5 +274,29 @@ dependencies between plugins.
 **Omarchy today.** Screenshot, region, screen recording (with webcam), OCR
 text and QR as separate scripts.
 
-**Much better.** One Quickshell selection overlay: pick a region, then
-annotate, copy the text (OCR), copy or share the image, or record it.
+**Much better.** *Done* — plugin `capture` (`Print`, or the palette):
+- One overlay on every screen, over a frozen picture of it (grim, at each
+  screen's own resolution): drag a region, or click a window (or empty
+  screen) to take it all; the region's size in pixels as you drag.
+- Then, next to it: copy, save, copy its text (OCR, in the system's
+  language; read at twice the size, which Tesseract reads much better),
+  annotate (pen, arrow, box, marker, in the theme's colors, undo), or
+  record it (wf-recorder; a red dot and the time in the bar, click it or
+  press `Print` again to stop). ↵ copies and saves; c s t a r.
+- Each action shows the command it runs (`tesseract shot.png - -l eng |
+  wl-copy`), like the palette.
+- What's copied or saved is the region as it was, with its drawings, at
+  the screen's own pixels (snapped to them: no blur at fractional
+  scales); the overlay itself never is, nor a notice (none while
+  recording; earlier ones are dismissed before the screens freeze).
+- Audited (10 findings, all fixed): a recording is tracked by its pid, so
+  one that died never blocks the key; a failed recording (or a missing
+  grim, tesseract, wf-recorder) says so instead of "saved"; clicks on the
+  toolbar never reset the selection; the window on top is the one picked
+  (fullscreen, floating, special workspaces); frozen screens and shots
+  are deleted as soon as they're used; OCR uses the installed languages;
+  the action keys follow the language (g for guardar).
+
+**Follow-ups.** A region across two screens; blur/pixelate as a tool;
+share (upload/send); QR codes; recording with the webcam; a window-follow
+recording.

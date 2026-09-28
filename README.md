@@ -113,6 +113,13 @@ down, each with its command; the last three ask for a second click.
 `SUPER + L` locks. The lock screen (hyprlock) is in the theme: the time,
 the date, and a prompt. All of them are in the palette too.
 
+## Capture
+
+`Print` freezes the screens: drag a region or click a window, then copy,
+save (~/Pictures/Screenshots), copy its text (OCR), annotate it, or record
+it (~/Videos/Recordings; `Print` again or the red dot in the bar stops it).
+Each action shows the command it runs.
+
 ## Dev VM
 
 An official Arch cloud image, provisioned by cloud-init, with this repo mounted
