@@ -98,7 +98,7 @@ boot() {
   running || { cat "$state/qemu.log" >&2; die "qemu failed to start"; }
 }
 
-cmd_start()    { boot -display "${MYARCH_DISPLAY:-gtk,gl=on,zoom-to-fit=off}"; }
+cmd_start()    { boot -display "${MYARCH_DISPLAY:-gtk,gl=on,zoom-to-fit=off,grab-on-hover=on}"; }
 cmd_headless() { boot -display egl-headless; }
 
 cmd_wait() {

@@ -1,22 +1,44 @@
 [plugin]
 id = "columns"
 name = "Equal columns"
-version = "0.1.0"
+version = "0.4.0"
 api = 1
-description = "Windows as side-by-side columns; one key gives them all the same width"
+description = "Windows as columns: equal widths, phone-width and centered, or a focus layout with the active window in the middle"
 
 [packages]
 pacman = ["hyprland"]
 
 [settings]
-# Hyprland bind that equalizes the columns of the focused workspace.
+# Equal mode: every column of the focused workspace gets the same width,
+# filling the screen.
 key = "SUPER + equal"
-# Also equalize whenever a window opens, closes or moves in. Off by default:
-# it undoes a column you resized by hand as soon as another window opens.
+# Phone mode: every column gets a phone's width and the group is centered
+# on the screen. Pressing it again goes back to equal mode.
+phone_key = "SUPER + SHIFT + equal"
+# Width / height of a column in phone mode; 9:19.5 is a phone held upright.
+# The height is the monitor's, so the width adapts to each screen.
+phone_aspect = 0.4615
+# Focus mode: the focused window goes to the middle at focus_ratio of the
+# width, the others stack in a column on each side. On a side window it
+# brings that one to the middle; on the middle one it leaves focus mode.
+focus_key = "SUPER + C"
+focus_ratio = 0.55
+# Grow / shrink the focused column by resize_step (a fraction of the screen
+# width). Held down, they repeat.
+grow_key = "SUPER + ALT + right"
+shrink_key = "SUPER + ALT + left"
+resize_step = 0.05
+# Move the focused column one place left / right in the row.
+move_left_key = "SUPER + SHIFT + left"
+move_right_key = "SUPER + SHIFT + right"
+# Re-apply the workspace's mode whenever a window opens, closes or moves in.
+# Off by default: it undoes a column you resized by hand as soon as another
+# window opens.
 auto = false
-# Narrowest a column may get, in logical pixels. With more windows than fit
-# at this width, columns keep it and the row scrolls instead of shrinking.
-min_width = 480
+# Narrowest a column may get, in logical pixels: shrinking stops here, and
+# in equal mode, with more windows than fit at this width, columns keep it
+# and the row scrolls.
+min_width = 400
 
 [[targets]]
 template = "columns.lua.tmpl"

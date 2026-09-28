@@ -60,10 +60,15 @@ to `~/.cache/start-hyprland.log` in the guest.
 
 Knobs (env vars): `MYARCH_MEM` (8G), `MYARCH_CPUS` (8), `MYARCH_DISK` (40G),
 `MYARCH_RES` (1920x1080), `MYARCH_SSH_PORT` (2222), `MYARCH_DISPLAY`
-(`gtk,gl=on,zoom-to-fit=off`).
+(`gtk,gl=on,zoom-to-fit=off,grab-on-hover=on`).
 
 The QEMU window follows its own size: resize it and the guest's resolution
-follows. The host's Hyprland intercepts SUPER shortcuts; grabbing the keyboard
-in the QEMU window (Ctrl+Alt+G) should pass them to the guest (untested).
+follows.
+
+Keyboard and mouse: the mouse moves in and out of the window freely (the
+guest has an absolute tablet, not a captured mouse). The keyboard is grabbed
+while the pointer is over the window (`grab-on-hover`), so SUPER shortcuts go
+to the guest; move the pointer out and they go back to the host.
+Ctrl+Alt+G toggles the grab by hand.
 
 Requirements on the host: `qemu-desktop`, `xorriso`, `curl`, `python3`, KVM access.

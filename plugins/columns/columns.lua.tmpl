@@ -2,11 +2,42 @@
 --
 -- Windows are laid out as side-by-side columns (Hyprland's scrolling
 -- layout) instead of dwindle, where every new window halves the previous
--- one. {{.Settings.key}} gives every column of the workspace the same width.
+-- one. Three arrangements, remembered per workspace:
+--
+--   equal  {{.Settings.key}}: every column the same width, filling the screen
+--   phone  {{.Settings.phone_key}}: phone-width columns, centered as a group
+--   focus  {{.Settings.focus_key}}: the focused window in the middle at {{.Settings.focus_ratio}} of the
+--          width, the rest stacked in a column on each side
+--
+-- Plus, on the focused column: {{.Settings.grow_key}} / {{.Settings.shrink_key}} grow and
+-- shrink it (in focus mode: the middle), {{.Settings.move_left_key}} / {{.Settings.move_right_key}}
+-- move it along the row.
+--
+-- Centering in phone mode works through the workspace's outer gaps: the
+-- side gap is set to half the unused width, then `fit all` shares what's
+-- left equally. Focus mode switches just that workspace to Hyprland's
+-- master layout, centered.
 
 local MIN_WIDTH = {{.Settings.min_width}} -- logical px
+local PHONE_ASPECT = {{.Settings.phone_aspect}} -- column width / height
+local FOCUS_RATIO = {{.Settings.focus_ratio}} -- middle window / screen width
+local STEP = {{.Settings.resize_step}} -- fraction of the screen width
+local GAP_IN, GAP_OUT = {{.Theme.Shape.GapIn}}, {{.Theme.Shape.GapOut}}
 
-hl.config({ general = { layout = "scrolling" } })
+hl.config({
+  general = { layout = "scrolling" },
+  -- Only focus mode uses master. Center it even with a single other window,
+  -- and keep new windows on the sides.
+  master = {
+    orientation = "center",
+    mfact = FOCUS_RATIO,
+    slave_count_for_center_master = 0,
+    new_status = "slave",
+  },
+})
+
+local mode = {} -- workspace id -> "equal" | "phone" | "focus"
+local before_focus = {} -- workspace id -> mode to return to from focus
 
 local function tiled_count(ws)
   local n = 0
@@ -16,19 +47,38 @@ local function tiled_count(ws)
   return n
 end
 
-local function equalize()
-  local ws = hl.get_active_workspace()
-  if not ws then return end
-  local n = tiled_count(ws)
-  if n < 1 then return end
+-- Logical size of the workspace's monitor, with rotation (transform 1, 3,
+-- 5, 7 turn it 90/270 degrees) taken into account.
+local function screen(ws)
+  local m = ws.monitor
+  local w, h = m.width, m.height
+  if m.transform % 2 == 1 then w, h = h, w end
+  return w / m.scale, h / m.scale
+end
 
-  local mon = ws.monitor
-  -- Rotated 90/270 (transform 1, 3, 5, 7): the row runs along the height.
-  local px = (mon.transform % 2 == 1) and mon.height or mon.width
-  local fits = math.max(1, math.floor(px / mon.scale / MIN_WIDTH))
+local function side_gaps(ws, side)
+  hl.workspace_rule({
+    workspace = tostring(ws.id),
+    gaps_out = { top = GAP_OUT, right = side, bottom = GAP_OUT, left = side },
+  })
+end
 
+local function set_layout(ws, layout)
+  hl.workspace_rule({ workspace = tostring(ws.id), layout = layout })
+end
+
+-- A layout switched by workspace rule only takes over on the next turn of
+-- Hyprland's event loop; layout messages sent before that reach the old
+-- layout and are dropped. Run whatever follows a switch a moment later.
+local function after_switch(fn)
+  hl.timer(fn, { timeout = 30, type = "oneshot" })
+end
+
+local function equal(ws, n)
+  side_gaps(ws, GAP_OUT)
+  local w = screen(ws)
+  local fits = math.max(1, math.floor(w / MIN_WIDTH))
   if n <= fits then
-    -- Every column gets 1/n of the screen and all of them come into view.
     hl.dispatch(hl.dsp.layout("fit all"))
   else
     -- Too many to fit at MIN_WIDTH: keep that width and let the row scroll.
@@ -36,10 +86,98 @@ local function equalize()
   end
 end
 
-hl.bind("{{.Settings.key}}", equalize)
+local function phone(ws, n)
+  local w, h = screen(ws)
+  local col = (h - 2 * GAP_OUT) * PHONE_ASPECT
+  local group = n * col + (n - 1) * 2 * GAP_IN
+  local side = math.floor((w - group) / 2)
+  if side < GAP_OUT then
+    -- Phone-width columns don't fit side by side: fill the screen instead.
+    return equal(ws, n)
+  end
+  side_gaps(ws, side)
+  hl.dispatch(hl.dsp.layout("fit all"))
+end
+
+-- Apply a column mode (equal or phone) to the focused workspace, leaving
+-- focus mode if it's on. With no argument, re-apply the workspace's
+-- current mode (auto mode).
+local function arrange(which)
+  local ws = hl.get_active_workspace()
+  if not ws then return end
+  if not which and mode[ws.id] == "focus" then
+    return -- master places new windows on the sides by itself
+  end
+  which = which or mode[ws.id] or "equal"
+  local apply = function()
+    local n = tiled_count(ws)
+    if n < 1 then return end
+    if which == "phone" then phone(ws, n) else equal(ws, n) end
+  end
+  if mode[ws.id] == "focus" then
+    set_layout(ws, "scrolling")
+    mode[ws.id] = which
+    return after_switch(apply)
+  end
+  mode[ws.id] = which
+  apply()
+end
+
+-- The middle window is FOCUS_RATIO of the screen, the side ones at most
+-- half of what's left: anything wider than 40% is the middle one.
+local function is_middle(win, ws)
+  return win.size.x > 0.4 * screen(ws)
+end
+
+local function focus()
+  local ws, win = hl.get_active_workspace(), hl.get_active_window()
+  if not ws or not win or win.floating then return end
+
+  if mode[ws.id] ~= "focus" then
+    before_focus[ws.id] = mode[ws.id] or "equal"
+    mode[ws.id] = "focus"
+    side_gaps(ws, GAP_OUT) -- undo phone mode's wide side gaps
+    set_layout(ws, "master")
+    after_switch(function()
+      hl.dispatch(hl.dsp.layout(string.format("mfact exact %.4f", FOCUS_RATIO)))
+      hl.dispatch(hl.dsp.layout("swapwithmaster master ignoremaster"))
+    end)
+  elseif not is_middle(win, ws) then
+    -- A side window: bring it to the middle.
+    hl.dispatch(hl.dsp.layout("swapwithmaster master ignoremaster"))
+  else
+    -- The middle window again: back to the mode from before.
+    arrange(before_focus[ws.id])
+  end
+end
+
+-- In focus mode, resize the middle; otherwise the focused column, never
+-- below MIN_WIDTH (held down, it would shrink to a sliver).
+local function resize(sign)
+  local ws, win = hl.get_active_workspace(), hl.get_active_window()
+  if not ws or not win or win.floating then return end
+  if mode[ws.id] == "focus" then
+    hl.dispatch(hl.dsp.layout(string.format("mfact %s%.4f", sign, STEP)))
+    return
+  end
+  if sign == "-" and win.size.x - STEP * screen(ws) < MIN_WIDTH then return end
+  hl.dispatch(hl.dsp.layout(string.format("colresize %s%.4f", sign, STEP)))
+end
+
+hl.bind("{{.Settings.key}}", function() arrange("equal") end)
+hl.bind("{{.Settings.phone_key}}", function()
+  local ws = hl.get_active_workspace()
+  arrange(ws and mode[ws.id] == "phone" and "equal" or "phone")
+end)
+hl.bind("{{.Settings.focus_key}}", focus)
+hl.bind("{{.Settings.grow_key}}", function() resize("+") end, { repeating = true })
+hl.bind("{{.Settings.shrink_key}}", function() resize("-") end, { repeating = true })
+hl.bind("{{.Settings.move_left_key}}", hl.dsp.layout("swapcol l"))
+hl.bind("{{.Settings.move_right_key}}", hl.dsp.layout("swapcol r"))
 {{- if .Settings.auto}}
 
+-- Re-apply whatever mode the workspace is in.
 for _, ev in ipairs({ "window.open", "window.destroy", "window.move_to_workspace" }) do
-  hl.on(ev, equalize)
+  hl.on(ev, function() arrange() end)
 end
 {{- end}}
