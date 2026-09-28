@@ -22,7 +22,7 @@ func renderOne(t *testing.T, tmpl string) (string, error) {
 	os.WriteFile(filepath.Join(dir, "f.tmpl"), []byte(tmpl), 0o644)
 	p := &plugin.Plugin{Dir: dir, Targets: []plugin.Target{{Template: "f.tmpl", Output: filepath.Join(dir, "out")}}}
 	p.Meta.ID = "p"
-	files, err := All([]*plugin.Plugin{p}, testTheme())
+	files, err := All([]*plugin.Plugin{p}, testTheme(), nil)
 	if err != nil {
 		return "", err
 	}

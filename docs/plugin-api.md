@@ -32,6 +32,10 @@ description = "one line"
 [packages]
 pacman = ["foot"]          # checked on apply, warned about if missing
 
+[settings]                 # knobs with their defaults (string, int, float, bool)
+key = "SUPER + equal"
+auto = false
+
 [[targets]]                # zero or more files to generate
 template = "foot.ini.tmpl" # file in the plugin directory
 output = "~/.config/foot/foot.ini"
@@ -39,6 +43,23 @@ reload = "…"               # optional shell command, rendered as a template
 ```
 
 Unknown keys are an error, so typos don't pass silently.
+
+## Settings
+
+A plugin declares its settings with defaults; people override them in
+`~/.config/myarch/config.toml`:
+
+```toml
+[plugins.columns]
+auto = true
+min_width = 400
+```
+
+Overrides must use a key the plugin declares and the same type as the
+default (an integer is accepted where the default is a float). Anything
+else, including a `[plugins.<id>]` section for a plugin that doesn't exist,
+stops `apply` with an error naming the section. `myarch plugins` prints each
+plugin's effective settings and marks the ones set in config.toml.
 
 ## Targets
 
@@ -70,6 +91,7 @@ missing token fails the render instead of producing an empty value.
 | `.Theme`       | the theme: `.ID`, `.Meta`, `.Font`, `.Shape`, `.Motion`, `.Colors`, `.ANSI` |
 | `.Plugin`      | this plugin's id                                |
 | `.Home`        | the user's home directory                       |
+| `.Settings`    | the plugin's settings, defaults merged with config.toml |
 
 Functions:
 

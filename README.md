@@ -48,6 +48,7 @@ vm/vm wait         # until SSH is up and provisioning finished
 vm/vm ssh          # shell in the guest (user arch / password arch)
 vm/vm run <cmd>    # run inside the guest's Hyprland session (hyprctl, gsettings…)
 vm/vm exec <cmd>   # launch an app through Hyprland
+vm/vm key meta_l-equal  # press keys on the guest keyboard (QEMU sendkey names)
 vm/vm shot         # screenshot of the guest desktop -> vm/.state/shot.png
 vm/vm provision    # re-run after editing vm/guest/packages.txt
 vm/vm stop
@@ -65,4 +66,4 @@ The QEMU window follows its own size: resize it and the guest's resolution
 follows. The host's Hyprland intercepts SUPER shortcuts; grabbing the keyboard
 in the QEMU window (Ctrl+Alt+G) should pass them to the guest (untested).
 
-Requirements on the host: `qemu-desktop`, `xorriso`, `curl`, KVM access.
+Requirements on the host: `qemu-desktop`, `xorriso`, `curl`, `python3`, KVM access.

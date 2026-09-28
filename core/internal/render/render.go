@@ -25,9 +25,10 @@ type File struct {
 
 // Data is what every template sees as ".".
 type Data struct {
-	Theme  *theme.Theme
-	Plugin string
-	Home   string
+	Theme    *theme.Theme
+	Plugin   string
+	Home     string
+	Settings map[string]any // plugin defaults merged with config overrides
 }
 
 // ExpandHome turns a leading "~/" into the user's home directory.
@@ -41,7 +42,8 @@ func ExpandHome(p string) string {
 
 // All renders every target of every plugin. Output paths are collected first
 // so templates can see each other's outputs through the "under" function.
-func All(plugins []*plugin.Plugin, t *theme.Theme) ([]File, error) {
+// overrides holds per-plugin settings from config.toml, keyed by plugin id.
+func All(plugins []*plugin.Plugin, t *theme.Theme, overrides map[string]map[string]any) ([]File, error) {
 	var outputs []string
 	owner := map[string]string{}
 	for _, p := range plugins {
@@ -69,7 +71,11 @@ func All(plugins []*plugin.Plugin, t *theme.Theme) ([]File, error) {
 		if err != nil {
 			return nil, fmt.Errorf("plugin %s: %w", p.ID(), err)
 		}
-		data := Data{Theme: t, Plugin: p.ID(), Home: home}
+		settings, err := p.Resolve(overrides[p.ID()])
+		if err != nil {
+			return nil, err
+		}
+		data := Data{Theme: t, Plugin: p.ID(), Home: home, Settings: settings}
 		for _, tg := range p.Targets {
 			var buf bytes.Buffer
 			if err := tmpl.ExecuteTemplate(&buf, tg.Template, data); err != nil {

@@ -17,6 +17,8 @@ import (
 type Config struct {
 	Theme    string   `toml:"theme"`
 	Disabled []string `toml:"disabled_plugins,omitempty"`
+	// Per-plugin setting overrides: [plugins.<id>] key = value
+	Plugins map[string]map[string]any `toml:"plugins,omitempty"`
 }
 
 func Path() string { return render.ExpandHome("~/.config/myarch/config.toml") }

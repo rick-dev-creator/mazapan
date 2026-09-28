@@ -10,6 +10,7 @@
 #   vm/vm provision   re-run vm/guest/provision.sh (after editing packages)
 #   vm/vm run <cmd>   run a command inside the guest's Hyprland session
 #   vm/vm exec <cmd>  launch an app through Hyprland (outlives the SSH call)
+#   vm/vm key <combo> press keys as the guest keyboard, e.g. meta_l-equal
 #   vm/vm shot [file] screenshot of the guest desktop (default vm/.state/shot.png)
 #   vm/vm stop        power off
 #   vm/vm reset       throw away the overlay and seed: fresh first boot
@@ -90,6 +91,7 @@ boot() {
     -device "virtio-vga-gl,xres=$w,yres=$h" \
     "${display[@]}" \
     -serial "file:$state/serial.log" \
+    -monitor "unix:$state/monitor.sock,server,nowait" \
     -pidfile "$pidfile" \
     >"$state/qemu.log" 2>&1
   sleep 1
@@ -135,6 +137,22 @@ cmd_exec() {
   cmd_run "hyprctl dispatch 'hl.dsp.exec_cmd(\"$cmd\")' >/dev/null"
 }
 
+# QEMU keycodes (see `sendkey` in the QEMU monitor): meta_l-equal, ctrl-alt-f2…
+cmd_key() {
+  running || die "VM is not running"
+  local combo
+  for combo in "$@"; do
+    python3 - "$state/monitor.sock" "sendkey $combo" <<'PY'
+import socket, sys, time
+s = socket.socket(socket.AF_UNIX)
+s.connect(sys.argv[1])
+s.sendall((sys.argv[2] + "\n").encode())
+time.sleep(0.2)
+s.close()
+PY
+  done
+}
+
 cmd_shot() {
   local out="${1:-$state/shot.png}"
   cmd_run grim - > "$out"
@@ -162,7 +180,7 @@ cmd_destroy() {
 }
 
 case "${1:-}" in
-  create|start|headless|wait|ssh|provision|run|exec|shot|stop|reset|destroy)
+  create|start|headless|wait|ssh|provision|run|exec|key|shot|stop|reset|destroy)
     c=$1; shift; "cmd_$c" "$@" ;;
-  *) sed -n '2,18s/^# \{0,1\}//p' "$0"; exit 1 ;;
+  *) sed -n '2,19s/^# \{0,1\}//p' "$0"; exit 1 ;;
 esac

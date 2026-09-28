@@ -1,0 +1,24 @@
+[plugin]
+id = "columns"
+name = "Equal columns"
+version = "0.1.0"
+api = 1
+description = "Windows as side-by-side columns; one key gives them all the same width"
+
+[packages]
+pacman = ["hyprland"]
+
+[settings]
+# Hyprland bind that equalizes the columns of the focused workspace.
+key = "SUPER + equal"
+# Also equalize whenever a window opens, closes or moves in. Off by default:
+# it undoes a column you resized by hand as soon as another window opens.
+auto = false
+# Narrowest a column may get, in logical pixels. With more windows than fit
+# at this width, columns keep it and the row scrolls instead of shrinking.
+min_width = 480
+
+[[targets]]
+template = "columns.lua.tmpl"
+output = "~/.config/hypr/myarch/columns.lua"
+reload = "hyprctl reload >/dev/null"

@@ -31,6 +31,11 @@ type Plugin struct {
 		Pacman []string `toml:"pacman"`
 	} `toml:"packages"`
 
+	// Settings are the plugin's knobs with their defaults. People override
+	// them in config.toml under [plugins.<id>]; templates read the result
+	// as .Settings.
+	Settings map[string]any `toml:"settings"`
+
 	// Targets are files the plugin generates. The core renders and writes
 	// them; plugins never touch the filesystem themselves.
 	Targets []Target `toml:"targets"`
@@ -48,6 +53,65 @@ type Target struct {
 }
 
 func (p *Plugin) ID() string { return p.Meta.ID }
+
+// Resolve merges overrides from config.toml onto the plugin's defaults.
+// Unknown keys and type mismatches are errors: a typo in config.toml must
+// not be silently ignored.
+func (p *Plugin) Resolve(overrides map[string]any) (map[string]any, error) {
+	out := make(map[string]any, len(p.Settings))
+	for k, v := range p.Settings {
+		out[k] = v
+	}
+	for k, v := range overrides {
+		def, ok := p.Settings[k]
+		if !ok {
+			return nil, fmt.Errorf("[plugins.%s] %s: unknown setting (known: %s)", p.ID(), k, keys(p.Settings))
+		}
+		v, ok = coerce(def, v)
+		if !ok {
+			return nil, fmt.Errorf("[plugins.%s] %s = %v: want a %T like the default %v", p.ID(), k, v, def, def)
+		}
+		out[k] = v
+	}
+	return out, nil
+}
+
+// coerce accepts v if it has the default's type. An integer is accepted
+// where the default is a float (min_width = 480 for a 480.0 default).
+func coerce(def, v any) (any, bool) {
+	switch def.(type) {
+	case float64:
+		switch n := v.(type) {
+		case float64:
+			return n, true
+		case int64:
+			return float64(n), true
+		}
+		return v, false
+	case int64:
+		n, ok := v.(int64)
+		return n, ok
+	case string:
+		s, ok := v.(string)
+		return s, ok
+	case bool:
+		b, ok := v.(bool)
+		return b, ok
+	}
+	return v, fmt.Sprintf("%T", def) == fmt.Sprintf("%T", v)
+}
+
+func keys(m map[string]any) string {
+	ks := make([]string, 0, len(m))
+	for k := range m {
+		ks = append(ks, k)
+	}
+	sort.Strings(ks)
+	if len(ks) == 0 {
+		return "none"
+	}
+	return fmt.Sprint(ks)
+}
 
 // Discover loads every plugin under dirs. A plugin id found in an earlier
 // directory shadows the same id in later ones (user dir before built-ins).

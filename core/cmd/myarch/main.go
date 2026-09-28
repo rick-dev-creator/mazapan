@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"myarch/internal/apply"
@@ -116,7 +117,10 @@ func cmdApply(args []string) error {
 	}
 	warnMissingPackages(plugins)
 
-	files, err := render.All(plugins, t)
+	if err := checkOverrides(cfg); err != nil {
+		return err
+	}
+	files, err := render.All(plugins, t, cfg.Plugins)
 	if err != nil {
 		return err
 	}
@@ -189,6 +193,17 @@ func cmdPlugins() error {
 			state = "disabled"
 		}
 		fmt.Printf("%-16s %-8s %-8s %s\n", p.ID(), p.Meta.Version, state, p.Meta.Description)
+		settings, err := p.Resolve(cfg.Plugins[p.ID()])
+		if err != nil {
+			return err
+		}
+		for _, k := range sortedKeys(settings) {
+			mark := ""
+			if _, set := cfg.Plugins[p.ID()][k]; set {
+				mark = "  (config.toml)"
+			}
+			fmt.Printf("  %s = %#v%s\n", k, settings[k], mark)
+		}
 		for _, t := range p.Targets {
 			fmt.Printf("  -> %s\n", t.Output)
 		}
@@ -206,6 +221,34 @@ func cmdThemes() error {
 		fmt.Println(mark, id)
 	}
 	return nil
+}
+
+// checkOverrides rejects [plugins.<id>] sections for plugins that don't
+// exist, so a misspelled id doesn't silently do nothing.
+func checkOverrides(cfg *config.Config) error {
+	all, err := plugin.Discover(pluginDirs())
+	if err != nil {
+		return err
+	}
+	known := map[string]bool{}
+	for _, p := range all {
+		known[p.ID()] = true
+	}
+	for id := range cfg.Plugins {
+		if !known[id] {
+			return fmt.Errorf("%s: [plugins.%s]: no such plugin", config.Path(), id)
+		}
+	}
+	return nil
+}
+
+func sortedKeys(m map[string]any) []string {
+	ks := make([]string, 0, len(m))
+	for k := range m {
+		ks = append(ks, k)
+	}
+	sort.Strings(ks)
+	return ks
 }
 
 func warnMissingPackages(plugins []*plugin.Plugin) {
