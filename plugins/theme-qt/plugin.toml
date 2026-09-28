@@ -1,0 +1,44 @@
+[plugin]
+id = "theme-qt"
+name = "Qt theme"
+version = "0.1.0"
+api = 1
+description = "Qt 6 apps (KDE's too) in the theme: palette, font and style through qt6ct, and KDE's color scheme"
+
+[packages]
+pacman = ["qt6ct"]
+
+[settings]
+# Qt's widget style: Fusion follows the palette in full.
+style = "Fusion"
+# Icons Qt apps use.
+icon_theme = "Adwaita"
+
+# Qt apps read these when they start: open ones keep their colors.
+# qt6ct rewrites its file (and KDE apps kdeglobals, with their own
+# settings): shared, myarch only manages the keys it writes.
+[[targets]]
+template = "qt6ct.conf.tmpl"
+output = "~/.config/qt6ct/qt6ct.conf"
+merge = "ini"
+
+[[targets]]
+template = "colors.conf.tmpl"
+output = "~/.config/qt6ct/colors/myarch.conf"
+
+[[targets]]
+template = "kdeglobals.tmpl"
+output = "~/.config/kdeglobals"
+merge = "ini"
+
+[[targets]]
+template = "qt.lua.tmpl"
+output = "~/.config/hypr/myarch/qt.lua"
+reload = "hyprctl reload >/dev/null"
+
+[[checks]]
+name = "{{t \"check\"}}"
+run = "test -f /usr/lib/qt6/plugins/platformthemes/libqt6ct.so || { echo 'qt6ct is not installed: sudo pacman -S qt6ct'; exit 1; }"
+
+[coverage]
+toolkits = ["qt6"]

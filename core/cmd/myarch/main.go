@@ -202,6 +202,9 @@ func (s *session) write(changes []apply.Change, orphans []string, owned apply.Ow
 	for _, p := range res.Kept {
 		fmt.Printf("left %s in place: it was edited, no longer managed\n", tilde(p))
 	}
+	for _, p := range res.Shared {
+		fmt.Printf("left %s in place: it's its app's file too, no longer managed\n", tilde(p))
+	}
 	for cmd, e := range apply.Reload(res.Written) {
 		fmt.Fprintf(os.Stderr, "warning: reload %q failed: %v\n", cmd, e)
 	}

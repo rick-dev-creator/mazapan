@@ -158,6 +158,12 @@ That gives three guarantees:
   next `apply`, unless someone edited them; those are left in place and
   released.
 - **One owner per path.** Two plugins generating the same output is an error.
+- **Files shared with their app.** Some apps write their own config file
+  too (qt6ct saves its window geometry, KDE apps their settings in
+  kdeglobals). A target with `merge = "ini"` is shared: the core manages
+  only the keys the template renders, merges them into the file and keeps
+  the app's own; only a change to one of its keys is a conflict. When the
+  plugin is disabled, the file stays.
 
 After writing, each distinct `reload` command of plugins whose files changed
 runs once. A failing reload is a warning: the files are already in place.
@@ -189,6 +195,7 @@ Functions:
 | `rgb (c "accent")`         | `rgb(8a5cf5)` (Hyprland)      |
 | `rgba (c "accent") 0.5`    | `rgba(8a5cf580)` (Hyprland)   |
 | `cssa (c "accent") 0.36`   | `rgba(138, 92, 245, 0.36)`    |
+| `csv (c "accent")`         | `138,92,245` (KDE)            |
 | `speed 0.6`                | Hyprland speed for 60% of the theme duration |
 | `spring 1.1 1`             | `mass = 1, stiffness = …, dampening = …`: the theme's spring with its response ×1.1 and damping 1 (0 keeps the theme's) |
 | `num 11.0`                 | `11`                          |

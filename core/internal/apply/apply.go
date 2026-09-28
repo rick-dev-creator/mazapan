@@ -79,6 +79,10 @@ func Plan(files []render.File, owned Owned) (changes []Change, orphans []string,
 	for _, f := range files {
 		want[f.Path] = true
 		disk, err := os.ReadFile(f.Path)
+		if f.Merge == "ini" && err == nil {
+			changes = append(changes, Change{File: f, State: planShared(f, disk, owned[f.Path])})
+			continue
+		}
 		var st State
 		switch {
 		case errors.Is(err, fs.ErrNotExist):
@@ -103,11 +107,52 @@ func Plan(files []render.File, owned Owned) (changes []Change, orphans []string,
 	return changes, orphans, nil
 }
 
+// planShared: a file shared with its app is unchanged when myarch's keys
+// are as rendered, whatever else is in it; a conflict when one of them was
+// changed by someone else since myarch wrote it, or, the first time, when
+// the file has its own value for one of them (a person's kdeglobals).
+func planShared(f render.File, disk []byte, owned string) State {
+	want, have := iniKeys(string(f.Content)), iniKeys(string(disk))
+	same := true
+	for k, v := range want {
+		if have[k] != v {
+			same = false
+		}
+	}
+	switch {
+	case same:
+		return Unchanged
+	case IsShared(owned):
+		if Edited(owned, disk) {
+			return Conflict
+		}
+		return Changed
+	case owned != "" && Sum(disk) == owned:
+		return Changed // written whole by an older myarch, untouched since
+	}
+	for k, v := range want {
+		if hv, ok := have[k]; ok && hv != v {
+			return Conflict // its own value: theirs until --adopt
+		}
+	}
+	return Changed // only keys it doesn't have yet
+}
+
 type Result struct {
 	Written []Change
 	Backups map[string]string // path -> backup path
 	Removed []string
 	Kept    []string // orphans left in place because they were edited
+	Shared  []string // orphans shared with their app: left in place, released
+}
+
+// WriteShared writes a shared file through a symlink (dotfiles managed by
+// stow or chezmoi), not over it.
+func WriteShared(path string, b []byte) error {
+	if real, err := filepath.EvalSymlinks(path); err == nil {
+		path = real
+	}
+	return WriteAtomic(path, b)
 }
 
 // Execute writes the plan. Conflicts abort unless adopt is set, in which case
@@ -126,21 +171,36 @@ func Execute(changes []Change, orphans []string, owned Owned, adopt bool) (*Resu
 	res := &Result{Backups: map[string]string{}}
 	stamp := time.Now().Format("20060102-150405")
 	for _, c := range changes {
+		sum, content := Sum(c.Content), c.Content
+		if c.Merge == "ini" {
+			sum = iniOwned(iniKeys(string(c.Content)))
+			// Not there yet: written as rendered, comments and all.
+			if disk, err := os.ReadFile(c.Path); err == nil {
+				content = []byte(iniMerge(string(disk), iniKeys(string(c.Content))))
+			} else if !errors.Is(err, fs.ErrNotExist) {
+				return res, err
+			}
+		}
 		switch c.State {
 		case Unchanged:
-			owned[c.Path] = Sum(c.Content)
+			owned[c.Path] = sum
 			continue
 		case Conflict:
+			// A shared file keeps the app's keys: back it up, merge into it.
 			bak := c.Path + ".myarch-bak-" + stamp
-			if err := os.Rename(c.Path, bak); err != nil {
+			if err := copyOrRename(c.Path, bak, c.Merge == "ini"); err != nil {
 				return res, err
 			}
 			res.Backups[c.Path] = bak
 		}
-		if err := WriteAtomic(c.Path, c.Content); err != nil {
+		write := WriteAtomic
+		if c.Merge == "ini" {
+			write = WriteShared
+		}
+		if err := write(c.Path, content); err != nil {
 			return res, err
 		}
-		owned[c.Path] = Sum(c.Content)
+		owned[c.Path] = sum
 		res.Written = append(res.Written, c)
 	}
 
@@ -150,6 +210,9 @@ func Execute(changes []Change, orphans []string, owned Owned, adopt bool) (*Resu
 		case errors.Is(err, fs.ErrNotExist):
 		case err != nil:
 			return res, err
+		case IsShared(owned[p]):
+			// The app's file: it stays, with myarch's last keys in it.
+			res.Shared = append(res.Shared, p)
 		case Sum(disk) == owned[p]:
 			if err := os.Remove(p); err != nil {
 				return res, err
@@ -161,6 +224,17 @@ func Execute(changes []Change, orphans []string, owned Owned, adopt bool) (*Resu
 		delete(owned, p)
 	}
 	return res, nil
+}
+
+func copyOrRename(from, to string, keep bool) error {
+	if !keep {
+		return os.Rename(from, to)
+	}
+	b, err := os.ReadFile(from)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(to, b, 0o644)
 }
 
 type ConflictError struct{ Paths []string }

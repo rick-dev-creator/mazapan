@@ -172,12 +172,24 @@ manager unthemed.
   they theme (`[coverage]`: apps and toolkits); an app's toolkit comes
   from the libraries its binary links, what its script imports, or its
   package's dependencies (GTK 4/3, Qt 6/5, Electron, Chromium, Firefox, a
-  terminal, its own UI). The picker shows it: "reaches 12 of 17 installed
-  apps · not yet: kitty, Qt6 Settings…".
+  terminal, a web app, a Flatpak, its own UI). The picker shows it:
+  "reaches 15 of 17 installed apps · not yet: kitty…". Audited against a
+  real machine (61 apps; 9 findings, all fixed).
+- *Done* — Qt 6 apps, KDE's included (plugin `theme-qt`): qt6ct with the
+  theme's palette, font and the Fusion style, and KDE's color scheme in
+  kdeglobals. Both files are shared with their apps (`merge = "ini"`: the
+  core manages only its keys), since qt6ct and KDE apps write there too:
+  a person's own values for those keys are a conflict the first time
+  (--adopt backs them up), a rollback puts back only myarch's keys and
+  never deletes the file, symlinked dotfiles stay links. On a real machine
+  it took coverage from 19 to 27 of 61 apps. Audited (6 findings, all
+  fixed).
 
-**Follow-ups.** What coverage points at: a Qt plugin (qt6ct + Kvantum),
-Firefox (userChrome.css), other terminals; GTK apps previewed live too
-(they follow on ↵); light/dark on its own at sunset.
+**Follow-ups, by reach (for everyone, not one machine).** Browsers, both
+families: Firefox and its forks (userChrome.css) and Chromium's (its theme
+color), which also covers every web app; developer tools (a Neovim
+colorscheme, a VS Code theme, btop); Electron apps one by one; Qt 5 (qt5ct).
+Also: GTK apps previewed live (they follow on ↵); light/dark at sunset.
 
 ## 5. Hardware
 

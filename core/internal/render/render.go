@@ -50,6 +50,9 @@ type File struct {
 	Path    string // absolute
 	Content []byte
 	Reload  string // rendered reload command, may be empty
+	// Merge "ini": a file the app writes too; only these keys are
+	// myarch's (see apply).
+	Merge string
 }
 
 // Data is what every template sees as ".".
@@ -174,6 +177,7 @@ func All(plugins []*plugin.Plugin, t *theme.Theme, overrides map[string]map[stri
 				Path:    ExpandHome(tg.Output),
 				Content: buf.Bytes(),
 				Reload:  reload,
+				Merge:   tg.Merge,
 			})
 		}
 	}
@@ -242,6 +246,11 @@ func funcs(t *theme.Theme, outputs []string, cat *locale.Catalog) template.FuncM
 				}
 			}
 			return out
+		},
+		// csv "#ffb000" -> "255,176,0"  (KDE color syntax)
+		"csv": func(c string) (string, error) {
+			r, g, b, err := channels(c)
+			return fmt.Sprintf("%d,%d,%d", r, g, b), err
 		},
 		// spring 1.2 0.9 -> Hyprland spring curve fields for the theme's
 		// spring with its response scaled by 1.2 and damping 0.9 (0 keeps

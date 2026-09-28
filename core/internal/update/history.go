@@ -172,6 +172,7 @@ type Restored struct {
 	Backups    map[string]string // edited by hand since: path -> where the edit was kept
 	LeftBehind []string          // added since and edited by hand: left in place
 	Later      []string          // rewritten by a later `myarch apply`: left as they are
+	Shared     []string          // shared with their app, taken since: left in place, released
 	NoBackup   bool              // the record has no copy of the files: nothing touched
 }
 
@@ -208,10 +209,30 @@ func (r *Record) RestoreFiles(current apply.Owned) (*Restored, error) {
 			return res, err
 		}
 		disk, readErr := os.ReadFile(path)
+		// A file shared with its app (kdeglobals, qt6ct.conf): only myarch's
+		// keys go back; what the app wrote since stays.
+		if readErr == nil && (apply.IsShared(sum) || apply.IsShared(current[path])) {
+			merged := apply.RestoreShared(disk, sum, want)
+			if string(merged) != string(disk) {
+				if apply.Edited(current[path], disk) {
+					bak := path + ".myarch-bak-" + stamp
+					if err := os.WriteFile(bak, disk, 0o644); err != nil {
+						return res, err
+					}
+					res.Backups[path] = bak
+				}
+				if err := apply.WriteShared(path, merged); err != nil {
+					return res, err
+				}
+				res.Files++
+			}
+			res.Owned[path] = sum
+			continue
+		}
 		switch {
 		case readErr == nil && string(disk) == string(want):
 			// Already as it was: nothing to write, nothing to back up.
-		case readErr == nil && apply.Sum(disk) != current[path]:
+		case readErr == nil && apply.Edited(current[path], disk):
 			bak := path + ".myarch-bak-" + stamp
 			if err := os.Rename(path, bak); err != nil {
 				return res, err
@@ -234,7 +255,14 @@ func (r *Record) RestoreFiles(current apply.Owned) (*Restored, error) {
 			res.Later = append(res.Later, path)
 			continue
 		}
-		if b, err := os.ReadFile(path); err == nil && apply.Sum(b) != current[path] {
+		// Shared with its app: it may well have been there before myarch
+		// took some of its keys. Never removed; just no longer managed.
+		if apply.IsShared(current[path]) {
+			res.Shared = append(res.Shared, path)
+			delete(res.Owned, path)
+			continue
+		}
+		if b, err := os.ReadFile(path); err == nil && apply.Edited(current[path], b) {
 			res.LeftBehind = append(res.LeftBehind, path)
 			continue
 		}

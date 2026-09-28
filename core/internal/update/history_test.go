@@ -3,11 +3,69 @@ package update
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
 	"myarch/internal/apply"
+	"myarch/internal/render"
 )
+
+// sharedOwned writes content as a shared file (merge = "ini") through apply,
+// and returns what Owned then has for it.
+func sharedOwned(t *testing.T, path, content string) string {
+	t.Helper()
+	owned := apply.Owned{}
+	f := render.File{Plugin: "p", Path: path, Content: []byte(content), Merge: "ini"}
+	ch, orphans, err := apply.Plan([]render.File{f}, owned)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := apply.Execute(ch, orphans, owned, true); err != nil {
+		t.Fatal(err)
+	}
+	return owned[path]
+}
+
+// A person's kdeglobals, taken over (shared) by an update: rolling back
+// must not delete it.
+func TestRestoreNeverRemovesASharedFile(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	p := filepath.Join(t.TempDir(), "kdeglobals")
+	os.WriteFile(p, []byte("[KFileDialog Settings]\nx=1\n"), 0o644)
+	r := New()
+	r.BackupFiles(apply.Owned{}) // it wasn't myarch's before the update
+	current := apply.Owned{p: sharedOwned(t, p, "[KDE]\nwidgetStyle=Fusion\n")}
+	res, err := r.RestoreFiles(current)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(p); err != nil || len(res.Shared) != 1 || res.Owned[p] != "" {
+		t.Fatalf("kept and released: %v %+v", err, res)
+	}
+}
+
+// Rolling back a shared file puts myarch's keys back and keeps what the
+// app wrote since.
+func TestRestoreSharedKeepsTheAppsKeys(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	p := filepath.Join(t.TempDir(), "qt6ct.conf")
+	before := sharedOwned(t, p, "[Appearance]\nstyle=Fusion\n")
+	r := New()
+	r.BackupFiles(apply.Owned{p: before})
+	after := sharedOwned(t, p, "[Appearance]\nstyle=Windows\n")
+	// The app saves its window since.
+	b, _ := os.ReadFile(p)
+	os.WriteFile(p, append(b, []byte("[SettingsWindow]\ngeometry=x\n")...), 0o644)
+	res, err := r.RestoreFiles(apply.Owned{p: after})
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, _ := os.ReadFile(p)
+	if !strings.Contains(string(got), "style=Fusion") || !strings.Contains(string(got), "geometry=x") || len(res.Backups) != 0 {
+		t.Fatalf("got %q, %+v", got, res)
+	}
+}
 
 func TestBackupAndRestore(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())

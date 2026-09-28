@@ -106,6 +106,10 @@ type Target struct {
 	// Reload is a shell command run once after any of the plugin's files
 	// changed. It is rendered as a template too.
 	Reload string `toml:"reload"`
+	// Merge = "ini": the app writes this file too (qt6ct.conf, kdeglobals).
+	// myarch only manages the keys the template renders and keeps the
+	// app's own; only a change to its keys counts as an edit.
+	Merge string `toml:"merge"`
 }
 
 func (p *Plugin) ID() string { return p.Meta.ID }
@@ -233,6 +237,9 @@ func load(path string) (*Plugin, error) {
 	for i, t := range p.Targets {
 		if t.Template == "" || t.Output == "" {
 			return nil, fmt.Errorf("%s: targets[%d] needs template and output", path, i)
+		}
+		if t.Merge != "" && t.Merge != "ini" {
+			return nil, fmt.Errorf("%s: targets[%d]: merge = %q, only \"ini\" is supported", path, i, t.Merge)
 		}
 		if _, err := os.Stat(filepath.Join(p.Dir, t.Template)); err != nil {
 			return nil, fmt.Errorf("%s: targets[%d]: %w", path, i, err)
