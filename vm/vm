@@ -11,7 +11,7 @@
 #   vm/vm run <cmd>   run a command inside the guest's Hyprland session
 #   vm/vm exec <cmd>  launch an app through Hyprland (outlives the SSH call)
 #   vm/vm key <combo> press keys as the guest keyboard, e.g. meta_l-equal
-#   vm/vm mouse ...   move / press / drag the guest pointer, in guest pixels:
+#   vm/vm mouse ...   move / press / drag the guest pointer, in layout pixels:
 #                     move X Y | down | up | click X Y | rclick X Y | mclick X Y
 #                     | wheel X Y up|down [notches] | drag X1 Y1 X2 Y2 [ms]
 #   vm/vm shot [file] screenshot of the guest desktop (default vm/.state/shot.png)
@@ -29,6 +29,7 @@ mem="${MYARCH_MEM:-8G}"
 cpus="${MYARCH_CPUS:-8}"
 res="${MYARCH_RES:-1920x1080}"
 ssh_port="${MYARCH_SSH_PORT:-2222}"
+outputs="${MYARCH_OUTPUTS:-1}" # screens the guest sees (each one a window here)
 
 base="$state/base.qcow2"
 disk="$state/disk.qcow2"
@@ -92,7 +93,7 @@ boot() {
     -virtfs "local,path=$repo,mount_tag=myarch,security_model=none,id=myarch" \
     -device virtio-tablet-pci -device virtio-keyboard-pci \
     -audiodev pipewire,id=snd0 -device ich9-intel-hda -device hda-duplex,audiodev=snd0 \
-    -device "virtio-vga-gl,xres=$w,yres=$h" \
+    -device "virtio-vga-gl,xres=$w,yres=$h,max_outputs=$outputs" \
     "${display[@]}" \
     -serial "file:$state/serial.log" \
     -monitor "unix:$state/monitor.sock,server,nowait" \
@@ -162,8 +163,10 @@ PY
 # 0..32767 across the guest screen, so guest pixels are scaled by its size.
 cmd_mouse() {
   running || die "VM is not running"
+  # The tablet spans the whole layout (every screen), in logical pixels;
+  # coordinates here are in that same space, with 0,0 at its top-left.
   local size
-  size=$(cmd_run 'hyprctl monitors -j | jq -r ".[0] | \"\(.width) \(.height)\""')
+  size=$(cmd_run 'hyprctl monitors -j | jq -r "[.[] | {r: (.x + (if .transform % 2 == 1 then .height else .width end) / .scale), b: (.y + (if .transform % 2 == 1 then .width else .height end) / .scale)}] | \"\(map(.r) | max | floor) \(map(.b) | max | floor)\""')
   python3 - "$state/qmp.sock" $size "$@" <<'PY'
 import json, socket, sys, time
 

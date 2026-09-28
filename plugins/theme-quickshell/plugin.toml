@@ -11,5 +11,4 @@ pacman = ["quickshell"]
 [[targets]]
 template = "Theme.qml.tmpl"
 output = "~/.config/quickshell/myarch/Theme.qml"
-# Ask the running shell to reload; start it if it isn't running.
-reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''
+reload = "sh ~/.local/share/myarch/bin/shell-reload"

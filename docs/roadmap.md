@@ -7,30 +7,107 @@ means here. Ordered by impact.
 
 Suggested start: 1, 2 and 3.
 
+## Progress
+
+| # | Item | State |
+|---|------|-------|
+| 1 | Updates you can trust | **Done** (2026-09-28); follow-ups listed below |
+| 2 | Monitors | **Done** (2026-09-28); follow-ups listed below |
+| 3 | One command palette | not started |
+| 4 | Themes | partly: semantic tokens with shape and motion |
+| 5 | Hardware | not started |
+| 6 | An agent-native system | not started |
+| 7 | Plugins | partly: typed settings, localization, clean removal, checks |
+| 8 | Capture | not started |
+
 ## 1. Updates you can trust
 
 **Omarchy today.** 106 migration scripts run once, in order. `refresh-config`
 copies a shipped config over yours (with a backup). Updates take a snapper
 snapshot first and grep the log for known failures afterwards.
 
-**Much better.**
+**Much better.** *Done* — `myarch update`, `doctor`, `history`, `rollback`:
 - No config migrations: config is declarative and `myarch` knows which
   files it owns, so an update is just a new `apply`.
-- A preview before anything changes: packages, generated files, plugins.
-- Health checks after the update (Hyprland starts, network, sound, the bar
-  loads) and an automatic rollback to the snapshot when one fails.
-- Reset one plugin's files instead of a whole config.
+- A preview before anything changes: packages (★ the ones the desktop
+  depends on), Arch news since the last update (flagging manual
+  interventions), generated files. One confirmation; pacman doesn't ask
+  again, and isn't run at all when only generated files change.
+- Health checks declared by plugins (`[[checks]]`), run before and after
+  the update: only a check that passed before and still fails when tried
+  again a few seconds later counts as the update's doing. They cover:
+  Hyprland accepts the config (the new binary, without starting), the bar
+  loads on the new Quickshell (restarted once, never duplicated), network,
+  sound and Bluetooth when present. Checks that need the graphical session
+  are skipped, not failed, from a TTY or SSH.
+- An automatic rollback when one fails, with no reboot: the previous
+  versions of exactly the changed packages, from pacman's cache or else the
+  Arch Linux Archive, in one transaction (replaced packages resolved); the
+  generated files as they were, hand edits backed up, never lost, and
+  files a later `myarch apply` rewrote left alone.
+- A record from before anything changes, so an interrupted update is still
+  in the history and can be rolled back. Rollbacks go newest first: an old
+  update can't be undone under newer ones.
+- Audited four times (33 findings, all fixed) and tested end to end in
+  the dev VM: success, breakage with auto-rollback, archive fallback,
+  manual rollback over a hand edit, interrupted update, updating the bar
+  itself, rollback order, hand-edited conflict, config-only update, a
+  check already failing before the update (and one breaking alongside
+  it: rolled back, and older updates can still be rolled back), rollback
+  after a later apply. Not exercised
+  in the VM: rolling back an update that replaced one package with another.
+
+**Follow-ups.** btrfs snapshots as the safety net for what a package
+rollback can't fix (an unbootable system); AUR packages; an "updates
+available" widget in the bar; reset one plugin's files; the CLI's own text
+localized like the plugins.
 
 ## 2. Monitors
 
 **Omarchy today.** About 15 scripts: clamshell, external active, scaling,
 mirror, recover the internal monitor, a watcher for removed monitors.
 
-**Much better.** A monitor manager in Quickshell: drag screens into place,
-pick mode, scale and rotation, and save profiles matched by EDID that apply
-on their own when the screens appear ("desk with 4 screens", "laptop only").
-Connector names renumber; EDIDs don't. The original pain: 25 attempts at
-one afternoon's monitors.lua.
+**Much better.** *Done* — plugin `monitors`:
+- Profiles matched by EDID (`~/.config/myarch/monitors.json`), applied by
+  a Hyprland Lua engine at startup and on every hotplug: mode, position,
+  scale, rotation, adaptive sync (VRR), 10-bit color, mirroring, screens
+  off, and which workspaces live on each screen. Screens without an EDID,
+  or identical twins, fall back to the connector.
+- When no profile matches, screens a profile turned off or mirrored show
+  their own desktop again, so undocking can't leave you without a screen;
+  a notice says how to save a profile for the new set.
+- A manager in Quickshell (`SUPER + SHIFT + M`, or the screen icon in the
+  bar, which shows how many screens there are), sized to the screen it
+  opens on: live thumbnails of every screen, dragged into place (they snap
+  to each other's edges, never overlap, and glide into position); every
+  physical screen shows its name in large letters while it's open. Mode,
+  scale, rotation, on/off, VRR, 10-bit, mirror (no chains) and workspaces;
+  "Try" goes back on its own after 15 s unless kept, and reads back what
+  each screen accepted: what it can't do is switched off and reported
+  instead of pretending. "Save profile". The shell gained panels for it
+  (plugin windows outside the bar, opened over IPC).
+- The engine knows every screen that's plugged in, not just the ones
+  Hyprland lists: one turned off or mirrored (by a profile, the manager
+  or anything else) still counts, remembered across config reloads and
+  forgotten when the kernel says it's unplugged. A profile that leaves no
+  screen visible is never applied, and the manager won't try or save one.
+- Chosen over reusing nwg-displays or wdisplays: they look out of place
+  and don't adapt to the screen.
+- The desk's 4-screen layout from Omarchy turned into the first profile.
+- Tested in the dev VM with Hyprland's headless outputs as hotplugged
+  screens: arrange, try, auto-revert, keep, save, unplug/replug after a
+  reload (the engine re-applies), a screen turned off by a profile, the
+  undock case, mirror on/off from the manager, unplugging a mirror's
+  source and plugging it back, 10-bit on a screen that takes it and on one
+  that doesn't (virtio: reported, switched off), a screen turned off from
+  the manager surviving a reload and coming back on when undocked, a
+  broken monitors.json left untouched, no layout without a visible
+  screen. VRR can't be exercised in a VM.
+- Audited once (11 findings, all fixed).
+
+**Follow-ups.** HDR (`cm = "hdr"`, accepted by Hyprland but untested
+without an HDR screen); theming Hyprland's own notifications (or the
+shell's own notification daemon).
 
 ## 3. One command palette
 

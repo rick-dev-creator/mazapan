@@ -24,6 +24,13 @@ const usage = `usage: myarch <command> [flags]
 commands:
   apply [--theme ID] [--dry-run] [--adopt]
                  render every enabled plugin with the theme and write the files
+  update [-y] [--check] [--no-rollback]
+                 update the system: preview, upgrade, re-apply, check, and
+                 roll back on its own if a check fails
+  doctor         run every plugin's checks now
+  history        past updates and how they went
+  rollback [ID]  put back the packages and files from before an update
+                 (the last one by default)
   plugins        list plugins and what they generate
   themes         list available themes
 `
@@ -37,6 +44,14 @@ func main() {
 	switch os.Args[1] {
 	case "apply":
 		err = cmdApply(os.Args[2:])
+	case "update":
+		err = cmdUpdate(os.Args[2:])
+	case "doctor":
+		err = cmdDoctor()
+	case "history":
+		err = cmdHistory()
+	case "rollback":
+		err = cmdRollback(os.Args[2:])
 	case "plugins":
 		err = cmdPlugins()
 	case "themes":
@@ -90,63 +105,63 @@ func enabledPlugins(cfg *config.Config) ([]*plugin.Plugin, error) {
 	return out, nil
 }
 
-func cmdApply(args []string) error {
-	fs := flag.NewFlagSet("apply", flag.ExitOnError)
-	themeID := fs.String("theme", "", "switch to this theme (saved in config)")
-	dryRun := fs.Bool("dry-run", false, "show what would change, write nothing")
-	adopt := fs.Bool("adopt", false, "back up and take over files myarch didn't write")
-	fs.Parse(args)
+// session is everything loaded and rendered for one run: config, theme,
+// the enabled plugins, the language, and what they produce.
+type session struct {
+	cfg     *config.Config
+	theme   *theme.Theme
+	plugins []*plugin.Plugin
+	lang    string
+	out     *render.Output
+}
 
+// load reads the config (switching theme if themeID is set), the theme and
+// the enabled plugins, and renders everything.
+func load(themeID string) (*session, error) {
 	cfg, err := config.Load()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if *themeID != "" {
-		cfg.Theme = *themeID
+	if themeID != "" {
+		cfg.Theme = themeID
 	}
 	if cfg.Theme == "" {
-		return fmt.Errorf("no theme selected; available: %s\n  myarch apply --theme <id>",
+		return nil, fmt.Errorf("no theme selected; available: %s\n  myarch apply --theme <id>",
 			strings.Join(theme.List(themeDirs()), ", "))
 	}
 	t, err := theme.Load(themeDirs(), cfg.Theme)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	plugins, err := enabledPlugins(cfg)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	warnMissingPackages(plugins)
-
 	if err := checkOverrides(cfg); err != nil {
-		return err
+		return nil, err
 	}
 	lang := locale.Detect(cfg.Language)
-	files, err := render.All(plugins, t, cfg.Plugins, lang)
+	out, err := render.All(plugins, t, cfg.Plugins, lang)
 	if err != nil {
-		return err
+		return nil, err
 	}
+	return &session{cfg: cfg, theme: t, plugins: plugins, lang: lang, out: out}, nil
+}
+
+// plan compares the rendered files with the disk.
+func (s *session) plan() ([]apply.Change, []string, apply.Owned, error) {
 	owned, err := apply.LoadOwned(apply.StatePath())
 	if err != nil {
-		return err
+		return nil, nil, nil, err
 	}
-	changes, orphans, err := apply.Plan(files, owned)
-	if err != nil {
-		return err
-	}
+	changes, orphans, err := apply.Plan(s.out.Files, owned)
+	return changes, orphans, owned, err
+}
 
-	fmt.Printf("theme %s, language %s, %d plugins\n", t.ID, lang, len(plugins))
-	for _, c := range changes {
-		fmt.Printf("  %-9s %-16s %s\n", c.State, c.Plugin, tilde(c.Path))
-	}
-	for _, o := range orphans {
-		fmt.Printf("  %-9s %-16s %s\n", "orphan", "-", tilde(o))
-	}
-	if *dryRun {
-		return nil
-	}
-
-	res, err := apply.Execute(changes, orphans, owned, *adopt)
+// write applies the plan, records ownership, runs reload commands and
+// prints what happened.
+func (s *session) write(changes []apply.Change, orphans []string, owned apply.Owned, adopt bool) error {
+	res, err := apply.Execute(changes, orphans, owned, adopt)
 	var ce *apply.ConflictError
 	if errors.As(err, &ce) {
 		return err
@@ -158,17 +173,11 @@ func cmdApply(args []string) error {
 	if err != nil {
 		return err
 	}
-	if *themeID != "" {
-		if err := cfg.Save(); err != nil {
-			return err
-		}
-	}
-
 	for p, bak := range res.Backups {
 		fmt.Printf("backed up %s -> %s\n", tilde(p), filepath.Base(bak))
 	}
 	for _, p := range res.Removed {
-		fmt.Printf("removed %s (plugin no longer enabled)\n", tilde(p))
+		fmt.Printf("removed %s (no plugin generates it anymore)\n", tilde(p))
 	}
 	for _, p := range res.Kept {
 		fmt.Printf("left %s in place: it was edited, no longer managed\n", tilde(p))
@@ -177,6 +186,48 @@ func cmdApply(args []string) error {
 		fmt.Fprintf(os.Stderr, "warning: reload %q failed: %v\n", cmd, e)
 	}
 	fmt.Printf("%d written\n", len(res.Written))
+	return nil
+}
+
+func printPlan(changes []apply.Change, orphans []string, onlyChanges bool) {
+	for _, c := range changes {
+		if onlyChanges && c.State == apply.Unchanged {
+			continue
+		}
+		fmt.Printf("  %-9s %-16s %s\n", c.State, c.Plugin, tilde(c.Path))
+	}
+	for _, o := range orphans {
+		fmt.Printf("  %-9s %-16s %s\n", "orphan", "-", tilde(o))
+	}
+}
+
+func cmdApply(args []string) error {
+	fs := flag.NewFlagSet("apply", flag.ExitOnError)
+	themeID := fs.String("theme", "", "switch to this theme (saved in config)")
+	dryRun := fs.Bool("dry-run", false, "show what would change, write nothing")
+	adopt := fs.Bool("adopt", false, "back up and take over files myarch didn't write")
+	fs.Parse(args)
+
+	s, err := load(*themeID)
+	if err != nil {
+		return err
+	}
+	warnMissingPackages(s.plugins)
+	changes, orphans, owned, err := s.plan()
+	if err != nil {
+		return err
+	}
+	fmt.Printf("theme %s, language %s, %d plugins\n", s.theme.ID, s.lang, len(s.plugins))
+	printPlan(changes, orphans, false)
+	if *dryRun {
+		return nil
+	}
+	if err := s.write(changes, orphans, owned, *adopt); err != nil {
+		return err
+	}
+	if *themeID != "" {
+		return s.cfg.Save()
+	}
 	return nil
 }
 

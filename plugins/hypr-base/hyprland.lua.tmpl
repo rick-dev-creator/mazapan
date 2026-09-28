@@ -25,7 +25,18 @@ local terminal = "foot"
 local mod = "SUPER"
 
 hl.bind(mod .. " + Return", hl.dsp.exec_cmd(terminal))
-hl.bind(mod .. " + Q", hl.dsp.window.close())
+-- Close: the shell's open panel if there is one (the monitor manager…),
+-- else the window. A panel isn't a window: without this, SUPER + Q would
+-- close whatever window sits behind it.
+hl.bind(mod .. " + Q", function()
+  for _, l in ipairs(hl.get_layers()) do
+    if (l.namespace or ""):match("^myarch%-panel%-") then
+      hl.dispatch(hl.dsp.exec_cmd("qs ipc -c myarch call myarch close"))
+      return
+    end
+  end
+  hl.dispatch(hl.dsp.window.close())
+end)
 hl.bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mod .. " + J", hl.dsp.layout("togglesplit"))
 hl.bind(mod .. " + SHIFT + E", hl.dsp.exec_cmd("hyprctl dispatch 'hl.dsp.exit()'"))

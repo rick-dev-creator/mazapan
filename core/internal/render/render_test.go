@@ -27,11 +27,11 @@ func renderOne(t *testing.T, tmpl string) (string, error) {
 	os.WriteFile(filepath.Join(dir, "locales", "es.toml"), []byte("hello = 'hola \"tú\"'\n"), 0o644)
 	p := &plugin.Plugin{Dir: dir, Targets: []plugin.Target{{Template: "f.tmpl", Output: filepath.Join(dir, "out")}}}
 	p.Meta.ID = "p"
-	files, err := All([]*plugin.Plugin{p}, testTheme(), nil, "es_MX")
+	out, err := All([]*plugin.Plugin{p}, testTheme(), nil, "es_MX")
 	if err != nil {
 		return "", err
 	}
-	return string(files[0].Content), nil
+	return string(out.Files[0].Content), nil
 }
 
 func TestColorFuncs(t *testing.T) {
@@ -65,5 +65,22 @@ func TestUnknownTokenFails(t *testing.T) {
 	_, err := renderOne(t, `{{c "acent"}}`)
 	if err == nil || !strings.Contains(err.Error(), `no color "acent"`) {
 		t.Fatalf("typo in a token must fail the render, got %v", err)
+	}
+}
+
+func TestChecksAreRendered(t *testing.T) {
+	dir := t.TempDir()
+	os.MkdirAll(filepath.Join(dir, "locales"), 0o755)
+	os.WriteFile(filepath.Join(dir, "locales", "en.toml"), []byte("check = 'bar loads'\n"), 0o644)
+	p := &plugin.Plugin{Dir: dir, Checks: []plugin.Check{{Name: `{{t "check"}}`, Run: `test {{.Settings.n}} = 3`}}}
+	p.Meta.ID = "p"
+	p.Settings = map[string]any{"n": int64(3)}
+	out, err := All([]*plugin.Plugin{p}, testTheme(), nil, "en")
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := out.Checks[0]
+	if c.Name != "bar loads" || c.Run != "test 3 = 3" || c.Timeout != 15 || c.Plugin != "p" {
+		t.Fatalf("check = %+v", c)
 	}
 }

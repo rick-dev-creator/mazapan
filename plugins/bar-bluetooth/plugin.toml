@@ -16,5 +16,11 @@ hide_without_adapter = true
 [[targets]]
 template = "Bluetooth.qml.tmpl"
 output = "~/.config/quickshell/myarch/widgets/right/20-bluetooth.qml"
-# Ask the running shell to reload; start it if it isn't running.
-reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+# If you use Bluetooth (an adapter, and bluetooth.service enabled), BlueZ
+# runs. No adapter, or a service you never enabled (Arch doesn't by
+# default), is nothing to check.
+[[checks]]
+name = "{{t \"check\"}}"
+run = "[ -z \"$(ls /sys/class/bluetooth 2>/dev/null)\" ] || ! systemctl is-enabled -q bluetooth || systemctl is-active -q bluetooth"

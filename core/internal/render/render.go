@@ -17,6 +17,21 @@ import (
 	"myarch/internal/theme"
 )
 
+// Output is everything the plugins produce for one theme and language.
+type Output struct {
+	Files  []File
+	Checks []Check
+}
+
+// Check is one plugin check, rendered.
+type Check struct {
+	Plugin  string
+	Name    string
+	Run     string
+	Timeout int  // seconds
+	Session bool // needs the graphical session
+}
+
 // File is one rendered target.
 type File struct {
 	Plugin  string
@@ -48,7 +63,7 @@ func ExpandHome(p string) string {
 // so templates can see each other's outputs through the "under" function.
 // overrides holds per-plugin settings from config.toml, keyed by plugin id;
 // lang is the language to render text in (see locale.Detect).
-func All(plugins []*plugin.Plugin, t *theme.Theme, overrides map[string]map[string]any, lang string) ([]File, error) {
+func All(plugins []*plugin.Plugin, t *theme.Theme, overrides map[string]map[string]any, lang string) (*Output, error) {
 	var outputs []string
 	owner := map[string]string{}
 	for _, p := range plugins {
@@ -64,21 +79,22 @@ func All(plugins []*plugin.Plugin, t *theme.Theme, overrides map[string]map[stri
 	sort.Strings(outputs)
 
 	home, _ := os.UserHomeDir()
-	var files []File
+	out := &Output{}
 	for _, p := range plugins {
-		if len(p.Targets) == 0 {
+		if len(p.Targets) == 0 && len(p.Checks) == 0 {
 			continue
 		}
 		cat, err := locale.Load(p.ID(), p.Dir, lang)
 		if err != nil {
 			return nil, err
 		}
-		tmpl, err := template.New(p.ID()).
+		tmpl := template.New(p.ID()).
 			Funcs(funcs(t, outputs, cat)).
-			Option("missingkey=error").
-			ParseGlob(filepath.Join(p.Dir, "*.tmpl"))
-		if err != nil {
-			return nil, fmt.Errorf("plugin %s: %w", p.ID(), err)
+			Option("missingkey=error")
+		if len(p.Targets) > 0 {
+			if tmpl, err = tmpl.ParseGlob(filepath.Join(p.Dir, "*.tmpl")); err != nil {
+				return nil, fmt.Errorf("plugin %s: %w", p.ID(), err)
+			}
 		}
 		settings, err := p.Resolve(overrides[p.ID()])
 		if err != nil {
@@ -95,15 +111,30 @@ func All(plugins []*plugin.Plugin, t *theme.Theme, overrides map[string]map[stri
 			if err != nil {
 				return nil, fmt.Errorf("plugin %s: reload: %w", p.ID(), err)
 			}
-			files = append(files, File{
+			out.Files = append(out.Files, File{
 				Plugin:  p.ID(),
 				Path:    ExpandHome(tg.Output),
 				Content: buf.Bytes(),
 				Reload:  reload,
 			})
 		}
+		for _, c := range p.Checks {
+			name, err := renderString(tmpl, c.Name, data)
+			if err != nil {
+				return nil, fmt.Errorf("plugin %s: check name: %w", p.ID(), err)
+			}
+			run, err := renderString(tmpl, c.Run, data)
+			if err != nil {
+				return nil, fmt.Errorf("plugin %s: check %q: %w", p.ID(), name, err)
+			}
+			timeout := c.Timeout
+			if timeout <= 0 {
+				timeout = 15
+			}
+			out.Checks = append(out.Checks, Check{Plugin: p.ID(), Name: name, Run: run, Timeout: timeout, Session: c.Session})
+		}
 	}
-	return files, nil
+	return out, nil
 }
 
 func renderString(base *template.Template, s string, data Data) (string, error) {

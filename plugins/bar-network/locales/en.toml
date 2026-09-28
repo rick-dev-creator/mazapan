@@ -15,3 +15,5 @@
 "failed" = "couldn't connect to %1"
 "wrong_password" = "wrong password for %1"
 "hint" = "click: connect · right-click: forget"
+
+"check" = "Network is up"

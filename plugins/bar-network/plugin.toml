@@ -12,5 +12,9 @@ pacman = ["quickshell", "networkmanager"]
 [[targets]]
 template = "Network.qml.tmpl"
 output = "~/.config/quickshell/myarch/widgets/right/10-network.qml"
-# Ask the running shell to reload; start it if it isn't running.
-reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+# NetworkManager runs and the machine is on some network.
+[[checks]]
+name = "{{t \"check\"}}"
+run = "systemctl is-active -q NetworkManager && test \"$(nmcli -t networking connectivity)\" != none"

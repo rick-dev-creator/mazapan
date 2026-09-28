@@ -14,3 +14,5 @@
 "failed" = "no pude conectar a %1"
 "wrong_password" = "contraseña incorrecta para %1"
 "hint" = "clic: conectar · clic derecho: olvidar"
+
+"check" = "Hay red"

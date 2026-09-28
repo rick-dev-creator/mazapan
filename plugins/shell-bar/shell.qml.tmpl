@@ -6,6 +6,13 @@
 // picks its place with a prefix like 10-). Each widget loads on its own:
 // one that fails shows a warning in its place and the rest keep working.
 //
+// Panels are the other kind of plugin surface: windows that aren't part of
+// the bar (a monitor manager, a launcher). A plugin generates
+// panels/<name>.qml; it's loaded once, and opened or closed with
+//   qs ipc -c myarch call myarch panel <name>
+// Panel contract: a root Item with `function toggle()`; it makes its own
+// windows.
+//
 // Widget contract: a root Item with an implicitWidth; it may declare
 // `property var barScreen` (the ShellScreen of its bar) and
 // `property int barHeight`, which are set after it loads, and
@@ -34,6 +41,41 @@ ShellRoot {
     target: "myarch"
     function reload(): void {
       Quickshell.reload(false)
+    }
+    // For health checks: answers as long as the bar is alive.
+    function ping(): string {
+      return "ok"
+    }
+    // Open or close a panel by name (panels/<name>.qml).
+    function panel(name: string): string {
+      for (const p of panels.instances) {
+        if (p.name === name && p.item) {
+          p.item.toggle()
+          return "ok"
+        }
+      }
+      return `no panel ${name}`
+    }
+    // Close every open panel (SUPER + Q while one is open).
+    function close(): void {
+      for (const p of panels.instances)
+        if (p.item && p.item.open) p.item.close()
+    }
+  }
+
+  Variants {
+    id: panels
+    model: [
+{{- range under "~/.config/quickshell/myarch/panels/"}}
+      "{{.}}",
+{{- end}}
+    ]
+
+    Loader {
+      required property string modelData
+      readonly property string name: modelData.split("/").pop().replace(/\.qml$/, "")
+      source: "file://" + modelData + "?generation=" + root.generation
+      onStatusChanged: if (status === Loader.Error) console.warn("myarch: panel failed to load:", modelData)
     }
   }
 

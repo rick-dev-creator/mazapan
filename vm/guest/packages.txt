@@ -6,6 +6,7 @@ base-devel
 git
 go
 jq
+pacman-contrib
 rsync
 openssh
 

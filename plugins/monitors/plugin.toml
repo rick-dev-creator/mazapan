@@ -1,0 +1,34 @@
+[plugin]
+id = "monitors"
+name = "Monitors"
+version = "0.1.0"
+api = 1
+description = "Monitor profiles matched by EDID, applied on their own when screens come and go; a visual manager to arrange them"
+
+[packages]
+pacman = ["hyprland", "quickshell"]
+
+[settings]
+# Opens the monitor manager.
+key = "SUPER + SHIFT + M"
+# When the connected screens match no profile, say how to arrange them.
+notify_unknown = true
+# An icon in the bar (right side) that opens the manager.
+bar = true
+
+# The engine: reads ~/.config/myarch/monitors.json (your profiles; the
+# manager writes it, you can too) and applies the one that matches.
+[[targets]]
+template = "monitors.lua.tmpl"
+output = "~/.config/hypr/myarch/monitors.lua"
+reload = "hyprctl reload >/dev/null"
+
+[[targets]]
+template = "Manager.qml.tmpl"
+output = "~/.config/quickshell/myarch/panels/monitors.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "Widget.qml.tmpl"
+output = "~/.config/quickshell/myarch/widgets/right/05-monitors.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"

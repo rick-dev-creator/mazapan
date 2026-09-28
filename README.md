@@ -28,7 +28,27 @@ myarch themes
 ```
 
 It never overwrites a file it didn't write, or one you edited, without
-`--adopt`. How plugins work: [docs/plugin-api.md](docs/plugin-api.md).
+`--adopt`.
+
+Updating the system:
+
+```sh
+myarch update --check   # preview: packages (★ = your desktop depends on it),
+                        # Arch news since your last update, generated files
+myarch update           # preview, confirm, upgrade, re-apply, run the checks;
+                        # if one fails, roll back on its own
+myarch doctor           # run every plugin's health check now
+myarch history          # past updates and how they went
+myarch rollback [ID]    # undo an update: previous packages from pacman's
+                        # cache, generated files as they were
+```
+
+Rolling back needs no reboot: it reinstalls the previous version of exactly
+the packages the update changed, from pacman's cache or, when the cache no
+longer has them, from the Arch Linux Archive. Generated files go back as
+they were; one you edited by hand since is backed up first, never lost.
+Checks that need the graphical session are skipped (not failed) when you
+update from a TTY or over SSH. How plugins work: [docs/plugin-api.md](docs/plugin-api.md).
 
 Build and test (inside the VM, which has Go):
 
@@ -36,6 +56,28 @@ Build and test (inside the VM, which has Go):
 vm/vm run 'cd core && go test ./... && go build -o ../bin/myarch ./cmd/myarch'
 vm/vm run 'myarch apply'
 ```
+
+## Monitors
+
+Profiles live in `~/.config/myarch/monitors.json`: which screens, where,
+at what mode, scale and rotation, adaptive sync (VRR), 10-bit color, which
+ones mirror another or are off, and which workspaces each one holds.
+Screens are identified by their EDID, so connector names that move around
+(DP-2 today, DP-3 tomorrow) don't matter. The profile whose screens are
+exactly the ones connected is applied at startup and whenever a screen
+comes or goes; when none matches, screens a profile had turned off or
+mirrored show their own desktop again.
+
+`SUPER + SHIFT + M`, or the screen icon in the bar (with how many screens
+there are, when more than one), opens the manager, sized to the screen it
+opens on:
+live thumbnails of every screen that you drag into place (they snap to
+each other, never overlap, and glide into position), and each physical
+screen shows its name in large letters while it's open, so you know which
+is which. Pick mode, scale, rotation, VRR, 10-bit and mirroring, try the
+layout (it goes back on its own after 15 s unless you keep it; what a
+screen can't do, like 10-bit on some GPUs, is switched back off and
+reported) and save it as a profile.
 
 ## Dev VM
 
@@ -49,6 +91,8 @@ vm/vm ssh          # shell in the guest (user arch / password arch)
 vm/vm run <cmd>    # run inside the guest's Hyprland session (hyprctl, gsettings…)
 vm/vm exec <cmd>   # launch an app through Hyprland
 vm/vm key meta_l-equal  # press keys on the guest keyboard (QEMU sendkey names)
+vm/vm mouse click X Y   # pointer, in layout pixels (all screens together)
+vm/vm run 'hyprctl output create headless TEST-A'  # a screen to plug in and out
 vm/vm run 'vm/guest/motion-probe.py "hl.dsp.layout(\"swapcol r\")"'  # measure an animation
 vm/vm shot         # screenshot of the guest desktop -> vm/.state/shot.png
 vm/vm provision    # re-run after editing vm/guest/packages.txt
@@ -60,6 +104,7 @@ The guest autologins on tty1 and starts Hyprland. Output from its startup goes
 to `~/.cache/start-hyprland.log` in the guest.
 
 Knobs (env vars): `MYARCH_MEM` (8G), `MYARCH_CPUS` (8), `MYARCH_DISK` (40G),
+`MYARCH_OUTPUTS` (1; extra outputs stay disconnected with the GTK window),
 `MYARCH_RES` (1920x1080), `MYARCH_SSH_PORT` (2222), `MYARCH_DISPLAY`
 (`gtk,gl=on,zoom-to-fit=off,grab-on-hover=on`).
 

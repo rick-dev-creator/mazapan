@@ -12,3 +12,9 @@ pacman = ["hyprland", "foot"]
 template = "hyprland.lua.tmpl"
 output = "~/.config/hypr/hyprland.lua"
 reload = "hyprctl reload >/dev/null"
+
+# Hyprland (the installed binary) accepts the generated configuration. Runs
+# without starting a compositor, so it's safe right after an update.
+[[checks]]
+name = "{{t \"check.config\"}}"
+run = "Hyprland --verify-config -c ~/.config/hypr/hyprland.lua"

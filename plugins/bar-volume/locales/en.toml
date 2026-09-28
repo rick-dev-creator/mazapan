@@ -4,3 +4,5 @@
 "muted" = "muted"
 "no_device" = "No audio device"
 "devices" = "devices"
+
+"check" = "Audio works (if there is a sound card)"

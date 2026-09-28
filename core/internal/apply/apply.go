@@ -63,10 +63,11 @@ func (o Owned) Save(path string) error {
 	if err != nil {
 		return err
 	}
-	return writeAtomic(path, append(b, '\n'))
+	return WriteAtomic(path, append(b, '\n'))
 }
 
-func sum(b []byte) string {
+// Sum is how ownership identifies a file's content.
+func Sum(b []byte) string {
 	h := sha256.Sum256(b)
 	return hex.EncodeToString(h[:])
 }
@@ -86,7 +87,7 @@ func Plan(files []render.File, owned Owned) (changes []Change, orphans []string,
 			return nil, nil, err
 		case bytes.Equal(disk, f.Content):
 			st = Unchanged
-		case owned[f.Path] == sum(disk):
+		case owned[f.Path] == Sum(disk):
 			st = Changed
 		default:
 			st = Conflict
@@ -127,7 +128,7 @@ func Execute(changes []Change, orphans []string, owned Owned, adopt bool) (*Resu
 	for _, c := range changes {
 		switch c.State {
 		case Unchanged:
-			owned[c.Path] = sum(c.Content)
+			owned[c.Path] = Sum(c.Content)
 			continue
 		case Conflict:
 			bak := c.Path + ".myarch-bak-" + stamp
@@ -136,10 +137,10 @@ func Execute(changes []Change, orphans []string, owned Owned, adopt bool) (*Resu
 			}
 			res.Backups[c.Path] = bak
 		}
-		if err := writeAtomic(c.Path, c.Content); err != nil {
+		if err := WriteAtomic(c.Path, c.Content); err != nil {
 			return res, err
 		}
-		owned[c.Path] = sum(c.Content)
+		owned[c.Path] = Sum(c.Content)
 		res.Written = append(res.Written, c)
 	}
 
@@ -149,7 +150,7 @@ func Execute(changes []Change, orphans []string, owned Owned, adopt bool) (*Resu
 		case errors.Is(err, fs.ErrNotExist):
 		case err != nil:
 			return res, err
-		case sum(disk) == owned[p]:
+		case Sum(disk) == owned[p]:
 			if err := os.Remove(p); err != nil {
 				return res, err
 			}
@@ -189,7 +190,9 @@ func Reload(written []Change) map[string]error {
 	return errs
 }
 
-func writeAtomic(path string, b []byte) error {
+// WriteAtomic writes through a temporary file, so a reader never sees half
+// a file.
+func WriteAtomic(path string, b []byte) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}

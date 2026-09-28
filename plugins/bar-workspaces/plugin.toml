@@ -37,11 +37,9 @@ preview_aspect = 1.6
 [[targets]]
 template = "Workspaces.qml.tmpl"
 output = "~/.config/quickshell/myarch/widgets/left/10-workspaces.qml"
-# Ask the running shell to reload; start it if it isn't running.
-reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
 
 [[targets]]
 template = "Preview.qml.tmpl"
 output = "~/.config/quickshell/myarch/components/workspaces/Preview.qml"
-# Ask the running shell to reload; start it if it isn't running.
-reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''
+reload = "sh ~/.local/share/myarch/bin/shell-reload"

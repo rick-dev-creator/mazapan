@@ -39,6 +39,26 @@ type Plugin struct {
 	// Targets are files the plugin generates. The core renders and writes
 	// them; plugins never touch the filesystem themselves.
 	Targets []Target `toml:"targets"`
+
+	// Checks say whether what the plugin is responsible for still works.
+	// `myarch doctor` runs them on demand; `myarch update` runs them after
+	// updating and rolls back when one fails.
+	Checks []Check `toml:"checks"`
+}
+
+type Check struct {
+	// Name and Run are rendered as templates, so the name can be
+	// translated (t "…") and the command can use settings.
+	Name string `toml:"name"`
+	// Run is a shell command; exit status 0 means healthy. Its output is
+	// shown when it fails.
+	Run string `toml:"run"`
+	// Timeout in seconds (default 15): a check that hangs has failed.
+	Timeout int `toml:"timeout"`
+	// Session: the check needs the graphical session (Hyprland, the bar,
+	// the user's PipeWire). Outside it (a TTY, SSH) it's skipped, never
+	// failed: a skipped check must not roll back a good update.
+	Session bool `toml:"session"`
 }
 
 type Target struct {
@@ -158,6 +178,11 @@ func load(path string) (*Plugin, error) {
 		return nil, fmt.Errorf("%s: [plugin] id is required", path)
 	case p.Meta.API != APIVersion:
 		return nil, fmt.Errorf("%s: api = %d, this core supports api = %d", path, p.Meta.API, APIVersion)
+	}
+	for i, c := range p.Checks {
+		if c.Name == "" || c.Run == "" {
+			return nil, fmt.Errorf("%s: checks[%d] needs name and run", path, i)
+		}
 	}
 	for i, t := range p.Targets {
 		if t.Template == "" || t.Output == "" {

@@ -11,3 +11,5 @@
 "scan" = "look for new devices"
 "no_devices" = "No devices yet"
 "hint" = "click: connect · right-click: forget"
+
+"check" = "Bluetooth works (if you use it)"

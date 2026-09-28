@@ -37,13 +37,13 @@ func TestPlanStates(t *testing.T) {
 	if s := planOne(t, file(p, "v2"), Owned{}); s != Conflict {
 		t.Fatalf("foreign file: got %v, want conflict", s)
 	}
-	if s := planOne(t, file(p, "v2"), Owned{p: sum([]byte("v1"))}); s != Changed {
+	if s := planOne(t, file(p, "v2"), Owned{p: Sum([]byte("v1"))}); s != Changed {
 		t.Fatalf("our file: got %v, want changed", s)
 	}
 
 	// We wrote v1, then a person edited it: that's theirs now.
 	os.WriteFile(p, []byte("hand edit"), 0o644)
-	if s := planOne(t, file(p, "v2"), Owned{p: sum([]byte("v1"))}); s != Conflict {
+	if s := planOne(t, file(p, "v2"), Owned{p: Sum([]byte("v1"))}); s != Conflict {
 		t.Fatalf("edited file: got %v, want conflict", s)
 	}
 }
@@ -82,7 +82,7 @@ func TestOrphans(t *testing.T) {
 	edited := filepath.Join(dir, "edited.conf")
 	os.WriteFile(clean, []byte("gen"), 0o644)
 	os.WriteFile(edited, []byte("hand edit"), 0o644)
-	owned := Owned{clean: sum([]byte("gen")), edited: sum([]byte("gen"))}
+	owned := Owned{clean: Sum([]byte("gen")), edited: Sum([]byte("gen"))}
 
 	ch, orphans, _ := Plan(nil, owned)
 	res, err := Execute(ch, orphans, owned, false)

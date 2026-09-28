@@ -3,3 +3,5 @@
 "muted" = "silenciado"
 "no_device" = "Sin dispositivo de audio"
 "devices" = "dispositivos"
+
+"check" = "El audio funciona (si hay tarjeta de sonido)"
