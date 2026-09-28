@@ -13,6 +13,7 @@ import (
 
 	"myarch/internal/apply"
 	"myarch/internal/config"
+	"myarch/internal/locale"
 	"myarch/internal/plugin"
 	"myarch/internal/render"
 	"myarch/internal/theme"
@@ -120,7 +121,8 @@ func cmdApply(args []string) error {
 	if err := checkOverrides(cfg); err != nil {
 		return err
 	}
-	files, err := render.All(plugins, t, cfg.Plugins)
+	lang := locale.Detect(cfg.Language)
+	files, err := render.All(plugins, t, cfg.Plugins, lang)
 	if err != nil {
 		return err
 	}
@@ -133,7 +135,7 @@ func cmdApply(args []string) error {
 		return err
 	}
 
-	fmt.Printf("theme %s, %d plugins\n", t.ID, len(plugins))
+	fmt.Printf("theme %s, language %s, %d plugins\n", t.ID, lang, len(plugins))
 	for _, c := range changes {
 		fmt.Printf("  %-9s %-16s %s\n", c.State, c.Plugin, tilde(c.Path))
 	}

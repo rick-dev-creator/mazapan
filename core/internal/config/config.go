@@ -15,7 +15,9 @@ import (
 )
 
 type Config struct {
-	Theme    string   `toml:"theme"`
+	Theme string `toml:"theme"`
+	// Language to render text in ("es", "es_MX"); empty = the OS's.
+	Language string   `toml:"language,omitempty"`
 	Disabled []string `toml:"disabled_plugins,omitempty"`
 	// Per-plugin setting overrides: [plugins.<id>] key = value
 	Plugins map[string]map[string]any `toml:"plugins,omitempty"`

@@ -12,6 +12,7 @@ import (
 	"strings"
 	"text/template"
 
+	"myarch/internal/locale"
 	"myarch/internal/plugin"
 	"myarch/internal/theme"
 )
@@ -30,6 +31,8 @@ type Data struct {
 	Plugin   string
 	Home     string
 	Settings map[string]any // plugin defaults merged with config overrides
+	Lang     string         // POSIX locale name: "es_MX", "en"
+	LangCode string         // just the language: "es", "en"
 }
 
 // ExpandHome turns a leading "~/" into the user's home directory.
@@ -43,8 +46,9 @@ func ExpandHome(p string) string {
 
 // All renders every target of every plugin. Output paths are collected first
 // so templates can see each other's outputs through the "under" function.
-// overrides holds per-plugin settings from config.toml, keyed by plugin id.
-func All(plugins []*plugin.Plugin, t *theme.Theme, overrides map[string]map[string]any) ([]File, error) {
+// overrides holds per-plugin settings from config.toml, keyed by plugin id;
+// lang is the language to render text in (see locale.Detect).
+func All(plugins []*plugin.Plugin, t *theme.Theme, overrides map[string]map[string]any, lang string) ([]File, error) {
 	var outputs []string
 	owner := map[string]string{}
 	for _, p := range plugins {
@@ -65,8 +69,12 @@ func All(plugins []*plugin.Plugin, t *theme.Theme, overrides map[string]map[stri
 		if len(p.Targets) == 0 {
 			continue
 		}
+		cat, err := locale.Load(p.ID(), p.Dir, lang)
+		if err != nil {
+			return nil, err
+		}
 		tmpl, err := template.New(p.ID()).
-			Funcs(funcs(t, outputs)).
+			Funcs(funcs(t, outputs, cat)).
 			Option("missingkey=error").
 			ParseGlob(filepath.Join(p.Dir, "*.tmpl"))
 		if err != nil {
@@ -76,7 +84,8 @@ func All(plugins []*plugin.Plugin, t *theme.Theme, overrides map[string]map[stri
 		if err != nil {
 			return nil, err
 		}
-		data := Data{Theme: t, Plugin: p.ID(), Home: home, Settings: settings}
+		code, _, _ := strings.Cut(lang, "_")
+		data := Data{Theme: t, Plugin: p.ID(), Home: home, Settings: settings, Lang: lang, LangCode: code}
 		for _, tg := range p.Targets {
 			var buf bytes.Buffer
 			if err := tmpl.ExecuteTemplate(&buf, tg.Template, data); err != nil {
@@ -114,8 +123,16 @@ func renderString(base *template.Template, s string, data Data) (string, error) 
 	return buf.String(), err
 }
 
-func funcs(t *theme.Theme, outputs []string) template.FuncMap {
+func funcs(t *theme.Theme, outputs []string, cat *locale.Catalog) template.FuncMap {
 	return template.FuncMap{
+		// t "preview.empty" -> the plugin's text in the current language.
+		"t": cat.T,
+		// tq "preview.empty" -> the same, as a quoted string literal that is
+		// valid in QML/JS and Lua: "workspace %1 · vacío"
+		"tq": func(key string) (string, error) {
+			v, err := cat.T(key)
+			return strconv.Quote(v), err
+		},
 		// c "accent" -> "#ffb000"; fails the render on unknown tokens.
 		"c": t.Color,
 		// hex "#ffb000" -> "ffb000"
@@ -164,6 +181,16 @@ func funcs(t *theme.Theme, outputs []string) template.FuncMap {
 			return fmt.Sprintf("mass = 1, stiffness = %.2f, dampening = %.2f", omega*omega, 2*damping*omega)
 		},
 		"num": func(f float64) string { return strconv.FormatFloat(f, 'f', -1, 64) },
+		// camel "bg_alt" -> "bgAlt"  (QML/JS property names)
+		"camel": func(s string) string {
+			parts := strings.Split(s, "_")
+			for i := 1; i < len(parts); i++ {
+				if parts[i] != "" {
+					parts[i] = strings.ToUpper(parts[i][:1]) + parts[i][1:]
+				}
+			}
+			return strings.Join(parts, "")
+		},
 	}
 }
 

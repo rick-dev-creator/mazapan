@@ -22,9 +22,12 @@ func renderOne(t *testing.T, tmpl string) (string, error) {
 	t.Helper()
 	dir := t.TempDir()
 	os.WriteFile(filepath.Join(dir, "f.tmpl"), []byte(tmpl), 0o644)
+	os.MkdirAll(filepath.Join(dir, "locales"), 0o755)
+	os.WriteFile(filepath.Join(dir, "locales", "en.toml"), []byte("hello = \"hello\"\nbye = \"bye\"\n"), 0o644)
+	os.WriteFile(filepath.Join(dir, "locales", "es.toml"), []byte("hello = 'hola \"tú\"'\n"), 0o644)
 	p := &plugin.Plugin{Dir: dir, Targets: []plugin.Target{{Template: "f.tmpl", Output: filepath.Join(dir, "out")}}}
 	p.Meta.ID = "p"
-	files, err := All([]*plugin.Plugin{p}, testTheme(), nil)
+	files, err := All([]*plugin.Plugin{p}, testTheme(), nil, "es_MX")
 	if err != nil {
 		return "", err
 	}
@@ -40,9 +43,15 @@ func TestColorFuncs(t *testing.T) {
 		`{{cssa (c "accent") 0.36}}`: "rgba(255, 176, 0, 0.36)",
 		`{{speed 0.5}}`:              "0.90",
 		// omega = 2*pi/0.4 = 15.708: k = omega^2, c = 2*z*omega
-		`{{spring 1 0}}`:   "mass = 1, stiffness = 246.74, dampening = 25.13",
-		`{{spring 1 1}}`:   "mass = 1, stiffness = 246.74, dampening = 31.42",
-		`{{spring 0.5 0}}`: "mass = 1, stiffness = 986.96, dampening = 50.27",
+		`{{spring 1 0}}`:             "mass = 1, stiffness = 246.74, dampening = 25.13",
+		`{{spring 1 1}}`:             "mass = 1, stiffness = 246.74, dampening = 31.42",
+		`{{spring 0.5 0}}`:           "mass = 1, stiffness = 986.96, dampening = 50.27",
+		`{{camel "bright_magenta"}}`: "brightMagenta",
+		`{{camel "bg"}}`:             "bg",
+		`{{t "hello"}}`:              `hola "tú"`,
+		`{{tq "hello"}}`:             `"hola \"tú\""`,
+		`{{t "bye"}}`:                "bye", // missing in es: falls back to en
+		`{{.Lang}} {{.LangCode}}`:    "es_MX es",
 	}
 	for in, want := range cases {
 		got, err := renderOne(t, in)
