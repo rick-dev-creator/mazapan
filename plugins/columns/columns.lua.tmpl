@@ -14,7 +14,7 @@
 -- move it along the row.
 --
 -- Centering in phone mode works through the workspace's outer gaps: the
--- side gap is set to half the unused width, then `fit all` shares what's
+-- side gap is set to half the unused width, then the columns share what's
 -- left equally. Focus mode switches just that workspace to Hyprland's
 -- master layout, centered.
 
@@ -67,11 +67,20 @@ local function set_layout(ws, layout)
   hl.workspace_rule({ workspace = tostring(ws.id), layout = layout })
 end
 
--- A layout switched by workspace rule only takes over on the next turn of
--- Hyprland's event loop; layout messages sent before that reach the old
--- layout and are dropped. Run whatever follows a switch a moment later.
-local function after_switch(fn)
+-- Hyprland applies some changes only on the next turn of its event loop: a
+-- layout switched by workspace rule, a window moved into a workspace (its
+-- event fires before the window is placed). Layout messages sent before
+-- that reach the old state and are lost, so run them a moment later.
+local function later(fn)
   hl.timer(fn, { timeout = 30, type = "oneshot" })
+end
+
+-- Every column 1/n of the width, then bring them all into view. `fit all`
+-- alone only shrinks columns that don't fit; it never widens them when a
+-- window leaves and space frees up.
+local function share(n)
+  hl.dispatch(hl.dsp.layout(string.format("colresize all %.4f", 1 / n)))
+  hl.dispatch(hl.dsp.layout("fit all"))
 end
 
 local function equal(ws, n)
@@ -79,7 +88,7 @@ local function equal(ws, n)
   local w = screen(ws)
   local fits = math.max(1, math.floor(w / MIN_WIDTH))
   if n <= fits then
-    hl.dispatch(hl.dsp.layout("fit all"))
+    share(n)
   else
     -- Too many to fit at MIN_WIDTH: keep that width and let the row scroll.
     hl.dispatch(hl.dsp.layout(string.format("colresize all %.4f", 1 / fits)))
@@ -96,7 +105,7 @@ local function phone(ws, n)
     return equal(ws, n)
   end
   side_gaps(ws, side)
-  hl.dispatch(hl.dsp.layout("fit all"))
+  share(n)
 end
 
 -- Apply a column mode (equal or phone) to the focused workspace, leaving
@@ -117,7 +126,7 @@ local function arrange(which)
   if mode[ws.id] == "focus" then
     set_layout(ws, "scrolling")
     mode[ws.id] = which
-    return after_switch(apply)
+    return later(apply)
   end
   mode[ws.id] = which
   apply()
@@ -138,7 +147,7 @@ local function focus()
     mode[ws.id] = "focus"
     side_gaps(ws, GAP_OUT) -- undo phone mode's wide side gaps
     set_layout(ws, "master")
-    after_switch(function()
+    later(function()
       hl.dispatch(hl.dsp.layout(string.format("mfact exact %.4f", FOCUS_RATIO)))
       hl.dispatch(hl.dsp.layout("swapwithmaster master ignoremaster"))
     end)
@@ -176,8 +185,10 @@ hl.bind("{{.Settings.move_left_key}}", hl.dsp.layout("swapcol l"))
 hl.bind("{{.Settings.move_right_key}}", hl.dsp.layout("swapcol r"))
 {{- if .Settings.auto}}
 
--- Re-apply whatever mode the workspace is in.
-for _, ev in ipairs({ "window.open", "window.destroy", "window.move_to_workspace" }) do
-  hl.on(ev, function() arrange() end)
+-- Re-apply whatever mode the workspace is in when its windows change.
+-- Layout messages only reach the workspace on screen, so a workspace that
+-- got a window while out of sight is re-arranged when you arrive.
+for _, ev in ipairs({ "window.open", "window.destroy", "window.move_to_workspace", "workspace.active" }) do
+  hl.on(ev, function() later(function() arrange() end) end)
 end
 {{- end}}

@@ -1,7 +1,7 @@
 [plugin]
 id = "columns"
 name = "Equal columns"
-version = "0.4.0"
+version = "0.5.0"
 api = 1
 description = "Windows as columns: equal widths, phone-width and centered, or a focus layout with the active window in the middle"
 
@@ -31,10 +31,10 @@ resize_step = 0.05
 # Move the focused column one place left / right in the row.
 move_left_key = "SUPER + SHIFT + left"
 move_right_key = "SUPER + SHIFT + right"
-# Re-apply the workspace's mode whenever a window opens, closes or moves in.
-# Off by default: it undoes a column you resized by hand as soon as another
-# window opens.
-auto = false
+# Re-apply the workspace's mode whenever a window opens, closes or moves in,
+# so the columns always share the screen. Turn it off to keep columns you
+# resized by hand: then only the keys rearrange them.
+auto = true
 # Narrowest a column may get, in logical pixels: shrinking stops here, and
 # in equal mode, with more windows than fit at this width, columns keep it
 # and the row scrolls.
