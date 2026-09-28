@@ -330,6 +330,29 @@ func funcs(t *theme.Theme, outputs []string, cat *locale.Catalog) template.FuncM
 		// camel "bg_alt" -> "bgAlt"  (QML/JS property names)
 		// base "/x/y.default" -> "y.default" (a profile's name, from .Place)
 		"base": filepath.Base,
+		// mix (c "bg") (c "success") 0.18 -> the second over the first at
+		// 18%: "#2a3322" (a diff's added line)
+		"mix": func(a, b string, t float64) (string, error) {
+			ar, ag, ab, err := channels(a)
+			if err != nil {
+				return "", err
+			}
+			br, bg, bb, err := channels(b)
+			if err != nil {
+				return "", err
+			}
+			m := func(x, y int) int { return int(math.Round(float64(x) + float64(y-x)*t)) }
+			return fmt.Sprintf("#%02x%02x%02x", m(ar, br), m(ag, bg), m(ab, bb)), nil
+		},
+		// solid "#ffb00080" -> "#ffb000" (for apps with no alpha: Neovim, btop)
+		"solid": func(c string) string {
+			if len(c) > 7 {
+				return c[:7]
+			}
+			return c
+		},
+		// list "a" "b" -> [a b], to range over
+		"list": func(s ...string) []string { return s },
 		"camel": func(s string) string {
 			parts := strings.Split(s, "_")
 			for i := 1; i < len(parts); i++ {

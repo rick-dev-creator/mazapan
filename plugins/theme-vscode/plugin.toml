@@ -1,0 +1,24 @@
+[plugin]
+id = "theme-vscode"
+name = "VS Code theme"
+version = "0.1.0"
+api = 1
+description = "VS Code, Code - OSS and VSCodium in the theme: its colors over VS Code's default theme (workbench, syntax, semantic tokens, terminal), following the system's dark/light; open windows follow at once"
+
+[packages]
+pacman = []
+
+# In your settings.json, as color customizations of VS Code's default theme
+# (VS Code's own way to recolor a theme, applied live), and VS Code set to
+# follow the system's dark/light (which the theme sets): only those keys
+# are myarch's. Pick another theme and these simply don't apply to it. A
+# settings.json with comments is left alone ("unreadable").
+[[targets]]
+template = "settings.json.tmpl"
+output = "User/settings.json"
+merge = "json"
+each = ["~/.config/Code/User", "~/.config/Code - OSS/User", "~/.config/VSCodium/User",
+  "~/.var/app/com.visualstudio.code/config/Code/User", "~/.var/app/com.vscodium.codium/config/VSCodium/User"]
+
+[coverage]
+apps = ["code", "code-oss", "codium", "vscodium", "visual-studio-code", "com.visualstudio.code"]

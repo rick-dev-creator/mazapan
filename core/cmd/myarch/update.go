@@ -129,9 +129,12 @@ func cmdUpdate(args []string) error {
 		}
 	}
 
+	// What an apply would write: busy and unreadable files wait, they're
+	// not an update.
 	fileChanges := 0
 	for _, c := range changes {
-		if c.State != apply.Unchanged {
+		switch c.State {
+		case apply.New, apply.Changed, apply.Conflict:
 			fileChanges++
 		}
 	}

@@ -218,6 +218,8 @@ Functions:
 | `num 11.0`                 | `11`                          |
 | `pct 0.9`                  | `90`                          |
 | `base .Place`              | `gwfdp8rp.default-release`    |
+| `mix (c "bg") (c "success") 0.18` | the second over the first at 18%: `#2a3322` |
+| `list "a" "b"`             | a list to `range` over        |
 | `camel "bg_alt"`           | `bgAlt` (QML property names)  |
 | `t "today"`                | `hoy` (this plugin's text)    |
 | `tq "today"`               | `"hoy"` (quoted for QML/Lua)  |

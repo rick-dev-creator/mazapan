@@ -207,10 +207,33 @@ manager unthemed.
     mode left alone; coverage claims the browsers, not every app built on
     them.
 
+- *Done* — developer tools:
+  - Neovim (plugin `theme-neovim`): a full colorscheme from the theme
+    (syntax, Treesitter, LSP, diagnostics, diff, git, Telescope, which-key,
+    its terminal's 16 colors), see-through when the terminals are; in
+    Neovim's data folder, never in your ~/.config/nvim; used on its own
+    when your config sets no colorscheme (else set yours to "myarch");
+    running Neovims recolor on apply.
+  - VS Code, Code - OSS, VSCodium, and their Flatpaks (plugin
+    `theme-vscode`): the theme as color customizations in settings.json
+    scoped to VS Code's default theme (whatever it's called in that
+    version: "Dark 2026", "Dark Modern", "Default Dark Modern"), so a theme
+    you pick yourself is left alone; VS Code follows the system's dark or
+    light. Open windows follow a new theme at once (switching between dark
+    and light takes a restart). A settings.json with comments is left
+    alone: a new plan state, `unreadable`; one that's formatted stays so.
+  - btop (plugin `theme-btop`): a btop theme from the theme's colors, over
+    the terminal's background; btop.conf shared with btop.
+  - Audited (10 findings, all fixed): a rollback never rewrites a
+    settings.json it can't read; reload commands time out (a Neovim
+    suspended with ctrl-z hung apply); busy and unreadable files aren't
+    counted as an update; JSON keeps its layout; myarch's JSON keys leave
+    with the plugin; readable fuzzy matches on VS Code's selected rows;
+    colors with alpha trimmed for Neovim and btop.
+
 **Follow-ups, by reach (for everyone, not one machine).** Chromium's
 accent through its policy (needs root: a way for plugins to write system
-files); developer tools (a Neovim colorscheme, a VS Code theme, btop);
-Electron apps one by one; Qt 5 (qt5ct). Also: GTK apps previewed live
+files); Electron apps one by one (Obsidian, Discord…); Qt 5 (qt5ct). Also: GTK apps previewed live
 (they follow on ↵); light/dark at sunset; restart the browsers' theme
 without restarting them.
 

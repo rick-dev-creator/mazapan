@@ -109,6 +109,26 @@ func TestOtherSharedFormats(t *testing.T) {
 	}
 }
 
+// A settings.json people read stays indented; one line stays one line (a
+// browser's Preferences); myarch's keys leave, and the objects they empty.
+func TestJSONLayoutAndDrop(t *testing.T) {
+	want := keysOf("json", `{"a":{"[T]":{"x":"<1>"}}}`)
+	got := mergeKeys("json", "{\n\t\"mine\": 1\n}\n", want)
+	if got != "{\n\t\"a\": {\n\t\t\"[T]\": {\n\t\t\t\"x\": \"<1>\"\n\t\t}\n\t},\n\t\"mine\": 1\n}\n" {
+		t.Errorf("indented: %q", got)
+	}
+	if one := mergeKeys("json", `{"mine":1}`, want); strings.Contains(one, "\n") {
+		t.Errorf("one line: %q", one)
+	}
+	if back := dropKeys("json", got, want); back != "{\n\t\"mine\": 1\n}\n" {
+		t.Errorf("dropped: %q", back)
+	}
+	// Not JSON (a comment): left exactly as it is.
+	if s := mergeKeys("json", "{ // mine\n}", want); s != "{ // mine\n}" {
+		t.Errorf("unparsable rewritten: %q", s)
+	}
+}
+
 func TestSharedFormatsEdgeCases(t *testing.T) {
 	// An @import after other rules is ignored by CSS: not there.
 	if k := keysOf("lines", "#a { color: red }\n@import \"myarch.css\";\n"); len(k) != 0 {
@@ -175,13 +195,20 @@ func TestUnreadableAndBusy(t *testing.T) {
 	p := filepath.Join(dir, "Preferences")
 	os.WriteFile(p, []byte(`{"a":1,}`), 0o600)
 	f := render.File{Plugin: "p", Path: p, Content: []byte(`{"x":1}`), Merge: "json"}
-	if ch, _, _ := Plan([]render.File{f}, Owned{}); ch[0].State != Conflict {
+	ch, orphans, _ := Plan([]render.File{f}, Owned{})
+	if ch[0].State != Unreadable {
 		t.Fatalf("unreadable: %v", ch[0].State)
+	}
+	if _, err := Execute(ch, orphans, Owned{}, true); err != nil {
+		t.Fatal(err)
+	}
+	if b, _ := os.ReadFile(p); string(b) != `{"a":1,}` {
+		t.Fatalf("unreadable file touched, even with --adopt: %s", b)
 	}
 	os.WriteFile(p, []byte(`{"a":1}`), 0o600)
 	f.Busy = true
 	owned := Owned{p: "json:old"}
-	ch, orphans, _ := Plan([]render.File{f}, owned)
+	ch, orphans, _ = Plan([]render.File{f}, owned)
 	if ch[0].State != Busy {
 		t.Fatalf("busy: %v", ch[0].State)
 	}

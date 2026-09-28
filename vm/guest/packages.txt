@@ -48,3 +48,5 @@ iw
 noto-fonts
 ttf-jetbrains-mono-nerd
 hyprlock
+neovim
+btop

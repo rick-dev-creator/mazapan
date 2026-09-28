@@ -1,0 +1,22 @@
+[plugin]
+id = "theme-btop"
+name = "btop theme"
+version = "0.1.0"
+api = 1
+description = "btop in the theme: its boxes, graphs and meters from the theme's colors, over the terminal's background"
+
+[packages]
+pacman = ["btop"]
+
+[[targets]]
+template = "myarch.theme.tmpl"
+output = "~/.config/btop/themes/myarch.theme"
+
+# btop writes its own settings here: only the theme's are myarch's.
+[[targets]]
+template = "btop.conf.tmpl"
+output = "~/.config/btop/btop.conf"
+merge = "ini"
+
+[coverage]
+apps = ["btop"]

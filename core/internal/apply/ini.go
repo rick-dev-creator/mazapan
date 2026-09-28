@@ -1,6 +1,7 @@
 package apply
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"regexp"
@@ -21,7 +22,7 @@ import (
 
 // readable: can a file in this format be merged into without losing it?
 // Only JSON can fail: a file that doesn't parse (a crash's half-write, a
-// comment) is never rewritten, it's a conflict.
+// comment) is never rewritten: "unreadable", left as it is.
 func readable(format string, text []byte) bool {
 	if format != "json" {
 		return true
@@ -37,12 +38,16 @@ func readable(format string, text []byte) bool {
 func removedIsEdit(format string) bool { return format == "prefs" || format == "lines" }
 
 // dropKeys takes myarch's keys that it no longer manages (gone, as it wrote
-// them) out of a person's own file (prefs, lines): a pref of an older
-// version, the @import of a plugin that's disabled. Other formats keep
-// them: the app may need them.
+// them) out of the file: a pref of an older version, the @import of a
+// plugin that's disabled, a settings.json's color customizations (else an
+// editor stays in a theme nothing manages). INI keeps them: an app like
+// qt6ct needs its keys set.
 func dropKeys(format, text string, drop map[string]string) string {
-	if !removedIsEdit(format) || len(drop) == 0 {
+	if len(drop) == 0 || format == "ini" {
 		return text
+	}
+	if format == "json" {
+		return jsonDrop(text, drop)
 	}
 	lines := strings.Split(text, "\n")
 	var out []string
@@ -119,8 +124,10 @@ func jsonKeys(text string) map[string]string {
 // creating the objects on the way.
 func jsonMerge(text string, want map[string]string) string {
 	root := map[string]any{}
-	if json.Unmarshal([]byte(text), &root) != nil || root == nil {
-		root = map[string]any{}
+	if strings.TrimSpace(text) != "" {
+		if json.Unmarshal([]byte(text), &root) != nil || root == nil {
+			return text // never rewritten blind: whatever it is stays
+		}
 	}
 	for k, raw := range want {
 		var val any
@@ -139,8 +146,62 @@ func jsonMerge(text string, want map[string]string) string {
 		}
 		m[path[len(path)-1]] = val
 	}
-	b, _ := json.Marshal(root)
-	return string(b)
+	return jsonWrite(text, root)
+}
+
+// jsonWrite: laid out the way the file was, near enough: one line if it
+// was one line (a browser's Preferences), else indented with tabs (a
+// settings.json people read). No HTML escaping of <, >, &.
+func jsonWrite(was string, root map[string]any) string {
+	var b bytes.Buffer
+	enc := json.NewEncoder(&b)
+	enc.SetEscapeHTML(false)
+	if strings.TrimSpace(was) == "" || strings.Contains(strings.TrimSpace(was), "\n") {
+		enc.SetIndent("", "\t")
+	}
+	enc.Encode(root)
+	if !strings.HasSuffix(was, "\n") && strings.TrimSpace(was) != "" {
+		return strings.TrimSuffix(b.String(), "\n")
+	}
+	return b.String()
+}
+
+// jsonDrop deletes the paths still holding what myarch wrote there, and the
+// objects that leaves empty.
+func jsonDrop(text string, drop map[string]string) string {
+	root := map[string]any{}
+	if json.Unmarshal([]byte(text), &root) != nil || root == nil {
+		return text
+	}
+	changed := false
+	for k, v := range drop {
+		path := strings.Split(strings.TrimPrefix(k, "\x00"), "\x01")
+		var walk func(m map[string]any, i int) bool // true: m[path[i]] went
+		walk = func(m map[string]any, i int) bool {
+			if i == len(path)-1 {
+				if cur, ok := m[path[i]]; ok {
+					if b, _ := json.Marshal(cur); string(b) == v {
+						delete(m, path[i])
+						return true
+					}
+				}
+				return false
+			}
+			next, ok := m[path[i]].(map[string]any)
+			if !ok || !walk(next, i+1) {
+				return false
+			}
+			if len(next) == 0 {
+				delete(m, path[i])
+			}
+			return true
+		}
+		changed = walk(root, 0) || changed
+	}
+	if !changed {
+		return text
+	}
+	return jsonWrite(text, root)
 }
 
 // "lines": myarch's keys are whole lines that must be in the file (an
@@ -315,6 +376,9 @@ func Edited(owned string, disk []byte) bool {
 // the file then), keeping whatever the app wrote since. Owned from before
 // the file was shared is a hash: then every key of the backup goes back.
 func RestoreShared(disk []byte, recorded, current string, backup []byte) []byte {
+	if _, format, ok := fromSharedOwned(current); ok && !readable(format, disk) {
+		return disk // not something it can merge into: left as it is
+	}
 	keys, format, shared := fromSharedOwned(recorded)
 	if !shared {
 		_, format, _ = fromSharedOwned(current)

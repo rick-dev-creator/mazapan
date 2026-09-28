@@ -1,0 +1,32 @@
+[plugin]
+id = "theme-neovim"
+name = "Neovim theme"
+version = "0.1.0"
+api = 1
+description = "A Neovim colorscheme from the theme (syntax, Treesitter, LSP, diagnostics, git, Telescope), used when you haven't chosen another; open Neovims recolor on apply"
+
+[packages]
+pacman = ["neovim"]
+
+[settings]
+# Use it on its own when your config sets no colorscheme. With one (e.g.
+# LazyVim), set yours to "myarch".
+auto = true
+
+# In Neovim's data folder (on its runtimepath, kept by lazy.nvim), not in
+# ~/.config/nvim: that one is yours (and LazyVim's installer wants it empty).
+[[targets]]
+template = "myarch.lua.tmpl"
+output = "~/.local/share/nvim/site/colors/myarch.lua"
+reload = "sh ~/.local/share/myarch/bin/nvim-recolor"
+
+[[targets]]
+template = "auto.lua.tmpl"
+output = "~/.local/share/nvim/site/plugin/myarch-theme.lua"
+
+[[targets]]
+template = "recolor.sh.tmpl"
+output = "~/.local/share/myarch/bin/nvim-recolor"
+
+[coverage]
+apps = ["nvim", "neovim"]

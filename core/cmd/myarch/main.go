@@ -217,16 +217,21 @@ func printPlan(changes []apply.Change, orphans []string, onlyChanges bool) {
 		if onlyChanges && c.State == apply.Unchanged {
 			continue
 		}
-		fmt.Printf("  %-9s %-16s %s\n", c.State, c.Plugin, tilde(c.Path))
+		fmt.Printf("  %-10s %-16s %s\n", c.State, c.Plugin, tilde(c.Path))
 	}
 	for _, o := range orphans {
-		fmt.Printf("  %-9s %-16s %s\n", "orphan", "-", tilde(o))
+		fmt.Printf("  %-10s %-16s %s\n", "orphan", "-", tilde(o))
 	}
+	busy, unreadable := false, false
 	for _, c := range changes {
-		if c.State == apply.Busy {
-			fmt.Printf("  %sbusy: its app is running and would write its own copy back; close it and apply again%s\n", dim, reset)
-			break
-		}
+		busy = busy || c.State == apply.Busy
+		unreadable = unreadable || c.State == apply.Unreadable
+	}
+	if busy {
+		fmt.Printf("  %sbusy: its app is running and would write its own copy back; close it and apply again%s\n", dim, reset)
+	}
+	if unreadable {
+		fmt.Printf("  %sunreadable: not plain JSON (comments?), left as it is; set what myarch would by hand%s\n", dim, reset)
 	}
 }
 

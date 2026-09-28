@@ -5,6 +5,7 @@ package apply
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -24,15 +25,16 @@ import (
 type State int
 
 const (
-	Unchanged State = iota
-	New             // file doesn't exist yet
-	Changed         // ours, and the new content differs
-	Conflict        // exists, but we didn't write it (or it was edited since)
-	Busy            // its app is running: left for the next apply
+	Unchanged  State = iota
+	New              // file doesn't exist yet
+	Changed          // ours, and the new content differs
+	Conflict         // exists, but we didn't write it (or it was edited since)
+	Busy             // its app is running: left for the next apply
+	Unreadable       // shared, but not in a form it can merge into (JSON with comments): left alone
 )
 
 func (s State) String() string {
-	return [...]string{"unchanged", "new", "changed", "conflict", "busy"}[s]
+	return [...]string{"unchanged", "new", "changed", "conflict", "busy", "unreadable"}[s]
 }
 
 type Change struct {
@@ -119,7 +121,7 @@ func Plan(files []render.File, owned Owned) (changes []Change, orphans []string,
 // the file has its own value for one of them (a person's kdeglobals).
 func planShared(f render.File, disk []byte, owned string) State {
 	if !readable(f.Merge, disk) {
-		return Conflict // never rewritten blind: --adopt backs it up first
+		return Unreadable // never rewritten blind, not even with --adopt
 	}
 	want, have := keysOf(f.Merge, string(f.Content)), keysOf(f.Merge, string(disk))
 	same := true
@@ -200,7 +202,7 @@ func Execute(changes []Change, orphans []string, owned Owned, adopt bool) (*Resu
 	res := &Result{Backups: map[string]string{}}
 	stamp := time.Now().Format("20060102-150405")
 	for _, c := range changes {
-		if c.State == Busy {
+		if c.State == Busy || c.State == Unreadable {
 			continue // untouched, still ours as it was
 		}
 		sum, content := Sum(c.Content), c.Content
@@ -288,7 +290,9 @@ func (e *ConflictError) Error() string {
 
 // Reload runs each distinct reload command of plugins whose files changed,
 // in plugin order. Failures are returned, not fatal: the files are already
-// written and the next session picks them up anyway.
+// written and the next session picks them up anyway. Each gets 30 s: one
+// that hangs (an app that's suspended and never answers) mustn't hold up an
+// apply, an update or a rollback.
 func Reload(written []Change) map[string]error {
 	errs := map[string]error{}
 	seen := map[string]bool{}
@@ -297,7 +301,11 @@ func Reload(written []Change) map[string]error {
 			continue
 		}
 		seen[c.Reload] = true
-		out, err := exec.Command("sh", "-c", c.Reload).CombinedOutput()
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		cmd := exec.CommandContext(ctx, "sh", "-c", c.Reload)
+		cmd.WaitDelay = 2 * time.Second // its children holding the output open
+		out, err := cmd.CombinedOutput()
+		cancel()
 		if err != nil {
 			errs[c.Reload] = fmt.Errorf("%w: %s", err, strings.TrimSpace(string(out)))
 		}
