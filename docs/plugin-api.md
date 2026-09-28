@@ -99,7 +99,8 @@ which installed apps the theme doesn't reach:
 [coverage]
 apps = ["foot", "footclient"]   # .desktop ids or executable names
 toolkits = ["terminal"]         # terminal, gtk4, gtk3, qt6, qt5,
-                                # electron, chromium, firefox
+                                # electron, chromium, firefox,
+                                # flatpak, web (web apps)
 ```
 
 An app counts as covered when a plugin names it, or names its toolkit.

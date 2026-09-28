@@ -29,6 +29,7 @@ Item {
   property var screenAtOpen: null
   // Installed apps, and whether the theme reaches them (myarch coverage).
   property var apps: []
+  property bool coverageFailed: false
 
   readonly property var theme: themes[ti] ?? null
   readonly property var accent: theme ? theme.accents[ai] ?? theme.accents[0] : null
@@ -136,11 +137,14 @@ Item {
       onStreamFinished: {
         try {
           root.apps = JSON.parse(text)
+          root.coverageFailed = false
         } catch (e) {
           root.apps = []
+          root.coverageFailed = true
         }
       }
     }
+    onExited: code => { if (code !== 0) root.coverageFailed = true }
   }
 
   Process {
@@ -463,9 +467,9 @@ Item {
         Caption {
           readonly property var missing: root.apps.filter(a => !a.plugin)
           Layout.fillWidth: true
-          visible: root.apps.length > 0
+          visible: root.apps.length > 0 || root.coverageFailed
           elide: Text.ElideRight
-          text: {{tq "coverage"}}.arg(root.apps.length - missing.length).arg(root.apps.length)
+          text: root.coverageFailed ? {{tq "coverage_failed"}} : {{tq "coverage"}}.arg(root.apps.length - missing.length).arg(root.apps.length)
             + (missing.length ? "  ·  " + {{tq "missing"}}.arg(missing.map(a => a.name).join(", ")) : "")
           color: missing.length ? Theme.fgMuted : Theme.success
         }

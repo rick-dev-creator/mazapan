@@ -55,13 +55,13 @@ type Plugin struct {
 		// .desktop ids or executable names: "foot", "org.gnome.Nautilus".
 		Apps []string `toml:"apps"`
 		// Whole toolkits: terminal, gtk4, gtk3, qt6, qt5, electron,
-		// chromium, firefox.
+		// chromium, firefox, flatpak, web.
 		Toolkits []string `toml:"toolkits"`
 	} `toml:"coverage"`
 }
 
 var toolkits = map[string]bool{"terminal": true, "gtk4": true, "gtk3": true, "qt6": true, "qt5": true,
-	"electron": true, "chromium": true, "firefox": true}
+	"electron": true, "chromium": true, "firefox": true, "flatpak": true, "web": true}
 
 type Action struct {
 	// Name, Run and Key are rendered as templates: the name can be

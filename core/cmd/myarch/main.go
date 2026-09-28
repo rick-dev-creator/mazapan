@@ -360,13 +360,15 @@ var missingHint = map[string]string{
 	coverage.Electron: "Electron: only follows dark/light, needs its own plugin",
 	coverage.Chromium: "has its own theming: needs its own plugin",
 	coverage.Firefox:  "has its own theming (userChrome.css): needs its own plugin",
+	coverage.Flatpak:  "Flatpak: sandboxed, the theme's files don't reach it",
+	coverage.Web:      "a web app: it looks as the browser (and the site) make it",
 	coverage.Other:    "draws its own UI: needs a plugin for its config",
 }
 
 var toolkitName = map[string]string{
 	coverage.Terminal: "terminal", coverage.GTK4: "GTK 4", coverage.GTK3: "GTK 3", coverage.Qt6: "Qt 6",
 	coverage.Qt5: "Qt 5", coverage.Electron: "Electron", coverage.Chromium: "Chromium",
-	coverage.Firefox: "Firefox", coverage.Other: "own UI",
+	coverage.Firefox: "Firefox", coverage.Flatpak: "Flatpak", coverage.Web: "web app", coverage.Other: "own UI",
 }
 
 func cmdThemes(args []string) error {

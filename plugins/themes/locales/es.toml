@@ -16,3 +16,4 @@
 "unreadable" = "No se pudieron leer los temas (myarch themes --json)"
 "coverage" = "Llega a %1 de %2 apps instaladas"
 "missing" = "faltan: %1 (myarch coverage)"
+"coverage_failed" = "No se pudo saber a qué apps llega el tema (myarch coverage)"
