@@ -16,46 +16,46 @@ reload = "hyprctl reload >/dev/null"
 # Hyprland (the installed binary) accepts the generated configuration. Runs
 # without starting a compositor, so it's safe right after an update.
 [[checks]]
-name = "{{t \"check.config\"}}"
+name = "{{ t \"check.config\" }}"
 run = "Hyprland --verify-config -c ~/.config/hypr/hyprland.lua"
 
 # What the palette lists: each with its command and its keybinding.
 [[actions]]
-name = "{{t \"act.terminal\"}}"
+name = "{{ t \"act.terminal\" }}"
 run = "foot"
 key = "SUPER + Return"
-keywords = "{{t \"act.terminal.kw\"}}"
+keywords = "{{ t \"act.terminal.kw\" }}"
 
 [[actions]]
-name = "{{t \"act.close\"}}"
+name = "{{ t \"act.close\" }}"
 run = "hyprctl dispatch 'hl.dsp.window.close()'"
 key = "SUPER + Q"
-keywords = "{{t \"act.close.kw\"}}"
+keywords = "{{ t \"act.close.kw\" }}"
 
 [[actions]]
-name = "{{t \"act.float\"}}"
+name = "{{ t \"act.float\" }}"
 run = "hyprctl dispatch 'hl.dsp.window.float({ action = \"toggle\" })'"
 key = "SUPER + V"
 
 [[actions]]
-name = "{{t \"act.split\"}}"
+name = "{{ t \"act.split\" }}"
 run = "hyprctl dispatch 'hl.dsp.layout(\"togglesplit\")'"
 key = "SUPER + J"
 
 [[actions]]
-name = "{{t \"act.exit\"}}"
+name = "{{ t \"act.exit\" }}"
 run = "hyprctl dispatch 'hl.dsp.exit()'"
 key = "SUPER + SHIFT + E"
-keywords = "{{t \"act.exit.kw\"}}"
+keywords = "{{ t \"act.exit.kw\" }}"
 
 [[actions]]
-name = "{{t \"act.focus\"}}"
+name = "{{ t \"act.focus\" }}"
 key = "SUPER + ← ↑ → ↓"
 
 [[actions]]
-name = "{{t \"act.workspace\"}}"
+name = "{{ t \"act.workspace\" }}"
 key = "SUPER + 1…0"
 
 [[actions]]
-name = "{{t \"act.move\"}}"
+name = "{{ t \"act.move\" }}"
 key = "SUPER + SHIFT + 1…0"

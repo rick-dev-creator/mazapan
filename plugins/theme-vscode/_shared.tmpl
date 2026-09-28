@@ -1,0 +1,35 @@
+{{- ## The token colors, the same for every theme name they apply to. ## -}}
+{{- func textmate }}[
+    { "scope": ["comment", "punctuation.definition.comment"], "settings": { "foreground": "{{ c "fg_subtle" }}", "fontStyle": "italic" } },
+    { "scope": ["string", "string.quoted", "markup.inline.raw"], "settings": { "foreground": "{{ c "success" }}" } },
+    { "scope": ["constant.character.escape", "string.regexp"], "settings": { "foreground": "{{ c "accent_text" }}" } },
+    { "scope": ["constant.numeric"], "settings": { "foreground": "{{ c "info" }}" } },
+    { "scope": ["constant.language", "constant.other", "variable.language"], "settings": { "foreground": "{{ c "magenta" }}" } },
+    { "scope": ["keyword", "keyword.control", "storage", "storage.type", "storage.modifier", "keyword.operator.new", "keyword.operator.expression"], "settings": { "foreground": "{{ c "warning" }}" } },
+    { "scope": ["keyword.operator", "punctuation"], "settings": { "foreground": "{{ c "fg_muted" }}" } },
+    { "scope": ["entity.name.function", "support.function", "meta.function-call"], "settings": { "foreground": "{{ c "yellow" }}" } },
+    { "scope": ["entity.name.type", "entity.name.class", "support.type", "support.class", "entity.other.inherited-class"], "settings": { "foreground": "{{ c "cyan" }}" } },
+    { "scope": ["variable", "variable.other"], "settings": { "foreground": "{{ c "fg" }}" } },
+    { "scope": ["variable.other.property", "variable.other.member", "entity.other.attribute-name", "support.variable.property"], "settings": { "foreground": "{{ c "magenta" }}" } },
+    { "scope": ["entity.name.tag"], "settings": { "foreground": "{{ c "yellow" }}" } },
+    { "scope": ["meta.preprocessor", "keyword.control.import", "keyword.control.directive"], "settings": { "foreground": "{{ c "accent_text" }}" } },
+    { "scope": ["markup.heading", "entity.name.section"], "settings": { "foreground": "{{ c "accent_text" }}", "fontStyle": "bold" } },
+    { "scope": ["markup.bold"], "settings": { "fontStyle": "bold" } },
+    { "scope": ["markup.italic"], "settings": { "fontStyle": "italic" } },
+    { "scope": ["markup.underline.link"], "settings": { "foreground": "{{ c "accent_text" }}" } },
+    { "scope": ["markup.inserted"], "settings": { "foreground": "{{ c "success" }}" } },
+    { "scope": ["markup.deleted", "invalid"], "settings": { "foreground": "{{ c "danger" }}" } },
+    { "scope": ["markup.changed"], "settings": { "foreground": "{{ c "info" }}" } }
+  ]{{ end }}
+{{- func semantic }}{
+    "function": "{{ c "yellow" }}",
+    "method": "{{ c "yellow" }}",
+    "type": "{{ c "cyan" }}",
+    "class": "{{ c "cyan" }}",
+    "interface": "{{ c "cyan" }}",
+    "enumMember": "{{ c "magenta" }}",
+    "property": "{{ c "magenta" }}",
+    "namespace": "{{ c "fg" }}",
+    "parameter": "{{ c "fg" }}",
+    "variable.readonly": "{{ c "magenta" }}"
+  }{{ end }}

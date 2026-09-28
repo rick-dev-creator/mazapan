@@ -36,12 +36,12 @@ output = "~/.config/quickshell/myarch/widgets/center/40-recording.qml"
 reload = "sh ~/.local/share/myarch/bin/shell-reload"
 
 [[actions]]
-name = "{{t \"act.capture\"}}"
+name = "{{ t \"act.capture\" }}"
 run = "qs ipc -c myarch call myarch panel capture"
-key = "{{.Settings.key}}"
-keywords = "{{t \"act.capture.kw\"}}"
+key = "{{ settings.key }}"
+keywords = "{{ t \"act.capture.kw\" }}"
 
 [[actions]]
-name = "{{t \"act.stop\"}}"
+name = "{{ t \"act.stop\" }}"
 run = "kill -INT \"$(cut -d' ' -f1 \"${XDG_RUNTIME_DIR}/myarch-capture/recording\")\""
-keywords = "{{t \"act.stop.kw\"}}"
+keywords = "{{ t \"act.stop.kw\" }}"

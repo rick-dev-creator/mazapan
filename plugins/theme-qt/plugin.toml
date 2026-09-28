@@ -38,7 +38,7 @@ output = "~/.config/hypr/myarch/qt.lua"
 reload = "hyprctl reload >/dev/null"
 
 [[checks]]
-name = "{{t \"check\"}}"
+name = "{{ t \"check\" }}"
 run = "test -f /usr/lib/qt6/plugins/platformthemes/libqt6ct.so || { echo 'qt6ct is not installed: sudo pacman -S qt6ct'; exit 1; }"
 
 [coverage]

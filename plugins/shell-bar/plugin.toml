@@ -91,7 +91,7 @@ reload = "sh ~/.local/share/myarch/bin/shell-reload"
 # check tests what you'll actually run. Inline rather than a generated
 # script, so a rollback that removes generated files can't break it.
 [[checks]]
-name = "{{t \"check.bar\"}}"
+name = "{{ t \"check.bar\" }}"
 session = true
 timeout = 25
 run = '''

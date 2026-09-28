@@ -38,36 +38,36 @@ output = "~/.config/quickshell/myarch/panels/palette.qml"
 reload = "sh ~/.local/share/myarch/bin/shell-reload"
 
 [[actions]]
-name = "{{t \"act.palette\"}}"
-key = "{{.Settings.key}}"
-keywords = "{{t \"act.palette.kw\"}}"
+name = "{{ t \"act.palette\" }}"
+key = "{{ settings.key }}"
+keywords = "{{ t \"act.palette.kw\" }}"
 
 [[actions]]
-name = "{{t \"act.update\"}}"
+name = "{{ t \"act.update\" }}"
 run = "myarch update"
 terminal = true
-keywords = "{{t \"act.update.kw\"}}"
+keywords = "{{ t \"act.update.kw\" }}"
 
 [[actions]]
-name = "{{t \"act.doctor\"}}"
+name = "{{ t \"act.doctor\" }}"
 run = "myarch doctor"
 terminal = true
-keywords = "{{t \"act.doctor.kw\"}}"
+keywords = "{{ t \"act.doctor.kw\" }}"
 
 [[actions]]
-name = "{{t \"act.history\"}}"
+name = "{{ t \"act.history\" }}"
 run = "myarch history"
 terminal = true
-keywords = "{{t \"act.history.kw\"}}"
+keywords = "{{ t \"act.history.kw\" }}"
 
 [[actions]]
-name = "{{t \"act.rollback\"}}"
+name = "{{ t \"act.rollback\" }}"
 run = "myarch rollback"
 terminal = true
-keywords = "{{t \"act.rollback.kw\"}}"
+keywords = "{{ t \"act.rollback.kw\" }}"
 
 [[actions]]
-name = "{{t \"act.apply\"}}"
+name = "{{ t \"act.apply\" }}"
 run = "myarch apply"
 terminal = true
-keywords = "{{t \"act.apply.kw\"}}"
+keywords = "{{ t \"act.apply.kw\" }}"

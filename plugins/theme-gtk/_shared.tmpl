@@ -1,55 +1,55 @@
-{{- /* Blocks shared by this plugin's templates. */ -}}
+{{- ## Functions shared by this plugin's templates and commands. ## -}}
 
-{{- define "gsettings" -}}
-{{- $gtk := "adw-gtk3" }}{{ if eq .Theme.Meta.Mode "dark" }}{{ $gtk = "adw-gtk3-dark" }}{{ end -}}
-gsettings set org.gnome.desktop.interface color-scheme 'prefer-{{.Theme.Meta.Mode}}' && gsettings set org.gnome.desktop.interface gtk-theme '{{$gtk}}' && gsettings set org.gnome.desktop.interface font-name '{{.Theme.Font.UI}} {{num .Theme.Font.Size}}' && gsettings set org.gnome.desktop.interface monospace-font-name '{{.Theme.Font.Mono}} {{num .Theme.Font.Size}}'
+{{- func gsettings -}}
+{{- $gtk = "adw-gtk3" }}{{ if theme.meta.mode == "dark" }}{{ $gtk = "adw-gtk3-dark" }}{{ end -}}
+gsettings set org.gnome.desktop.interface color-scheme 'prefer-{{ theme.meta.mode }}' && gsettings set org.gnome.desktop.interface gtk-theme '{{ $gtk }}' && gsettings set org.gnome.desktop.interface font-name '{{ theme.font.ui }} {{ num theme.font.size }}' && gsettings set org.gnome.desktop.interface monospace-font-name '{{ theme.font.mono }} {{ num theme.font.size }}'
 {{- end -}}
 
-{{- /* libadwaita's named colors. adw-gtk3 reads the same names, which is
-       what makes GTK3 and GTK4 apps match. */ -}}
-{{- define "named-colors" -}}
-@define-color accent_color {{c "accent_text"}};
-@define-color accent_bg_color {{c "accent"}};
-@define-color accent_fg_color {{c "accent_fg"}};
-@define-color destructive_color {{c "danger"}};
-@define-color destructive_bg_color {{c "danger"}};
-@define-color destructive_fg_color {{c "bg"}};
-@define-color success_color {{c "success"}};
-@define-color success_bg_color {{c "success"}};
-@define-color success_fg_color {{c "bg"}};
-@define-color warning_color {{c "warning"}};
-@define-color warning_bg_color {{c "warning"}};
-@define-color warning_fg_color {{c "bg"}};
-@define-color error_color {{c "danger"}};
-@define-color error_bg_color {{c "danger"}};
-@define-color error_fg_color {{c "bg"}};
+{{- ## libadwaita's named colors. adw-gtk3 reads the same names, which is
+       what makes GTK3 and GTK4 apps match. ## -}}
+{{- func named_colors -}}
+@define-color accent_color {{ c "accent_text" }};
+@define-color accent_bg_color {{ c "accent" }};
+@define-color accent_fg_color {{ c "accent_fg" }};
+@define-color destructive_color {{ c "danger" }};
+@define-color destructive_bg_color {{ c "danger" }};
+@define-color destructive_fg_color {{ c "bg" }};
+@define-color success_color {{ c "success" }};
+@define-color success_bg_color {{ c "success" }};
+@define-color success_fg_color {{ c "bg" }};
+@define-color warning_color {{ c "warning" }};
+@define-color warning_bg_color {{ c "warning" }};
+@define-color warning_fg_color {{ c "bg" }};
+@define-color error_color {{ c "danger" }};
+@define-color error_bg_color {{ c "danger" }};
+@define-color error_fg_color {{ c "bg" }};
 
-@define-color window_bg_color {{c "bg"}};
-@define-color window_fg_color {{c "fg"}};
-@define-color view_bg_color {{c "bg"}};
-@define-color view_fg_color {{c "fg"}};
-@define-color headerbar_bg_color {{c "bg_alt"}};
-@define-color headerbar_fg_color {{c "fg"}};
-@define-color headerbar_border_color {{c "border"}};
-@define-color headerbar_backdrop_color {{c "bg_alt"}};
-@define-color headerbar_shade_color {{cssa (c "bg_alt") 0.36}};
-@define-color sidebar_bg_color {{c "bg_alt"}};
-@define-color sidebar_fg_color {{c "fg"}};
-@define-color sidebar_backdrop_color {{c "bg_alt"}};
-@define-color sidebar_shade_color {{cssa (c "bg_alt") 0.36}};
-@define-color secondary_sidebar_bg_color {{c "bg_alt"}};
-@define-color secondary_sidebar_fg_color {{c "fg"}};
-@define-color secondary_sidebar_backdrop_color {{c "bg_alt"}};
-@define-color card_bg_color {{c "surface"}};
-@define-color card_fg_color {{c "fg"}};
-@define-color card_shade_color {{cssa (c "bg_alt") 0.36}};
-@define-color dialog_bg_color {{c "surface_raised"}};
-@define-color dialog_fg_color {{c "fg"}};
-@define-color popover_bg_color {{c "surface_raised"}};
-@define-color popover_fg_color {{c "fg"}};
-@define-color popover_shade_color {{cssa (c "bg_alt") 0.36}};
-@define-color thumbnail_bg_color {{c "surface"}};
-@define-color thumbnail_fg_color {{c "fg"}};
-@define-color shade_color {{cssa (c "bg_alt") 0.36}};
-@define-color scrollbar_outline_color {{cssa (c "bg_alt") 0.5}};
+@define-color window_bg_color {{ c "bg" }};
+@define-color window_fg_color {{ c "fg" }};
+@define-color view_bg_color {{ c "bg" }};
+@define-color view_fg_color {{ c "fg" }};
+@define-color headerbar_bg_color {{ c "bg_alt" }};
+@define-color headerbar_fg_color {{ c "fg" }};
+@define-color headerbar_border_color {{ c "border" }};
+@define-color headerbar_backdrop_color {{ c "bg_alt" }};
+@define-color headerbar_shade_color {{ cssa (c "bg_alt") 0.36 }};
+@define-color sidebar_bg_color {{ c "bg_alt" }};
+@define-color sidebar_fg_color {{ c "fg" }};
+@define-color sidebar_backdrop_color {{ c "bg_alt" }};
+@define-color sidebar_shade_color {{ cssa (c "bg_alt") 0.36 }};
+@define-color secondary_sidebar_bg_color {{ c "bg_alt" }};
+@define-color secondary_sidebar_fg_color {{ c "fg" }};
+@define-color secondary_sidebar_backdrop_color {{ c "bg_alt" }};
+@define-color card_bg_color {{ c "surface" }};
+@define-color card_fg_color {{ c "fg" }};
+@define-color card_shade_color {{ cssa (c "bg_alt") 0.36 }};
+@define-color dialog_bg_color {{ c "surface_raised" }};
+@define-color dialog_fg_color {{ c "fg" }};
+@define-color popover_bg_color {{ c "surface_raised" }};
+@define-color popover_fg_color {{ c "fg" }};
+@define-color popover_shade_color {{ cssa (c "bg_alt") 0.36 }};
+@define-color thumbnail_bg_color {{ c "surface" }};
+@define-color thumbnail_fg_color {{ c "fg" }};
+@define-color shade_color {{ cssa (c "bg_alt") 0.36 }};
+@define-color scrollbar_outline_color {{ cssa (c "bg_alt") 0.5 }};
 {{- end -}}

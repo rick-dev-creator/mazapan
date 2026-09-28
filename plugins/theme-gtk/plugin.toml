@@ -11,17 +11,17 @@ pacman = ["adw-gtk-theme"]
 [[targets]]
 template = "gtk4.css.tmpl"
 output = "~/.config/gtk-4.0/gtk.css"
-reload = "{{template \"gsettings\" .}}"
+reload = "{{ gsettings }}"
 
 [[targets]]
 template = "gtk3.css.tmpl"
 output = "~/.config/gtk-3.0/gtk.css"
-reload = "{{template \"gsettings\" .}}"
+reload = "{{ gsettings }}"
 
 [[targets]]
 template = "gtk3-settings.ini.tmpl"
 output = "~/.config/gtk-3.0/settings.ini"
-reload = "{{template \"gsettings\" .}}"
+reload = "{{ gsettings }}"
 
 # GTK 3 (adw-gtk3) and GTK 4 / libadwaita apps.
 [coverage]

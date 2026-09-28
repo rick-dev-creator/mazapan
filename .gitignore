@@ -4,3 +4,6 @@ vm/.state/
 # Build output
 /bin/
 /dist/
+core/**/bin/
+core/**/obj/
+core/obj/

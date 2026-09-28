@@ -17,5 +17,5 @@ reload = "sh ~/.local/share/myarch/bin/shell-reload"
 
 # NetworkManager runs and the machine is on some network.
 [[checks]]
-name = "{{t \"check\"}}"
+name = "{{ t \"check\" }}"
 run = "systemctl is-active -q NetworkManager && test \"$(nmcli -t networking connectivity)\" != none"

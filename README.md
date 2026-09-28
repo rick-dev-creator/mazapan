@@ -9,7 +9,7 @@ the layer on top.
 ## Layout
 
 ```
-core/      CLI `myarch`: plugin loader, merge, generate, apply, rollback, doctor
+core/      CLI `myarch` (C#, Native AOT): plugin loader, merge, generate, apply, rollback, doctor
 plugins/   built-in plugins, same API as third-party ones: theme targets,
            window layouts, the Quickshell bar and its widgets…
 themes/    token palettes
@@ -62,10 +62,12 @@ they were; one you edited by hand since is backed up first, never lost.
 Checks that need the graphical session are skipped (not failed) when you
 update from a TTY or over SSH. How plugins work: [docs/plugin-api.md](docs/plugin-api.md).
 
-Build and test (inside the VM, which has Go):
+The core is C# (.NET 10), built with Native AOT into one native binary
+that needs nothing installed next to it. Build and test (needs the .NET 10
+SDK and clang), then try it in the VM:
 
 ```sh
-vm/vm run 'cd core && go test ./... && go build -o ../bin/myarch ./cmd/myarch'
+core/build test                 # run the tests, build bin/myarch
 vm/vm run 'myarch apply'
 ```
 

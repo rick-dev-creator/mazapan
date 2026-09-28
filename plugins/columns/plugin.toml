@@ -47,41 +47,41 @@ output = "~/.config/hypr/myarch/columns.lua"
 reload = "hyprctl reload >/dev/null"
 
 [[actions]]
-name = "{{t \"equal\"}}"
+name = "{{ t \"equal\" }}"
 run = "hyprctl eval 'myarch_columns.equal()'"
-key = "{{.Settings.key}}"
-keywords = "{{t \"equal.kw\"}}"
+key = "{{ settings.key }}"
+keywords = "{{ t \"equal.kw\" }}"
 
 [[actions]]
-name = "{{t \"phone\"}}"
+name = "{{ t \"phone\" }}"
 run = "hyprctl eval 'myarch_columns.phone()'"
-key = "{{.Settings.phone_key}}"
-keywords = "{{t \"phone.kw\"}}"
+key = "{{ settings.phone_key }}"
+keywords = "{{ t \"phone.kw\" }}"
 
 [[actions]]
-name = "{{t \"focus\"}}"
+name = "{{ t \"focus\" }}"
 run = "hyprctl eval 'myarch_columns.focus()'"
-key = "{{.Settings.focus_key}}"
-keywords = "{{t \"focus.kw\"}}"
+key = "{{ settings.focus_key }}"
+keywords = "{{ t \"focus.kw\" }}"
 
 [[actions]]
-name = "{{t \"grow\"}}"
+name = "{{ t \"grow\" }}"
 run = "hyprctl eval 'myarch_columns.grow()'"
-key = "{{.Settings.grow_key}}"
-keywords = "{{t \"grow.kw\"}}"
+key = "{{ settings.grow_key }}"
+keywords = "{{ t \"grow.kw\" }}"
 
 [[actions]]
-name = "{{t \"shrink\"}}"
+name = "{{ t \"shrink\" }}"
 run = "hyprctl eval 'myarch_columns.shrink()'"
-key = "{{.Settings.shrink_key}}"
-keywords = "{{t \"shrink.kw\"}}"
+key = "{{ settings.shrink_key }}"
+keywords = "{{ t \"shrink.kw\" }}"
 
 [[actions]]
-name = "{{t \"move_left\"}}"
+name = "{{ t \"move_left\" }}"
 run = "hyprctl dispatch 'hl.dsp.layout(\"swapcol l\")'"
-key = "{{.Settings.move_left_key}}"
+key = "{{ settings.move_left_key }}"
 
 [[actions]]
-name = "{{t \"move_right\"}}"
+name = "{{ t \"move_right\" }}"
 run = "hyprctl dispatch 'hl.dsp.layout(\"swapcol r\")'"
-key = "{{.Settings.move_right_key}}"
+key = "{{ settings.move_right_key }}"

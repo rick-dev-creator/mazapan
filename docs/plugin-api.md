@@ -40,8 +40,15 @@ its manifest, not taken from its word:
   config (foot's `shell=`, hyprlock's `cmd[]`, a `.desktop`'s `Exec=`, VS
   Code's terminal profiles); only stylesheets and color schemes aren't.
 - the commands it runs (after writing, as checks, as actions), written out
-  as they will run: `{{template}}` calls inlined, settings replaced by
-  their defaults. Commands can't use translated text (`t`, `tq`).
+  as they will run: calls to its shared functions inlined, settings replaced by
+  their defaults. So a command is a small language on purpose: text, and
+  `{{ … }}` holding literals, the data (`theme.*`, `settings.*`, `home`,
+  `plugin`, `lang`, `lang_code`, `place`), `$locals`, operators and the
+  functions below (not `t`/`tq`: translated text isn't shown); `if`/`else`;
+  and a shared function called on its own (`{{ gsettings }}`), written as
+  text (`{{ func gsettings }}…{{ end }}`, no parameters). Anything else
+  (`for`, `capture`, `this`, `object.*`, several statements in one `{{ }}`)
+  makes the plugin not load: what can't be shown can't be approved.
 - the files it writes, the packages it needs.
 
 Nothing is installed until you say yes (`-y` says it without asking;
@@ -110,7 +117,7 @@ A plugin says how to tell that what it's responsible for still works:
 
 ```toml
 [[checks]]
-name = "{{t \"check.config\"}}"        # rendered: can be translated
+name = "{{ t \"check.config\" }}"    # rendered: can be translated
 run = "Hyprland --verify-config -c ~/.config/hypr/hyprland.lua"
 timeout = 15                             # seconds, default 15
 session = false                          # needs the graphical session?
@@ -133,9 +140,9 @@ What a plugin lets you do, for the command palette (`SUPER + Space`):
 
 ```toml
 [[actions]]
-name = "{{t \"open\"}}"                             # rendered: translatable
+name = "{{ t \"open\" }}"                         # rendered: translatable
 run = "qs ipc -c myarch call myarch panel monitors"   # the command it runs
-key = "{{.Settings.key}}"                             # its keybinding
+key = "{{ settings.key }}"                         # its keybinding
 terminal = false                                      # run it in a terminal
 keywords = "displays screens resolution"              # other words for it
 ```
@@ -247,23 +254,49 @@ runs once. A failing reload is a warning: the files are already in place.
 
 ## Templates
 
-Go `text/template`. All `*.tmpl` files of a plugin are parsed together, so
-`{{define}}` blocks are shared between its targets (see `theme-gtk`). A
-missing token fails the render instead of producing an empty value.
+[Scriban](https://github.com/scriban/scriban): `{{ theme.meta.mode }}`,
+`{{ if settings.auto }}…{{ end }}`, `{{ for f in under "…" }}…{{ end }}`,
+`{{ c "accent" }}`; `{{-` and `-}}` take the whitespace next to them. A
+missing name or token fails the render instead of producing an empty
+value, and every name below is read-only: a template can't change what the
+next one sees.
 
-`.` is:
+A plugin's `_*.tmpl` files hold functions shared by its templates and
+commands, and nothing else:
 
-| Field          | Meaning                                         |
+```
+{{- func named_colors -}}
+@define-color accent_color {{ c "accent_text" }};
+{{- end -}}
+```
+
+A template calls it as `{{ named_colors }}`; a command, the same way on its
+own (`reload = "{{ gsettings }}"`), which is how its capability can show
+what it runs (see `theme-gtk`). A function can take parameters:
+`{{ func roles(role) }}…{{ end }}`, called as `{{ roles "fg" }}`.
+
+Each template gets 10 seconds, then the render fails: a plugin from git
+whose template loops forever can't hang myarch. A template gets the data
+made anew: what it changes (an item of `actions`, say) no other template,
+plugin or command sees. A template is a `*.tmpl` file in the plugin's own
+folder, never a path out of it. Scriban's functions are all there but those
+that read or run something else (`include`, `object.eval`) or change on
+every apply (`date.now`, `math.random`).
+
+What templates see:
+
+| Name           | Meaning                                         |
 |----------------|-------------------------------------------------|
-| `.Theme`       | the theme: `.ID`, `.Meta`, `.Font`, `.Shape`, `.Motion`, `.Colors`, `.ANSI` |
-| `.Plugin`      | this plugin's id                                |
-| `.Home`        | the user's home directory                       |
-| `.Settings`    | the plugin's settings, defaults merged with config.toml |
-| `.Lang`        | the language, as a POSIX locale name: `es_MX`, `en` |
-| `.LangCode`    | just the language: `es`, `en`                   |
-| `.Actions`     | every plugin's actions, rendered: `.Plugin`, `.Name`, `.Run`, `.Key`, `.Terminal`, `.Keywords` |
+| `theme`        | the theme: `id`, `meta` (`name`, `mode`, `accents`), `font` (`mono`, `ui`, `size`), `shape` (`radius`, `border`, `gap_in`, `gap_out`), `effects` (`terminal_opacity`, `blur`, `wallpaper`), `motion` (`enabled`, `duration_ms`, `curve`, `response_ms`, `damping`), `colors`, `ansi` |
+| `plugin`       | this plugin's id                                |
+| `home`         | the user's home directory                       |
+| `settings`     | the plugin's settings, defaults merged with config.toml |
+| `lang`         | the language, as a POSIX locale name: `es_MX`, `en` |
+| `lang_code`    | just the language: `es`, `en`                   |
+| `actions`      | every plugin's actions, rendered: `plugin`, `name`, and `run`, `key`, `terminal`, `keywords` when set |
+| `place`        | for a target with `each`: the folder this copy goes into |
 
-Functions:
+Functions, besides Scriban's own (`string.*`, `array.*`, `object.keys`…):
 
 | Function                   | Example result                |
 |----------------------------|-------------------------------|
@@ -277,14 +310,14 @@ Functions:
 | `spring 1.1 1`             | `mass = 1, stiffness = …, dampening = …`: the theme's spring with its response ×1.1 and damping 1 (0 keeps the theme's) |
 | `num 11.0`                 | `11`                          |
 | `pct 0.9`                  | `90`                          |
-| `base .Place`              | `gwfdp8rp.default-release`    |
+| `base place`               | `gwfdp8rp.default-release`    |
 | `mix (c "bg") (c "success") 0.18` | the second over the first at 18%: `#2a3322` |
-| `list "a" "b"`             | a list to `range` over        |
 | `camel "bg_alt"`           | `bgAlt` (QML property names)  |
 | `t "today"`                | `hoy` (this plugin's text)    |
 | `tq "today"`               | `"hoy"` (quoted for QML/Lua)  |
+| `quote settings.format`    | any string, quoted the same way |
 | `under "~/.config/hypr/myarch/"` | every plugin output below that path |
-| `json .Actions`            | a JSON value, also a valid QML/JS literal |
+| `json actions`             | a JSON value, also a valid QML/JS literal |
 
 `under` is how an entry point includes fragments without knowing which
 plugins exist: `hypr-base` loads every file other plugins generate under
@@ -293,8 +326,8 @@ the rest from loading.
 
 ## Theme tokens
 
-The token names in `core/internal/theme/theme.go` (`RequiredColors`,
-`RequiredANSI`) are part of this API. Ask for meaning (`danger`,
+The token names in `core/src/MyArch/Themes/Theme.cs` (`RequiredColors`,
+`RequiredAnsi`) are part of this API. Ask for meaning (`danger`,
 `surface_raised`), not for a hue; `[ansi]` is for terminals and TUIs.
 
 The accent tokens (`accent`, `accent_fg`, `accent_text`, `accent_deep`,
@@ -310,8 +343,8 @@ colors follow through `myarch_theme({...})` (plugin `theme-hyprland`).
 A theme's `[effects]` are optional: `terminal_opacity` (0.5–1),
 `blur` (see-through windows blur what's behind), and `wallpaper`: `"grid"`
 (drawn from the tokens), `"plain"` (bg_alt) or an image next to
-theme.toml. Templates read them as `.Theme.Effects.TerminalOpacity`,
-`.Blur`, `.Wallpaper`; QML as `Theme.terminalOpacity`, `Theme.blur`,
+theme.toml. Templates read them as `theme.effects.terminal_opacity`,
+`.blur`, `.wallpaper`; QML as `Theme.terminalOpacity`, `Theme.blur`,
 `Theme.wallpaper`, `Theme.mode`.
 
 A theme can suggest accents besides its own, in `[meta]`:

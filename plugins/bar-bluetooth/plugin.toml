@@ -23,5 +23,5 @@ reload = "sh ~/.local/share/myarch/bin/shell-reload"
 # runs. No adapter, or a service you never enabled (Arch doesn't by
 # default), is nothing to check.
 [[checks]]
-name = "{{t \"check\"}}"
+name = "{{ t \"check\" }}"
 run = "[ -z \"$(ls /sys/class/bluetooth 2>/dev/null)\" ] || ! systemctl is-enabled -q bluetooth || systemctl is-active -q bluetooth"

@@ -20,7 +20,7 @@ output = "~/.config/hypr/myarch/titles.lua"
 reload = "hyprctl reload >/dev/null"
 
 [[actions]]
-name = "{{t \"toggle\"}}"
+name = "{{ t \"toggle\" }}"
 run = "hyprctl eval 'myarch_titles_toggle()'"
-key = "{{.Settings.key}}"
-keywords = "{{t \"toggle.kw\"}}"
+key = "{{ settings.key }}"
+keywords = "{{ t \"toggle.kw\" }}"

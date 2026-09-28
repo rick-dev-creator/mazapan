@@ -20,6 +20,24 @@ Suggested start: 1, 2 and 3.
 | 7 | Plugins | **Done** (2026-09-29); follow-ups listed below |
 | 8 | Capture | **Done** (2026-09-29); follow-ups listed below |
 
+## The core: Go to C#
+
+On 2026-09-29 the core moved from Go to C# (.NET 10, Native AOT: one
+12.7 MB native binary, no runtime, ~4 ms to start), and plugin templates
+from Go's text/template to Scriban. Verified byte for byte against the Go
+version: every generated file for 18 theme × accent × language × settings
+combinations, `themes --json`, `coverage --json`, `plugins`, and a full
+`apply`; state written by Go (owned.json, update records) reads as it was.
+Audited in three parts (25 findings, fixed): the command language behind
+capabilities is an allowlist now (shared functions written as code, `this`,
+`object.eval`, loops or capture could run what the approval didn't show);
+templates get fresh data (one could change another plugin's actions); a
+template path could read any file (`../../.ssh/…`); symlink loops and
+self-referencing JSON crashed; reloads with a lingering child hung; an
+unexpected error stopped a rollback half way; non-UTF-8 shared files were
+rewritten with their bytes changed; config.toml could be written in a form
+that didn't read back; duplicated TOML keys silently won.
+
 ## 1. Updates you can trust
 
 **Omarchy today.** 106 migration scripts run once, in order. `refresh-config`

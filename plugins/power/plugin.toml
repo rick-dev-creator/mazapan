@@ -31,27 +31,27 @@ reload = "hyprctl reload >/dev/null"
 
 # The same commands the button runs (see Power.qml.tmpl).
 [[actions]]
-name = "{{t \"lock\"}}"
+name = "{{ t \"lock\" }}"
 run = "pidof hyprlock || hyprlock"
-key = "{{.Settings.lock_key}}"
-keywords = "{{t \"lock.kw\"}}"
+key = "{{ settings.lock_key }}"
+keywords = "{{ t \"lock.kw\" }}"
 
 [[actions]]
-name = "{{t \"suspend\"}}"
+name = "{{ t \"suspend\" }}"
 run = "(pidof hyprlock || hyprlock &); sleep 1; systemctl suspend"
-keywords = "{{t \"suspend.kw\"}}"
+keywords = "{{ t \"suspend.kw\" }}"
 
 [[actions]]
-name = "{{t \"logout\"}}"
+name = "{{ t \"logout\" }}"
 run = "hyprctl dispatch 'hl.dsp.exit()'"
-keywords = "{{t \"logout.kw\"}}"
+keywords = "{{ t \"logout.kw\" }}"
 
 [[actions]]
-name = "{{t \"reboot\"}}"
+name = "{{ t \"reboot\" }}"
 run = "systemctl reboot"
-keywords = "{{t \"reboot.kw\"}}"
+keywords = "{{ t \"reboot.kw\" }}"
 
 [[actions]]
-name = "{{t \"poweroff\"}}"
+name = "{{ t \"poweroff\" }}"
 run = "systemctl poweroff"
-keywords = "{{t \"poweroff.kw\"}}"
+keywords = "{{ t \"poweroff.kw\" }}"
