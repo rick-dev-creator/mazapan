@@ -222,6 +222,12 @@ func printPlan(changes []apply.Change, orphans []string, onlyChanges bool) {
 	for _, o := range orphans {
 		fmt.Printf("  %-9s %-16s %s\n", "orphan", "-", tilde(o))
 	}
+	for _, c := range changes {
+		if c.State == apply.Busy {
+			fmt.Printf("  %sbusy: its app is running and would write its own copy back; close it and apply again%s\n", dim, reset)
+			break
+		}
+	}
 }
 
 func cmdApply(args []string) error {
@@ -296,7 +302,11 @@ func cmdPlugins() error {
 			fmt.Printf("  %s = %#v%s\n", k, settings[k], mark)
 		}
 		for _, t := range p.Targets {
-			fmt.Printf("  -> %s\n", t.Output)
+			if len(t.Each) > 0 {
+				fmt.Printf("  -> %s, in each of %s\n", t.Output, strings.Join(t.Each, ", "))
+			} else {
+				fmt.Printf("  -> %s\n", t.Output)
+			}
 		}
 	}
 	return nil

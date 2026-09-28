@@ -428,6 +428,9 @@ func rollback(rec *update.Record) error {
 		for _, p := range restored.Shared {
 			fmt.Printf("  %sleft %s in place: it's its app's file too%s\n", dim, tilde(p), reset)
 		}
+		for _, p := range restored.Gone {
+			fmt.Printf("  %s%s: its folder is gone, not brought back%s\n", dim, tilde(p), reset)
+		}
 	}
 
 	incomplete := func(more ...string) error {

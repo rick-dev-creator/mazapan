@@ -28,10 +28,11 @@ const (
 	New             // file doesn't exist yet
 	Changed         // ours, and the new content differs
 	Conflict        // exists, but we didn't write it (or it was edited since)
+	Busy            // its app is running: left for the next apply
 )
 
 func (s State) String() string {
-	return [...]string{"unchanged", "new", "changed", "conflict"}[s]
+	return [...]string{"unchanged", "new", "changed", "conflict", "busy"}[s]
 }
 
 type Change struct {
@@ -78,8 +79,13 @@ func Plan(files []render.File, owned Owned) (changes []Change, orphans []string,
 	want := map[string]bool{}
 	for _, f := range files {
 		want[f.Path] = true
+		if f.Busy {
+			// Its app is running and would write its own copy back: later.
+			changes = append(changes, Change{File: f, State: Busy})
+			continue
+		}
 		disk, err := os.ReadFile(f.Path)
-		if f.Merge == "ini" && err == nil {
+		if f.Merge != "" && err == nil {
 			changes = append(changes, Change{File: f, State: planShared(f, disk, owned[f.Path])})
 			continue
 		}
@@ -112,12 +118,19 @@ func Plan(files []render.File, owned Owned) (changes []Change, orphans []string,
 // changed by someone else since myarch wrote it, or, the first time, when
 // the file has its own value for one of them (a person's kdeglobals).
 func planShared(f render.File, disk []byte, owned string) State {
-	want, have := iniKeys(string(f.Content)), iniKeys(string(disk))
+	if !readable(f.Merge, disk) {
+		return Conflict // never rewritten blind: --adopt backs it up first
+	}
+	want, have := keysOf(f.Merge, string(f.Content)), keysOf(f.Merge, string(disk))
 	same := true
 	for k, v := range want {
 		if have[k] != v {
 			same = false
 		}
+	}
+	// A key myarch no longer manages, still in a person's file: it goes.
+	if drop := noLonger(owned, want); same && dropKeys(f.Merge, string(disk), drop) != string(disk) {
+		same = false
 	}
 	switch {
 	case same:
@@ -136,6 +149,22 @@ func planShared(f render.File, disk []byte, owned string) State {
 		}
 	}
 	return Changed // only keys it doesn't have yet
+}
+
+// noLonger: the keys myarch wrote last (owned) that it doesn't manage
+// anymore (not in want), with the values it wrote.
+func noLonger(owned string, want map[string]string) map[string]string {
+	old, _, ok := fromSharedOwned(owned)
+	if !ok {
+		return nil
+	}
+	out := map[string]string{}
+	for k, v := range old {
+		if _, still := want[k]; !still {
+			out[k] = v
+		}
+	}
+	return out
 }
 
 type Result struct {
@@ -171,12 +200,16 @@ func Execute(changes []Change, orphans []string, owned Owned, adopt bool) (*Resu
 	res := &Result{Backups: map[string]string{}}
 	stamp := time.Now().Format("20060102-150405")
 	for _, c := range changes {
+		if c.State == Busy {
+			continue // untouched, still ours as it was
+		}
 		sum, content := Sum(c.Content), c.Content
-		if c.Merge == "ini" {
-			sum = iniOwned(iniKeys(string(c.Content)))
+		if c.Merge != "" {
+			keys := keysOf(c.Merge, string(c.Content))
+			sum = sharedOwned(c.Merge, keys)
 			// Not there yet: written as rendered, comments and all.
 			if disk, err := os.ReadFile(c.Path); err == nil {
-				content = []byte(iniMerge(string(disk), iniKeys(string(c.Content))))
+				content = []byte(dropKeys(c.Merge, mergeKeys(c.Merge, string(disk), keys), noLonger(owned[c.Path], keys)))
 			} else if !errors.Is(err, fs.ErrNotExist) {
 				return res, err
 			}
@@ -188,13 +221,13 @@ func Execute(changes []Change, orphans []string, owned Owned, adopt bool) (*Resu
 		case Conflict:
 			// A shared file keeps the app's keys: back it up, merge into it.
 			bak := c.Path + ".myarch-bak-" + stamp
-			if err := copyOrRename(c.Path, bak, c.Merge == "ini"); err != nil {
+			if err := copyOrRename(c.Path, bak, c.Merge != ""); err != nil {
 				return res, err
 			}
 			res.Backups[c.Path] = bak
 		}
 		write := WriteAtomic
-		if c.Merge == "ini" {
+		if c.Merge != "" {
 			write = WriteShared
 		}
 		if err := write(c.Path, content); err != nil {
@@ -211,7 +244,14 @@ func Execute(changes []Change, orphans []string, owned Owned, adopt bool) (*Resu
 		case err != nil:
 			return res, err
 		case IsShared(owned[p]):
-			// The app's file: it stays, with myarch's last keys in it.
+			// The app's (or the person's) file: it stays. In a person's own
+			// (user.js, userChrome.css), myarch's lines go with the plugin.
+			old, format, _ := fromSharedOwned(owned[p])
+			if kept := dropKeys(format, string(disk), old); kept != string(disk) {
+				if err := WriteShared(p, []byte(kept)); err != nil {
+					return res, err
+				}
+			}
 			res.Shared = append(res.Shared, p)
 		case Sum(disk) == owned[p]:
 			if err := os.Remove(p); err != nil {
@@ -234,7 +274,8 @@ func copyOrRename(from, to string, keep bool) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(to, b, 0o644)
+	// A browser's Preferences hold personal data: backups stay private.
+	return os.WriteFile(to, b, 0o600)
 }
 
 type ConflictError struct{ Paths []string }
@@ -265,10 +306,15 @@ func Reload(written []Change) map[string]error {
 }
 
 // WriteAtomic writes through a temporary file, so a reader never sees half
-// a file.
+// a file. A file that's there keeps its permissions (a browser's 0600
+// Preferences); a new one is 0644.
 func WriteAtomic(path string, b []byte) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
+	}
+	mode := os.FileMode(0o644)
+	if fi, err := os.Stat(path); err == nil {
+		mode = fi.Mode().Perm()
 	}
 	tmp, err := os.CreateTemp(filepath.Dir(path), "."+filepath.Base(path)+".tmp-*")
 	if err != nil {
@@ -279,7 +325,7 @@ func WriteAtomic(path string, b []byte) error {
 		tmp.Close()
 		return err
 	}
-	if err := tmp.Chmod(0o644); err != nil {
+	if err := tmp.Chmod(mode); err != nil {
 		tmp.Close()
 		return err
 	}

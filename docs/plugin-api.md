@@ -160,10 +160,27 @@ That gives three guarantees:
 - **One owner per path.** Two plugins generating the same output is an error.
 - **Files shared with their app.** Some apps write their own config file
   too (qt6ct saves its window geometry, KDE apps their settings in
-  kdeglobals). A target with `merge = "ini"` is shared: the core manages
-  only the keys the template renders, merges them into the file and keeps
-  the app's own; only a change to one of its keys is a conflict. When the
-  plugin is disabled, the file stays.
+  kdeglobals, a browser its Preferences), and some files are often the
+  person's (Firefox's user.js, userChrome.css). A target with `merge` is
+  shared: the core manages only what the template renders, merges it into
+  the file and keeps the rest; only a change to one of its keys is a
+  conflict, and a person's own value for one the first time. When the
+  plugin is disabled, the file stays. Formats: `ini`; `prefs` (user.js's
+  `user_pref("name", value);` lines); `lines` (the template's lines must be
+  at the head of the file, missing ones go on top: an `@import`); `json`
+  (the template's leaves in a JSON object; one that doesn't parse is a
+  conflict, never rewritten). `prefs` and `lines` are the person's own
+  files: taking one of myarch's lines out is an edit (a conflict, not put
+  back), and myarch's lines leave with the plugin (or when a newer version
+  stops writing them).
+- **In every place.** `each = ["~/.config/mozilla/firefox/*/prefs.js"]`
+  writes the target into every directory holding a file those patterns
+  match (every browser profile, symlinks counted once), `output` being
+  relative to it; templates see the directory as `.Place`. New places are
+  taken on the next apply; a rollback doesn't bring back a deleted one.
+  `busy = "../SingletonLock"`: while that file exists (relative to the
+  place), the app is running and would write its own copy back, so the
+  file is left for the next apply (`busy` in the plan).
 
 After writing, each distinct `reload` command of plugins whose files changed
 runs once. A failing reload is a warning: the files are already in place.
@@ -200,6 +217,7 @@ Functions:
 | `spring 1.1 1`             | `mass = 1, stiffness = …, dampening = …`: the theme's spring with its response ×1.1 and damping 1 (0 keeps the theme's) |
 | `num 11.0`                 | `11`                          |
 | `pct 0.9`                  | `90`                          |
+| `base .Place`              | `gwfdp8rp.default-release`    |
 | `camel "bg_alt"`           | `bgAlt` (QML property names)  |
 | `t "today"`                | `hoy` (this plugin's text)    |
 | `tq "today"`               | `"hoy"` (quoted for QML/Lua)  |

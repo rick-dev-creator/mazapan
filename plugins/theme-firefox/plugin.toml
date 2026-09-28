@@ -1,0 +1,46 @@
+[plugin]
+id = "theme-firefox"
+name = "Firefox theme"
+version = "0.1.0"
+api = 1
+description = "Firefox and its forks (Zen, LibreWolf, Floorp, Waterfox) in the theme, in every profile: the browser's frame and its own pages"
+
+[packages]
+pacman = []
+
+# Every profile of every Firefox-family browser: a profile has a prefs.js.
+# Firefox reads these when it starts: restart it to see a new theme.
+[[targets]]
+template = "theme.css.tmpl"
+output = "chrome/myarch.css"
+each = ["~/.config/mozilla/firefox/*/prefs.js", "~/.mozilla/firefox/*/prefs.js", "~/.config/zen/*/prefs.js", "~/.zen/*/prefs.js", "~/.librewolf/*/prefs.js", "~/.floorp/*/prefs.js", "~/.waterfox/*/prefs.js"]
+
+[[targets]]
+template = "content.css.tmpl"
+output = "chrome/myarch-content.css"
+each = ["~/.config/mozilla/firefox/*/prefs.js", "~/.mozilla/firefox/*/prefs.js", "~/.config/zen/*/prefs.js", "~/.zen/*/prefs.js", "~/.librewolf/*/prefs.js", "~/.floorp/*/prefs.js", "~/.waterfox/*/prefs.js"]
+
+# userChrome.css and userContent.css may be yours (Zen mods, your own CSS):
+# only the @import of the theme is myarch's.
+[[targets]]
+template = "userChrome.css.tmpl"
+output = "chrome/userChrome.css"
+merge = "lines"
+each = ["~/.config/mozilla/firefox/*/prefs.js", "~/.mozilla/firefox/*/prefs.js", "~/.config/zen/*/prefs.js", "~/.zen/*/prefs.js", "~/.librewolf/*/prefs.js", "~/.floorp/*/prefs.js", "~/.waterfox/*/prefs.js"]
+
+[[targets]]
+template = "userContent.css.tmpl"
+output = "chrome/userContent.css"
+merge = "lines"
+each = ["~/.config/mozilla/firefox/*/prefs.js", "~/.mozilla/firefox/*/prefs.js", "~/.config/zen/*/prefs.js", "~/.zen/*/prefs.js", "~/.librewolf/*/prefs.js", "~/.floorp/*/prefs.js", "~/.waterfox/*/prefs.js"]
+
+# user.js may be yours too (arkenfox…): only these prefs are myarch's.
+[[targets]]
+template = "user.js.tmpl"
+output = "user.js"
+merge = "prefs"
+each = ["~/.config/mozilla/firefox/*/prefs.js", "~/.mozilla/firefox/*/prefs.js", "~/.config/zen/*/prefs.js", "~/.zen/*/prefs.js", "~/.librewolf/*/prefs.js", "~/.floorp/*/prefs.js", "~/.waterfox/*/prefs.js"]
+
+# The browsers whose profiles are above (not Thunderbird or Mullvad's).
+[coverage]
+apps = ["firefox", "zen", "zen-bin", "zen-browser", "app.zen_browser.zen", "librewolf", "floorp", "waterfox"]

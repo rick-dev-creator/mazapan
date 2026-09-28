@@ -113,7 +113,7 @@ func (r *Record) BackupFiles(owned apply.Owned) error {
 		if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
 			return err
 		}
-		if err := os.WriteFile(dst, b, 0o644); err != nil {
+		if err := os.WriteFile(dst, b, 0o600); err != nil {
 			return err
 		}
 		r.Owned[path] = sum
@@ -173,6 +173,7 @@ type Restored struct {
 	LeftBehind []string          // added since and edited by hand: left in place
 	Later      []string          // rewritten by a later `myarch apply`: left as they are
 	Shared     []string          // shared with their app, taken since: left in place, released
+	Gone       []string          // their directory is gone (a deleted profile): not restored
 	NoBackup   bool              // the record has no copy of the files: nothing touched
 }
 
@@ -209,14 +210,23 @@ func (r *Record) RestoreFiles(current apply.Owned) (*Restored, error) {
 			return res, err
 		}
 		disk, readErr := os.ReadFile(path)
+		// Its directory is gone (a browser profile that was deleted): not
+		// brought back to life to hold one file.
+		if errors.Is(readErr, fs.ErrNotExist) {
+			if _, err := os.Stat(filepath.Dir(path)); errors.Is(err, fs.ErrNotExist) {
+				res.Gone = append(res.Gone, path)
+				delete(res.Owned, path)
+				continue
+			}
+		}
 		// A file shared with its app (kdeglobals, qt6ct.conf): only myarch's
 		// keys go back; what the app wrote since stays.
 		if readErr == nil && (apply.IsShared(sum) || apply.IsShared(current[path])) {
-			merged := apply.RestoreShared(disk, sum, want)
+			merged := apply.RestoreShared(disk, sum, current[path], want)
 			if string(merged) != string(disk) {
 				if apply.Edited(current[path], disk) {
 					bak := path + ".myarch-bak-" + stamp
-					if err := os.WriteFile(bak, disk, 0o644); err != nil {
+					if err := os.WriteFile(bak, disk, 0o600); err != nil {
 						return res, err
 					}
 					res.Backups[path] = bak

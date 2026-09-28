@@ -1,0 +1,35 @@
+[plugin]
+id = "theme-chromium"
+name = "Chromium theme"
+version = "0.1.0"
+api = 1
+description = "Chromium, Chrome, Brave and Edge follow the theme through GTK (theme-gtk), in every profile: frame, tabs, toolbar and font"
+
+[packages]
+pacman = []
+
+# Every profile's Preferences, which the browser rewrites all the time:
+# only the theme key is myarch's. While the browser runs (SingletonLock in
+# its data folder) it's left alone: it would write its own copy back.
+# Its accent stays the browser's: only a system policy sets that, and one
+# that sets a theme color (BrowserThemeColor) wins over GTK mode.
+[[targets]]
+template = "Preferences.tmpl"
+output = "Preferences"
+merge = "json"
+busy = "../SingletonLock"
+each = [
+  "~/.config/chromium/*/Preferences",
+  "~/.config/google-chrome/*/Preferences",
+  "~/.config/google-chrome-beta/*/Preferences",
+  "~/.config/google-chrome-unstable/*/Preferences",
+  "~/.config/BraveSoftware/Brave-Browser/*/Preferences",
+  "~/.config/microsoft-edge/*/Preferences",
+  "~/.config/microsoft-edge-dev/*/Preferences",
+]
+
+# The browsers themselves: other apps built on Chromium keep their own
+# settings elsewhere.
+[coverage]
+apps = ["chromium", "google-chrome", "google-chrome-stable", "google-chrome-beta", "google-chrome-unstable",
+  "brave-browser", "brave", "microsoft-edge", "microsoft-edge-stable", "microsoft-edge-dev"]

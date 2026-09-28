@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 )
@@ -108,8 +109,21 @@ type Target struct {
 	Reload string `toml:"reload"`
 	// Merge = "ini": the app writes this file too (qt6ct.conf, kdeglobals).
 	// myarch only manages the keys the template renders and keeps the
-	// app's own; only a change to its keys counts as an edit.
+	// app's own; only a change to its keys counts as an edit. "prefs" is
+	// the same for Firefox's user.js (user_pref("name", value); lines);
+	// "lines" makes sure the template's lines are in the file (an @import
+	// in someone's userChrome.css), at the top when missing; "json" sets the
+	// template's leaves in a JSON object (Chromium's Preferences).
 	Merge string `toml:"merge"`
+	// Each: glob patterns of a file that marks a place ("~/.config/mozilla/
+	// firefox/*/prefs.js": a Firefox profile). The target is written into
+	// every such directory, Output being relative to it; templates see the
+	// directory as .Place.
+	Each []string `toml:"each"`
+	// Busy: a file, relative to each place, that says its app is running
+	// ("../SingletonLock" for a Chromium profile); then the file is left
+	// for the next apply, since the app would write its own copy back.
+	Busy string `toml:"busy"`
 }
 
 func (p *Plugin) ID() string { return p.Meta.ID }
@@ -238,8 +252,11 @@ func load(path string) (*Plugin, error) {
 		if t.Template == "" || t.Output == "" {
 			return nil, fmt.Errorf("%s: targets[%d] needs template and output", path, i)
 		}
-		if t.Merge != "" && t.Merge != "ini" {
-			return nil, fmt.Errorf("%s: targets[%d]: merge = %q, only \"ini\" is supported", path, i, t.Merge)
+		if t.Merge != "" && t.Merge != "ini" && t.Merge != "prefs" && t.Merge != "lines" && t.Merge != "json" {
+			return nil, fmt.Errorf("%s: targets[%d]: merge = %q: \"ini\", \"prefs\", \"lines\" or \"json\"", path, i, t.Merge)
+		}
+		if len(t.Each) > 0 && (filepath.IsAbs(t.Output) || strings.HasPrefix(t.Output, "~")) {
+			return nil, fmt.Errorf("%s: targets[%d]: with each, output is relative to each place", path, i)
 		}
 		if _, err := os.Stat(filepath.Join(p.Dir, t.Template)); err != nil {
 			return nil, fmt.Errorf("%s: targets[%d]: %w", path, i, err)

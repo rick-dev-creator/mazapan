@@ -85,6 +85,30 @@ func TestChecksAreRendered(t *testing.T) {
 	}
 }
 
+// A target with `each` goes into every directory its marker matches, and
+// its template sees which one.
+func TestEachPlace(t *testing.T) {
+	dir := t.TempDir()
+	for _, p := range []string{"a.default", "b.work", "Crash Reports"} {
+		os.MkdirAll(filepath.Join(dir, "profiles", p), 0o755)
+	}
+	os.WriteFile(filepath.Join(dir, "profiles", "a.default", "prefs.js"), nil, 0o644)
+	os.WriteFile(filepath.Join(dir, "profiles", "b.work", "prefs.js"), nil, 0o644)
+	os.MkdirAll(filepath.Join(dir, "plugin"), 0o755)
+	os.WriteFile(filepath.Join(dir, "plugin", "f.tmpl"), []byte(`{{base .Place}}`), 0o644)
+	p := &plugin.Plugin{Dir: filepath.Join(dir, "plugin"), Targets: []plugin.Target{{
+		Template: "f.tmpl", Output: "chrome/x.css", Each: []string{filepath.Join(dir, "profiles", "*", "prefs.js")},
+	}}}
+	p.Meta.ID = "p"
+	out, err := All([]*plugin.Plugin{p}, testTheme(), nil, "en")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(out.Files) != 2 || out.Files[0].Path != filepath.Join(dir, "profiles", "a.default", "chrome", "x.css") || string(out.Files[1].Content) != "b.work" {
+		t.Fatalf("files: %+v", out.Files)
+	}
+}
+
 func TestActionsAreSeenByEveryTemplate(t *testing.T) {
 	dir := t.TempDir()
 	os.MkdirAll(filepath.Join(dir, "a", "locales"), 0o755)

@@ -50,9 +50,12 @@ type File struct {
 	Path    string // absolute
 	Content []byte
 	Reload  string // rendered reload command, may be empty
-	// Merge "ini": a file the app writes too; only these keys are
+	// Merge: a file shared with its app or person; only these keys are
 	// myarch's (see apply).
 	Merge string
+	// Busy: its app is running (the target's busy marker exists): left
+	// for the next apply.
+	Busy bool
 }
 
 // Data is what every template sees as ".".
@@ -65,6 +68,39 @@ type Data struct {
 	LangCode string         // just the language: "es", "en"
 	// Every plugin's actions, rendered: what a command palette lists.
 	Actions []Action
+	// For a target with `each`: the directory this copy goes into (a
+	// browser profile); "" otherwise.
+	Place string
+}
+
+// Places are where a target goes: once at its output, or, with `each`,
+// into every directory holding a file its patterns match (every Firefox
+// profile has a prefs.js). A place that appears later is taken on the
+// next apply; one that's gone takes its file with it (the dir is gone).
+func Places(tg plugin.Target) []string {
+	if len(tg.Each) == 0 {
+		return []string{""}
+	}
+	seen := map[string]bool{}
+	var out []string
+	for _, pattern := range tg.Each {
+		matches, _ := filepath.Glob(ExpandHome(pattern))
+		for _, m := range matches {
+			d := filepath.Dir(m)
+			// ~/.mozilla/firefox linked to ~/.config/mozilla/firefox: one
+			// profile, one copy.
+			real := d
+			if r, err := filepath.EvalSymlinks(d); err == nil {
+				real = r
+			}
+			if !seen[real] {
+				seen[real] = true
+				out = append(out, d)
+			}
+		}
+	}
+	sort.Strings(out)
+	return out
 }
 
 // ExpandHome turns a leading "~/" into the user's home directory.
@@ -85,12 +121,17 @@ func All(plugins []*plugin.Plugin, t *theme.Theme, overrides map[string]map[stri
 	owner := map[string]string{}
 	for _, p := range plugins {
 		for _, tg := range p.Targets {
-			out := ExpandHome(tg.Output)
-			if other, dup := owner[out]; dup {
-				return nil, fmt.Errorf("%s: both %s and %s generate it", out, other, p.ID())
+			for _, d := range Places(tg) {
+				out := ExpandHome(tg.Output)
+				if d != "" {
+					out = filepath.Join(d, tg.Output)
+				}
+				if other, dup := owner[out]; dup {
+					return nil, fmt.Errorf("%s: both %s and %s generate it", out, other, p.ID())
+				}
+				owner[out] = p.ID()
+				outputs = append(outputs, out)
 			}
-			owner[out] = p.ID()
-			outputs = append(outputs, out)
 		}
 	}
 	sort.Strings(outputs)
@@ -164,21 +205,35 @@ func All(plugins []*plugin.Plugin, t *theme.Theme, overrides map[string]map[stri
 	for _, r := range ready {
 		r.data.Actions = out.Actions
 		for _, tg := range r.p.Targets {
-			var buf bytes.Buffer
-			if err := r.tmpl.ExecuteTemplate(&buf, tg.Template, r.data); err != nil {
-				return nil, fmt.Errorf("plugin %s: %w", r.p.ID(), err)
+			for _, place := range Places(tg) {
+				data := r.data
+				data.Place = place
+				path := ExpandHome(tg.Output)
+				if place != "" {
+					path = filepath.Join(place, tg.Output)
+				}
+				var buf bytes.Buffer
+				if err := r.tmpl.ExecuteTemplate(&buf, tg.Template, data); err != nil {
+					return nil, fmt.Errorf("plugin %s: %w", r.p.ID(), err)
+				}
+				reload, err := renderString(r.tmpl, tg.Reload, data)
+				if err != nil {
+					return nil, fmt.Errorf("plugin %s: reload: %w", r.p.ID(), err)
+				}
+				busy := false
+				if tg.Busy != "" && place != "" {
+					_, err := os.Lstat(filepath.Join(place, tg.Busy))
+					busy = err == nil
+				}
+				out.Files = append(out.Files, File{
+					Plugin:  r.p.ID(),
+					Path:    path,
+					Content: buf.Bytes(),
+					Reload:  reload,
+					Merge:   tg.Merge,
+					Busy:    busy,
+				})
 			}
-			reload, err := renderString(r.tmpl, tg.Reload, r.data)
-			if err != nil {
-				return nil, fmt.Errorf("plugin %s: reload: %w", r.p.ID(), err)
-			}
-			out.Files = append(out.Files, File{
-				Plugin:  r.p.ID(),
-				Path:    ExpandHome(tg.Output),
-				Content: buf.Bytes(),
-				Reload:  reload,
-				Merge:   tg.Merge,
-			})
 		}
 	}
 	return out, nil
@@ -273,6 +328,8 @@ func funcs(t *theme.Theme, outputs []string, cat *locale.Catalog) template.FuncM
 			return string(b), err
 		},
 		// camel "bg_alt" -> "bgAlt"  (QML/JS property names)
+		// base "/x/y.default" -> "y.default" (a profile's name, from .Place)
+		"base": filepath.Base,
 		"camel": func(s string) string {
 			parts := strings.Split(s, "_")
 			for i := 1; i < len(parts); i++ {

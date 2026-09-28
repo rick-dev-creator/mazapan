@@ -185,11 +185,34 @@ manager unthemed.
   it took coverage from 19 to 27 of 61 apps. Audited (6 findings, all
   fixed).
 
-**Follow-ups, by reach (for everyone, not one machine).** Browsers, both
-families: Firefox and its forks (userChrome.css) and Chromium's (its theme
-color), which also covers every web app; developer tools (a Neovim
-colorscheme, a VS Code theme, btop); Electron apps one by one; Qt 5 (qt5ct).
-Also: GTK apps previewed live (they follow on ↵); light/dark at sunset.
+- *Done* — browsers, in every profile (targets with `each`):
+  - Firefox and its forks (Zen, LibreWolf, Floorp, Waterfox; plugin
+    `theme-firefox`): the frame (tabs, toolbar, address bar, menus,
+    sidebar, Zen's own variables) and the browser's own pages, from a
+    stylesheet imported into userChrome.css/userContent.css, so a
+    person's own CSS and user.js stay theirs (`lines` and `prefs`).
+  - Chromium, Chrome, Brave, Edge (plugin `theme-chromium`): their GTK
+    mode, set in each profile's Preferences (`json`): the frame, tabs,
+    toolbar and font follow the theme (through theme-gtk). Left alone
+    while the browser runs (it would write its copy back): "busy", applied
+    next time. Their accent stays theirs: only a system policy (/etc)
+    sets it, and one that sets a theme color (Omarchy's) wins over GTK
+    mode.
+  - Audited (12 findings, all fixed): a JSON file that doesn't parse is
+    never rewritten; keys with dots; an @import only counts at the head of
+    the file; taking myarch's line out of your own file is respected, and
+    its lines leave with the plugin; profiles linked twice count once;
+    rollbacks don't bring back deleted profiles; permissions kept (0600
+    Preferences); contrast of Firefox's buttons and links; high contrast
+    mode left alone; coverage claims the browsers, not every app built on
+    them.
+
+**Follow-ups, by reach (for everyone, not one machine).** Chromium's
+accent through its policy (needs root: a way for plugins to write system
+files); developer tools (a Neovim colorscheme, a VS Code theme, btop);
+Electron apps one by one; Qt 5 (qt5ct). Also: GTK apps previewed live
+(they follow on ↵); light/dark at sunset; restart the browsers' theme
+without restarting them.
 
 ## 5. Hardware
 

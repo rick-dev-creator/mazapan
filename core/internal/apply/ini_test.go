@@ -83,6 +83,121 @@ func TestSharedFileEditedKeyIsAConflict(t *testing.T) {
 	}
 }
 
+func TestOtherSharedFormats(t *testing.T) {
+	// user.js: someone's arkenfox prefs stay, ours are set or added.
+	js := "user_pref(\"privacy.x\", true);\nuser_pref(\"browser.theme.toolbar-theme\", 2);\n"
+	got := mergeKeys("prefs", js, keysOf("prefs", "user_pref(\"browser.theme.toolbar-theme\", 0);\nuser_pref(\"toolkit.a\", true);\n"))
+	if got != "user_pref(\"privacy.x\", true);\nuser_pref(\"browser.theme.toolbar-theme\", 0);\nuser_pref(\"toolkit.a\", true);\n" {
+		t.Errorf("prefs: %q", got)
+	}
+	// userChrome.css: their CSS stays, our @import goes first, once.
+	css := "#nav-bar { order: 1 }\n"
+	want := keysOf("lines", "@import \"myarch.css\";\n")
+	got = mergeKeys("lines", css, want)
+	if got != "@import \"myarch.css\";\n#nav-bar { order: 1 }\n" || mergeKeys("lines", got, want) != got {
+		t.Errorf("lines: %q", got)
+	}
+	// Chromium's Preferences: its keys stay, our leaf is set.
+	got = mergeKeys("json", `{"extensions":{"theme":{"id":"x"},"other":1},"a":[1,2]}`, keysOf("json", `{"extensions":{"theme":{"system_theme":1}}}`))
+	if keys := keysOf("json", got); keys["\x00extensions\x01theme\x01system_theme"] != "1" || keys["\x00extensions\x01theme\x01id"] != `"x"` || keys["\x00a"] != "[1,2]" {
+		t.Errorf("json: %s", got)
+	}
+	// Keys with dots stay keys: VS Code's "workbench.colorTheme".
+	got = mergeKeys("json", `{"workbench.colorTheme":"A"}`, keysOf("json", `{"workbench.colorTheme":"B"}`))
+	if got != `{"workbench.colorTheme":"B"}` {
+		t.Errorf("dotted key: %s", got)
+	}
+}
+
+func TestSharedFormatsEdgeCases(t *testing.T) {
+	// An @import after other rules is ignored by CSS: not there.
+	if k := keysOf("lines", "#a { color: red }\n@import \"myarch.css\";\n"); len(k) != 0 {
+		t.Errorf("late @import counted: %v", k)
+	}
+	if k := keysOf("lines", "/* mine\n   more */\n@charset \"utf-8\";\n@import \"myarch.css\";\n#a{}\n"); k["\x00@import \"myarch.css\";"] != "1" {
+		t.Errorf("head @import missed: %v", k)
+	}
+	// A commented-out pref isn't set; single quotes and a trailing comment.
+	k := keysOf("prefs", "/*\nuser_pref(\"a\", true);\n*/\nuser_pref('b', 1); // mine\n")
+	if _, ok := k["\x00a"]; ok || k["\x00b"] != "1" {
+		t.Errorf("prefs: %v", k)
+	}
+	if got := mergeKeys("prefs", "user_pref('b', 1); // mine\n", map[string]string{"\x00b": "2"}); got != "user_pref(\"b\", 2); // mine\n" {
+		t.Errorf("comment kept: %q", got)
+	}
+}
+
+// In a person's own user.js: a pref a newer plugin version drops goes (as
+// myarch wrote it), theirs stay; when the plugin goes, its lines go too.
+func TestPersonsFileLetsGo(t *testing.T) {
+	p := filepath.Join(t.TempDir(), "user.js")
+	os.WriteFile(p, []byte("user_pref(\"mine\", 1);\n"), 0o644)
+	v1 := render.File{Plugin: "p", Path: p, Merge: "prefs", Content: []byte("user_pref(\"a\", true);\nuser_pref(\"old\", 0);\n")}
+	owned := Owned{}
+	ch, orphans, _ := Plan([]render.File{v1}, owned)
+	Execute(ch, orphans, owned, false)
+
+	v2 := v1
+	v2.Content = []byte("user_pref(\"a\", true);\n")
+	ch, orphans, _ = Plan([]render.File{v2}, owned)
+	if ch[0].State != Changed {
+		t.Fatalf("a dropped pref is a change: %v", ch[0].State)
+	}
+	Execute(ch, orphans, owned, false)
+	if b, _ := os.ReadFile(p); string(b) != "user_pref(\"mine\", 1);\nuser_pref(\"a\", true);\n" {
+		t.Fatalf("after v2: %q", b)
+	}
+	ch, orphans, _ = Plan(nil, owned)
+	Execute(ch, orphans, owned, false)
+	if b, _ := os.ReadFile(p); string(b) != "user_pref(\"mine\", 1);\n" {
+		t.Fatalf("after the plugin went: %q", b)
+	}
+}
+
+// Taking myarch's @import out of your userChrome.css (to opt a profile
+// out) is an edit: not put back silently.
+func TestRemovedLineIsAnEdit(t *testing.T) {
+	p := filepath.Join(t.TempDir(), "userChrome.css")
+	f := render.File{Plugin: "p", Path: p, Content: []byte("@import \"myarch.css\";\n"), Merge: "lines"}
+	owned := Owned{}
+	ch, orphans, _ := Plan([]render.File{f}, owned)
+	Execute(ch, orphans, owned, false)
+	os.WriteFile(p, []byte("#mine {}\n"), 0o644)
+	if ch, _, _ = Plan([]render.File{f}, owned); ch[0].State != Conflict {
+		t.Fatalf("state %v", ch[0].State)
+	}
+}
+
+// A JSON file that doesn't parse is never rewritten blind; a busy one
+// (its app running) isn't touched at all.
+func TestUnreadableAndBusy(t *testing.T) {
+	dir := t.TempDir()
+	p := filepath.Join(dir, "Preferences")
+	os.WriteFile(p, []byte(`{"a":1,}`), 0o600)
+	f := render.File{Plugin: "p", Path: p, Content: []byte(`{"x":1}`), Merge: "json"}
+	if ch, _, _ := Plan([]render.File{f}, Owned{}); ch[0].State != Conflict {
+		t.Fatalf("unreadable: %v", ch[0].State)
+	}
+	os.WriteFile(p, []byte(`{"a":1}`), 0o600)
+	f.Busy = true
+	owned := Owned{p: "json:old"}
+	ch, orphans, _ := Plan([]render.File{f}, owned)
+	if ch[0].State != Busy {
+		t.Fatalf("busy: %v", ch[0].State)
+	}
+	Execute(ch, orphans, owned, false)
+	if b, _ := os.ReadFile(p); string(b) != `{"a":1}` || owned[p] != "json:old" {
+		t.Fatalf("busy file touched: %s %q", b, owned[p])
+	}
+	// Rewritten, a 0600 file stays 0600.
+	f.Busy = false
+	ch, orphans, _ = Plan([]render.File{f}, Owned{})
+	Execute(ch, orphans, Owned{}, false)
+	if fi, _ := os.Stat(p); fi.Mode().Perm() != 0o600 {
+		t.Fatalf("mode %v", fi.Mode().Perm())
+	}
+}
+
 // A person's own kdeglobals, never written by myarch: its own value for one
 // of myarch's keys is theirs (a conflict); keys it lacks are just added.
 func TestSharedFileFirstTime(t *testing.T) {
