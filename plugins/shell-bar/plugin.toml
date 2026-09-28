@@ -4,6 +4,7 @@ name = "Bar"
 version = "0.2.0"
 api = 1
 description = "A bar on every monitor (Quickshell), filled with the widgets other plugins put in its left/center/right slots; ships a kit of components for them"
+requires = ["theme-quickshell", "hypr-base"]
 
 [packages]
 pacman = ["quickshell"]

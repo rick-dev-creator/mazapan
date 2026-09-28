@@ -4,6 +4,7 @@ name = "Capture"
 version = "0.1.0"
 api = 1
 description = "One capture overlay: pick a region or a window on a frozen screen, then copy, save, copy its text (OCR), annotate or record it"
+requires = ["shell-bar", "hypr-base"]
 
 [packages]
 # OCR in another language needs its data too: tesseract-data-spa, -fra…

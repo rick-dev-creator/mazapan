@@ -4,6 +4,7 @@ name = "Clock"
 version = "0.1.0"
 api = 1
 description = "Day, date and time in the middle of the bar, in the system's language; click for a calendar"
+requires = ["shell-bar"]
 
 [packages]
 pacman = ["quickshell"]

@@ -4,6 +4,7 @@ name = "Volume"
 version = "0.1.0"
 api = 1
 description = "Output volume in the bar: scroll to change, middle-click to mute, click for outputs and inputs"
+requires = ["shell-bar"]
 
 [packages]
 pacman = ["quickshell", "pipewire", "wireplumber"]

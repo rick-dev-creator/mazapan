@@ -17,6 +17,7 @@ import (
 	"myarch/internal/apply"
 	"myarch/internal/config"
 	"myarch/internal/coverage"
+	"myarch/internal/install"
 	"myarch/internal/locale"
 	"myarch/internal/plugin"
 	"myarch/internal/render"
@@ -35,7 +36,18 @@ commands:
   history        past updates and how they went
   rollback [ID]  put back the packages and files from before an update
                  (the last one by default)
-  plugins        list plugins and what they generate
+  plugins [list]  plugins, where they come from, and their state
+  plugins show ID
+                 what a plugin needs and does: requirements, settings,
+                 files, commands, code
+  plugins enable|disable ID...
+  plugins add URL[#REF] [-y]
+                 install a plugin from git, after approving what it can do
+  plugins update [ID[#REF]...] [-y]
+                 update plugins from git (to another branch or tag with
+                 #REF); asks before any new capability
+  plugins remove ID...
+  plugins sync   install exactly what plugins.lock says (another machine)
   coverage [--json]
                  installed apps, and whether the theme reaches them
   themes [--json]
@@ -60,7 +72,7 @@ func main() {
 	case "rollback":
 		err = cmdRollback(os.Args[2:])
 	case "plugins":
-		err = cmdPlugins()
+		err = cmdPlugins(os.Args[2:])
 	case "coverage":
 		err = cmdCoverage(os.Args[2:])
 	case "themes":
@@ -93,25 +105,89 @@ func root() string {
 
 // Search paths: the user's directory first, so it can shadow built-ins.
 func pluginDirs() []string {
-	return []string{render.ExpandHome("~/.local/share/myarch/plugins"), filepath.Join(root(), "plugins")}
+	return []string{install.Dir(), filepath.Join(root(), "plugins")}
 }
 
 func themeDirs() []string {
 	return []string{render.ExpandHome("~/.local/share/myarch/themes"), filepath.Join(root(), "themes")}
 }
 
+// enabledPlugins are the plugins to apply. It refuses when one doesn't
+// load, needs a plugin that isn't there, or is a plugin from git that isn't
+// what plugins.lock says (moved, edited, or needing more than was
+// approved): applying would run what nobody agreed to.
 func enabledPlugins(cfg *config.Config) ([]*plugin.Plugin, error) {
-	all, err := plugin.Discover(pluginDirs())
+	all, broken := plugin.Discover(pluginDirs())
+	lock, err := install.LoadLock()
 	if err != nil {
 		return nil, err
 	}
-	var out []*plugin.Plugin
-	for _, p := range all {
-		if !cfg.IsDisabled(p.ID()) {
-			out = append(out, p)
+	var out, failed []*plugin.Plugin
+	var problems []string
+	for _, id := range sortedKeys(broken) {
+		if !cfg.IsDisabled(id) {
+			problems = append(problems, broken[id].Error())
 		}
 	}
+	found := map[string]bool{}
+	for _, p := range all {
+		found[p.ID()] = true
+		if cfg.IsDisabled(p.ID()) {
+			continue
+		}
+		if err := trusted(lock, p); err != nil {
+			problems = append(problems, err.Error())
+			failed = append(failed, p)
+			continue
+		}
+		out = append(out, p)
+	}
+	for _, e := range lock.Plugins {
+		if !found[e.ID] && broken[e.ID] == nil && !cfg.IsDisabled(e.ID) {
+			problems = append(problems, e.ID+" is in plugins.lock but not installed (run: myarch plugins sync)")
+		}
+	}
+	// Those that failed still count as there: their dependents' problem is
+	// theirs, not a missing plugin.
+	for _, pr := range plugin.Unmet(append(append([]*plugin.Plugin{}, out...), failed...), all, broken) {
+		problems = append(problems, pr.Text)
+	}
+	if len(problems) > 0 {
+		return nil, errors.New("plugins:\n  " + strings.Join(problems, "\n  "))
+	}
 	return out, nil
+}
+
+// trusted: built-ins and your own plugins are; one from git must be what
+// plugins.lock says.
+func trusted(lock *install.Lock, p *plugin.Plugin) error {
+	e := lock.Get(p.ID())
+	fromGit := filepath.Dir(p.Dir) == install.Dir()
+	switch {
+	case e != nil && !fromGit:
+		return fmt.Errorf("%s is in plugins.lock but not installed (run: myarch plugins sync)", p.ID())
+	case e == nil && fromGit && isCheckout(p.Dir):
+		return fmt.Errorf("%s is a git checkout that isn't in plugins.lock; add it with myarch plugins add, or delete %s",
+			p.ID(), tilde(p.Dir))
+	case e != nil:
+		return install.Verify(p.Dir, e, p)
+	}
+	return nil
+}
+
+func isCheckout(dir string) bool {
+	_, err := os.Lstat(filepath.Join(dir, ".git"))
+	return err == nil
+}
+
+// lockedEntry is p's plugins.lock entry when p is the plugin installed
+// from git; a plugin elsewhere with the same id isn't.
+func lockedEntry(lock *install.Lock, p *plugin.Plugin) *install.Entry {
+	e := lock.Get(p.ID())
+	if e == nil || filepath.Dir(p.Dir) != install.Dir() {
+		return nil
+	}
+	return e
 }
 
 // session is everything loaded and rendered for one run: config, theme,
@@ -276,43 +352,6 @@ func cmdApply(args []string) error {
 	}
 	if *themeID != "" || *accent != "" {
 		return s.cfg.Save()
-	}
-	return nil
-}
-
-func cmdPlugins() error {
-	cfg, err := config.Load()
-	if err != nil {
-		return err
-	}
-	all, err := plugin.Discover(pluginDirs())
-	if err != nil {
-		return err
-	}
-	for _, p := range all {
-		state := "enabled"
-		if cfg.IsDisabled(p.ID()) {
-			state = "disabled"
-		}
-		fmt.Printf("%-16s %-8s %-8s %s\n", p.ID(), p.Meta.Version, state, p.Meta.Description)
-		settings, err := p.Resolve(cfg.Plugins[p.ID()])
-		if err != nil {
-			return err
-		}
-		for _, k := range sortedKeys(settings) {
-			mark := ""
-			if _, set := cfg.Plugins[p.ID()][k]; set {
-				mark = "  (config.toml)"
-			}
-			fmt.Printf("  %s = %#v%s\n", k, settings[k], mark)
-		}
-		for _, t := range p.Targets {
-			if len(t.Each) > 0 {
-				fmt.Printf("  -> %s, in each of %s\n", t.Output, strings.Join(t.Each, ", "))
-			} else {
-				fmt.Printf("  -> %s\n", t.Output)
-			}
-		}
 	}
 	return nil
 }
@@ -512,23 +551,23 @@ func problems(t *theme.Theme) []problem {
 // checkOverrides rejects [plugins.<id>] sections for plugins that don't
 // exist, so a misspelled id doesn't silently do nothing.
 func checkOverrides(cfg *config.Config) error {
-	all, err := plugin.Discover(pluginDirs())
-	if err != nil {
-		return err
-	}
-	known := map[string]bool{}
-	for _, p := range all {
-		known[p.ID()] = true
-	}
+	all, broken := plugin.Discover(pluginDirs())
 	for id := range cfg.Plugins {
-		if !known[id] {
+		if broken[id] != nil {
+			continue
+		}
+		known := false
+		for _, p := range all {
+			known = known || p.ID() == id
+		}
+		if !known {
 			return fmt.Errorf("%s: [plugins.%s]: no such plugin", config.Path(), id)
 		}
 	}
 	return nil
 }
 
-func sortedKeys(m map[string]any) []string {
+func sortedKeys[V any](m map[string]V) []string {
 	ks := make([]string, 0, len(m))
 	for k := range m {
 		ks = append(ks, k)

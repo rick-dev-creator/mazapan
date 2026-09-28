@@ -23,7 +23,10 @@ vm/        dev VM
 myarch apply --theme phosphor   # render every enabled plugin and write the files
 myarch apply --dry-run          # show new / changed / conflict / orphan, write nothing
 myarch apply --adopt            # back up files myarch didn't write and take them over
-myarch plugins                  # what each plugin generates
+myarch plugins                  # every plugin, where it comes from, on or off
+myarch plugins show palette     # what it needs and what it can do
+myarch plugins add <git-url>    # a plugin from git, after you approve what it can do
+myarch plugins sync             # the plugins in plugins.lock (on another machine)
 myarch themes                   # every theme, with its contrast problems
 myarch coverage                 # installed apps the theme reaches, and not
 myarch apply --accent '#4fa35f' # your accent in any theme ("theme" = its own)

@@ -17,7 +17,7 @@ Suggested start: 1, 2 and 3.
 | 4 | Themes | **Done** (2026-09-28); follow-ups listed below |
 | 5 | Hardware | not started |
 | 6 | An agent-native system | not started |
-| 7 | Plugins | partly: typed settings, localization, clean removal, checks |
+| 7 | Plugins | **Done** (2026-09-29); follow-ups listed below |
 | 8 | Capture | **Done** (2026-09-29); follow-ups listed below |
 
 ## 1. Updates you can trust
@@ -266,8 +266,31 @@ schema.
 bar widgets), with typed settings, localization, and clean removal that
 never touches files you edited.
 
-**Still missing.** Pinned versions (a lockfile), declared permissions,
-dependencies between plugins.
+**Much better.** *Done* — `myarch plugins list|show|enable|disable|add|
+update|remove|sync`:
+- Dependencies: `requires = ["shell-bar", "hypr-base >= 0.1"]`. apply
+  refuses while one is missing, disabled or too old; `disable` says what
+  would have to go with it (all the way down), `enable` what's missing.
+- Capabilities worked out from the manifest, not declared: full access
+  (code, and configs that can run commands), the commands it runs written
+  out as they'll run (defines inlined, settings' defaults), the files, the
+  packages. Approved at `add`; an `update` that needs more asks again.
+- Plugins from git, pinned in `~/.config/myarch/plugins.lock` (source,
+  ref, commit, approvals): `sync` reproduces them on another machine.
+  apply refuses one that moved, was edited (even an ignored file), or
+  needs more than approved.
+- Audited (17 findings, all fixed): commands were approved as raw
+  templates, so a changed define or default ran unasked; a plugin could
+  write into myarch's own folders (plugins.lock, a decoy plugin); symlinks
+  and submodules in a repo; index flags and ignored files hid edits; git
+  ran with the user's hooks and config; the lock's values reached git
+  arguments; an update was checked out before it was approved; a broken
+  manifest broke every command; a checkout without its lock entry passed
+  as your own; ref switches that were lost; updates in the wrong order.
+
+**Follow-ups.** A catalog to find plugins; a plugin manager in the shell
+(list, show capabilities, enable); `myarch update` offering plugin updates
+too; signed tags.
 
 ## 8. Capture
 

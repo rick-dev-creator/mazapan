@@ -4,6 +4,7 @@ name = "Monitors"
 version = "0.1.0"
 api = 1
 description = "Monitor profiles matched by EDID, applied on their own when screens come and go; a visual manager to arrange them"
+requires = ["shell-bar", "hypr-base"]
 
 [packages]
 pacman = ["hyprland", "quickshell"]

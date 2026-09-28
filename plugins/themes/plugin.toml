@@ -4,6 +4,7 @@ name = "Theme picker"
 version = "0.1.0"
 api = 1
 description = "Pick a theme and an accent, previewed live on the desktop, with each theme's contrast checked"
+requires = ["shell-bar", "hypr-base"]
 
 [packages]
 pacman = ["quickshell", "hyprland"]

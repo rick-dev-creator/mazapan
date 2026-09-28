@@ -4,6 +4,7 @@ name = "Wallpaper"
 version = "0.1.0"
 api = 1
 description = "The wallpaper, drawn from the theme (or the theme's image): it changes with it, previews included"
+requires = ["shell-bar"]
 
 [packages]
 pacman = ["quickshell"]

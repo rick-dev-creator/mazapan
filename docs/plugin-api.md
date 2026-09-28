@@ -7,17 +7,67 @@ grows; built-ins never get a private path.
 ## Where plugins live
 
 ```
-~/.local/share/myarch/plugins/<dir>/plugin.toml   your plugins (searched first)
+~/.local/share/myarch/plugins/<id>/plugin.toml    from git, or your own (searched first)
 <repo>/plugins/<dir>/plugin.toml                  built-ins
 ```
 
-A plugin id found in the user directory shadows the built-in with the same
-id. Disable a plugin in `~/.config/myarch/config.toml`:
+A plugin in the user directory shadows the built-in with the same id (your
+own; one from git can't take a built-in's id). Turn plugins on and off with
+`myarch plugins enable|disable <id>…`, which is `disabled_plugins` in
+`~/.config/myarch/config.toml`:
 
 ```toml
 theme = "phosphor"
 disabled_plugins = ["theme-foot"]
 ```
+
+## Plugins from git
+
+```sh
+myarch plugins add https://github.com/you/myarch-hello[#ref]   # asks first
+myarch plugins show hello        # requirements, settings, what it can do
+myarch plugins update [hello[#ref]]
+myarch plugins remove hello      # myarch apply then takes its files away
+myarch plugins sync              # install what plugins.lock says (another machine)
+```
+
+`add` clones the repository (its root holds plugin.toml; no symlinks or
+submodules) and shows what the plugin will be able to do, worked out from
+its manifest, not taken from its word:
+
+- **full access**: code where code runs (QML in the shell, Lua in
+  Hyprland, scripts) and configs that can run commands. That is nearly any
+  config (foot's `shell=`, hyprlock's `cmd[]`, a `.desktop`'s `Exec=`, VS
+  Code's terminal profiles); only stylesheets and color schemes aren't.
+- the commands it runs (after writing, as checks, as actions), written out
+  as they will run: `{{template}}` calls inlined, settings replaced by
+  their defaults. Commands can't use translated text (`t`, `tq`).
+- the files it writes, the packages it needs.
+
+Nothing is installed until you say yes (`-y` says it without asking;
+without a terminal there is no other yes).
+
+`~/.config/myarch/plugins.lock` keeps, for each one, its source, the branch
+or tag it follows, the exact commit, and what you approved. With
+config.toml, it's all another machine needs: `myarch plugins sync && myarch
+apply`.
+
+`update` looks at the new version beside the installed one, shows its
+commits, and asks again only when it needs something you didn't approve;
+the plugin moves only then. `myarch apply` (and doctor, and the rest)
+refuses a plugin from git that isn't what the lock says: at another commit,
+with any file edited or added (even ignored ones: every `*.tmpl` in the
+folder is parsed), needing more than was approved, or a checkout the lock
+doesn't list. git runs without your git config or hooks.
+
+No plugin writes into myarch's own folders (`~/.config/myarch`,
+`~/.local/share/myarch` but its `bin/`, `~/.local/state/myarch`); outputs
+start with `~/` or `/` and never go up with `..`. Approving "full access"
+is trusting its author, like any extension: that code runs with your
+rights.
+
+Your own plugins (a folder you put there, not a git checkout) aren't
+checked: they're yours.
 
 ## plugin.toml
 
@@ -28,6 +78,7 @@ name = "foot theme"
 version = "0.1.0"
 api = 1                    # manifest API; the core refuses other values
 description = "one line"
+requires = ["shell-bar", "hypr-base >= 0.1"]   # other plugins it needs
 
 [packages]
 pacman = ["foot"]          # checked on apply, warned about if missing
@@ -42,7 +93,16 @@ output = "~/.config/foot/foot.ini"
 reload = "…"               # optional shell command, rendered as a template
 ```
 
-Unknown keys are an error, so typos don't pass silently.
+Unknown keys are an error, so typos don't pass silently. The id is
+lowercase letters, digits and dashes, and names the plugin's folder; the
+version, numbers and dots. A plugin that doesn't load is listed as broken
+and blocks apply (unless disabled), but never the other commands.
+
+`requires` lists plugins this one needs, with an optional version (`>=`,
+`>`, `=`, `<=`, `<`; `1.2` is `1.2.0`). myarch refuses to apply while an
+enabled plugin needs one that is missing, disabled or at a version that
+doesn't do; `enable` and `disable` say what else they'd need to take along.
+A bar widget requires `shell-bar`; a Hyprland fragment, `hypr-base`.
 
 ## Checks
 

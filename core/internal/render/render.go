@@ -103,6 +103,22 @@ func Places(tg plugin.Target) []string {
 	return out
 }
 
+// landing resolves the symlinks of path's nearest existing folder, to see
+// where a write would land.
+func landing(path string) string {
+	dir, rest := filepath.Dir(path), filepath.Base(path)
+	for {
+		if r, err := filepath.EvalSymlinks(dir); err == nil {
+			return filepath.Join(r, rest)
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return path
+		}
+		dir, rest = parent, filepath.Join(filepath.Base(dir), rest)
+	}
+}
+
 // ExpandHome turns a leading "~/" into the user's home directory.
 func ExpandHome(p string) string {
 	if strings.HasPrefix(p, "~/") {
@@ -125,6 +141,9 @@ func All(plugins []*plugin.Plugin, t *theme.Theme, overrides map[string]map[stri
 				out := ExpandHome(tg.Output)
 				if d != "" {
 					out = filepath.Join(d, tg.Output)
+				}
+				if plugin.Reserved(out) || plugin.Reserved(landing(out)) {
+					return nil, fmt.Errorf("plugin %s: %s is myarch's own; no plugin writes there", p.ID(), out)
 				}
 				if other, dup := owner[out]; dup {
 					return nil, fmt.Errorf("%s: both %s and %s generate it", out, other, p.ID())

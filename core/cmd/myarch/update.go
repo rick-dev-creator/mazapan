@@ -9,7 +9,9 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"syscall"
 	"time"
+	"unsafe"
 
 	"myarch/internal/apply"
 	"myarch/internal/health"
@@ -48,9 +50,13 @@ func critical(s *session) map[string]bool {
 
 func header(title string) { fmt.Printf("\n%s%s%s\n", bold, title, reset) }
 
+// One reader for every question, so answers piped in aren't lost to a
+// reader's buffer.
+var stdin = bufio.NewReader(os.Stdin)
+
 func confirm(question string) bool {
 	fmt.Printf("\n%s [y/N] ", question)
-	line, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+	line, _ := stdin.ReadString('\n')
 	a := strings.ToLower(strings.TrimSpace(line))
 	return a == "y" || a == "yes" || a == "s" || a == "si" || a == "sí"
 }
@@ -569,9 +575,12 @@ func cmdRollback(args []string) error {
 	return rollback(rec)
 }
 
+// isTerminal: a real terminal, not just a character device (/dev/null is
+// one too): only a terminal can take termios.
 func isTerminal(f *os.File) bool {
-	st, err := f.Stat()
-	return err == nil && st.Mode()&os.ModeCharDevice != 0
+	var t syscall.Termios
+	_, _, errno := syscall.Syscall(syscall.SYS_IOCTL, f.Fd(), syscall.TCGETS, uintptr(unsafe.Pointer(&t)))
+	return errno == 0
 }
 
 func plural(n int, one, many string) string {

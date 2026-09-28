@@ -4,6 +4,7 @@ name = "Weather"
 version = "0.1.0"
 api = 1
 description = "Current weather in the middle of the bar; click for details and the forecast"
+requires = ["shell-bar"]
 
 [packages]
 pacman = ["quickshell"]

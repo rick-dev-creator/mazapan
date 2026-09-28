@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -25,6 +26,8 @@ type Plugin struct {
 		Version     string `toml:"version"`
 		API         int    `toml:"api"`
 		Description string `toml:"description"`
+		// Requires: other plugins it needs, "id" or "id >= 1.2".
+		Requires []string `toml:"requires"`
 	} `toml:"plugin"`
 
 	// Packages the plugin needs at runtime. Checked, not installed (yet).
@@ -187,36 +190,69 @@ func keys(m map[string]any) string {
 	return fmt.Sprint(ks)
 }
 
-// Discover loads every plugin under dirs. A plugin id found in an earlier
-// directory shadows the same id in later ones (user dir before built-ins).
-func Discover(dirs []string) ([]*Plugin, error) {
+// Discover loads every plugin under dirs; a plugin's folder is named after
+// its id. An id found in an earlier directory shadows the same id in later
+// ones (user dir before built-ins). A plugin that doesn't load is returned
+// in broken, by id, and still shadows: a broken plugin from git must not
+// quietly fall back to a built-in.
+func Discover(dirs []string) (plugins []*Plugin, broken map[string]error) {
 	byID := map[string]*Plugin{}
+	broken = map[string]error{}
 	for _, d := range dirs {
 		entries, err := os.ReadDir(d)
 		if err != nil {
 			continue
 		}
 		for _, e := range entries {
-			path := filepath.Join(d, e.Name(), "plugin.toml")
+			id := e.Name()
+			path := filepath.Join(d, id, "plugin.toml")
 			if _, err := os.Stat(path); err != nil {
 				continue
 			}
+			if _, seen := byID[id]; seen {
+				continue
+			}
+			if _, seen := broken[id]; seen {
+				continue
+			}
 			p, err := load(path)
+			if err == nil && p.ID() != id {
+				err = fmt.Errorf("%s: id %q, but its folder is %q: they must match", path, p.ID(), id)
+			}
 			if err != nil {
-				return nil, err
+				broken[id] = err
+				continue
 			}
-			if _, dup := byID[p.ID()]; !dup {
-				byID[p.ID()] = p
-			}
+			byID[id] = p
 		}
 	}
-	out := make([]*Plugin, 0, len(byID))
 	for _, p := range byID {
-		out = append(out, p)
+		plugins = append(plugins, p)
 	}
-	sort.Slice(out, func(i, j int) bool { return out[i].ID() < out[j].ID() })
-	return out, nil
+	sort.Slice(plugins, func(i, j int) bool { return plugins[i].ID() < plugins[j].ID() })
+	return plugins, broken
 }
+
+// Reserved says whether path is myarch's own: its config, plugins.lock,
+// the plugins and themes it loads, what it remembers. No plugin writes
+// there (bin/, for the scripts plugins ship, is the exception).
+func Reserved(path string) bool {
+	home, _ := os.UserHomeDir()
+	path = filepath.Clean(path)
+	for _, r := range []string{".config/myarch", ".local/state/myarch", ".local/share/myarch"} {
+		r = filepath.Join(home, r)
+		if path == r || strings.HasPrefix(path, r+"/") {
+			return !strings.HasPrefix(path, filepath.Join(home, ".local/share/myarch/bin")+"/")
+		}
+	}
+	return false
+}
+
+// Load reads the plugin in dir.
+func Load(dir string) (*Plugin, error) { return load(filepath.Join(dir, "plugin.toml")) }
+
+// An id names the plugin's folder and its [plugins.<id>] table.
+var idPattern = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*$`)
 
 func load(path string) (*Plugin, error) {
 	p := &Plugin{Dir: filepath.Dir(path)}
@@ -230,8 +266,22 @@ func load(path string) (*Plugin, error) {
 	switch {
 	case p.Meta.ID == "":
 		return nil, fmt.Errorf("%s: [plugin] id is required", path)
+	case !idPattern.MatchString(p.Meta.ID):
+		return nil, fmt.Errorf("%s: [plugin] id %q: lowercase letters, digits and dashes", path, p.Meta.ID)
 	case p.Meta.API != APIVersion:
 		return nil, fmt.Errorf("%s: api = %d, this core supports api = %d", path, p.Meta.API, APIVersion)
+	}
+	if _, err := parseVersion(p.Meta.Version); err != nil {
+		return nil, fmt.Errorf("%s: [plugin] %w", path, err)
+	}
+	for _, r := range p.Meta.Requires {
+		req, err := ParseRequirement(r)
+		if err != nil {
+			return nil, fmt.Errorf("%s: [plugin] %w", path, err)
+		}
+		if req.ID == p.Meta.ID {
+			return nil, fmt.Errorf("%s: [plugin] requires itself", path)
+		}
 	}
 	for i, c := range p.Checks {
 		if c.Name == "" || c.Run == "" {
@@ -258,9 +308,45 @@ func load(path string) (*Plugin, error) {
 		if len(t.Each) > 0 && (filepath.IsAbs(t.Output) || strings.HasPrefix(t.Output, "~")) {
 			return nil, fmt.Errorf("%s: targets[%d]: with each, output is relative to each place", path, i)
 		}
+		if len(t.Each) == 0 && !filepath.IsAbs(t.Output) && !strings.HasPrefix(t.Output, "~/") {
+			return nil, fmt.Errorf("%s: targets[%d]: output starts with ~/ or / (or use each)", path, i)
+		}
+		for _, part := range strings.Split(t.Output, "/") {
+			if part == ".." {
+				return nil, fmt.Errorf("%s: targets[%d]: output can't go up (..)", path, i)
+			}
+		}
+		for _, e := range t.Each {
+			// The part before the first wildcard is where every place is.
+			fixed := e
+			if i := strings.IndexAny(e, "*?["); i >= 0 {
+				fixed = filepath.Dir(e[:i+1])
+			}
+			home, _ := os.UserHomeDir()
+			if strings.HasPrefix(fixed, "~/") {
+				fixed = filepath.Join(home, fixed[2:])
+			}
+			if Reserved(fixed) || Reserved(filepath.Join(fixed, "x")) {
+				return nil, fmt.Errorf("%s: targets[%d]: each %s is in myarch's own folders", path, i, e)
+			}
+		}
+		if len(t.Each) == 0 {
+			home, _ := os.UserHomeDir()
+			out := t.Output
+			if strings.HasPrefix(out, "~/") {
+				out = filepath.Join(home, out[2:])
+			}
+			if Reserved(out) {
+				return nil, fmt.Errorf("%s: targets[%d]: %s is myarch's own", path, i, t.Output)
+			}
+		}
 		if _, err := os.Stat(filepath.Join(p.Dir, t.Template)); err != nil {
 			return nil, fmt.Errorf("%s: targets[%d]: %w", path, i, err)
 		}
+	}
+	// Commands must say what they run (see Capabilities).
+	if _, err := p.capabilities(); err != nil {
+		return nil, fmt.Errorf("%s: %w", path, err)
 	}
 	return p, nil
 }

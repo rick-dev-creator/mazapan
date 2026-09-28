@@ -4,6 +4,7 @@ name = "Command palette"
 version = "0.1.0"
 api = 1
 description = "One palette for apps, open windows, every plugin's actions and keybindings, each showing the command it runs"
+requires = ["shell-bar", "hypr-base"]
 
 [packages]
 pacman = ["quickshell", "wl-clipboard", "foot"]
