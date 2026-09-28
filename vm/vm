@@ -1,0 +1,168 @@
+#!/usr/bin/env bash
+# Dev VM for my-arch: official Arch cloud image + cloud-init, repo shared
+# live over 9p at /home/arch/my-arch.
+#
+#   vm/vm create      download base image, build overlay disk + seed
+#   vm/vm start       boot with a GL window (virtio-vga-gl)
+#   vm/vm headless    boot without a window (provisioning, CI)
+#   vm/vm wait        block until SSH is up and cloud-init has finished
+#   vm/vm ssh [cmd]   shell (or command) in the guest as user "arch"
+#   vm/vm provision   re-run vm/guest/provision.sh (after editing packages)
+#   vm/vm run <cmd>   run a command inside the guest's Hyprland session
+#   vm/vm exec <cmd>  launch an app through Hyprland (outlives the SSH call)
+#   vm/vm shot [file] screenshot of the guest desktop (default vm/.state/shot.png)
+#   vm/vm stop        power off
+#   vm/vm reset       throw away the overlay and seed: fresh first boot
+#   vm/vm destroy     delete all VM state, including the base image
+set -euo pipefail
+
+repo="$(cd "$(dirname "$0")/.." && pwd)"
+state="$repo/vm/.state"
+
+image_url="${MYARCH_IMAGE_URL:-https://geo.mirror.pkgbuild.com/images/latest/Arch-Linux-x86_64-cloudimg.qcow2}"
+disk_size="${MYARCH_DISK:-40G}"
+mem="${MYARCH_MEM:-8G}"
+cpus="${MYARCH_CPUS:-8}"
+res="${MYARCH_RES:-1920x1080}"
+ssh_port="${MYARCH_SSH_PORT:-2222}"
+
+base="$state/base.qcow2"
+disk="$state/disk.qcow2"
+seed="$state/seed.iso"
+key="$state/id_ed25519"
+pidfile="$state/qemu.pid"
+
+log() { printf '\e[1;35m[vm]\e[0m %s\n' "$*"; }
+die() { printf '\e[1;31m[vm]\e[0m %s\n' "$*" >&2; exit 1; }
+
+running() { [[ -f $pidfile ]] && kill -0 "$(cat "$pidfile")" 2>/dev/null; }
+
+ssh_opts=(-i "$key" -p "$ssh_port"
+  -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
+  -o LogLevel=ERROR -o ConnectTimeout=3)
+
+fetch_base() {
+  [[ -f $base ]] && return
+  log "downloading $image_url"
+  curl -fL --progress-bar -o "$base.part" "$image_url"
+  local want
+  want="$(curl -fsSL "$image_url.SHA256" | awk '{print $1}')"
+  echo "$want  $base.part" | sha256sum -c --quiet - || die "checksum mismatch"
+  mv "$base.part" "$base"
+}
+
+make_seed() {
+  [[ -f $key ]] || ssh-keygen -q -t ed25519 -N '' -C myarch-vm -f "$key"
+  local tmp; tmp="$(mktemp -d)"
+  sed "s|@SSH_PUBKEY@|$(cat "$key.pub")|" "$repo/vm/cloud-init/user-data.tmpl" > "$tmp/user-data"
+  cp "$repo/vm/cloud-init/meta-data" "$tmp/meta-data"
+  xorriso -as mkisofs -quiet -V cidata -J -R -o "$seed" "$tmp/user-data" "$tmp/meta-data" \
+    2>"$state/xorriso.log" || { cat "$state/xorriso.log" >&2; die "seed build failed"; }
+  rm -rf "$tmp"
+}
+
+make_disk() {
+  qemu-img create -q -f qcow2 -F qcow2 -b "$base" "$disk" "$disk_size"
+}
+
+cmd_create() {
+  mkdir -p "$state"
+  fetch_base
+  [[ -f $disk ]] || { log "creating overlay disk ($disk_size)"; make_disk; }
+  [[ -f $seed ]] || { log "building cloud-init seed"; make_seed; }
+  log "ready: vm/vm start"
+}
+
+boot() {
+  local display=("$@")
+  running && die "already running (pid $(cat "$pidfile"))"
+  [[ -f $disk && -f $seed ]] || cmd_create
+  local w=${res%x*} h=${res#*x}
+  log "booting ($cpus cpus, $mem, ${res}); serial log: vm/.state/serial.log"
+  setsid -f qemu-system-x86_64 \
+    -name myarch-vm \
+    -machine q35,accel=kvm -cpu host -smp "$cpus" -m "$mem" \
+    -drive "file=$disk,if=virtio,discard=unmap" \
+    -drive "file=$seed,media=cdrom,readonly=on" \
+    -nic "user,model=virtio-net-pci,hostfwd=tcp:127.0.0.1:$ssh_port-:22" \
+    -virtfs "local,path=$repo,mount_tag=myarch,security_model=none,id=myarch" \
+    -device virtio-tablet-pci -device virtio-keyboard-pci \
+    -device "virtio-vga-gl,xres=$w,yres=$h" \
+    "${display[@]}" \
+    -serial "file:$state/serial.log" \
+    -pidfile "$pidfile" \
+    >"$state/qemu.log" 2>&1
+  sleep 1
+  running || { cat "$state/qemu.log" >&2; die "qemu failed to start"; }
+}
+
+cmd_start()    { boot -display "${MYARCH_DISPLAY:-gtk,gl=on,zoom-to-fit=off}"; }
+cmd_headless() { boot -display egl-headless; }
+
+cmd_wait() {
+  log "waiting for SSH"
+  until ssh "${ssh_opts[@]}" arch@127.0.0.1 true 2>/dev/null; do
+    running || die "VM is not running"
+    sleep 2
+  done
+  log "waiting for cloud-init (first boot installs packages; a few minutes)"
+  ssh "${ssh_opts[@]}" arch@127.0.0.1 cloud-init status --wait >/dev/null || true
+  ssh "${ssh_opts[@]}" arch@127.0.0.1 cloud-init status --long
+}
+
+cmd_ssh() { exec ssh "${ssh_opts[@]}" -t arch@127.0.0.1 "$@"; }
+
+cmd_provision() {
+  ssh "${ssh_opts[@]}" arch@127.0.0.1 sudo bash /home/arch/my-arch/vm/guest/provision.sh
+}
+
+# Env of the logged-in graphical session, for hyprctl, gsettings, grim...
+session_env='export XDG_RUNTIME_DIR=/run/user/$(id -u)
+export DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus
+export WAYLAND_DISPLAY=$(ls $XDG_RUNTIME_DIR | grep -m1 "^wayland-[0-9]*$")
+export HYPRLAND_INSTANCE_SIGNATURE=$(ls -t $XDG_RUNTIME_DIR/hypr 2>/dev/null | head -1)
+export PATH=$HOME/my-arch/bin:$PATH
+cd $HOME/my-arch'
+
+cmd_run() {
+  ssh "${ssh_opts[@]}" arch@127.0.0.1 "$session_env
+$*"
+}
+
+cmd_exec() {
+  local cmd="$*"
+  cmd=${cmd//\\/\\\\}; cmd=${cmd//\"/\\\"}
+  cmd_run "hyprctl dispatch 'hl.dsp.exec_cmd(\"$cmd\")' >/dev/null"
+}
+
+cmd_shot() {
+  local out="${1:-$state/shot.png}"
+  cmd_run grim - > "$out"
+  log "saved $out"
+}
+
+cmd_stop() {
+  running || { log "not running"; return; }
+  ssh "${ssh_opts[@]}" arch@127.0.0.1 sudo systemctl poweroff 2>/dev/null || kill "$(cat "$pidfile")"
+  while running; do sleep 1; done
+  rm -f "$pidfile"
+  log "stopped"
+}
+
+cmd_reset() {
+  running && die "stop the VM first"
+  rm -f "$disk" "$seed"
+  cmd_create
+}
+
+cmd_destroy() {
+  running && die "stop the VM first"
+  rm -rf "$state"
+  log "destroyed"
+}
+
+case "${1:-}" in
+  create|start|headless|wait|ssh|provision|run|exec|shot|stop|reset|destroy)
+    c=$1; shift; "cmd_$c" "$@" ;;
+  *) sed -n '2,18s/^# \{0,1\}//p' "$0"; exit 1 ;;
+esac

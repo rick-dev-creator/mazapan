@@ -1,0 +1,6 @@
+# VM state: base image, overlay disk, seed ISO, SSH key, logs
+vm/.state/
+
+# Build output
+/bin/
+/dist/

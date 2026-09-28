@@ -1,0 +1,14 @@
+[plugin]
+id = "theme-foot"
+name = "foot theme"
+version = "0.1.0"
+api = 1
+description = "foot terminal: font, palette and a blinking block cursor in the accent color"
+
+[packages]
+pacman = ["foot"]
+
+# foot has no live reload; new windows pick the file up.
+[[targets]]
+template = "foot.ini.tmpl"
+output = "~/.config/foot/foot.ini"

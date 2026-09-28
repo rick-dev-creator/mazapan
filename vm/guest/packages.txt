@@ -1,0 +1,39 @@
+# Packages for the dev VM. All from official Arch repos.
+# One per line; '#' starts a comment. provision.sh installs with --needed.
+
+# Base tooling
+base-devel
+git
+go
+jq
+rsync
+openssh
+
+# Compositor + shell
+hyprland
+xdg-desktop-portal-hyprland
+quickshell
+qt6-wayland
+polkit
+
+# Terminals (kitty is what Hyprland's generated default config launches)
+foot
+kitty
+
+# Toolkits to check theme consistency against
+gtk3-demos
+gtk4-demos
+libadwaita-demos
+adw-gtk-theme
+qt6ct
+
+# Desktop plumbing
+wl-clipboard
+grim
+pipewire
+wireplumber
+pipewire-pulse
+
+# Fonts
+noto-fonts
+ttf-jetbrains-mono-nerd

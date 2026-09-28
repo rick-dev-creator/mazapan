@@ -1,0 +1,27 @@
+#cloud-config
+# First boot only. Everything that should be re-runnable lives in
+# vm/guest/provision.sh, which this file calls at the end.
+
+hostname: myarch-vm
+
+users:
+  - name: arch
+    groups: [wheel, video, input]
+    sudo: "ALL=(ALL) NOPASSWD:ALL"
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - "@SSH_PUBKEY@"
+
+chpasswd:
+  expire: false
+  users:
+    - { name: arch, password: arch, type: text }
+
+# The repo is shared live from the host over 9p (mount_tag "myarch").
+mounts:
+  - [myarch, /home/arch/my-arch, 9p, "trans=virtio,version=9p2000.L,msize=104857600,nofail", "0", "0"]
+
+runcmd:
+  - [mkdir, -p, /home/arch/my-arch]
+  - [mount, /home/arch/my-arch]
+  - [bash, /home/arch/my-arch/vm/guest/provision.sh]

@@ -1,0 +1,14 @@
+[plugin]
+id = "hypr-base"
+name = "Hyprland base"
+version = "0.1.0"
+api = 1
+description = "Hyprland entry point: monitors, input, core bindings; loads every plugin fragment in ~/.config/hypr/myarch/"
+
+[packages]
+pacman = ["hyprland", "foot"]
+
+[[targets]]
+template = "hyprland.lua.tmpl"
+output = "~/.config/hypr/hyprland.lua"
+reload = "hyprctl reload >/dev/null"

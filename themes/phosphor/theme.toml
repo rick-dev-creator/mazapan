@@ -1,0 +1,66 @@
+# Phosphor: an 80s amber-phosphor terminal crossed with JetBrains Darcula.
+#
+# Colors are semantic first. Plugins ask for "accent" or "danger", never for
+# "orange"; the [ansi] table exists only for terminals and TUIs.
+# Contrast against bg (WCAG): every text color >= 4.5:1 except fg_subtle
+# (3.0:1), which is for non-essential hints only.
+
+[meta]
+name = "Phosphor"
+mode = "dark"
+description = "Amber CRT phosphor on warm charcoal, Darcula syntax colors, square corners."
+
+[colors]
+bg             = "#1a1917"  # windows, editor, terminal: the CRT glass
+bg_alt         = "#141311"  # bars, sidebars, header bars: one step darker
+surface        = "#232220"  # cards, inputs, list rows
+surface_raised = "#2d2b28"  # popovers, menus, dialogs
+border         = "#3b3833"  # separators, inactive window borders
+
+fg        = "#dcd3bf"  # body text: warm phosphor white
+fg_muted  = "#9a917e"  # secondary text
+fg_subtle = "#6b6457"  # hints, placeholders, disabled
+
+accent    = "#ffb000"  # P3 amber phosphor: focus, selection, cursor
+accent_fg = "#1a1917"  # text on top of accent
+selection = "#4a3a12"  # selected text background (dim amber)
+
+success = "#98b760"
+warning = "#cc7832"  # Darcula keyword orange
+danger  = "#e0584a"
+info    = "#6897bb"  # Darcula number blue
+
+[ansi]
+black   = "#1a1917"
+red     = "#d9574a"
+green   = "#98b760"
+yellow  = "#ffc66d"  # Darcula function yellow
+blue    = "#6897bb"
+magenta = "#9876aa"  # Darcula field purple
+cyan    = "#5fa8a0"
+white   = "#dcd3bf"
+
+bright_black   = "#6b6457"
+bright_red     = "#ff7a6b"
+bright_green   = "#bfe08a"
+bright_yellow  = "#ffd98f"
+bright_blue    = "#8fb8dc"
+bright_magenta = "#b99acb"
+bright_cyan    = "#86cbc2"
+bright_white   = "#f4ecd8"
+
+[font]
+mono = "JetBrainsMono Nerd Font"
+ui   = "JetBrainsMono Nerd Font"
+size = 11
+
+[shape]
+radius  = 0  # terminals don't have rounded corners
+border  = 2
+gap_in  = 4
+gap_out = 8
+
+[motion]
+enabled     = true
+duration_ms = 180                   # short: motion informs, it doesn't decorate
+curve       = [0.23, 1.0, 0.32, 1.0]  # cubic-bezier, ease-out quint
