@@ -2,17 +2,21 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
+	"math"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
 	"myarch/internal/apply"
 	"myarch/internal/config"
+	"myarch/internal/coverage"
 	"myarch/internal/locale"
 	"myarch/internal/plugin"
 	"myarch/internal/render"
@@ -32,7 +36,10 @@ commands:
   rollback [ID]  put back the packages and files from before an update
                  (the last one by default)
   plugins        list plugins and what they generate
-  themes         list available themes
+  coverage [--json]
+                 installed apps, and whether the theme reaches them
+  themes [--json]
+                 list themes, with their contrast problems
 `
 
 func main() {
@@ -54,8 +61,10 @@ func main() {
 		err = cmdRollback(os.Args[2:])
 	case "plugins":
 		err = cmdPlugins()
+	case "coverage":
+		err = cmdCoverage(os.Args[2:])
 	case "themes":
-		err = cmdThemes()
+		err = cmdThemes(os.Args[2:])
 	case "-h", "--help", "help":
 		fmt.Print(usage)
 	default:
@@ -115,15 +124,21 @@ type session struct {
 	out     *render.Output
 }
 
-// load reads the config (switching theme if themeID is set), the theme and
-// the enabled plugins, and renders everything.
-func load(themeID string) (*session, error) {
+// load reads the config, the theme and the enabled plugins, and renders
+// everything.
+func load() (*session, error) {
+	return loadWith(nil)
+}
+
+// loadWith is load with config changes that aren't saved yet (switching
+// theme or accent), so they're only saved once they render.
+func loadWith(change func(*config.Config)) (*session, error) {
 	cfg, err := config.Load()
 	if err != nil {
 		return nil, err
 	}
-	if themeID != "" {
-		cfg.Theme = themeID
+	if change != nil {
+		change(cfg)
 	}
 	if cfg.Theme == "" {
 		return nil, fmt.Errorf("no theme selected; available: %s\n  myarch apply --theme <id>",
@@ -132,6 +147,11 @@ func load(themeID string) (*session, error) {
 	t, err := theme.Load(themeDirs(), cfg.Theme)
 	if err != nil {
 		return nil, err
+	}
+	if cfg.Accent != "" {
+		if err := t.WithAccent(cfg.Accent); err != nil {
+			return nil, fmt.Errorf("accent: %w", err)
+		}
 	}
 	plugins, err := enabledPlugins(cfg)
 	if err != nil {
@@ -204,11 +224,26 @@ func printPlan(changes []apply.Change, orphans []string, onlyChanges bool) {
 func cmdApply(args []string) error {
 	fs := flag.NewFlagSet("apply", flag.ExitOnError)
 	themeID := fs.String("theme", "", "switch to this theme (saved in config)")
+	accent := fs.String("accent", "", "use this accent color, #rrggbb; \"theme\" for the theme's own (saved in config)")
 	dryRun := fs.Bool("dry-run", false, "show what would change, write nothing")
 	adopt := fs.Bool("adopt", false, "back up and take over files myarch didn't write")
 	fs.Parse(args)
+	if *accent != "" && *accent != "theme" && !accentPattern.MatchString(*accent) {
+		return fmt.Errorf("--accent %q: use #rrggbb, or \"theme\" for the theme's own", *accent)
+	}
 
-	s, err := load(*themeID)
+	s, err := loadWith(func(c *config.Config) {
+		if *themeID != "" {
+			c.Theme = *themeID
+		}
+		switch *accent {
+		case "":
+		case "theme":
+			c.Accent = ""
+		default:
+			c.Accent = strings.ToLower(*accent)
+		}
+	})
 	if err != nil {
 		return err
 	}
@@ -225,7 +260,7 @@ func cmdApply(args []string) error {
 	if err := s.write(changes, orphans, owned, *adopt); err != nil {
 		return err
 	}
-	if *themeID != "" {
+	if *themeID != "" || *accent != "" {
 		return s.cfg.Save()
 	}
 	return nil
@@ -264,16 +299,194 @@ func cmdPlugins() error {
 	return nil
 }
 
-func cmdThemes() error {
-	cfg, _ := config.Load()
-	for _, id := range theme.List(themeDirs()) {
-		mark := " "
-		if id == cfg.Theme {
-			mark = "*"
+var accentPattern = regexp.MustCompile(`^#[0-9a-fA-F]{6}$`)
+
+func cmdCoverage(args []string) error {
+	fs := flag.NewFlagSet("coverage", flag.ExitOnError)
+	asJSON := fs.Bool("json", false, "for the theme picker")
+	fs.Parse(args)
+	cfg, err := config.Load()
+	if err != nil {
+		return err
+	}
+	plugins, err := enabledPlugins(cfg)
+	if err != nil {
+		return err
+	}
+	var covers []coverage.Covers
+	for _, p := range plugins {
+		covers = append(covers, coverage.Covers{Plugin: p.ID(), Apps: p.Coverage.Apps, Toolkits: p.Coverage.Toolkits})
+	}
+	apps := coverage.Report(coverage.Dirs(), locale.Detect(cfg.Language), covers)
+	if apps == nil {
+		apps = []coverage.App{}
+	}
+	if *asJSON {
+		b, err := json.Marshal(apps)
+		if err != nil {
+			return err
 		}
-		fmt.Println(mark, id)
+		fmt.Println(string(b))
+		return nil
+	}
+	covered := 0
+	for _, a := range apps {
+		if a.Plugin != "" {
+			covered++
+		}
+	}
+	fmt.Printf("The theme reaches %d of %d apps\n", covered, len(apps))
+	for _, a := range apps {
+		mark, by := green+"✓"+reset, dim+a.Plugin+reset
+		if a.Plugin == "" {
+			mark, by = amber+"✗"+reset, amber+missingHint[a.Toolkit]+reset
+		}
+		name := a.Name
+		if r := []rune(name); len(r) > 30 {
+			name = string(r[:29]) + "…"
+		}
+		fmt.Printf("  %s %-30s %-9s %s\n", mark, name, toolkitName[a.Toolkit], by)
 	}
 	return nil
+}
+
+// What a plugin for each toolkit would take, for the ones nothing themes.
+var missingHint = map[string]string{
+	coverage.Terminal: "no plugin themes the terminal yet",
+	coverage.GTK4:     "no plugin themes GTK 4 yet",
+	coverage.GTK3:     "no plugin themes GTK 3 yet",
+	coverage.Qt6:      "no plugin themes Qt yet (a qt6ct + Kvantum plugin would)",
+	coverage.Qt5:      "no plugin themes Qt yet (a qt5ct + Kvantum plugin would)",
+	coverage.Electron: "Electron: only follows dark/light, needs its own plugin",
+	coverage.Chromium: "has its own theming: needs its own plugin",
+	coverage.Firefox:  "has its own theming (userChrome.css): needs its own plugin",
+	coverage.Other:    "draws its own UI: needs a plugin for its config",
+}
+
+var toolkitName = map[string]string{
+	coverage.Terminal: "terminal", coverage.GTK4: "GTK 4", coverage.GTK3: "GTK 3", coverage.Qt6: "Qt 6",
+	coverage.Qt5: "Qt 5", coverage.Electron: "Electron", coverage.Chromium: "Chromium",
+	coverage.Firefox: "Firefox", coverage.Other: "own UI",
+}
+
+func cmdThemes(args []string) error {
+	fs := flag.NewFlagSet("themes", flag.ExitOnError)
+	asJSON := fs.Bool("json", false, "everything about every theme, for the theme picker")
+	fs.Parse(args)
+	cfg, _ := config.Load()
+	all := []themeInfo{} // [] in JSON, never null
+	for _, id := range theme.List(themeDirs()) {
+		t, err := theme.Load(themeDirs(), id)
+		if err != nil {
+			if !*asJSON {
+				fmt.Printf("  %-14s %v\n", id, err)
+			}
+			continue
+		}
+		info := describe(t, cfg)
+		all = append(all, info)
+		if *asJSON {
+			continue
+		}
+		mark := " "
+		shown := info.Problems
+		if id == cfg.Theme {
+			mark = "*"
+			// As you have it: with your accent.
+			for _, a := range info.Accents {
+				if cfg.Accent != "" && a.Color == strings.ToLower(cfg.Accent) {
+					shown = a.Problems
+				}
+			}
+		}
+		problems := ""
+		for _, p := range shown {
+			problems += fmt.Sprintf("  %s on %s %.2f < %.1f", p.Fg, p.Bg, p.Ratio, p.Min)
+		}
+		if problems == "" {
+			problems = "  contrast ok"
+		}
+		fmt.Printf("%s %-14s %-5s %s%s\n", mark, id, t.Meta.Mode, t.Meta.Name, problems)
+	}
+	if *asJSON {
+		b, err := json.Marshal(map[string]any{"current": cfg.Theme, "accent": cfg.Accent, "themes": all})
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(b))
+	}
+	return nil
+}
+
+// themeInfo is a theme as the picker needs it: its tokens, the accents it
+// suggests (each with its derived tokens) and its contrast problems.
+type themeInfo struct {
+	ID          string            `json:"id"`
+	Name        string            `json:"name"`
+	Mode        string            `json:"mode"`
+	Description string            `json:"description"`
+	Colors      map[string]string `json:"colors"`
+	ANSI        map[string]string `json:"ansi"`
+	Font        string            `json:"font"`
+	Radius      int               `json:"radius"`
+	Border      int               `json:"border"`
+	Opacity     float64           `json:"terminal_opacity"`
+	Blur        bool              `json:"blur"`
+	Wallpaper   string            `json:"wallpaper"`
+	Accents     []accentInfo      `json:"accents"`
+	Problems    []problem         `json:"problems"`
+}
+
+type accentInfo struct {
+	Color    string            `json:"color"`    // as chosen (what config.toml keeps)
+	Tokens   map[string]string `json:"tokens"`   // what it becomes in this theme
+	Problems []problem         `json:"problems"` // the theme's, with this accent
+}
+
+type problem struct {
+	Fg    string  `json:"fg"`
+	Bg    string  `json:"bg"`
+	Ratio float64 `json:"ratio"`
+	Min   float64 `json:"min"`
+}
+
+func describe(t *theme.Theme, cfg *config.Config) themeInfo {
+	info := themeInfo{ID: t.ID, Name: t.Meta.Name, Mode: t.Meta.Mode, Description: t.Meta.Description,
+		Colors: t.Colors, ANSI: t.ANSI, Font: t.Font.Mono, Radius: t.Shape.Radius, Border: t.Shape.Border,
+		Opacity: t.Effects.TerminalOpacity, Blur: t.Effects.Blur, Wallpaper: t.Effects.Wallpaper,
+		Accents: []accentInfo{}, Problems: problems(t)}
+	// The theme's own accent first, then its suggestions, then the one in
+	// config.toml if it's none of those.
+	seen := map[string]bool{}
+	for _, a := range append([]string{t.Colors["accent"]}, append(t.Meta.Accents, cfg.Accent)...) {
+		a = strings.ToLower(a)
+		if a == "" || seen[a] {
+			continue
+		}
+		seen[a] = true
+		with, err := theme.Load(themeDirs(), t.ID)
+		if err != nil || with.WithAccent(a) != nil {
+			continue
+		}
+		tokens := map[string]string{}
+		for _, k := range []string{"accent", "accent_fg", "accent_text", "accent_deep", "selection"} {
+			tokens[k] = with.Colors[k]
+		}
+		info.Accents = append(info.Accents, accentInfo{Color: a, Tokens: tokens, Problems: problems(with)})
+	}
+	return info
+}
+
+// problems are the contrast pairs a theme fails, rounded down for showing
+// (2.9997 is not 3.00).
+func problems(t *theme.Theme) []problem {
+	out := []problem{}
+	for _, p := range t.Contrast() {
+		if !p.OK() {
+			out = append(out, problem{p.Fg, p.Bg, math.Floor(p.Ratio*100) / 100, p.Min})
+		}
+	}
+	return out
 }
 
 // checkOverrides rejects [plugins.<id>] sections for plugins that don't

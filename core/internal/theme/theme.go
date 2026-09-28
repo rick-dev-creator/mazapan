@@ -37,6 +37,9 @@ type Theme struct {
 		Name        string `toml:"name"`
 		Mode        string `toml:"mode"`
 		Description string `toml:"description"`
+		// Accents the theme suggests besides its own (the picker offers
+		// them): #rrggbb.
+		Accents []string `toml:"accents"`
 	} `toml:"meta"`
 
 	Colors map[string]string `toml:"colors"`
@@ -54,6 +57,18 @@ type Theme struct {
 		GapIn  int `toml:"gap_in"`
 		GapOut int `toml:"gap_out"`
 	} `toml:"shape"`
+
+	// Effects are optional: without them, windows are opaque and there's
+	// no blur.
+	Effects struct {
+		// Terminal background opacity, 0.5 to 1.
+		TerminalOpacity float64 `toml:"terminal_opacity"`
+		// Blur what's behind see-through windows.
+		Blur bool `toml:"blur"`
+		// The wallpaper drawn from the theme: "grid" (a faint grid in the
+		// accent over a gradient), "plain" (bg_alt), or a path to an image.
+		Wallpaper string `toml:"wallpaper"`
+	} `toml:"effects"`
 
 	Motion struct {
 		Enabled bool `toml:"enabled"`
@@ -126,6 +141,11 @@ func (t *Theme) Validate() error {
 			}
 		}
 	}
+	for _, a := range t.Meta.Accents {
+		if !hexColor.MatchString(a) {
+			problems = append(problems, fmt.Sprintf("[meta] accents: %q is not #rrggbb", a))
+		}
+	}
 	check("colors", t.Colors, RequiredColors)
 	check("ansi", t.ANSI, RequiredANSI)
 	if t.Meta.Mode != "dark" && t.Meta.Mode != "light" {
@@ -133,6 +153,25 @@ func (t *Theme) Validate() error {
 	}
 	if t.Motion.ResponseMS <= 0 || t.Motion.Damping <= 0 || t.Motion.Damping > 2 {
 		problems = append(problems, "[motion] needs response_ms > 0 and 0 < damping <= 2")
+	}
+	if t.Effects.TerminalOpacity == 0 {
+		t.Effects.TerminalOpacity = 1
+	}
+	if t.Effects.TerminalOpacity < 0.5 || t.Effects.TerminalOpacity > 1 {
+		problems = append(problems, "[effects] terminal_opacity must be between 0.5 and 1")
+	}
+	switch w := t.Effects.Wallpaper; w {
+	case "":
+		t.Effects.Wallpaper = "plain"
+	case "plain", "grid":
+	default:
+		// An image: next to theme.toml unless the path is absolute.
+		if !filepath.IsAbs(w) {
+			t.Effects.Wallpaper = filepath.Join(t.Dir, w)
+		}
+		if _, err := os.Stat(t.Effects.Wallpaper); err != nil {
+			problems = append(problems, fmt.Sprintf("[effects] wallpaper: %v", err))
+		}
 	}
 	if t.Font.Mono == "" || t.Font.UI == "" || t.Font.Size <= 0 {
 		problems = append(problems, "[font] needs mono, ui and a positive size")

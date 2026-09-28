@@ -24,8 +24,17 @@ myarch apply --theme phosphor   # render every enabled plugin and write the file
 myarch apply --dry-run          # show new / changed / conflict / orphan, write nothing
 myarch apply --adopt            # back up files myarch didn't write and take them over
 myarch plugins                  # what each plugin generates
-myarch themes
+myarch themes                   # every theme, with its contrast problems
+myarch coverage                 # installed apps the theme reaches, and not
+myarch apply --accent '#4fa35f' # your accent in any theme ("theme" = its own)
 ```
+
+`SUPER + SHIFT + T` opens the theme picker: each theme drawn as a small
+desktop from its own colors, previewed live on yours as you move through
+them (← →, tab for the accent), terminals already open included; ↵
+applies it, esc goes back. Themes also set how see-through terminals are
+(with the wallpaper blurred behind) and the wallpaper, drawn from their
+own colors.
 
 It never overwrites a file it didn't write, or one you edited, without
 `--adopt`.

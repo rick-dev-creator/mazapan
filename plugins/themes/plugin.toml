@@ -1,0 +1,35 @@
+[plugin]
+id = "themes"
+name = "Theme picker"
+version = "0.1.0"
+api = 1
+description = "Pick a theme and an accent, previewed live on the desktop, with each theme's contrast checked"
+
+[packages]
+pacman = ["quickshell", "hyprland"]
+
+[settings]
+# Opens the theme picker.
+key = "SUPER + SHIFT + T"
+
+[[targets]]
+template = "themes.lua.tmpl"
+output = "~/.config/hypr/myarch/themes.lua"
+reload = "hyprctl reload >/dev/null"
+
+[[targets]]
+template = "Picker.qml.tmpl"
+output = "~/.config/quickshell/myarch/panels/themes.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[actions]]
+name = "{{t \"act.pick\"}}"
+run = "qs ipc -c myarch call myarch panel themes"
+key = "{{.Settings.key}}"
+keywords = "{{t \"act.pick.kw\"}}"
+
+[[actions]]
+name = "{{t \"act.list\"}}"
+run = "myarch themes"
+terminal = true
+keywords = "{{t \"act.list.kw\"}}"

@@ -1,0 +1,75 @@
+# Paper: a light theme, ink on warm paper, like a JetBrains IDE in light
+# mode printed on a notebook. Purple ink for the accent.
+
+[meta]
+name = "Paper"
+mode = "light"
+description = "Ink on warm paper: a light theme with purple ink and slightly rounded corners."
+accents = ["#b3470f", "#2d7a3a", "#1f5fae", "#b3265e"]
+
+[colors]
+bg             = "#f7f3ea"
+bg_alt         = "#eee8da"
+surface        = "#fbf9f3"
+surface_raised = "#ffffff"
+border         = "#d6ccb8"
+
+fg        = "#2b2620"
+fg_muted  = "#5f564b"
+fg_subtle = "#8a7f70"
+
+accent      = "#6a3fd6"
+accent_fg   = "#ffffff"
+accent_text = "#5a30c4"
+accent_deep = "#ece5fb"
+selection   = "#d7cbef"
+
+success = "#3a7426"
+warning = "#8f5500"
+danger  = "#b3261e"
+info    = "#1f5a99"
+
+[ansi]
+black   = "#2b2620"
+red     = "#b3261e"
+green   = "#3a7426"
+yellow  = "#8a6a00"
+blue    = "#1f5a99"
+magenta = "#8a3aa6"
+cyan    = "#1d7373"
+white   = "#d6ccb8"
+
+bright_black   = "#8a7f70"
+bright_red     = "#d0453b"
+bright_green   = "#4f9436"
+bright_yellow  = "#a88200"
+bright_blue    = "#3a78bf"
+bright_magenta = "#a656c2"
+bright_cyan    = "#2a9090"
+bright_white   = "#f7f3ea"
+
+[font]
+mono = "JetBrainsMono Nerd Font"
+ui   = "JetBrainsMono Nerd Font"
+size = 11
+
+[shape]
+radius  = 3
+border  = 2
+gap_in  = 4
+gap_out = 8
+
+[effects]
+# Terminals let the wallpaper through, blurred.
+terminal_opacity = 0.94
+blur             = true
+# Drawn from the theme's colors: a faint grid in the accent over a gradient.
+# "plain" for bg_alt alone, or a path to an image (next to this file).
+wallpaper        = "grid"
+
+[motion]
+enabled     = true
+duration_ms = 180
+curve       = [0.23, 1.0, 0.32, 1.0]
+response_ms = 280
+damping     = 0.86

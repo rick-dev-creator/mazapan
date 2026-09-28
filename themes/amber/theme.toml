@@ -1,0 +1,75 @@
+# Amber: an 80s amber monochrome terminal. Everything glows the same warm
+# orange on near-black brown; only status colors break the monochrome.
+
+[meta]
+name = "Amber"
+mode = "dark"
+description = "80s amber monochrome CRT: glowing orange on burnt black, square corners."
+accents = ["#7847eb", "#4fa35f", "#3f7fd9", "#d6557a"]
+
+[colors]
+bg             = "#16120c"
+bg_alt         = "#110e09"
+surface        = "#201a11"
+surface_raised = "#2a2217"
+border         = "#43372a"
+
+fg        = "#f0c27a"
+fg_muted  = "#b8935a"
+fg_subtle = "#7c6441"
+
+accent      = "#ffb000"
+accent_fg   = "#1a1206"
+accent_text = "#ffc34d"
+accent_deep = "#3a2700"
+selection   = "#5f4507"
+
+success = "#b9c95c"
+warning = "#ff9a2e"
+danger  = "#ff6a4d"
+info    = "#8fb4c9"
+
+[ansi]
+black   = "#16120c"
+red     = "#ff6a4d"
+green   = "#b9c95c"
+yellow  = "#ffb000"
+blue    = "#8fb4c9"
+magenta = "#d9a0c0"
+cyan    = "#9fcfb8"
+white   = "#f0c27a"
+
+bright_black   = "#7c6441"
+bright_red     = "#ff8f78"
+bright_green   = "#d4e08a"
+bright_yellow  = "#ffcf66"
+bright_blue    = "#b3cfdd"
+bright_magenta = "#ebc0d8"
+bright_cyan    = "#bfe3d2"
+bright_white   = "#ffe2b0"
+
+[font]
+mono = "JetBrainsMono Nerd Font"
+ui   = "JetBrainsMono Nerd Font"
+size = 11
+
+[shape]
+radius  = 0
+border  = 2
+gap_in  = 4
+gap_out = 8
+
+[effects]
+# Terminals let the wallpaper through, blurred.
+terminal_opacity = 0.88
+blur             = true
+# Drawn from the theme's colors: a faint grid in the accent over a gradient.
+# "plain" for bg_alt alone, or a path to an image (next to this file).
+wallpaper        = "grid"
+
+[motion]
+enabled     = true
+duration_ms = 180
+curve       = [0.23, 1.0, 0.32, 1.0]
+response_ms = 280
+damping     = 0.86

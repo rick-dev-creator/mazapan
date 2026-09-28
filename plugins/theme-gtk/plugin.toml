@@ -22,3 +22,7 @@ reload = "{{template \"gsettings\" .}}"
 template = "gtk3-settings.ini.tmpl"
 output = "~/.config/gtk-3.0/settings.ini"
 reload = "{{template \"gsettings\" .}}"
+
+# GTK 3 (adw-gtk3) and GTK 4 / libadwaita apps.
+[coverage]
+toolkits = ["gtk3", "gtk4"]

@@ -14,7 +14,7 @@ Suggested start: 1, 2 and 3.
 | 1 | Updates you can trust | **Done** (2026-09-28); follow-ups listed below |
 | 2 | Monitors | **Done** (2026-09-28); follow-ups listed below |
 | 3 | One command palette | **Done** (2026-09-28): first version; follow-ups listed below |
-| 4 | Themes | partly: semantic tokens with shape and motion |
+| 4 | Themes | **Done** (2026-09-28); follow-ups listed below |
 | 5 | Hardware | not started |
 | 6 | An agent-native system | not started |
 | 7 | Plugins | partly: typed settings, localization, clean removal, checks |
@@ -143,9 +143,41 @@ manager unthemed.
 
 **Much better.**
 - Semantic tokens that include shape and motion. *Done.*
-- Try a theme live on the desktop before choosing it.
-- Contrast checked automatically when a theme loads.
-- A coverage report: installed apps the theme doesn't reach.
+- *Done* — a theme picker (plugin `themes`, `SUPER + SHIFT + T`): every
+  theme as a small desktop drawn from its own tokens (bar, a terminal in
+  its ANSI colors, a window with the selection and buttons), so any
+  theme, yours too, has an exact preview; no screenshots to keep up to
+  date. Moving through them previews each one live on the real desktop:
+  the bar, panels, wallpaper and window borders morph to it (a 320 ms
+  color transition, no flash), and terminals already open take its colors
+  (escape sequences, like pywal); ↵ applies it everywhere, esc goes back
+  to yours.
+- *Done* — effects in the theme: see-through terminals (`terminal_opacity`)
+  with the wallpaper blurred behind them, and a wallpaper drawn from the
+  theme's tokens (plugin `wallpaper`): a faint perspective floor in the
+  accent over a gradient, CRT scanlines, for dark themes; graph paper for
+  light ones; or the theme's own image.
+- *Done* — the accent is yours to pick in any theme: the theme's own or
+  the ones it suggests (`accents` in theme.toml, or any #rrggbb with
+  `myarch apply --accent`). The other accent tokens (text on it, as text,
+  a deep tint, the selection) are derived in OKLab with contrast kept.
+- *Done* — contrast checked for every theme and accent (`myarch themes`,
+  and in the picker): the pairs plugins rely on against WCAG's minimums.
+  It caught Gruvbox's red at 4.3:1 on its background. Derived accents keep
+  every pair: tested over a grid of 216 accents in every bundled theme.
+- Audited once (8 findings, all fixed); a demo recorded in the dev VM.
+- Three more themes: Amber (the 80s amber CRT), Gruvbox, and Paper (light).
+- *Done* — coverage: `myarch coverage` lists the installed apps (their
+  .desktop files) and whether the theme reaches them. Plugins declare what
+  they theme (`[coverage]`: apps and toolkits); an app's toolkit comes
+  from the libraries its binary links, what its script imports, or its
+  package's dependencies (GTK 4/3, Qt 6/5, Electron, Chromium, Firefox, a
+  terminal, its own UI). The picker shows it: "reaches 12 of 17 installed
+  apps · not yet: kitty, Qt6 Settings…".
+
+**Follow-ups.** What coverage points at: a Qt plugin (qt6ct + Kvantum),
+Firefox (userChrome.css), other terminals; GTK apps previewed live too
+(they follow on ↵); light/dark on its own at sunset.
 
 ## 5. Hardware
 

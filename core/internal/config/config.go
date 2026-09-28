@@ -16,6 +16,9 @@ import (
 
 type Config struct {
 	Theme string `toml:"theme"`
+	// Accent color (#rrggbb) instead of the theme's; its other accent
+	// tokens are derived from it. Empty = the theme's own.
+	Accent string `toml:"accent,omitempty"`
 	// Language to render text in ("es", "es_MX"); empty = the OS's.
 	Language string   `toml:"language,omitempty"`
 	Disabled []string `toml:"disabled_plugins,omitempty"`

@@ -90,6 +90,20 @@ keybinding a plugin binds should be one of its actions: that's how the
 palette's list of keys stays right. `terminal = true` is for commands that
 ask or print (`myarch update`); the terminal stays open afterwards.
 
+## Coverage
+
+What a plugin themes, so `myarch coverage` (and the theme picker) can tell
+which installed apps the theme doesn't reach:
+
+```toml
+[coverage]
+apps = ["foot", "footclient"]   # .desktop ids or executable names
+toolkits = ["terminal"]         # terminal, gtk4, gtk3, qt6, qt5,
+                                # electron, chromium, firefox
+```
+
+An app counts as covered when a plugin names it, or names its toolkit.
+
 ## Settings
 
 A plugin declares its settings with defaults; people override them in
@@ -177,6 +191,7 @@ Functions:
 | `speed 0.6`                | Hyprland speed for 60% of the theme duration |
 | `spring 1.1 1`             | `mass = 1, stiffness = …, dampening = …`: the theme's spring with its response ×1.1 and damping 1 (0 keeps the theme's) |
 | `num 11.0`                 | `11`                          |
+| `pct 0.9`                  | `90`                          |
 | `camel "bg_alt"`           | `bgAlt` (QML property names)  |
 | `t "today"`                | `hoy` (this plugin's text)    |
 | `tq "today"`               | `"hoy"` (quoted for QML/Lua)  |
@@ -193,6 +208,27 @@ the rest from loading.
 The token names in `core/internal/theme/theme.go` (`RequiredColors`,
 `RequiredANSI`) are part of this API. Ask for meaning (`danger`,
 `surface_raised`), not for a hue; `[ansi]` is for terminals and TUIs.
+
+The accent tokens (`accent`, `accent_fg`, `accent_text`, `accent_deep`,
+`selection`) may not be the theme's: when the person picks another accent
+(`myarch apply --accent`, the theme picker), they're derived from it with
+their contrast kept. Rely on what each one is for, not on its value.
+
+The theme picker previews themes live: QML that reads `Theme.<token>` in
+bindings morphs with it for free. A color copied into a plain value
+(`property string c: "" + Theme.accent`) doesn't follow; Hyprland-side
+colors follow through `myarch_theme({...})` (plugin `theme-hyprland`).
+
+A theme's `[effects]` are optional: `terminal_opacity` (0.5–1),
+`blur` (see-through windows blur what's behind), and `wallpaper`: `"grid"`
+(drawn from the tokens), `"plain"` (bg_alt) or an image next to
+theme.toml. Templates read them as `.Theme.Effects.TerminalOpacity`,
+`.Blur`, `.Wallpaper`; QML as `Theme.terminalOpacity`, `Theme.blur`,
+`Theme.wallpaper`, `Theme.mode`.
+
+A theme can suggest accents besides its own, in `[meta]`:
+`accents = ["#d99a2b", "#4fa35f"]`. `myarch themes` lists every theme with
+the contrast pairs it fails (WCAG: 4.5:1 for text, 3:1 for fills).
 
 ## Bar widgets
 

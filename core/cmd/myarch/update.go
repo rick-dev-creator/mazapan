@@ -62,7 +62,7 @@ func cmdUpdate(args []string) error {
 	noRollback := fs.Bool("no-rollback", false, "if a check fails, leave things as they are")
 	fs.Parse(args)
 
-	s, err := load("")
+	s, err := load()
 	if err != nil {
 		return err
 	}
@@ -223,7 +223,7 @@ func cmdUpdate(args []string) error {
 	}
 
 	header("Applying the configuration")
-	s, err = load("")
+	s, err = load()
 	if err == nil {
 		changes, orphans, owned, err = s.plan()
 	}
@@ -438,7 +438,7 @@ func rollback(rec *update.Record) error {
 	}
 
 	// Let everything that reads those files pick them up again, and check.
-	s, err := load("")
+	s, err := load()
 	if err != nil {
 		return incomplete("the configuration doesn't load: " + err.Error())
 	}
@@ -470,7 +470,7 @@ func rollback(rec *update.Record) error {
 }
 
 func cmdDoctor() error {
-	s, err := load("")
+	s, err := load()
 	if err != nil {
 		return err
 	}

@@ -3,12 +3,24 @@ id = "theme-foot"
 name = "foot theme"
 version = "0.1.0"
 api = 1
-description = "foot terminal: font, palette and a blinking block cursor in the accent color"
+description = "foot terminal: font, palette, opacity and a blinking block cursor in the accent color; open terminals recolored live"
 
 [packages]
 pacman = ["foot"]
 
-# foot has no live reload; new windows pick the file up.
+# foot has no live reload: new windows pick the file up, and term-colors
+# recolors the ones already open.
 [[targets]]
 template = "foot.ini.tmpl"
 output = "~/.config/foot/foot.ini"
+reload = "sh ~/.local/share/myarch/bin/term-colors"
+
+[[targets]]
+template = "term-colors.sh.tmpl"
+output = "~/.local/share/myarch/bin/term-colors"
+reload = "sh ~/.local/share/myarch/bin/term-colors"
+
+# foot itself, and every app that runs in a terminal (its 16 colors).
+[coverage]
+apps = ["foot", "footclient", "foot-server"]
+toolkits = ["terminal"]

@@ -48,7 +48,20 @@ type Plugin struct {
 	// Actions are what the plugin lets you do: the command palette lists
 	// every plugin's, each with the command it runs and its keybinding.
 	Actions []Action `toml:"actions"`
+
+	// Coverage says which apps the plugin themes, so `myarch coverage`
+	// can tell which installed apps the theme doesn't reach.
+	Coverage struct {
+		// .desktop ids or executable names: "foot", "org.gnome.Nautilus".
+		Apps []string `toml:"apps"`
+		// Whole toolkits: terminal, gtk4, gtk3, qt6, qt5, electron,
+		// chromium, firefox.
+		Toolkits []string `toml:"toolkits"`
+	} `toml:"coverage"`
 }
+
+var toolkits = map[string]bool{"terminal": true, "gtk4": true, "gtk3": true, "qt6": true, "qt5": true,
+	"electron": true, "chromium": true, "firefox": true}
 
 type Action struct {
 	// Name, Run and Key are rendered as templates: the name can be
@@ -205,6 +218,11 @@ func load(path string) (*Plugin, error) {
 	for i, c := range p.Checks {
 		if c.Name == "" || c.Run == "" {
 			return nil, fmt.Errorf("%s: checks[%d] needs name and run", path, i)
+		}
+	}
+	for _, t := range p.Coverage.Toolkits {
+		if !toolkits[t] {
+			return nil, fmt.Errorf("%s: coverage: unknown toolkit %q", path, t)
 		}
 	}
 	for i, a := range p.Actions {

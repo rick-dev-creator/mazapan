@@ -12,3 +12,7 @@ pacman = ["quickshell"]
 template = "Theme.qml.tmpl"
 output = "~/.config/quickshell/myarch/Theme.qml"
 reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+# The shell itself.
+[coverage]
+apps = ["org.quickshell"]

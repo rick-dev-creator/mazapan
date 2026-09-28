@@ -1,0 +1,75 @@
+# Gruvbox: warm retro browns with punchy, earthy colors (morhetz/gruvbox,
+# dark, medium contrast). Slightly rounded.
+
+[meta]
+name = "Gruvbox"
+mode = "dark"
+description = "Warm retro browns and earthy colors, orange accent, softly rounded."
+accents = ["#d3869b", "#8ec07c", "#83a598", "#fabd2f"]
+
+[colors]
+bg             = "#282828"
+bg_alt         = "#1d2021"
+surface        = "#32302f"
+surface_raised = "#3c3836"
+border         = "#504945"
+
+fg        = "#ebdbb2"
+fg_muted  = "#bdae93"
+fg_subtle = "#928374"
+
+accent      = "#fe8019"
+accent_fg   = "#1d2021"
+accent_text = "#fe8019"
+accent_deep = "#44260b"
+selection   = "#6f4a2b"
+
+success = "#b8bb26"
+warning = "#fabd2f"
+danger  = "#fc6a55"  # gruvbox red, a touch lighter: 4.5:1 on bg
+info    = "#83a598"
+
+[ansi]
+black   = "#282828"
+red     = "#cc241d"
+green   = "#98971a"
+yellow  = "#d79921"
+blue    = "#458588"
+magenta = "#b16286"
+cyan    = "#689d6a"
+white   = "#a89984"
+
+bright_black   = "#928374"
+bright_red     = "#fb4934"
+bright_green   = "#b8bb26"
+bright_yellow  = "#fabd2f"
+bright_blue    = "#83a598"
+bright_magenta = "#d3869b"
+bright_cyan    = "#8ec07c"
+bright_white   = "#ebdbb2"
+
+[font]
+mono = "JetBrainsMono Nerd Font"
+ui   = "JetBrainsMono Nerd Font"
+size = 11
+
+[shape]
+radius  = 4
+border  = 2
+gap_in  = 4
+gap_out = 8
+
+[effects]
+# Terminals let the wallpaper through, blurred.
+terminal_opacity = 0.92
+blur             = true
+# Drawn from the theme's colors: a faint grid in the accent over a gradient.
+# "plain" for bg_alt alone, or a path to an image (next to this file).
+wallpaper        = "grid"
+
+[motion]
+enabled     = true
+duration_ms = 180
+curve       = [0.23, 1.0, 0.32, 1.0]
+response_ms = 280
+damping     = 0.86

@@ -255,6 +255,8 @@ func funcs(t *theme.Theme, outputs []string, cat *locale.Catalog) template.FuncM
 			return fmt.Sprintf("mass = 1, stiffness = %.2f, dampening = %.2f", omega*omega, 2*damping*omega)
 		},
 		"num": func(f float64) string { return strconv.FormatFloat(f, 'f', -1, 64) },
+		// pct 0.9 -> "90"
+		"pct": func(f float64) string { return strconv.Itoa(int(math.Round(f * 100))) },
 		// json .Actions -> a JSON value, which is also a valid QML/JS
 		// literal: data for a template's code.
 		"json": func(v any) (string, error) {

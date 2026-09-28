@@ -10,6 +10,7 @@ style=block
 blink=yes
 
 [colors-{{.Theme.Meta.Mode}}]
+alpha={{num .Theme.Effects.TerminalOpacity}}
 background={{hex (c "bg")}}
 foreground={{hex (c "fg")}}
 cursor={{hex (c "accent_fg")}} {{hex (c "accent")}}

@@ -11,6 +11,8 @@
 name = "Phosphor"
 mode = "dark"
 description = "Warm charcoal CRT, Obsidian purple accent, Darcula syntax colors, square corners."
+# Other accents to pick from (the theme picker); its own comes first.
+accents = ["#d99a2b", "#4fa35f", "#3f7fd9", "#2a9d8f", "#d6557a"]
 
 [colors]
 bg             = "#1a1917"  # windows, editor, terminal: the CRT glass
@@ -21,7 +23,7 @@ border         = "#3b3833"  # separators, inactive window borders
 
 fg        = "#dcd3bf"  # body text: warm phosphor white
 fg_muted  = "#9a917e"  # secondary text
-fg_subtle = "#6b6457"  # hints, placeholders, disabled
+fg_subtle = "#6c6558"  # hints, placeholders, disabled
 
 accent      = "#7847eb"  # Obsidian's hue, darker: hsl(258 80% 60%). Focus, fills, cursor
 accent_fg   = "#ffffff"  # text on top of accent (5.4:1)
@@ -63,6 +65,14 @@ radius  = 0  # terminals don't have rounded corners
 border  = 2
 gap_in  = 4
 gap_out = 8
+
+[effects]
+# Terminals let the wallpaper through, blurred.
+terminal_opacity = 0.85
+blur             = true
+# Drawn from the theme's colors: a faint grid in the accent over a gradient.
+# "plain" for bg_alt alone, or a path to an image (next to this file).
+wallpaper        = "grid"
 
 [motion]
 enabled     = true
