@@ -4,6 +4,7 @@ package render
 import (
 	"bytes"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"sort"
@@ -150,6 +151,17 @@ func funcs(t *theme.Theme, outputs []string) template.FuncMap {
 				}
 			}
 			return out
+		},
+		// spring 1.2 0.9 -> Hyprland spring curve fields for the theme's
+		// spring with its response scaled by 1.2 and damping 0.9 (0 keeps
+		// the theme's damping). A mass-spring with period T and damping
+		// ratio z has stiffness (2*pi/T)^2 and dampening 2*z*(2*pi/T).
+		"spring": func(responseFactor, damping float64) string {
+			if damping == 0 {
+				damping = t.Motion.Damping
+			}
+			omega := 2 * math.Pi / (float64(t.Motion.ResponseMS) * responseFactor / 1000)
+			return fmt.Sprintf("mass = 1, stiffness = %.2f, dampening = %.2f", omega*omega, 2*damping*omega)
 		},
 		"num": func(f float64) string { return strconv.FormatFloat(f, 'f', -1, 64) },
 	}

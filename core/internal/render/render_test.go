@@ -13,6 +13,8 @@ import (
 func testTheme() *theme.Theme {
 	t := &theme.Theme{ID: "t", Colors: map[string]string{"accent": "#ffb000"}}
 	t.Motion.DurationMS = 180
+	t.Motion.ResponseMS = 400
+	t.Motion.Damping = 0.8
 	return t
 }
 
@@ -37,6 +39,10 @@ func TestColorFuncs(t *testing.T) {
 		`{{rgba (c "accent") 0.5}}`:  "rgba(ffb00080)",
 		`{{cssa (c "accent") 0.36}}`: "rgba(255, 176, 0, 0.36)",
 		`{{speed 0.5}}`:              "0.90",
+		// omega = 2*pi/0.4 = 15.708: k = omega^2, c = 2*z*omega
+		`{{spring 1 0}}`:   "mass = 1, stiffness = 246.74, dampening = 25.13",
+		`{{spring 1 1}}`:   "mass = 1, stiffness = 246.74, dampening = 31.42",
+		`{{spring 0.5 0}}`: "mass = 1, stiffness = 986.96, dampening = 50.27",
 	}
 	for in, want := range cases {
 		got, err := renderOne(t, in)

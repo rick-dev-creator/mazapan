@@ -66,5 +66,10 @@ gap_out = 8
 
 [motion]
 enabled     = true
-duration_ms = 180                   # short: motion informs, it doesn't decorate
+# Fades and color changes: short, motion informs, it doesn't decorate.
+duration_ms = 180
 curve       = [0.23, 1.0, 0.32, 1.0]  # cubic-bezier, ease-out quint
+# Movement: a spring, like a tablet. Windows glide and settle instead of
+# snapping; a hint of overshoot makes them feel physical without bouncing.
+response_ms = 420
+damping     = 0.86

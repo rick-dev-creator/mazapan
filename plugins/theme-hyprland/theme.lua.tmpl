@@ -27,12 +27,22 @@ hl.config({
 hl.curve("myarch", { type = "bezier", points = { { {{num (index . 0)}}, {{num (index . 1)}} }, { {{num (index . 2)}}, {{num (index . 3)}} } } })
 {{- end}}
 
--- Speeds are in deciseconds, derived from the theme's base duration.
-hl.animation({ leaf = "global",      enabled = true, speed = {{speed 1}},   bezier = "myarch" })
-hl.animation({ leaf = "border",      enabled = true, speed = {{speed 1}},   bezier = "myarch" })
-hl.animation({ leaf = "windowsIn",   enabled = true, speed = {{speed 1}},   bezier = "myarch", style = "popin 90%" })
-hl.animation({ leaf = "windowsOut",  enabled = true, speed = {{speed 0.6}}, bezier = "myarch", style = "popin 90%" })
-hl.animation({ leaf = "windowsMove", enabled = true, speed = {{speed 1}},   bezier = "myarch" })
-hl.animation({ leaf = "fade",        enabled = true, speed = {{speed 0.8}}, bezier = "myarch" })
-hl.animation({ leaf = "layers",      enabled = true, speed = {{speed 0.8}}, bezier = "myarch", style = "fade" })
-hl.animation({ leaf = "workspaces",  enabled = true, speed = {{speed 1.5}}, bezier = "myarch", style = "slide" })
+-- Springs derived from the theme's (response {{.Theme.Motion.ResponseMS}}ms, damping {{num .Theme.Motion.Damping}}).
+-- Like on a tablet, things that move follow a spring; only fades and color
+-- changes use the bezier. With a spring, Hyprland ignores `speed`.
+hl.curve("myarch_move",  { type = "spring", {{spring 1 0}} })    -- glide and settle
+hl.curve("myarch_open",  { type = "spring", {{spring 1 0.72}} }) -- app launch: a little bounce
+hl.curve("myarch_close", { type = "spring", {{spring 0.6 1}} })  -- quick, no bounce
+hl.curve("myarch_page",  { type = "spring", {{spring 1.1 1}} })  -- paging between workspaces
+
+hl.animation({ leaf = "global",           enabled = true, speed = {{speed 1}},   bezier = "myarch" })
+hl.animation({ leaf = "border",           enabled = true, speed = {{speed 1}},   bezier = "myarch" })
+hl.animation({ leaf = "fade",             enabled = true, speed = {{speed 1}},   bezier = "myarch" })
+hl.animation({ leaf = "fadeOut",          enabled = true, speed = {{speed 0.6}}, bezier = "myarch" })
+hl.animation({ leaf = "layers",           enabled = true, speed = {{speed 1}},   bezier = "myarch", style = "fade" })
+hl.animation({ leaf = "windows",          enabled = true, speed = 1, spring = "myarch_move" })
+hl.animation({ leaf = "windowsMove",      enabled = true, speed = 1, spring = "myarch_move" })
+hl.animation({ leaf = "windowsIn",        enabled = true, speed = 1, spring = "myarch_open",  style = "popin 85%" })
+hl.animation({ leaf = "windowsOut",       enabled = true, speed = 1, spring = "myarch_close", style = "popin 90%" })
+hl.animation({ leaf = "workspaces",       enabled = true, speed = 1, spring = "myarch_page",  style = "slide" })
+hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 1, spring = "myarch_page",  style = "slidevert" })

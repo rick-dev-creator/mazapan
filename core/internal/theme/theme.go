@@ -56,9 +56,14 @@ type Theme struct {
 	} `toml:"shape"`
 
 	Motion struct {
-		Enabled    bool       `toml:"enabled"`
+		Enabled bool `toml:"enabled"`
+		// Short transitions (fades, border color): a cubic-bezier.
 		DurationMS int        `toml:"duration_ms"`
 		Curve      [4]float64 `toml:"curve"`
+		// Movement (windows, workspaces): a spring, described the way
+		// tablet UIs do (SwiftUI's spring(response:dampingFraction:)).
+		ResponseMS int     `toml:"response_ms"` // period of the spring
+		Damping    float64 `toml:"damping"`     // 1 = no overshoot, lower = bouncier
 	} `toml:"motion"`
 }
 
@@ -125,6 +130,9 @@ func (t *Theme) Validate() error {
 	check("ansi", t.ANSI, RequiredANSI)
 	if t.Meta.Mode != "dark" && t.Meta.Mode != "light" {
 		problems = append(problems, fmt.Sprintf("[meta] mode = %q must be \"dark\" or \"light\"", t.Meta.Mode))
+	}
+	if t.Motion.ResponseMS <= 0 || t.Motion.Damping <= 0 || t.Motion.Damping > 2 {
+		problems = append(problems, "[motion] needs response_ms > 0 and 0 < damping <= 2")
 	}
 	if t.Font.Mono == "" || t.Font.UI == "" || t.Font.Size <= 0 {
 		problems = append(problems, "[font] needs mono, ui and a positive size")

@@ -30,6 +30,7 @@ qt6ct
 # Desktop plumbing
 wl-clipboard
 grim
+wf-recorder
 pipewire
 wireplumber
 pipewire-pulse

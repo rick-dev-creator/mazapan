@@ -103,6 +103,7 @@ Functions:
 | `rgba (c "accent") 0.5`    | `rgba(8a5cf580)` (Hyprland)   |
 | `cssa (c "accent") 0.36`   | `rgba(138, 92, 245, 0.36)`    |
 | `speed 0.6`                | Hyprland speed for 60% of the theme duration |
+| `spring 1.1 1`             | `mass = 1, stiffness = …, dampening = …`: the theme's spring with its response ×1.1 and damping 1 (0 keeps the theme's) |
 | `num 11.0`                 | `11`                          |
 | `under "~/.config/hypr/myarch/"` | every plugin output below that path |
 

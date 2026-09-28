@@ -49,6 +49,7 @@ vm/vm ssh          # shell in the guest (user arch / password arch)
 vm/vm run <cmd>    # run inside the guest's Hyprland session (hyprctl, gsettings…)
 vm/vm exec <cmd>   # launch an app through Hyprland
 vm/vm key meta_l-equal  # press keys on the guest keyboard (QEMU sendkey names)
+vm/vm run 'vm/guest/motion-probe.py "hl.dsp.layout(\"swapcol r\")"'  # measure an animation
 vm/vm shot         # screenshot of the guest desktop -> vm/.state/shot.png
 vm/vm provision    # re-run after editing vm/guest/packages.txt
 vm/vm stop
