@@ -1,0 +1,6 @@
+# Text in the volume widget.
+"output" = "output"
+"input" = "input"
+"muted" = "muted"
+"no_device" = "No audio device"
+"devices" = "devices"

@@ -1,0 +1,4 @@
+"preview.empty" = "workspace %1 · vacío"
+"preview.one" = "workspace %1 · 1 ventana"
+"preview.many" = "workspace %1 · %2 ventanas"
+"preview.drop_to" = "→ workspace %1"

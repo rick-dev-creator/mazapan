@@ -1,0 +1,70 @@
+[plugin]
+id = "shell-bar"
+name = "Bar"
+version = "0.2.0"
+api = 1
+description = "A bar on every monitor (Quickshell), filled with the widgets other plugins put in its left/center/right slots; ships a kit of components for them"
+
+[packages]
+pacman = ["quickshell"]
+
+[settings]
+# Bar height in logical pixels.
+height = 28
+
+[[targets]]
+template = "shell.qml.tmpl"
+output = "~/.config/quickshell/myarch/shell.qml"
+# Ask the running shell to reload; start it if it isn't running.
+reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''
+
+[[targets]]
+template = "shell.lua.tmpl"
+output = "~/.config/hypr/myarch/shell.lua"
+reload = "hyprctl reload >/dev/null"
+
+# The kit: components every widget can use (import "../../components/kit").
+[[targets]]
+template = "KitBarPopup.qml.tmpl"
+output = "~/.config/quickshell/myarch/components/kit/BarPopup.qml"
+reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''
+
+[[targets]]
+template = "KitBarItem.qml.tmpl"
+output = "~/.config/quickshell/myarch/components/kit/BarItem.qml"
+reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''
+
+[[targets]]
+template = "KitGlyph.qml.tmpl"
+output = "~/.config/quickshell/myarch/components/kit/Glyph.qml"
+reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''
+
+[[targets]]
+template = "KitLabel.qml.tmpl"
+output = "~/.config/quickshell/myarch/components/kit/Label.qml"
+reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''
+
+[[targets]]
+template = "KitCaption.qml.tmpl"
+output = "~/.config/quickshell/myarch/components/kit/Caption.qml"
+reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''
+
+[[targets]]
+template = "KitRule.qml.tmpl"
+output = "~/.config/quickshell/myarch/components/kit/Rule.qml"
+reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''
+
+[[targets]]
+template = "KitToggle.qml.tmpl"
+output = "~/.config/quickshell/myarch/components/kit/Toggle.qml"
+reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''
+
+[[targets]]
+template = "KitSlider.qml.tmpl"
+output = "~/.config/quickshell/myarch/components/kit/Slider.qml"
+reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''
+
+[[targets]]
+template = "KitListRow.qml.tmpl"
+output = "~/.config/quickshell/myarch/components/kit/ListRow.qml"
+reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''

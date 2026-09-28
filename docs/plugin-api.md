@@ -61,6 +61,29 @@ else, including a `[plugins.<id>]` section for a plugin that doesn't exist,
 stops `apply` with an error naming the section. `myarch plugins` prints each
 plugin's effective settings and marks the ones set in config.toml.
 
+## Localization
+
+Plugins never hardcode user-facing text in their templates. It lives in
+`locales/<lang>.toml`, flat `key = "text"` tables:
+
+```
+plugins/bar-weather/locales/en.toml   required, the fallback
+plugins/bar-weather/locales/es.toml   may leave keys out
+plugins/bar-weather/locales/es_MX.toml
+```
+
+The language comes from the OS (`LC_ALL`, `LC_MESSAGES`, `LANG`, then
+`/etc/locale.conf`), or from `language = "es"` in config.toml. For `es_MX`
+the core tries `es_MX.toml`, `es.toml`, then `en.toml`, key by key. A key
+in another language that en.toml doesn't have stops `apply` (it's a typo);
+a key missing everywhere fails the render.
+
+In templates, `t "key"` gives the text and `tq "key"` gives it as a quoted
+literal that is valid in QML/JS and Lua. Placeholders are `%1`, `%2`… and
+filled in with QML's `.arg()`: `{{tq "updated"}}.arg(time)`. `.Lang`
+(`es_MX`) and `.LangCode` (`es`) are there for APIs that take a language,
+and for `Qt.locale(…)`, which gives day names and time formats for free.
+
 ## Targets
 
 The core renders every target and writes it; plugins never touch the disk.
@@ -92,6 +115,8 @@ missing token fails the render instead of producing an empty value.
 | `.Plugin`      | this plugin's id                                |
 | `.Home`        | the user's home directory                       |
 | `.Settings`    | the plugin's settings, defaults merged with config.toml |
+| `.Lang`        | the language, as a POSIX locale name: `es_MX`, `en` |
+| `.LangCode`    | just the language: `es`, `en`                   |
 
 Functions:
 
@@ -105,6 +130,9 @@ Functions:
 | `speed 0.6`                | Hyprland speed for 60% of the theme duration |
 | `spring 1.1 1`             | `mass = 1, stiffness = …, dampening = …`: the theme's spring with its response ×1.1 and damping 1 (0 keeps the theme's) |
 | `num 11.0`                 | `11`                          |
+| `camel "bg_alt"`           | `bgAlt` (QML property names)  |
+| `t "today"`                | `hoy` (this plugin's text)    |
+| `tq "today"`               | `"hoy"` (quoted for QML/Lua)  |
 | `under "~/.config/hypr/myarch/"` | every plugin output below that path |
 
 `under` is how an entry point includes fragments without knowing which
@@ -117,3 +145,42 @@ the rest from loading.
 The token names in `core/internal/theme/theme.go` (`RequiredColors`,
 `RequiredANSI`) are part of this API. Ask for meaning (`danger`,
 `surface_raised`), not for a hue; `[ansi]` is for terminals and TUIs.
+
+## Bar widgets
+
+The bar (plugin `shell-bar`) has no widgets of its own. A plugin adds one by
+generating a QML file into a slot:
+
+```
+~/.config/quickshell/myarch/widgets/left/<NN>-<name>.qml
+~/.config/quickshell/myarch/widgets/center/<NN>-<name>.qml
+~/.config/quickshell/myarch/widgets/right/<NN>-<name>.qml
+```
+
+`NN` orders widgets within a slot. Each one loads on its own: one that
+fails shows a warning in its place and the rest keep working. The root item
+needs an `implicitWidth`; it may declare `property var barScreen` and
+`property int barHeight`, set once it loads, and `property bool shown`: a
+widget with nothing to show sets it to false and the bar takes it out, gap
+included, until it's true again (use this, not `visible`). Shared, non-widget files (a
+data service, a component) go under `components/<name>/`.
+
+After writing, a widget plugin asks the running shell to reload (the
+reload command of any Quickshell target in the built-in plugins does it,
+and starts the shell if it isn't running).
+
+`shell-bar` ships a kit for widgets, `import "../../components/kit"`:
+
+| Component  | What it is                                                     |
+|------------|----------------------------------------------------------------|
+| `BarItem`  | the clickable part of a widget: hover/open highlight, `clicked`, `wheel` |
+| `BarPopup` | the card that drops down from it: `toggle()`, closes on click outside or Escape, `opening`, `key` |
+| `Glyph`    | a Nerd Font icon                                               |
+| `Label`    | body text                                                      |
+| `Caption`  | a section label                                                |
+| `Rule`     | a hairline between sections                                    |
+| `Toggle`   | an on/off switch: `checked`, `toggled(bool)`                   |
+| `Slider`   | `value`, `to`, `step`, `moved(real)`                           |
+| `ListRow`  | a row in a list: `glyph`, `title`, `detail`, `trailing`, `active`, `clicked(mouse)` |
+
+They all take their colors, font and shape from the theme.

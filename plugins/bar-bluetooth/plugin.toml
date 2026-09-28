@@ -1,0 +1,20 @@
+[plugin]
+id = "bar-bluetooth"
+name = "Bluetooth"
+version = "0.1.0"
+api = 1
+description = "Bluetooth in the bar; click to connect, pair and forget devices"
+
+# Quickshell talks to BlueZ over D-Bus.
+[packages]
+pacman = ["quickshell", "bluez"]
+
+[settings]
+# Without a Bluetooth adapter there is nothing to do: hide the widget.
+hide_without_adapter = true
+
+[[targets]]
+template = "Bluetooth.qml.tmpl"
+output = "~/.config/quickshell/myarch/widgets/right/20-bluetooth.qml"
+# Ask the running shell to reload; start it if it isn't running.
+reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''

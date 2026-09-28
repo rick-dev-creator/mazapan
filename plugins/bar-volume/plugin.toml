@@ -1,0 +1,23 @@
+[plugin]
+id = "bar-volume"
+name = "Volume"
+version = "0.1.0"
+api = 1
+description = "Output volume in the bar: scroll to change, middle-click to mute, click for outputs and inputs"
+
+[packages]
+pacman = ["quickshell", "pipewire", "wireplumber"]
+
+[settings]
+# Change per wheel notch, as a fraction (0.05 = 5%).
+step = 0.05
+# Highest volume the slider and the wheel reach: 1.0 = 100%; up to 1.5 to
+# boost quiet sources (it can distort).
+max_volume = 1.0
+show_percent = true
+
+[[targets]]
+template = "Volume.qml.tmpl"
+output = "~/.config/quickshell/myarch/widgets/right/30-volume.qml"
+# Ask the running shell to reload; start it if it isn't running.
+reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''

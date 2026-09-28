@@ -1,0 +1,13 @@
+# Text in the Bluetooth widget. %1, %2… are filled in at runtime.
+"bluetooth" = "bluetooth"
+"no_adapter" = "No Bluetooth adapter"
+"off" = "Bluetooth is off"
+"connected" = "connected"
+"connecting" = "connecting…"
+"disconnecting" = "disconnecting…"
+"paired" = "paired"
+"pairing" = "pairing…"
+"new" = "click to pair"
+"scan" = "look for new devices"
+"no_devices" = "No devices yet"
+"hint" = "click: connect · right-click: forget"

@@ -10,8 +10,8 @@ the layer on top.
 
 ```
 core/      CLI `myarch`: plugin loader, merge, generate, apply, rollback, doctor
-shell/     Quickshell shell: skeleton, plugin registry, Theme.qml
-plugins/   built-in plugins (theme targets, widgets, layouts…), same API as third-party ones
+plugins/   built-in plugins, same API as third-party ones: theme targets,
+           window layouts, the Quickshell bar and its widgets…
 themes/    token palettes
 docs/      plugin API and design notes
 vm/        dev VM

@@ -1,0 +1,47 @@
+[plugin]
+id = "bar-workspaces"
+name = "Workspaces"
+version = "0.3.0"
+api = 1
+description = "Workspace numbers in the bar, with a live preview on hover whose windows can be dragged out"
+
+[packages]
+pacman = ["quickshell"]
+
+[settings]
+# Workspaces 1..persistent are always shown, even when empty; any other
+# workspace appears while it exists.
+persistent = 5
+# Width of each number's cell, logical pixels.
+cell = 28
+# Size of the numbers, in points.
+font_size = 9.5
+
+# Live preview of a workspace from its number. Its windows can be dragged
+# out: dropped on the screen they come to the current workspace, dropped on
+# another number they go there.
+preview = true
+# What opens it: "right-click" on a number, or "hover" over it.
+trigger = "right-click"
+# With "hover": how long to hover before it opens.
+open_delay_ms = 350
+# It grows this long after opening.
+grow_delay_ms = 200
+# Card width, small and grown, logical pixels.
+preview_width = 320
+preview_width_large = 640
+# Narrowest shape of the card, width / height: it's always at least this
+# landscape. A monitor wider than that (an ultrawide) keeps its own shape.
+preview_aspect = 1.6
+
+[[targets]]
+template = "Workspaces.qml.tmpl"
+output = "~/.config/quickshell/myarch/widgets/left/10-workspaces.qml"
+# Ask the running shell to reload; start it if it isn't running.
+reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''
+
+[[targets]]
+template = "Preview.qml.tmpl"
+output = "~/.config/quickshell/myarch/components/workspaces/Preview.qml"
+# Ask the running shell to reload; start it if it isn't running.
+reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''

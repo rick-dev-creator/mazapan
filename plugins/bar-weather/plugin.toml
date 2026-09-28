@@ -1,0 +1,35 @@
+[plugin]
+id = "bar-weather"
+name = "Weather"
+version = "0.1.0"
+api = 1
+description = "Current weather in the middle of the bar; click for details and the forecast"
+
+[packages]
+pacman = ["quickshell"]
+
+[settings]
+# "auto" finds you by your public IP (ipinfo.io), a city name is looked up
+# (Open-Meteo geocoding), or give coordinates as "lat,lon". The forecast
+# itself comes from Open-Meteo: no account, no key.
+location = "auto"
+# "metric" (°C, km/h) or "imperial" (°F, mph).
+units = "metric"
+refresh_minutes = 15
+
+# Shared by the widget on every bar, so the data is fetched once.
+[[targets]]
+template = "qmldir.tmpl"
+output = "~/.config/quickshell/myarch/components/weather/qmldir"
+# Ask the running shell to reload; start it if it isn't running.
+reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''
+
+[[targets]]
+template = "WeatherService.qml.tmpl"
+output = "~/.config/quickshell/myarch/components/weather/WeatherService.qml"
+reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''
+
+[[targets]]
+template = "Weather.qml.tmpl"
+output = "~/.config/quickshell/myarch/widgets/center/10-weather.qml"
+reload = '''qs ipc -c myarch call myarch reload >/dev/null 2>&1 || { qs kill -c myarch >/dev/null 2>&1; hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch")' >/dev/null; }'''
