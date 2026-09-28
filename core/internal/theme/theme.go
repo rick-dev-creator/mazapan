@@ -19,7 +19,7 @@ import (
 var RequiredColors = []string{
 	"bg", "bg_alt", "surface", "surface_raised", "border",
 	"fg", "fg_muted", "fg_subtle",
-	"accent", "accent_fg", "selection",
+	"accent", "accent_fg", "accent_text", "accent_deep", "selection",
 	"success", "warning", "danger", "info",
 }
 

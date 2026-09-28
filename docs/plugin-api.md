@@ -97,11 +97,11 @@ Functions:
 
 | Function                   | Example result                |
 |----------------------------|-------------------------------|
-| `c "accent"`               | `#ffb000` (colors, then ansi) |
-| `hex (c "accent")`         | `ffb000`                      |
-| `rgb (c "accent")`         | `rgb(ffb000)` (Hyprland)      |
-| `rgba (c "accent") 0.5`    | `rgba(ffb00080)` (Hyprland)   |
-| `cssa (c "accent") 0.36`   | `rgba(255, 176, 0, 0.36)`     |
+| `c "accent"`               | `#8a5cf5` (colors, then ansi) |
+| `hex (c "accent")`         | `8a5cf5`                      |
+| `rgb (c "accent")`         | `rgb(8a5cf5)` (Hyprland)      |
+| `rgba (c "accent") 0.5`    | `rgba(8a5cf580)` (Hyprland)   |
+| `cssa (c "accent") 0.36`   | `rgba(138, 92, 245, 0.36)`    |
 | `speed 0.6`                | Hyprland speed for 60% of the theme duration |
 | `num 11.0`                 | `11`                          |
 | `under "~/.config/hypr/myarch/"` | every plugin output below that path |

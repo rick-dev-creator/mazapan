@@ -1,14 +1,16 @@
-# Phosphor: an 80s amber-phosphor terminal crossed with JetBrains Darcula.
+# Phosphor: an 80s terminal crossed with JetBrains Darcula, with Obsidian's
+# purple as the accent.
 #
 # Colors are semantic first. Plugins ask for "accent" or "danger", never for
 # "orange"; the [ansi] table exists only for terminals and TUIs.
 # Contrast against bg (WCAG): every text color >= 4.5:1 except fg_subtle
-# (3.0:1), which is for non-essential hints only.
+# (3.0:1), for non-essential hints only, and accent (3.3:1), which is for
+# fills and borders (>= 3:1); text in the accent color uses accent_text.
 
 [meta]
 name = "Phosphor"
 mode = "dark"
-description = "Amber CRT phosphor on warm charcoal, Darcula syntax colors, square corners."
+description = "Warm charcoal CRT, Obsidian purple accent, Darcula syntax colors, square corners."
 
 [colors]
 bg             = "#1a1917"  # windows, editor, terminal: the CRT glass
@@ -21,9 +23,11 @@ fg        = "#dcd3bf"  # body text: warm phosphor white
 fg_muted  = "#9a917e"  # secondary text
 fg_subtle = "#6b6457"  # hints, placeholders, disabled
 
-accent    = "#ffb000"  # P3 amber phosphor: focus, selection, cursor
-accent_fg = "#1a1917"  # text on top of accent
-selection = "#4a3a12"  # selected text background (dim amber)
+accent      = "#7847eb"  # Obsidian's hue, darker: hsl(258 80% 60%). Focus, fills, cursor
+accent_fg   = "#ffffff"  # text on top of accent (5.4:1)
+accent_text = "#a68af9"  # accent as text on bg: links, URLs (Obsidian's dark accent-1)
+accent_deep = "#21143d"  # near-black purple for large fills (active title bar); text on it: accent_text
+selection   = "#39285d"  # selected text background: accent at 33% over bg
 
 success = "#98b760"
 warning = "#cc7832"  # Darcula keyword orange

@@ -8,21 +8,21 @@ gsettings set org.gnome.desktop.interface color-scheme 'prefer-{{.Theme.Meta.Mod
 {{- /* libadwaita's named colors. adw-gtk3 reads the same names, which is
        what makes GTK3 and GTK4 apps match. */ -}}
 {{- define "named-colors" -}}
-@define-color accent_color {{c "accent"}};
+@define-color accent_color {{c "accent_text"}};
 @define-color accent_bg_color {{c "accent"}};
 @define-color accent_fg_color {{c "accent_fg"}};
 @define-color destructive_color {{c "danger"}};
 @define-color destructive_bg_color {{c "danger"}};
-@define-color destructive_fg_color {{c "accent_fg"}};
+@define-color destructive_fg_color {{c "bg"}};
 @define-color success_color {{c "success"}};
 @define-color success_bg_color {{c "success"}};
-@define-color success_fg_color {{c "accent_fg"}};
+@define-color success_fg_color {{c "bg"}};
 @define-color warning_color {{c "warning"}};
 @define-color warning_bg_color {{c "warning"}};
-@define-color warning_fg_color {{c "accent_fg"}};
+@define-color warning_fg_color {{c "bg"}};
 @define-color error_color {{c "danger"}};
 @define-color error_bg_color {{c "danger"}};
-@define-color error_fg_color {{c "accent_fg"}};
+@define-color error_fg_color {{c "bg"}};
 
 @define-color window_bg_color {{c "bg"}};
 @define-color window_fg_color {{c "fg"}};
