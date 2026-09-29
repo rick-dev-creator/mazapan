@@ -91,6 +91,8 @@ Item {
     reloadableId: "myarch-night-light"
     property string override: ""
     property bool sawNight: false
+    // Held by a mode (the modes plugin): "on" or "off" while it lasts.
+    property string held: ""
     onLoaded: root.update()
   }
 
@@ -101,6 +103,8 @@ Item {
   // over (the fade out done), "on" until the night is at its warmest (or,
   // a night too short to get there, over).
   function level() {
+    if (kept.held === "on") return 1
+    if (kept.held === "off") return 0
     const f = scheduled ? night(new Date()) : 0
     if (kept.override === "off" && f === 0) kept.override = ""
     if (kept.override === "on") {
@@ -157,18 +161,29 @@ Item {
   IpcHandler {
     target: "nightlight"
     // On now if it's off, off if it's on (until the schedule agrees).
+    // By hand wins over a mode's hold.
     function toggle(): void {
-      kept.override = root.level() > 0 ? "off" : "on"
+      const on = root.level() > 0
+      kept.held = ""
+      kept.override = on ? "off" : "on"
       root.update()
     }
     function on(): void {
+      kept.held = ""
       kept.override = "on"
       root.update()
     }
     function off(): void {
+      kept.held = ""
       kept.override = "off"
       root.update()
     }
     function isOn(): bool { return root.level() > 0 }
+    // A mode's: "on" or "off" while it lasts, "" when it's over (the
+    // schedule again).
+    function hold(state: string): void {
+      kept.held = state === "on" || state === "off" ? state : ""
+      root.update()
+    }
   }
 }

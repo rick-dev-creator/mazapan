@@ -1,0 +1,51 @@
+[plugin]
+id = "modes"
+name = "Modes"
+version = "0.1.0"
+api = 1
+description = "The whole desktop changed at once: quiet but for some apps, the theme, night light, the power profile, keep awake, what the bar shows; by hand, on a schedule or with a second screen, and back as it was when it's over"
+categories = ["panel", "bar", "tools"]
+requires = ["shell-bar", "hypr-base"]
+
+[packages]
+pacman = ["quickshell"]
+
+[settings]
+# Opens the Modes panel.
+key = "SUPER + ALT + M"
+
+[[targets]]
+template = "qmldir.tmpl"
+output = "~/.config/quickshell/myarch/components/modes/qmldir"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "ModesService.qml.tmpl"
+output = "~/.config/quickshell/myarch/components/modes/ModesService.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "Modes.qml.tmpl"
+output = "~/.config/quickshell/myarch/panels/modes.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "Indicator.qml.tmpl"
+output = "~/.config/quickshell/myarch/widgets/center/50-mode.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "modes.lua.tmpl"
+output = "~/.config/hypr/myarch/modes.lua"
+reload = "hyprctl reload >/dev/null"
+
+[[actions]]
+name = "{{ t \"act.open\" }}"
+run = "qs ipc -c myarch call myarch panel modes"
+key = "{{ settings.key }}"
+keywords = "{{ t \"act.open.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.off\" }}"
+run = "qs ipc -c myarch call modes off"
+keywords = "{{ t \"act.open.kw\" }}"

@@ -51,8 +51,31 @@ Singleton {
   property bool scheduled: false
   readonly property bool fullscreen: !!Hyprland.focusedMonitor && !!Hyprland.focusedMonitor.activeWorkspace
     && Hyprland.focusedMonitor.activeWorkspace.hasFullscreen
-  readonly property bool quiet: manualQuiet || scheduled || (quietFullscreen && fullscreen)
-  readonly property string quietWhy: manualQuiet ? "manual" : scheduled ? "schedule" : quiet ? "fullscreen" : ""
+  // A mode (the modes plugin) can be quiet too, and let some apps
+  // through (theirs only when nothing else made it quiet). Kept across
+  // reloads (the apps as text: lists aren't kept).
+  PersistentProperties {
+    id: mode
+    reloadableId: "myarch-notifications-mode"
+    property string name: ""
+    property bool quiet: false
+    property string allow: ""
+  }
+  readonly property var modeAllow: mode.allow.split(",").filter(a => a !== "")
+  readonly property string modeName: mode.name
+  readonly property bool quiet: manualQuiet || scheduled || (quietFullscreen && fullscreen) || mode.quiet
+  readonly property string quietWhy: manualQuiet ? "manual" : scheduled ? "schedule"
+    : quietFullscreen && fullscreen ? "fullscreen" : quiet ? "mode" : ""
+
+  // Let through while quiet: urgent ones (if so set), an app allowed
+  // always, or one the quiet mode allows.
+  function lets(item) {
+    const rules = apps[item.app] || {}
+    if ((item.urgency === 2 && quietCritical) || rules.quiet === true) return true
+    if (quietWhy !== "mode") return false
+    const app = String(item.app || "").toLowerCase()
+    return app !== "" && modeAllow.some(a => app.includes(a))
+  }
   property int missed: 0
 
   // Banners held back altogether: a screenshot or a recording is being
@@ -194,7 +217,7 @@ Singleton {
   function decide(key, item, n, fresh) {
     const rules = apps[item.app] || {}
     const critical = item.urgency === 2
-    const through = !quiet || (critical && quietCritical) || rules.quiet === true
+    const through = !quiet || lets(item)
     if ((rules.banners === false && !critical) || !through) {
       if (!through && !item.transient && fresh) missed++
       if (item.transient) n.expire() // nowhere to be: over
@@ -436,13 +459,15 @@ Singleton {
   onQuietChanged: {
     if (quiet) {
       over.stop()
-      for (let b = banners.count - 1; b >= 0; b--) {
-        const key = banners.get(b).key
-        const item = shown[key] || {}
-        const rules = apps[item.app] || {}
-        if (!((item.urgency === 2 && quietCritical) || rules.quiet === true)) retire(key)
-      }
+      refilter()
     } else if (missed > 0) over.restart()
+  }
+  function refilter() {
+    for (let b = banners.count - 1; b >= 0; b--) {
+      const key = banners.get(b).key
+      const item = shown[key] || {}
+      if (!lets(item)) retire(key)
+    }
   }
 
   Timer {
@@ -611,6 +636,15 @@ Singleton {
   IpcHandler {
     target: "notifications"
     function toggleQuiet(): void { root.setQuiet(!root.manualQuiet) }
+    // A mode's: its name ("" when none), quiet or not, and the apps it
+    // still lets through (comma separated, any part of their name).
+    function setMode(name: string, quiet: bool, allow: string): void {
+      mode.name = name
+      mode.quiet = quiet
+      mode.allow = allow.split(",").map(a => a.trim().toLowerCase()).filter(a => a !== "").join(",")
+      // Another quiet mode: what's on screen that it doesn't let through goes.
+      if (root.quiet) root.refilter()
+    }
     function setQuiet(on: bool): void { root.setQuiet(on) }
     function clear(): void { root.clearAll() }
     function dismiss(): void { root.dismissBanners() }

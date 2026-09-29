@@ -37,6 +37,19 @@ ShellRoot {
   // Quickshell's own file watching loses track of files myarch replaces
   // atomically, so plugins ask for a reload after writing (see the reload
   // command of any Quickshell target).
+  // Widgets taken out of the bar for a while (a mode hides the ticker
+  // during a talk): their names, "markets" for widgets/right/45-markets.qml.
+  // Kept across reloads (as text: lists aren't kept).
+  PersistentProperties {
+    id: barState
+    reloadableId: "myarch-bar"
+    property string hidden: ""
+  }
+  readonly property var hiddenWidgets: barState.hidden.split(",").filter(n => n !== "")
+  function widgetName(file) {
+    return file.split("/").pop().replace(/\.qml$/, "").replace(/^[0-9]+-/, "")
+  }
+
   IpcHandler {
     target: "myarch"
     function reload(): void {
@@ -55,6 +68,24 @@ ShellRoot {
         }
       }
       return `no panel ${name}`
+    }
+    // Take widgets out of the bar ("markets,weather"; "": all back).
+    function hide(names: string): void {
+      barState.hidden = names.split(",").map(n => n.trim()).filter(n => n !== "").join(",")
+    }
+    // The bar's widgets by name, one per line (left, center, right).
+    function widgets(): string {
+      return [
+{{- for file in under "~/.config/quickshell/myarch/widgets/left/" }}
+        "{{ file }}",
+{{- end }}
+{{- for file in under "~/.config/quickshell/myarch/widgets/center/" }}
+        "{{ file }}",
+{{- end }}
+{{- for file in under "~/.config/quickshell/myarch/widgets/right/" }}
+        "{{ file }}",
+{{- end }}
+      ].map(f => root.widgetName(f)).join("\n")
     }
     // Close every open panel (SUPER + Q while one is open).
     function close(): void {
@@ -102,7 +133,8 @@ ShellRoot {
 
         // Not the widget's `visible`: inside a hidden slot it would read
         // false forever, so the widget could never come back.
-        visible: loader.status !== Loader.Ready || loader.item.shown !== false
+        visible: !root.hiddenWidgets.includes(root.widgetName(slot.file))
+          && (loader.status !== Loader.Ready || loader.item.shown !== false)
 
         implicitWidth: loader.status === Loader.Ready ? loader.implicitWidth : failed.implicitWidth
         implicitHeight: bar.height

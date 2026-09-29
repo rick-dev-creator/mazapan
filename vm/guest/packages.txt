@@ -65,3 +65,5 @@ noto-fonts-emoji
 hypridle
 hyprsunset
 chromium
+power-profiles-daemon
+python-gobject

@@ -289,7 +289,8 @@ Item {
             Caption {
               visible: text !== ""
               text: NotificationService.quietWhy === "schedule" ? {{ tq "quiet.schedule" }}.arg(NotificationService.quietTo)
-                : NotificationService.quietWhy === "fullscreen" ? {{ tq "quiet.fullscreen" }} : ""
+                : NotificationService.quietWhy === "fullscreen" ? {{ tq "quiet.fullscreen" }}
+                : NotificationService.quietWhy === "mode" ? {{ tq "quiet.mode" }}.arg(NotificationService.modeName) : ""
               wrapMode: Text.Wrap
               Layout.fillWidth: true
               Layout.preferredWidth: 0

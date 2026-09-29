@@ -23,7 +23,7 @@ Suggested start: 1, 2 and 3.
 | — | Notifications | **Done** (2026-09-29) |
 | 9 | Wallpapers, and a theme from any picture | **Done** (2026-09-29) |
 | 10 | The essentials still missing | **Done** (2026-09-29) |
-| 11 | Modes | Planned |
+| 11 | Modes | **Done** (2026-09-29) |
 | 12 | The desktop's history, visible | Planned |
 | 13 | The same desktop anywhere | Planned |
 | 14 | Workspace sessions | Planned |
@@ -593,6 +593,21 @@ Work (Slack yes, social no), Presentation (no notifications, no ticker,
 larger text), Night (dark theme, warm light), Game (performance, quiet).
 On by hand, on a schedule, or when a monitor is plugged in. Built on what
 9 and 10 add (wallpapers, night light, power) and on notifications.
+
+*Done* (2026-09-29), plugin `modes` (`SUPER + ALT + M`, the palette, the
+bar). A mode can be quiet and still let some apps through (any part of
+their name), switch the theme (and the wallpaper, when it's the
+theme's), hold night light on or off, pick the power profile (only the
+ones the computer has), keep it awake (it still locks before any
+sleep), and take widgets out of the bar. On by hand, on a schedule
+(days and hours, past midnight too), or while a second screen is
+connected; one at a time, and off, everything goes back to how it was.
+An automatic one turned off by hand waits for its next time. Four to
+start with (Work, Presentation, Night, Game), edited in a panel; the
+bar shows the one that's on by its glyph, as macOS does. The plugins it
+drives each gained a small IPC for it: `notifications setMode`,
+`nightlight hold`, `myarch hide`/`widgets`. Left for later: larger text
+for presentations.
 
 ## 12. The desktop's history, visible
 

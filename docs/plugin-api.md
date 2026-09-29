@@ -534,6 +534,15 @@ closes it, like any window (`qs ipc -c myarch call myarch close` closes
 every open panel), instead of closing the window behind it. Panels import
 the kit as `"../components/kit"`.
 
+The shell and some plugins answer other plugins through IPC, so one can
+drive another without depending on it (a missing one just doesn't
+answer). Those a mode uses: `myarch hide "markets,weather"` takes widgets
+out of the bar (by file name without `NN-` and `.qml`; `""` puts them
+back), `myarch widgets` lists them; `notifications setMode NAME QUIET
+"app,app"` is a mode's Do Not Disturb and the apps it lets through;
+`nightlight hold on|off|none`; `idle` (the helper at
+`~/.local/share/myarch/bin/idle awake on|off`).
+
 `shell-bar` ships a kit for widgets, `import "../../components/kit"`:
 
 | Component  | What it is                                                     |
