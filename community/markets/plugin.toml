@@ -1,0 +1,76 @@
+[plugin]
+id = "markets"
+name = "Markets"
+version = "0.1.0"
+api = 1
+description = "Crypto and stock prices with trend charts: a watchlist where each symbol has its own timeframe (BTC 4H, BTC 1W, SOL 1D), the top 20 coins, your stocks, and a ticker in the bar"
+requires = ["shell-bar", "hypr-base"]
+categories = ["panel", "bar"]
+
+[settings]
+# Opens the Markets panel.
+key = "SUPER + M"
+# A ticker in the bar: the symbols pinned in the Main list (up to three),
+# in turn.
+bar = true
+# Seconds each pinned symbol stays in the bar before the next.
+bar_rotate_seconds = { default = 6, min = 2, max = 60 }
+# How often prices are fetched again, in seconds: the pinned symbols always,
+# the rest while the panel is open.
+refresh_seconds = { default = 60, min = 15, max = 3600 }
+# Where stock prices come from: "yahoo" needs no account (Yahoo Finance's
+# unofficial API: it may change); "twelvedata" needs a free key from
+# twelvedata.com.
+stock_source = { default = "yahoo", choices = ["yahoo", "twelvedata"] }
+# Your Twelve Data key, for stock_source = "twelvedata". It's kept in
+# config.toml and in the panel's generated QML, in plain text, as any
+# setting; the free plan takes 8 requests a minute, so stocks refresh one
+# every 8 seconds.
+twelvedata_key = { default = "", kind = "text" }
+# Leave stablecoins and wrapped or staked copies of other coins (USDT,
+# WBTC, stETH…) out of the top 20.
+hide_stablecoins = true
+# How the chart draws the price: "candles" or "line".
+chart = { default = "candles", choices = ["candles", "line"] }
+
+# Prices and candles, fetched once for the bar and the panel.
+[[targets]]
+template = "qmldir.tmpl"
+output = "~/.config/quickshell/myarch/components/markets/qmldir"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "MarketsService.qml.tmpl"
+output = "~/.config/quickshell/myarch/components/markets/MarketsService.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "Sparkline.qml.tmpl"
+output = "~/.config/quickshell/myarch/components/markets/Sparkline.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "CandleChart.qml.tmpl"
+output = "~/.config/quickshell/myarch/components/markets/CandleChart.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "Ticker.qml.tmpl"
+output = "~/.config/quickshell/myarch/widgets/right/45-markets.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "Markets.qml.tmpl"
+output = "~/.config/quickshell/myarch/panels/markets.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "markets.lua.tmpl"
+output = "~/.config/hypr/myarch/markets.lua"
+reload = "hyprctl reload >/dev/null"
+
+[[actions]]
+name = "{{ t \"act.open\" }}"
+run = "qs ipc -c myarch call myarch panel markets"
+key = "{{ settings.key }}"
+keywords = "{{ t \"act.open.kw\" }}"
