@@ -1,0 +1,29 @@
+[plugin]
+id = "bar-battery"
+name = "Battery"
+version = "0.1.0"
+api = 1
+description = "The battery in the bar (only where there is one): its level, time left, health, the power profile and the screen's brightness; it says when it's getting low"
+categories = ["bar"]
+requires = ["shell-bar"]
+
+[packages]
+pacman = ["upower", "brightnessctl", "libnotify"]
+
+[settings]
+# Show the percentage next to the icon.
+show_percent = true
+# Getting low: a notification at this percentage…
+low = { default = 15, min = 5, max = 50 }
+# …and an urgent one at this one (never above "low").
+critical = { default = 5, min = 1, max = 20 }
+
+[[targets]]
+template = "Battery.qml.tmpl"
+output = "~/.config/quickshell/myarch/widgets/right/35-battery.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "Watch.qml.tmpl"
+output = "~/.config/quickshell/myarch/panels/battery.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"

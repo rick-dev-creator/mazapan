@@ -1,0 +1,89 @@
+[plugin]
+id = "osd"
+name = "Media keys"
+version = "0.1.0"
+api = 1
+description = "The volume, microphone, brightness and media keys, and what they did shown for a moment on screen"
+categories = ["tools"]
+requires = ["shell-bar", "hypr-base"]
+
+[packages]
+pacman = ["wireplumber", "brightnessctl"]
+
+[settings]
+# How much a volume key changes it, in percent.
+volume_step = { default = 5, min = 1, max = 20 }
+# The loudest the keys go: 1.0 = 100%; up to 1.5 to boost quiet sources.
+max_volume = { default = 1.0, min = 1.0, max = 1.5, step = 0.05 }
+# How much a brightness key changes it, in percent.
+brightness_step = { default = 5, min = 1, max = 25 }
+# Where it shows on the focused screen.
+position = { default = "bottom", choices = ["bottom", "top", "center"] }
+# Seconds it stays.
+seconds = { default = 1.5, min = 0.5, max = 5, step = 0.5 }
+
+[[targets]]
+template = "Osd.qml.tmpl"
+output = "~/.config/quickshell/myarch/panels/osd.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "keys.lua.tmpl"
+output = "~/.config/hypr/myarch/media-keys.lua"
+reload = "hyprctl reload >/dev/null"
+
+# In the palette, with their keys.
+[[actions]]
+name = "{{ t \"act.up\" }}"
+run = '''wpctl set-mute @DEFAULT_AUDIO_SINK@ 0; v=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | cut -d' ' -f2); awk -v v="$v" 'BEGIN { exit !(v + 0 < {{ num settings.max_volume }}) }' && wpctl set-volume -l {{ num settings.max_volume }} @DEFAULT_AUDIO_SINK@ {{ settings.volume_step }}%+'''
+key = "XF86AudioRaiseVolume"
+keywords = "{{ t \"act.volume.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.down\" }}"
+run = "wpctl set-volume @DEFAULT_AUDIO_SINK@ {{ settings.volume_step }}%-"
+key = "XF86AudioLowerVolume"
+keywords = "{{ t \"act.volume.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.mute\" }}"
+run = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+key = "XF86AudioMute"
+keywords = "{{ t \"act.volume.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.mic\" }}"
+run = "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
+key = "XF86AudioMicMute"
+keywords = "{{ t \"act.mic.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.play\" }}"
+run = "qs ipc -c myarch call osd playPause"
+key = "XF86AudioPlay"
+keywords = "{{ t \"act.play.kw\" }}"
+
+# XF86AudioPause does what Play does: one action for both.
+[[actions]]
+name = "{{ t \"act.next\" }}"
+run = "qs ipc -c myarch call osd next"
+key = "XF86AudioNext"
+keywords = "{{ t \"act.play.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.previous\" }}"
+run = "qs ipc -c myarch call osd previous"
+key = "XF86AudioPrev"
+keywords = "{{ t \"act.play.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.brighter\" }}"
+run = 'p=$(brightnessctl -c backlight -m -e4 -n2 set {{ settings.brightness_step }}%+ | cut -d, -f4 | tr -d %); [ -n "$p" ] && qs ipc -c myarch call osd brightness "$p"'
+key = "XF86MonBrightnessUp"
+keywords = "{{ t \"act.light.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.dimmer\" }}"
+run = 'p=$(brightnessctl -c backlight -m -e4 -n2 set {{ settings.brightness_step }}%- | cut -d, -f4 | tr -d %); [ -n "$p" ] && qs ipc -c myarch call osd brightness "$p"'
+key = "XF86MonBrightnessDown"
+keywords = "{{ t \"act.light.kw\" }}"

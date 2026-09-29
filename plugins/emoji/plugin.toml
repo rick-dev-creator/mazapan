@@ -1,0 +1,39 @@
+[plugin]
+id = "emoji"
+name = "Emoji picker"
+version = "0.1.0"
+api = 1
+description = "Every emoji, by category and found by name in your language; the one you pick is typed where you were (and copied)"
+categories = ["panel", "tools"]
+requires = ["shell-bar", "hypr-base"]
+
+[packages]
+pacman = ["wl-clipboard", "wtype", "noto-fonts-emoji"]
+
+[settings]
+# Opens the picker.
+key = "SUPER + period"
+# How many recently used it keeps first.
+recent = { default = 32, min = 8, max = 80 }
+# Type the emoji where you were (with wtype), not only copy it.
+type = { default = true, label = "Type it" }
+
+[[targets]]
+template = "emoji.tsv.tmpl"
+output = "~/.local/share/myarch-emoji/emoji.tsv"
+
+[[targets]]
+template = "Picker.qml.tmpl"
+output = "~/.config/quickshell/myarch/panels/emoji.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "emoji.lua.tmpl"
+output = "~/.config/hypr/myarch/emoji.lua"
+reload = "hyprctl reload >/dev/null"
+
+[[actions]]
+name = "{{ t \"act.open\" }}"
+run = "qs ipc -c myarch call myarch panel emoji"
+key = "{{ settings.key }}"
+keywords = "{{ t \"act.open.kw\" }}"

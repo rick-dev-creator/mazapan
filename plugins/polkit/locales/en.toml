@@ -1,0 +1,7 @@
+title = "Authentication required"
+as = "As %1"
+password = "Password"
+wrong = "That's not the password. Try again."
+cancel = "Cancel"
+authenticate = "Authenticate"
+"check.agent" = "The shell is the session's polkit agent (no other one got there first)"

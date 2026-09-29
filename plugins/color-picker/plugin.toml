@@ -1,0 +1,32 @@
+[plugin]
+id = "color-picker"
+name = "Color picker"
+version = "0.1.0"
+api = 1
+description = "Pick any color on screen: it's copied, and a notification says which"
+categories = ["tools"]
+requires = ["hypr-base"]
+
+[packages]
+pacman = ["hyprpicker", "wl-clipboard", "libnotify", "gawk"]
+
+[settings]
+# Picks a color.
+key = "SUPER + SHIFT + C"
+# How it's copied, as CSS writes it: #332925, rgb(51, 41, 37) or hsl(17, 16%, 17%).
+format = { default = "hex", choices = ["hex", "rgb", "hsl"] }
+
+[[targets]]
+template = "color-pick.sh.tmpl"
+output = "~/.local/share/myarch/bin/color-pick"
+
+[[targets]]
+template = "color.lua.tmpl"
+output = "~/.config/hypr/myarch/color-picker.lua"
+reload = "hyprctl reload >/dev/null"
+
+[[actions]]
+name = "{{ t \"act.pick\" }}"
+run = "sh ~/.local/share/myarch/bin/color-pick"
+key = "{{ settings.key }}"
+keywords = "{{ t \"act.pick.kw\" }}"

@@ -13,14 +13,16 @@ Item {
   property int barHeight: 28
 
   readonly property string title: Hyprland.activeToplevel ? Hyprland.activeToplevel.title : ""
+  // Shortened first when the bar is short of room.
+  readonly property bool elastic: true
 
-  implicitWidth: title === "" ? 0 : label.width
+  implicitWidth: title === "" ? 0 : Math.min(label.implicitWidth, {{ settings.max_width }})
   implicitHeight: barHeight
 
   Text {
     id: label
     anchors.verticalCenter: parent.verticalCenter
-    width: Math.min(implicitWidth, {{ settings.max_width }})
+    width: root.width
     text: root.title
     elide: Text.ElideRight
     color: Theme.fgMuted

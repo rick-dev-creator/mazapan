@@ -59,3 +59,9 @@ wf-recorder
 # Notifications (notify-send to test; sounds for urgent ones)
 libnotify
 sound-theme-freedesktop
+wtype
+hyprpicker
+noto-fonts-emoji
+hypridle
+hyprsunset
+chromium

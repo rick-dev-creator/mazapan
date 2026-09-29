@@ -512,7 +512,11 @@ fails shows a warning in its place and the rest keep working. The root item
 needs an `implicitWidth`; it may declare `property var barScreen` and
 `property int barHeight`, set once it loads, and `property bool shown`: a
 widget with nothing to show sets it to false and the bar takes it out, gap
-included, until it's true again (use this, not `visible`). Shared, non-widget files (a
+included, until it's true again (use this, not `visible`). One whose text
+can be shortened (a window's title) declares `readonly property bool
+elastic: true` and follows its `width`: when the bar is short of room
+(the center moves aside rather than overlap the right), it gives up room
+first. Shared, non-widget files (a
 data service, a component) go under `components/<name>/`.
 
 After writing, a widget plugin asks the running shell to reload with
@@ -546,7 +550,10 @@ the kit as `"../components/kit"`.
 | `Button`   | `text`, `primary`, `clicked`                                   |
 | `TextField`| `text`, `placeholder`, `echoMode`, `accepted`, `focusInput()`  |
 
-They all take their colors, font and shape from the theme.
+They all take their colors, font and shape from the theme. A
+`TextField`'s own `Keys` (`Keys.onPressed` on it) see a key before the
+text does: what they accept (the arrows of a list, Delete for an entry,
+Esc) never reaches the text; the rest is typed.
 
 ## Writing a plugin
 

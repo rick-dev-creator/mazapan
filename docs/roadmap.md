@@ -22,7 +22,7 @@ Suggested start: 1, 2 and 3.
 | — | Plugin ecosystem (catalogs, Plugins panel, author tools) | **Done** (2026-09-29), under 7 |
 | — | Notifications | **Done** (2026-09-29) |
 | 9 | Wallpapers, and a theme from any picture | **Done** (2026-09-29) |
-| 10 | The essentials still missing | Planned |
+| 10 | The essentials still missing | **Done** (2026-09-29) |
 | 11 | Modes | Planned |
 | 12 | The desktop's history, visible | Planned |
 | 13 | The same desktop anywhere | Planned |
@@ -540,6 +540,48 @@ What Omarchy has and this doesn't yet, in order of need:
 - **Brightness and battery** in the bar, for laptops.
 - **Web apps**: a site as an app of its own (WhatsApp, Gmail).
 
+*Done* (2026-09-29), each one a plugin, in English and Spanish:
+- `polkit`: the password prompt, in the theme, over a dimmed screen: what
+  is asked for and by what, whose password (several: pick one), a shake
+  on a wrong one, the fingerprint reader's messages; Esc, Cancel or
+  SUPER + Q refuse it; `myarch doctor` checks it's the session's agent.
+- `osd`: the volume, microphone, brightness and media keys (on the lock
+  screen too, repeating when held). What they did, for a moment, on the
+  focused screen, never in the way (clicks go through). Volume and the
+  microphone as PipeWire has them, whatever changed them; the track
+  once the player says what it did; the backlight only (never a
+  keyboard's LED).
+- `bar-battery`: only where there's a battery. Its level, time left and
+  health, the power profile, the screen's brightness (on the same curve
+  as the keys); a warning when low and an urgent one when very low, once
+  each, however many screens and reloads.
+- `clipboard` (`SUPER + CTRL + V`): text and pictures, searchable, pinned
+  ones kept; ↵ pastes where you were (Ctrl+Shift+V in terminals). One
+  copy is one entry; what's marked secret is never kept; files only you
+  can read, and only clip-store's own names are ever read or removed.
+- `emoji` (`SUPER + period`): every emoji (Unicode 18), found by its
+  name in your language or English, accents or not, the best match
+  first; the last used first; typed where you were.
+- `color-picker` (`SUPER + SHIFT + C`): copied as CSS writes it (hex,
+  rgb, hsl), in a notification with a swatch of it.
+- `idle`: the screens dim for 15 s first (a move and they're back), then
+  lock, turn off, and it suspends (sooner on battery); locked before any
+  sleep; videos and calls keep it awake, and so does "Keep awake" (a cup
+  in the bar). hypridle, started in the desktop's session.
+- `night-light`: warmer at night, fading in and out over half an hour
+  rather than at once; by hours or from sunset to sunrise worked out
+  here (no location service); on or off by hand until the schedule
+  agrees.
+- `webapps`: added from a panel (name and address, the site's icon, or
+  one of a few suggestions with a click; none unasked), opened in the
+  Chromium-based browser there is; opened again, its window comes
+  forward.
+
+Also: the bar no longer overlaps on narrow screens (the center moves
+aside, the window's title shortens first); a notification's missing
+icon shows the bell, not a checkerboard; the kit's text field lets a
+panel's keys go first (arrows, Delete, Esc).
+
 ## 11. Modes
 
 **Omarchy today.** Nothing like it: Do Not Disturb, by hand.
@@ -602,7 +644,6 @@ are English only. Same locales, same fallbacks.
 
 - Built-in plugins have no README: their page in the Plugins panel is
   empty (`myarch plugins check` says so).
-- The bar's centered clock overlaps the right side on small screens.
 - An "updates available" widget; `myarch update` offering plugin updates;
   Chromium's accent through its policy.
 

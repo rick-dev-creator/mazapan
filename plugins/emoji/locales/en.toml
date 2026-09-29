@@ -1,0 +1,7 @@
+search = "Find an emoji"
+none = "Nothing like that"
+no_recent = "The ones you use will be here"
+hints = "↵ type it   tab category   esc leave"
+"hints.copy" = "↵ copy it   tab category   esc leave"
+"act.open" = "Emoji"
+"act.open.kw" = "emoji smiley face symbol picker"

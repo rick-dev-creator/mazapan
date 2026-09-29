@@ -37,7 +37,7 @@ Rectangle {
 
   readonly property string summary: n ? NotificationService.plain(n.summary) : item.summary || ""
   readonly property string body: n ? NotificationService.plain(n.body) : item.body || ""
-  readonly property string icon: n && n.image ? n.image : item.icon || ""
+  readonly property string icon: (n ? NotificationService.picture(n.image, true) : "") || item.icon || ""
   readonly property bool critical: item.urgency === 2
   // The progress an app reports (0–100), as volume and downloads do.
   readonly property real progress: n && n.hints && n.hints.value !== undefined ? Number(n.hints.value) : -1

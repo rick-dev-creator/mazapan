@@ -106,6 +106,14 @@ ShellRoot {
 
         implicitWidth: loader.status === Loader.Ready ? loader.implicitWidth : failed.implicitWidth
         implicitHeight: bar.height
+        // An elastic widget (a window's title) gives up its room first
+        // when the bar is short of it; the others keep their width.
+        readonly property bool elastic: loader.status === Loader.Ready && loader.item.elastic === true
+        Layout.preferredWidth: implicitWidth
+        Layout.maximumWidth: implicitWidth
+        Layout.minimumWidth: elastic ? 0 : implicitWidth
+        Layout.fillWidth: elastic
+        clip: elastic
 
         Loader {
           id: loader
@@ -141,13 +149,19 @@ ShellRoot {
         color: Theme.border
       }
 
+      // Left, center and right. The center is centered while there's room;
+      // on a narrow screen it moves left, clear of the right, and the left
+      // gives up room (its elastic widgets first, then it's cut).
       RowLayout {
+        id: leftRow
         anchors {
           left: parent.left
           top: parent.top
           bottom: parent.bottom
           leftMargin: Theme.gapOut
         }
+        width: Math.max(0, Math.min(implicitWidth, (centerRow.children.length > 0 && centerRow.implicitWidth > 0 ? centerRow.x : rightRow.x) - Theme.gapOut * 2 - x))
+        clip: width < implicitWidth
         spacing: Theme.gapOut
 {{- for file in under "~/.config/quickshell/myarch/widgets/left/" }}
         Slot { file: "{{ file }}" }
@@ -155,11 +169,12 @@ ShellRoot {
       }
 
       RowLayout {
+        id: centerRow
         anchors {
-          horizontalCenter: parent.horizontalCenter
           top: parent.top
           bottom: parent.bottom
         }
+        x: Math.max(0, Math.min((bar.width - width) / 2, rightRow.x - Theme.gapOut * 2 - width))
         spacing: Theme.gapOut
 {{- for file in under "~/.config/quickshell/myarch/widgets/center/" }}
         Slot { file: "{{ file }}" }
@@ -167,6 +182,7 @@ ShellRoot {
       }
 
       RowLayout {
+        id: rightRow
         anchors {
           right: parent.right
           top: parent.top

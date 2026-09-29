@@ -116,6 +116,15 @@ Singleton {
     s = String(s || "")
     if (s === "") return ""
     if (s.startsWith("/") || s.startsWith("file:")) return s
+    // An icon theme's, by name: only if the theme has it (never Qt's
+    // "missing" checkerboard).
+    if (s.startsWith("image://icon/")) {
+      try {
+        return Quickshell.iconPath(decodeURIComponent(s.slice(13).split("?")[0]), true)
+      } catch (e) {
+        return ""
+      }
+    }
     if (s.startsWith("image://")) return allowData ? s : ""
     if (/^[a-z][a-z0-9+.-]*:/i.test(s)) return "" // http:, ftp:, …
     return Quickshell.iconPath(s, true)

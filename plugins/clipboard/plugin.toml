@@ -1,0 +1,55 @@
+[plugin]
+id = "clipboard"
+name = "Clipboard history"
+version = "0.1.0"
+api = 1
+description = "What you copied, text and pictures, kept and searchable; pick one and it's pasted where you were. what's marked as secret is never kept"
+categories = ["panel", "tools"]
+requires = ["shell-bar", "hypr-base"]
+
+[packages]
+pacman = ["wl-clipboard", "wtype"]
+
+[settings]
+# Opens the clipboard's history.
+key = "SUPER + CTRL + V"
+# How many entries it keeps (pinned ones don't count).
+keep = { default = 100, min = 10, max = 1000 }
+# Keep pictures too.
+images = true
+# How many pictures it keeps (they're larger; pinned ones don't count).
+keep_images = { default = 20, min = 1, max = 200 }
+# Paste the entry where you were (with wtype), not only copy it.
+paste = true
+# Larger copies than this, in KB, aren't kept.
+max_kb = { default = 5120, min = 64, max = 51200, label = "Largest copy kept (KB)" }
+
+[[targets]]
+template = "clip-store.sh.tmpl"
+output = "~/.local/share/myarch/bin/clip-store"
+
+[[targets]]
+template = "qmldir.tmpl"
+output = "~/.config/quickshell/myarch/components/clipboard/qmldir"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "ClipboardService.qml.tmpl"
+output = "~/.config/quickshell/myarch/components/clipboard/ClipboardService.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "History.qml.tmpl"
+output = "~/.config/quickshell/myarch/panels/clipboard.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "clipboard.lua.tmpl"
+output = "~/.config/hypr/myarch/clipboard.lua"
+reload = "hyprctl reload >/dev/null"
+
+[[actions]]
+name = "{{ t \"act.open\" }}"
+run = "qs ipc -c myarch call myarch panel clipboard"
+key = "{{ settings.key }}"
+keywords = "{{ t \"act.open.kw\" }}"

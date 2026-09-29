@@ -1,0 +1,64 @@
+[plugin]
+id = "idle"
+name = "Idle"
+version = "0.1.0"
+api = 1
+description = "After a while without use: the screens dim, then lock, turn off, and the computer suspends (sooner on battery); a video or a call keeps it awake, and so can you"
+categories = ["tools", "bar"]
+requires = ["shell-bar", "hypr-base", "power"]
+
+[packages]
+pacman = ["hypridle", "hyprlock", "systemd"]
+
+[settings]
+# Minutes until it locks (0: never).
+lock = { default = 5, min = 0, max = 240 }
+# The screens dim for a few seconds first: a move and they're back.
+dim = true
+# Minutes until the screens turn off (0: never).
+screens_off = { default = 6, min = 0, max = 240 }
+# Minutes until it suspends on battery (0: never).
+suspend_on_battery = { default = 15, min = 0, max = 240 }
+# Minutes until it suspends when plugged in, or on a desktop (0: never).
+suspend = { default = 0, min = 0, max = 480 }
+# Lock before sleeping, however it goes to sleep (the lid, a key).
+lock_on_sleep = true
+
+[[targets]]
+template = "idle.sh.tmpl"
+output = "~/.local/share/myarch/bin/idle"
+
+[[targets]]
+template = "hypridle.conf.tmpl"
+output = "~/.config/hypr/hypridle.conf"
+reload = "sh ~/.local/share/myarch/bin/idle restart"
+
+[[targets]]
+template = "idle.lua.tmpl"
+output = "~/.config/hypr/myarch/idle.lua"
+reload = "hyprctl reload >/dev/null"
+
+[[targets]]
+template = "qmldir.tmpl"
+output = "~/.config/quickshell/myarch/components/idle/qmldir"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "IdleService.qml.tmpl"
+output = "~/.config/quickshell/myarch/components/idle/IdleService.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "Dim.qml.tmpl"
+output = "~/.config/quickshell/myarch/panels/idle.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "Awake.qml.tmpl"
+output = "~/.config/quickshell/myarch/widgets/right/85-awake.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[actions]]
+name = "{{ t \"act.awake\" }}"
+run = "sh ~/.local/share/myarch/bin/idle awake toggle"
+keywords = "{{ t \"act.awake.kw\" }}"

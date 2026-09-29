@@ -1,0 +1,42 @@
+[plugin]
+id = "night-light"
+name = "Night light"
+version = "0.1.0"
+api = 1
+description = "The screens warmer at night, fading in and out slowly: by the hours you give, or from sunset to sunrise where you are"
+categories = ["tools"]
+requires = ["shell-bar"]
+
+[packages]
+pacman = ["hyprsunset", "util-linux"]
+
+[settings]
+# When: "hours" (from and to), "sun" (sunset to sunrise at sun_at), or
+# "off" (only by hand, from the palette).
+schedule = { default = "hours", choices = ["hours", "sun", "off"] }
+# Night starts (24-hour clock).
+from = "20:00"
+# Night ends.
+to = "07:00"
+# Where you are for "sun": latitude,longitude, a dot for decimals (e.g.
+# 40.4,-3.7 for Madrid).
+# Worked out here: nothing is looked up.
+sun_at = ""
+# How warm at night, in kelvin: lower is warmer (daylight is 6500).
+temperature = { default = 4000, min = 2500, max = 6000, step = 100 }
+# Minutes it takes to fade in and out.
+fade = { default = 30, min = 0, max = 120 }
+
+[[targets]]
+template = "hyprsunset.conf.tmpl"
+output = "~/.config/hypr/hyprsunset.conf"
+
+[[targets]]
+template = "NightLight.qml.tmpl"
+output = "~/.config/quickshell/myarch/panels/night-light.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[actions]]
+name = "{{ t \"act.toggle\" }}"
+run = "qs ipc -c myarch call nightlight toggle"
+keywords = "{{ t \"act.toggle.kw\" }}"

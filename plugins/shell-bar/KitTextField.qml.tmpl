@@ -34,6 +34,9 @@ Rectangle {
     font.family: Theme.fontMono
     font.pointSize: 9.5
     clip: true
+    // The field's own Keys (a panel's arrows, Delete, Esc) come first: what
+    // they don't take, the text gets.
+    Keys.forwardTo: [field]
     onAccepted: field.accepted()
   }
 
