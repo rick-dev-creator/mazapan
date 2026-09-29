@@ -12,7 +12,7 @@ namespace MyArch.Rendering;
 public sealed record RenderedAction(string Plugin, string Name, string Run, string Key, bool Terminal, string Keywords);
 
 /// <summary>Check is one plugin check, rendered.</summary>
-public sealed record RenderedCheck(string Plugin, string Name, string Run, long Timeout, bool Session);
+public sealed record RenderedCheck(string Plugin, string Name, string Run, long Timeout, bool Session, bool Before = false);
 
 /// <summary>File is one rendered target.</summary>
 public sealed class RenderedFile
@@ -25,6 +25,10 @@ public sealed class RenderedFile
     public string Merge = "";
     /// <summary>Busy: its app is running (the target's busy marker exists): left for the next apply.</summary>
     public bool Busy;
+    /// <summary>System: written as root (sudo), by apply --system only.</summary>
+    public bool System;
+    /// <summary>Reboot: it takes effect after a reboot.</summary>
+    public bool Reboot;
 }
 
 /// <summary>Output is everything the plugins produce for one theme and language.</summary>
@@ -164,7 +168,7 @@ public static class Renderer
             {
                 var name = scope.String(c.Name, "check name");
                 var run = scope.String(c.Run, $"check \"{name}\"");
-                output.Checks.Add(new(p.Id, name, run, c.Timeout <= 0 ? 15 : c.Timeout, c.Session));
+                output.Checks.Add(new(p.Id, name, run, c.Timeout <= 0 ? 15 : c.Timeout, c.Session, c.Before));
             }
             for (var n = 0; n < p.Actions.Count; n++)
             {
@@ -197,6 +201,8 @@ public static class Renderer
                         Reload = reload,
                         Merge = tg.Merge,
                         Busy = busy,
+                        System = tg.System,
+                        Reboot = tg.Reboot,
                     });
                 }
         }
@@ -233,6 +239,7 @@ public static class Renderer
             globals.Add("theme", new ScriptObject());
             globals.Add("settings", new ScriptObject());
             globals.Add("actions", new ScriptArray());
+            globals.Add("machine", new ScriptObject());
             ctx = new TemplateContext(Builtins.Shared)
             {
                 StrictVariables = true,
@@ -276,6 +283,7 @@ public static class Renderer
             Set("theme", Model.Theme(theme));
             Set("settings", Model.Settings(settings));
             Set("actions", Model.Actions(Actions));
+            Set("machine", Model.Machine(Hardware.ThisMachine.Get()));
             var before = isolate ? globals.Keys.ToHashSet() : null;
             using var deadline = new CancellationTokenSource(Timeout);
             ctx.CancellationToken = deadline.Token;

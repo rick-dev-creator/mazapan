@@ -35,6 +35,12 @@ public static partial class Program
         /// <summary>Write applies the plan, records ownership, runs reload commands and prints what happened.</summary>
         public void Write(List<Change> changes, List<string> orphans, Owned owned, bool adopt)
         {
+            // Files as root wait for apply --system (SystemPhase); one already
+            // as it would be is myarch's all the same (no sudo needed to say so).
+            foreach (var c in changes.Where(c => c.File.System && c.State == State.Unchanged))
+                owned[c.Path] = Apply.Proposed(c, owned).Sum;
+            changes = changes.Where(c => !c.File.System).ToList();
+            orphans = orphans.Where(o => !AsRoot.IsSystem(o)).ToList();
             Result res;
             try
             {
@@ -135,12 +141,98 @@ public static partial class Program
         return (plugin, key, value);
     }
 
+    /// <summary>
+    /// SystemPhase does, with sudo, what --system asked for, once the person
+    /// has seen it: packages first (a driver before the files that load it),
+    /// then the plugins' checks that must pass before (kernel headers for a
+    /// module built on install), then the system files, then their reloads,
+    /// and the reloads of the files it removes. Returns the packages it
+    /// installed (undo takes them out again).
+    /// </summary>
+    static List<string> SystemPhase(Session s, List<Change> changes, List<string> orphans, List<string> packages, Owned owned, bool adopt, bool yes)
+    {
+        var conflicts = changes.Where(c => c.State == State.Conflict).Select(c => c.Path).ToList();
+        if (conflicts.Count > 0 && !adopt) throw new ConflictException(conflicts);
+        var reloads = SystemState.Reloads();
+        var removals = orphans.Where(o => Apply.ReadOrNull(o) is { } b && Apply.Sum(b) == owned.Get(o)).ToList();
+
+        // Everything it will do as root, in full, before the first sudo.
+        Header("As root, with sudo");
+        foreach (var p in packages) Console.WriteLine($"  install  {p}");
+        foreach (var c in changes)
+        {
+            var before = Apply.ReadOrNull(c.Path) is { } b ? Files.Utf8.GetString(b) : "";
+            Console.Write(Diff.Unified(before, Files.Utf8.GetString(Apply.Proposed(c, owned).Content),
+                before == "" ? "/dev/null" : c.Path, c.Path));
+        }
+        foreach (var o in removals) Console.WriteLine($"  remove   {o}");
+        var commands = changes.Select(c => c.Reload).Concat(removals.Select(o => reloads.GetValueOrDefault(o, "")))
+            .Where(r => r != "").Distinct().ToList();
+        foreach (var cmd in commands) Console.WriteLine($"  run      {cmd}");
+        if (!yes)
+        {
+            if (!IsTerminal(0)) throw new MyArchException("no terminal to ask on: read the list above and run with --system -y");
+            if (!Confirm("Do this as root?")) return [];
+        }
+
+        AsRoot.Install(packages);
+        if (packages.Count > 0) Console.WriteLine($"  installed {string.Join(", ", packages)}");
+        foreach (var c in s.Out.Checks.Where(c => c.Before && s.Plugins.Any(p => p.Id == c.Plugin && changes.Any(ch => ch.Plugin == p.Id))))
+        {
+            var r = Health.Checks.RunOne(c);
+            if (!r.OK && !r.Skipped)
+                throw new MyArchException($"{c.Name} ({c.Plugin}): it must hold before its system files are written\n{r.Output.TrimEnd()}");
+        }
+        var stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss", System.Globalization.CultureInfo.InvariantCulture);
+        var written = new List<Change>();
+        try
+        {
+            foreach (var c in changes)
+            {
+                if (c.State == State.Conflict && Apply.ReadOrNull(c.Path) is { } mine)
+                {
+                    AsRoot.Write(c.Path + ".myarch-bak-" + stamp, mine); // someone's edit: kept
+                    Console.WriteLine($"  backed up {c.Path} -> {Paths.Base(c.Path)}.myarch-bak-{stamp}");
+                }
+                var (content, sum) = Apply.Proposed(c, owned);
+                AsRoot.Write(c.Path, content);
+                owned[c.Path] = sum;
+                reloads[c.Path] = c.Reload;
+                written.Add(c);
+                Console.WriteLine($"  wrote {c.Path}");
+            }
+            foreach (var o in orphans)
+            {
+                if (removals.Contains(o))
+                {
+                    AsRoot.Remove(o);
+                    Console.WriteLine($"  removed {o} (no plugin generates it anymore)");
+                }
+                else if (Apply.ReadOrNull(o) != null)
+                    Console.WriteLine($"  left {o} in place: it was edited, no longer managed");
+                owned.Remove(o);
+            }
+        }
+        finally
+        {
+            owned.Save(Apply.StatePath());
+            var keep = reloads.Where(kv => owned.ContainsKey(kv.Key)).ToDictionary(kv => kv.Key, kv => kv.Value);
+            SystemState.Save(keep);
+        }
+        foreach (var cmd in commands)
+            if (AsRoot.Run(cmd) is { } err) Console.Error.WriteLine($"warning: reload {GoFormat.Quote(cmd)} (as root) failed: {err}");
+        var reboot = written.Where(c => c.File.Reboot).Select(c => c.Path).ToList();
+        if (reboot.Count > 0) Console.WriteLine($"{Style.Amber}Reboot to use: {string.Join(", ", reboot)}{Style.Reset}");
+        return packages;
+    }
+
     /// <summary>PrintDiffs shows, as unified diffs, what writing the plan puts on disk.</summary>
     static void PrintDiffs(List<Change> changes, List<string> orphans, Owned owned, bool adopt)
     {
         foreach (var c in changes)
         {
             if (c.State is not (State.New or State.Changed) && !(c.State == State.Conflict && adopt)) continue;
+            if (c.File.System) Console.WriteLine($"# as root, with apply --system:");
             var before = Apply.ReadOrNull(c.Path) is { } b ? Files.Utf8.GetString(b) : "";
             var after = Files.Utf8.GetString(Apply.Proposed(c, owned).Content);
             Console.Write(Diff.Unified(before, after, c.State == State.New ? "/dev/null" : Tilde(c.Path), Tilde(c.Path)));
@@ -166,6 +258,9 @@ public static partial class Program
             .Bool("adopt", "back up and take over files myarch didn't write")
             .Bool("diff", "show exactly what would be written, as a unified diff")
             .Bool("changes-only", "list only the files that change")
+            .Bool("system", "also write the system files (/etc) and install the packages hardware plugins need, with sudo")
+            .Bool("y", "with --system: don't ask (everything is still listed first)")
+            .Bool("agent", "what an agent may do: no hardware plugins, nothing as root (the MCP server's applies)")
             .List("set", "set a plugin's setting in config.toml: plugin.key=value (a TOML value: true, 480, \"text\")")
             .List("reset", "back to the plugin's default: plugin.key")
             .List("enable", "enable a plugin")
@@ -176,6 +271,18 @@ public static partial class Program
         if (accent != "" && accent != "theme" && !AccentPattern().IsMatch(accent))
             throw new MyArchException($"--accent {GoFormat.Quote(accent)}: use #rrggbb, or \"theme\" for the theme's own");
         var edits = new List<string>(); // what changes config.toml, for undo --list
+        var found = Plugin.Discover(PluginDirs()).Plugins;
+        foreach (var id in fs.All("enable").Concat(fs.All("disable")))
+            if (found.All(p => p.Id != id)) throw new MyArchException($"no plugin \"{id}\"");
+        if (fs.IsSet("agent"))
+        {
+            // Hardware plugins write as root, on the person's say: an agent
+            // neither turns them on nor changes what they write.
+            if (fs.IsSet("system")) throw new MyArchException("an agent doesn't apply as root: the person runs myarch apply --system");
+            foreach (var id in fs.All("enable").Concat(fs.All("disable")).Concat(fs.All("set").Select(x => x.Split('.')[0])).Concat(fs.All("reset").Select(x => x.Split('.')[0])))
+                if (found.FirstOrDefault(p => p.Id == id) is { } hp && (hp.Hardware != null || hp.Targets.Any(t => t.System)))
+                    throw new MyArchException($"{id} is a hardware plugin: turning it on or off, or changing it, is the person's (myarch hardware)");
+        }
         var sets = fs.All("set").Select(ParseSet).ToList();
         var resets = fs.All("reset").Select(r => SplitKey(r, "--reset")).ToList();
         var s = LoadWith(c =>
@@ -196,25 +303,23 @@ public static partial class Program
             }
             foreach (var id in fs.All("enable"))
             {
-                c.Disabled.RemoveAll(d => d == id);
+                c.TurnOn(found.First(p => p.Id == id));
                 edits.Add("enable " + id);
             }
             foreach (var id in fs.All("disable"))
             {
-                if (!c.Disabled.Contains(id)) c.Disabled.Add(id);
+                c.TurnOff(found.First(p => p.Id == id));
                 edits.Add("disable " + id);
             }
         });
         // What's changed is checked even for a plugin that stays disabled: a
         // wrong key there would break the day it's enabled.
-        var found = Plugin.Discover(PluginDirs()).Plugins;
-        foreach (var id in fs.All("enable").Concat(fs.All("disable")).Concat(sets.Select(x => x.Plugin)).Concat(resets.Select(x => x.Plugin)))
+        foreach (var id in sets.Select(x => x.Plugin).Concat(resets.Select(x => x.Plugin)))
             if (found.All(p => p.Id != id)) throw new MyArchException($"no plugin \"{id}\"");
         foreach (var p in found.Where(p => sets.Any(x => x.Plugin == p.Id))) p.Resolve(s.Cfg.For(p.Id));
         foreach (var (plugin, key) in resets)
             if (!found.First(p => p.Id == plugin).Settings.ContainsKey(key))
                 throw new MyArchException($"--reset {plugin}.{key}: {plugin} has no setting {key}");
-        WarnMissingPackages(s.Plugins);
         // One apply at a time, from the plan to the end: what it compares
         // against must still be there when it writes.
         using var lk = fs.IsSet("dry-run") ? null : ApplyLock.Take();
@@ -223,13 +328,27 @@ public static partial class Program
         // With the diff, the plan lists only what changes: the diff is what to read.
         PrintPlan(changes, orphans, fs.IsSet("diff") || fs.IsSet("changes-only"));
         if (fs.IsSet("diff")) PrintDiffs(changes, orphans, owned, fs.IsSet("adopt"));
+        // What needs root: system files, and packages plugins need.
+        var sysChanges = changes.Where(c => c.File.System && c.State is State.New or State.Changed or State.Conflict).ToList();
+        var sysOrphans = orphans.Where(AsRoot.IsSystem).ToList();
+        // Hardware plugins' packages are installed (the person turned them on);
+        // the others' are only said, as they always were.
+        var packages = AsRoot.Missing(s.Plugins.Where(p => p.Hardware != null).SelectMany(p => p.Pacman));
+        foreach (var p in s.Plugins.Where(p => p.Hardware == null))
+            foreach (var pkg in AsRoot.Missing(p.Pacman))
+                Console.Error.WriteLine($"warning: plugin {p.Id} needs package {pkg} (not installed)");
+        foreach (var pkg in packages)
+            Console.WriteLine($"  {"install",-10} {string.Join(",", s.Plugins.Where(p => p.Pacman.Contains(pkg)).Select(p => p.Id)),-16} {pkg}");
+        var rootWork = sysChanges.Count + sysOrphans.Count + packages.Count;
         if (fs.IsSet("dry-run")) return 0;
         // Every apply can be undone: what it touches is kept first.
         var configChanged = themeId != "" || accent != "" || edits.Count > 0;
         var what = themeId != "" || accent != "" ? $"theme {s.Theme.Id}" + (s.Cfg.Accent != "" ? $", accent {s.Cfg.Accent}" : "") : "";
         if (edits.Count > 0) what = (what == "" ? "" : what + "; ") + string.Join(", ", edits);
         if (what == "") what = "apply";
-        var snap = Snapshots.Begin(changes, orphans, fs.IsSet("adopt"), Settings.Path, what, configOnly: configChanged);
+        // Packages alone are a change too: undo takes them out.
+        var snap = Snapshots.Begin(changes, orphans, fs.IsSet("adopt"), Settings.Path, what,
+            configOnly: configChanged || (fs.IsSet("system") && rootWork > 0));
         try
         {
             s.Write(changes, orphans, owned, fs.IsSet("adopt"));
@@ -246,21 +365,28 @@ public static partial class Program
             if (snap != null) Snapshots.Finish(snap, Settings.Path);
             throw;
         }
+        if (rootWork > 0 && fs.IsSet("system"))
+        {
+            try
+            {
+                var installed = SystemPhase(s, sysChanges, sysOrphans, packages, owned, fs.IsSet("adopt"), fs.IsSet("y"));
+                if (snap != null) snap.Packages = installed;
+            }
+            finally
+            {
+                if (snap != null) Snapshots.Finish(snap, Settings.Path);
+            }
+            snap = null;
+        }
+        else if (rootWork > 0)
+            Console.WriteLine($"{Style.Amber}{Plural(sysChanges.Count + sysOrphans.Count, "system file", "system files")} and " +
+                $"{Plural(packages.Count, "package", "packages")} wait for: myarch apply --system (with sudo){Style.Reset}");
         if (snap != null)
         {
             Snapshots.Finish(snap, Settings.Path);
             if (Directory.Exists(snap.Dir())) Console.WriteLine($"undo with: myarch undo (id {snap.ID})");
         }
         return 0;
-    }
-
-    static void WarnMissingPackages(List<Plugin> plugins)
-    {
-        if (!File.Exists("/usr/bin/pacman")) return;
-        foreach (var p in plugins)
-            foreach (var pkg in p.Pacman)
-                if (Run("pacman", "-Q", pkg) != 0)
-                    Console.Error.WriteLine($"warning: plugin {p.Id} needs package {pkg} (not installed)");
     }
 
     /// <summary>Runs a command quietly and returns its exit status (-1: it didn't start).</summary>

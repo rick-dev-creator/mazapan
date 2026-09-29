@@ -26,7 +26,8 @@ public static partial class Program
         foreach (var p in all)
         {
             found.Add(p.Id);
-            if (cfg.IsDisabled(p.Id)) continue;
+            // Off, or hardware that isn't this machine's: not applied.
+            if (!cfg.IsOn(p) || !Applies(p)) continue;
             try
             {
                 Trusted(lck, p);
@@ -47,6 +48,18 @@ public static partial class Program
         if (problems.Count > 0) throw new MyArchException("plugins:\n  " + string.Join("\n  ", problems));
         return out_;
     }
+
+    /// <summary>Applies: a plugin for every machine, or a hardware plugin whose rules this machine meets.</summary>
+    static bool Applies(Plugin p) => p.Hardware == null || p.Hardware.MatchesIdentity(Hardware.ThisMachine.Get());
+
+    /// <summary>A plugin's state, as listed.</summary>
+    static string PluginState(Settings cfg, Plugin p) => (cfg.IsOn(p), Applies(p)) switch
+    {
+        (true, true) => "enabled",
+        (true, false) => "on, not this machine",
+        (false, _) when p.Hardware != null => "off",
+        _ => "disabled",
+    };
 
     /// <summary>Trusted: built-ins and your own plugins are; one from git must be what plugins.lock says.</summary>
     static void Trusted(PluginsLock lck, Plugin p)
@@ -159,7 +172,7 @@ public static partial class Program
         public List<Plugin> Enabled(params IEnumerable<string> skip)
         {
             var s = skip.ToHashSet();
-            return All.Where(p => !cfg.IsDisabled(p.Id) && !s.Contains(p.Id)).ToList();
+            return All.Where(p => cfg.IsOn(p) && Applies(p) && !s.Contains(p.Id)).ToList();
         }
 
         /// <summary>Origin: built-in, local (a folder someone put in the plugin folder), or the git source it was added from.</summary>
@@ -175,7 +188,7 @@ public static partial class Program
         var c = Catalog.Load();
         foreach (var p in c.All)
         {
-            var state = c.Cfg.IsDisabled(p.Id) ? "disabled" : "enabled";
+            var state = PluginState(c.Cfg, p);
             Console.WriteLine($"{p.Id,-18} {p.Meta.Version,-8} {state,-9} {p.Meta.Description}");
             var o = c.Origin(p);
             if (o != "built-in") Console.WriteLine($"{"",-18} from {o}");
@@ -202,7 +215,7 @@ public static partial class Program
             if (c.Broken.TryGetValue(id, out var err)) throw new MyArchException(err);
             throw new MyArchException($"no plugin \"{id}\" (myarch plugins lists them)");
         }
-        var state = c.Cfg.IsDisabled(id) ? "disabled" : "enabled";
+        var state = PluginState(c.Cfg, p);
         Console.WriteLine($"{Style.Bold}{p.Meta.Name}{Style.Reset} {p.Meta.Version}, {state}, {c.Origin(p)}");
         if (p.Meta.Description != "") Console.WriteLine(p.Meta.Description);
         var e = LockedEntry(c.Lock, p);
@@ -261,7 +274,7 @@ public static partial class Program
             if (c.Broken.TryGetValue(id, out var err)) throw new MyArchException(err);
             if (c.Find(id) == null) throw new MyArchException($"no plugin \"{id}\"");
         }
-        c.Cfg.Disabled = c.Cfg.Disabled.Where(d => !ids.Contains(d)).ToList();
+        foreach (var id in ids) c.Cfg.TurnOn(c.Find(id)!);
         var pr = ProblemsOf(Dependencies.Unmet(c.Enabled(), c.All, c.Broken), [.. ids]);
         if (pr.Count > 0) throw new MyArchException("nothing enabled:\n  " + string.Join("\n  ", pr));
         c.Cfg.Save();
@@ -272,7 +285,7 @@ public static partial class Program
     {
         var c = Catalog.Load();
         foreach (var id in ids)
-            if (c.Find(id) == null && !c.Broken.ContainsKey(id) && !c.Cfg.IsDisabled(id))
+            if (c.Find(id) == null && !c.Broken.ContainsKey(id) && !c.Cfg.IsDisabled(id) && !c.Cfg.Enabled.Contains(id))
                 throw new MyArchException($"no plugin \"{id}\"");
         var rest = c.Enabled(ids);
         var problems = new List<string>();
@@ -291,7 +304,8 @@ public static partial class Program
             throw new MyArchException($"nothing disabled:\n  {string.Join("\n  ", problems)}\n  to disable them all: myarch plugins disable {string.Join(" ", all)}");
         }
         foreach (var id in ids)
-            if (!c.Cfg.IsDisabled(id)) c.Cfg.Disabled.Add(id);
+            if (c.Find(id) is { } p) c.Cfg.TurnOff(p);
+            else if (!c.Cfg.IsDisabled(id)) c.Cfg.Disabled.Add(id);
         c.Cfg.Save();
         Console.WriteLine($"disabled {string.Join(", ", ids)}; myarch apply takes away what it generated");
     }
@@ -545,6 +559,7 @@ public static partial class Program
             RemoveAll(Paths.Join(Git.Dir, id));
             if (c.Cfg.Plugins.Remove(id)) Console.WriteLine($"dropped [plugins.{id}] from config.toml");
             c.Cfg.Disabled.RemoveAll(d => d == id);
+            c.Cfg.Enabled.RemoveAll(d => d == id);
         }
         c.Cfg.Save();
         Console.WriteLine($"removed {string.Join(", ", ids)}; myarch apply takes away what it generated");

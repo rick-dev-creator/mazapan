@@ -54,17 +54,25 @@ public sealed partial class Plugin
         }
         foreach (var t in Targets)
         {
+            if (t.System)
+            {
+                set.Add("full access, as root: writes " + t.Output + (t.Reboot ? " (after a reboot)" : ""));
+                Command("as root after writing", t.Reload);
+                continue;
+            }
             set.Add(FileCapability(t));
             Command("after writing", t.Reload);
         }
         foreach (var c in Checks) Command("as a health check", c.Run);
         foreach (var a in Actions) Command("when you pick it", a.Run);
         foreach (var pkg in Pacman) set.Add("needs the package " + pkg);
+        if (Hardware != null) set.Add("for machines with " + Hardware.Describe());
         // The riskiest first: code, then commands, then files, then packages.
         static int Rank(string s) =>
             s.StartsWith("runs ") ? 1 :
             s.StartsWith("writes ") || s.StartsWith("changes ") ? 2 :
-            s.StartsWith("needs ") ? 3 : 0;
+            s.StartsWith("needs ") ? 3 :
+            s.StartsWith("for machines") ? 4 : 0;
         return set.OrderBy(Rank).ThenBy(s => s, StringComparer.Ordinal).ToList();
     }
 
@@ -168,7 +176,7 @@ public sealed class Library
 /// </summary>
 public static partial class Commands
 {
-    static readonly HashSet<string> Data = ["theme", "settings", "home", "plugin", "lang", "lang_code", "place"];
+    static readonly HashSet<string> Data = ["theme", "settings", "home", "plugin", "lang", "lang_code", "place", "machine"];
 
     static readonly HashSet<string> Pure =
         ["c", "hex", "rgb", "rgba", "cssa", "csv", "speed", "spring", "num", "pct", "quote", "lq", "inline", "base", "mix", "solid", "camel", "json"];

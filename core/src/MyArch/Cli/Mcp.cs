@@ -65,14 +65,14 @@ public static partial class Program
             Obj([]), true, _ => [], _ => { CmdHistory(); Console.WriteLine(); return CmdUndo(["--list"]); }),
         new("preview_change", "Preview a change",
             "What a change would do, without doing it: the plan and the exact unified diff of every file it would write. Show it to the person before apply_change.",
-            ChangeSchema, true, a => ["--dry-run", "--diff", .. ChangeArgs(a)], CmdApply),
+            ChangeSchema, true, a => ["--agent", "--dry-run", "--diff", .. ChangeArgs(a)], CmdApply),
         new("apply_change", "Apply a change",
             "Apply a change (theme, accent, plugin settings that are numbers or switches, enabling or disabling plugins) and write the files. Undoable with undo (the result gives the id). Preview it first. Text settings (commands, keys, formats) are the person's: tell them the command.",
-            ChangeSchema, false, a => ["--changes-only", .. ChangeArgs(a)], CmdApply),
+            ChangeSchema, false, a => ["--agent", "--changes-only", .. ChangeArgs(a)], CmdApply),
         new("undo", "Undo an apply",
             "Put back what the last apply changed (files and config.toml); files changed since are left as they are. Pass the id apply_change gave, so a later change of the person's isn't undone instead.",
             Obj(new Fields { { "id", Prop("string", "the apply to undo (apply_change's result says it); it must be the last one") } }), false,
-            a => a.TryGetProperty("id", out var id) && id.GetString() is { Length: > 0 } s ? ["-y", "--id=" + s] : ["-y"], CmdUndo),
+            a => a.TryGetProperty("id", out var id) && id.GetString() is { Length: > 0 } s ? ["--agent", "-y", "--id=" + s] : ["--agent", "-y"], CmdUndo),
     ];
 
     /// <summary>A change's JSON as apply's flags.</summary>

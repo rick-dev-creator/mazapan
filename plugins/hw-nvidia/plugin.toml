@@ -1,0 +1,41 @@
+[plugin]
+id = "hw-nvidia"
+name = "NVIDIA (Turing and newer)"
+version = "0.1.0"
+api = 1
+description = "NVIDIA's open driver for GeForce RTX 20 and newer: packages, kernel modesetting loaded early, and Hyprland's variables for it"
+requires = ["hypr-base"]
+
+[hardware]
+# Turing (TU1xx) and newer run NVIDIA's open kernel modules (they have a GSP).
+gpu = ["NVIDIA*TU1*", "NVIDIA*GA1*", "NVIDIA*AD1*", "NVIDIA*GB2*", "NVIDIA*GH1*"]
+
+[packages]
+pacman = ["nvidia-open-dkms", "nvidia-utils", "libva-nvidia-driver"]
+
+[[targets]]
+template = "modprobe.conf.tmpl"
+output = "/etc/modprobe.d/myarch-nvidia.conf"
+system = true
+reboot = true
+# The initramfs carries modprobe.d too (the modconf hook).
+reload = "mkinitcpio -P"
+
+[[targets]]
+template = "mkinitcpio.conf.tmpl"
+output = "/etc/mkinitcpio.conf.d/myarch-nvidia.conf"
+system = true
+reboot = true
+# The initramfs carries the modules, so the driver starts before the screen does.
+reload = "mkinitcpio -P"
+
+[[targets]]
+template = "nvidia.lua.tmpl"
+output = "~/.config/hypr/myarch/hw-nvidia.lua"
+
+# The open modules are built for the running kernel on install (DKMS): its
+# headers must be there first, or the driver never loads.
+[[checks]]
+name = "{{ t \"check.headers\" }}"
+run = "[ -e /usr/lib/modules/$(uname -r)/build ]"
+before_system = true

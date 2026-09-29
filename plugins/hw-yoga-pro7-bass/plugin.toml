@@ -1,0 +1,15 @@
+[plugin]
+id = "hw-yoga-pro7-bass"
+name = "Lenovo Yoga Pro 7 bass speakers"
+version = "0.1.0"
+api = 1
+description = "Turns on the bass speakers of the Lenovo Yoga Pro 7 (14IAH10), silent without the right codec pin model"
+
+[hardware]
+product = ["*Yoga Pro 7 14IAH10*"]
+
+[[targets]]
+template = "bass.conf.tmpl"
+output = "/etc/modprobe.d/myarch-yoga-pro7-bass.conf"
+system = true
+reboot = true

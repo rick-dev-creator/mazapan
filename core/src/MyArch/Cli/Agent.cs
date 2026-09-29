@@ -50,7 +50,7 @@ public static partial class Program
                     { "id", p.Id },
                     { "name", p.Meta.Name },
                     { "version", p.Meta.Version },
-                    { "enabled", !c.Cfg.IsDisabled(p.Id) },
+                    { "enabled", c.Cfg.IsOn(p) && Applies(p) },
                 };
                 var origin = c.Origin(p);
                 f.Add("origin", origin.StartsWith("git ") ? "git" : origin);
@@ -130,10 +130,12 @@ public static partial class Program
                         { "time", sn.Time.ToString("o", CultureInfo.InvariantCulture) },
                         { "what", sn.What },
                         { "files", sn.Files.Count },
+                        { "as_root", sn.Files.Any(e => AsRoot.IsSystem(e.Path)) || sn.Packages.Count > 0 },
                     }).ToList()
                 },
             };
             if (checks != null) out_.Add("checks", ChecksJson(checks));
+            if (cfg != null) out_.Add("hardware_to_offer", HardwareToOffer(cfg).Select(p => p.Id).ToList());
             out_.Add("problems", problems);
             Console.WriteLine(GoJson.Marshal(out_));
             return problems.Count > 0 ? 1 : 0;
@@ -201,6 +203,8 @@ public static partial class Program
             return failed > 0 ? 1 : 0;
         }
         var bad = Checks.Failed(RunChecks(s, "Checks"));
+        foreach (var p in HardwareToOffer(s.Cfg))
+            Console.WriteLine($"\n{Style.Amber}○{Style.Reset} {p.Id} is for this machine ({p.Meta.Description}): myarch hardware");
         if (bad.Count > 0) throw new MyArchException($"{bad.Count} checks failed");
         return 0;
     }
@@ -211,6 +215,7 @@ public static partial class Program
             .Bool("list", "what can be undone, newest first")
             .Bool("y", "don't ask")
             .String("id", "undo this apply only if it's still the last one")
+            .Bool("agent", "what an agent may undo: nothing done as root (the MCP server's undo)")
             .Parse(args);
         var snaps = Snapshots.List();
         if (fs.IsSet("list"))
@@ -229,15 +234,27 @@ public static partial class Program
             throw new MyArchException(snaps.Any(x => x.ID == want)
                 ? $"{want} isn't the last apply any more ({snap.ID}: {snap.What} came after it): undo that first, or leave it"
                 : $"no apply {want} to undo (myarch undo --list)");
+        var asRoot = snap.Files.Any(e => AsRoot.IsSystem(e.Path)) || snap.Packages.Count > 0;
+        if (asRoot && fs.IsSet("agent"))
+            throw new MyArchException($"{snap.ID} ({snap.What}) was done as root: undoing it is the person's (myarch undo)");
         Header($"Undo {snap.What} ({snap.ID})");
         foreach (var e in snap.Files)
             Console.WriteLine($"  {(e.Before == "" ? "remove " : "restore"),-8} {Tilde(e.Path)}");
+        foreach (var pkg in snap.Packages) Console.WriteLine($"  {"uninstall",-8} {pkg}");
         if (!fs.IsSet("y"))
         {
             if (!IsTerminal(0)) throw new MyArchException("no terminal to ask on: undo with -y");
             if (!Confirm("Put these back as they were?")) return 0;
         }
+        var rootReloads = SystemState.Reloads();
         var res = Snapshots.Undo(snap, Settings.Path);
+        // System files' reloads, as root, as when they were written: the
+        // plugin may be off by now and not say them any more.
+        foreach (var cmd in res.Restored.Concat(res.Removed).Where(AsRoot.IsSystem)
+                     .Select(p => rootReloads.GetValueOrDefault(p, "")).Where(c => c != "").Distinct())
+            if (AsRoot.Run(cmd) is { } err) Console.Error.WriteLine($"warning: reload {GoFormat.Quote(cmd)} (as root) failed: {err}");
+        foreach (var p in res.Removed.Where(AsRoot.IsSystem)) rootReloads.Remove(p);
+        SystemState.Save(rootReloads);
         foreach (var p in res.Later)
             Console.WriteLine($"  {Style.Amber}{Tilde(p)} changed since: left as it is{Style.Reset}");
         // Let what reads those files pick them up again.
@@ -245,7 +262,8 @@ public static partial class Program
         {
             var s = Load();
             var touched = res.Restored.Concat(res.Removed).ToHashSet();
-            foreach (var (cmd, e) in Apply.Reload(s.Out.Files.Where(f => touched.Contains(f.Path)).Select(f => new Change(f))))
+            var files = s.Out.Files.Where(f => touched.Contains(f.Path)).ToList();
+            foreach (var (cmd, e) in Apply.Reload(files.Where(f => !f.System).Select(f => new Change(f))))
                 Console.Error.WriteLine($"warning: reload {GoFormat.Quote(cmd)} failed: {e}");
         }
         catch (MyArchException e)
@@ -253,7 +271,9 @@ public static partial class Program
             Console.Error.WriteLine($"warning: {e.Message}");
         }
         Console.WriteLine($"{Plural(res.Restored.Count, "file", "files")} back as they were" +
-            (res.Removed.Count > 0 ? $", {res.Removed.Count} removed" : "") + ".");
+            (res.Removed.Count > 0 ? $", {res.Removed.Count} removed" : "") +
+            (snap.Packages.Count > res.PackagesKept.Count ? ", packages it installed uninstalled" : "") + ".");
+        foreach (var k in res.PackagesKept) Console.WriteLine($"  {Style.Dim}kept {k}{Style.Reset}");
         return 0;
     }
 }

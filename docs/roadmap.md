@@ -15,7 +15,7 @@ Suggested start: 1, 2 and 3.
 | 2 | Monitors | **Done** (2026-09-28); follow-ups listed below |
 | 3 | One command palette | **Done** (2026-09-28): first version; follow-ups listed below |
 | 4 | Themes | **Done** (2026-09-28); follow-ups listed below |
-| 5 | Hardware | not started |
+| 5 | Hardware | **Done** (2026-09-29); follow-ups listed below |
 | 6 | An agent-native system | **Done** (2026-09-29); follow-ups listed below |
 | 7 | Plugins | **Done** (2026-09-29); follow-ups listed below |
 | 8 | Capture | **Done** (2026-09-29); follow-ups listed below |
@@ -260,10 +260,40 @@ without restarting them.
 **Omarchy today.** 26 scripts for specific models (ASUS ROG, Dell XPS,
 Framework 16, Surface…), matched on the DMI product name.
 
-**Much better.** Hardware fixes as plugins with declarative match rules
-(DMI, PCI and USB IDs). `myarch doctor` finds the ones that apply and
-offers them; anyone can share theirs. First candidate: the hybrid-GPU
-software-cursor fix from this machine's Omarchy config.
+**Much better.** *Done* — hardware plugins ([plugin-api](plugin-api.md#hardware-plugins)):
+- Declarative match rules in the manifest (`[hardware]`: DMI maker, model
+  and board; PCI and USB ids; a GPU's name from the PCI database; input
+  devices; loaded modules; how many GPUs), read from /sys without root.
+  `myarch hardware` shows the machine and the fixes for it; `doctor` offers
+  the ones that are off. Never applied on their own, never on a machine they
+  aren't for (a config.toml shared with another computer).
+- System files, as root with sudo, only as `myarch*` drop-ins in folders
+  made for them (modprobe.d, udev, mkinitcpio.conf.d, sysctl.d…), and
+  packages: only on `myarch apply --system`, previewed with `--dry-run
+  --diff`, undone with `myarch undo` (files back, packages out). A plain
+  apply, the theme picker's or an agent's, never asks for a password.
+- First plugins: the several-GPUs software cursor (this machine's fix: an
+  RTX 4090 rendering for screens on the Radeon iGPU through a dock), Apple
+  and Mac-mode keyboards' function keys (hid_apple fnmode, applied at once),
+  NVIDIA's open driver for Turing and newer (packages, early KMS in the
+  initramfs, Hyprland's variables), Intel video decoding, Synaptics
+  InterTouch, the Yoga Pro 7's bass speakers.
+
+- Audited (15 findings, fixed): user-writable state (owned.json, snapshots)
+  reached root writes, deletes and pacman arguments (one guard where sudo
+  runs now: only myarch* drop-ins, package names that can't be options);
+  what's a system file was decided by the path under $HOME; every plugin's
+  packages were installed (hardware plugins' only now); undo could stick on
+  a package something needed; removing a system file skipped its reload
+  (mkinitcpio); packages came after the files that need them; agents could
+  turn hardware plugins on or undo root changes; nothing was confirmed
+  before sudo, and text settings reached root files; unplugging a keyboard
+  took its fix away; Intel and Synaptics rules misfired; NVIDIA's variables
+  were global on hybrid laptops; a literal [ never matched.
+
+**Follow-ups.** More of Omarchy's fixes (Surface, Framework, ASUS ROG
+through asusctl, T2 Macs); AUR packages; sharing fixes in a catalog; the
+Chromium accent through its policy (the system files are there now).
 
 ## 6. An agent-native system
 

@@ -102,6 +102,12 @@ public static class Dependencies
                 var r = Requirement.Parse(s); // checked when loaded
                 on.TryGetValue(r.Id, out var dep);
                 string text;
+                if (all.FirstOrDefault(x => x.Id == r.Id) is { Hardware: not null })
+                {
+                    // It's for some machines: on another, what needs it would break.
+                    out_.Add(new(p.Id, r.ToString(), $"{p.Id} requires {r.Id}, a hardware plugin: nothing can require one"));
+                    continue;
+                }
                 if (dep == null && broken != null && broken.ContainsKey(r.Id))
                     text = $"{p.Id} requires {r}, which doesn't load";
                 else if (dep == null && found.Contains(r.Id))

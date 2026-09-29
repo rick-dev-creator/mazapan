@@ -47,6 +47,8 @@ public static class Snapshots
         public string ConfigBefore = "", ConfigAfter = "";
         /// <summary>Written before the apply; finished after it. Pending: the apply didn't get to the end.</summary>
         public bool Pending;
+        /// <summary>Packages the apply installed (apply --system): undo takes them out.</summary>
+        public List<string> Packages = [];
         public string Dir() => Paths.Join(Root(), ID);
     }
 
@@ -122,7 +124,7 @@ public static class Snapshots
         foreach (var e in s.Files) e.After = SumOf(e.Path);
         s.ConfigAfter = SumOf(configPath);
         s.Pending = false;
-        if (s.Files.All(e => e.After == e.BeforeSum) && s.ConfigAfter == s.ConfigBefore)
+        if (s.Files.All(e => e.After == e.BeforeSum) && s.ConfigAfter == s.ConfigBefore && s.Packages.Count == 0)
         {
             Discard(s);
             return;
@@ -165,6 +167,7 @@ public static class Snapshots
                     { "path", e.Path }, { "before", e.Before }, { "before_sum", e.BeforeSum }, { "after", e.After },
                 }).ToList()
             },
+            { "packages", s.Packages },
             { "config_before", s.ConfigBefore },
             { "config_after", s.ConfigAfter },
         });
@@ -192,6 +195,9 @@ public static class Snapshots
                     ConfigBefore = Str(r, "config_before"),
                     ConfigAfter = Str(r, "config_after"),
                 };
+                if (r.TryGetProperty("packages", out var pk))
+                    foreach (var x in pk.EnumerateArray())
+                        if (x.GetString() is { } name && AsRoot.IsPackage(name)) s.Packages.Add(name);
                 foreach (var f in r.GetProperty("files").EnumerateArray())
                     s.Files.Add(new Entry { Path = Str(f, "path"), Before = Str(f, "before"), BeforeSum = Str(f, "before_sum"), After = Str(f, "after") });
                 if (s.ID == Paths.Base(dir)) out_.Add(s);
@@ -207,6 +213,8 @@ public static class Snapshots
         public List<string> Removed = [];
         /// <summary>Changed since the apply: left as they are.</summary>
         public List<string> Later = [];
+        /// <summary>Packages the apply installed that stay: gone already, or needed by something since.</summary>
+        public List<string> PackagesKept = [];
     }
 
     /// <summary>
@@ -236,9 +244,14 @@ public static class Snapshots
                     res.Later.Add(e.Path);
                     continue;
                 }
+                var system = AsRoot.IsSystem(e.Path);
                 if (e.Before == "")
                 {
-                    if (now != "") File.Delete(e.Path);
+                    if (now != "")
+                    {
+                        if (system) AsRoot.Remove(e.Path);
+                        else File.Delete(e.Path);
+                    }
                     res.Removed.Add(e.Path);
                     owned.Remove(e.Path);
                     continue;
@@ -247,7 +260,8 @@ public static class Snapshots
                 {
                     var content = File.ReadAllBytes(Paths.Join(dir, e.Before));
                     // A shared file (kdeglobals) goes back through its symlink, as it was written.
-                    if (Apply.IsShared(ownedBefore.Get(e.Path)) || Apply.IsShared(owned.Get(e.Path))) Apply.WriteShared(e.Path, content);
+                    if (system) AsRoot.Write(e.Path, content);
+                    else if (Apply.IsShared(ownedBefore.Get(e.Path)) || Apply.IsShared(owned.Get(e.Path))) Apply.WriteShared(e.Path, content);
                     else Files.WriteAtomic(e.Path, content);
                 }
                 res.Restored.Add(e.Path);
@@ -271,6 +285,8 @@ public static class Snapshots
             if (File.Exists(copy)) Files.WriteAtomic(real, File.ReadAllBytes(copy));
             else File.Delete(real);
         }
+        // What it installed goes too, but what something else needs by now.
+        res.PackagesKept = AsRoot.Uninstall(s.Packages);
         Directory.Delete(dir, true);
         return res;
     }

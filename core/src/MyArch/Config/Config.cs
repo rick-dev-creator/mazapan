@@ -19,6 +19,8 @@ public sealed class Settings
     /// <summary>Language to render text in ("es", "es_MX"); empty = the OS's.</summary>
     public string Language = "";
     public List<string> Disabled = [];
+    /// <summary>Hardware plugins are off until turned on: the ones that are.</summary>
+    public List<string> Enabled = [];
     /// <summary>Per-plugin setting overrides: [plugins.&lt;id&gt;] key = value</summary>
     public SortedDictionary<string, SortedDictionary<string, object>> Plugins = new(StringComparer.Ordinal);
 
@@ -34,6 +36,7 @@ public sealed class Settings
         c.Accent = r.String("accent");
         c.Language = r.String("language");
         c.Disabled = r.Strings("disabled_plugins");
+        c.Enabled = r.Strings("enabled_plugins");
         if (r.Raw("plugins") is { } plugins)
             foreach (var (id, v) in plugins)
             {
@@ -53,6 +56,7 @@ public sealed class Settings
         if (Accent != "") TomlWriter.Key(b, "accent", Accent);
         if (Language != "") TomlWriter.Key(b, "language", Language);
         if (Disabled.Count > 0) TomlWriter.Key(b, "disabled_plugins", Disabled);
+        if (Enabled.Count > 0) TomlWriter.Key(b, "enabled_plugins", Enabled);
         if (Plugins.Count > 0)
         {
             b.Append("\n[plugins]\n");
@@ -67,6 +71,24 @@ public sealed class Settings
     }
 
     public bool IsDisabled(string id) => Disabled.Contains(id);
+
+    /// <summary>
+    /// IsOn: a plugin is on unless disabled; a hardware plugin is off unless
+    /// enabled (it's for some machines, and can write system files).
+    /// </summary>
+    public bool IsOn(Plugins.Plugin p) => p.Hardware != null ? Enabled.Contains(p.Id) : !Disabled.Contains(p.Id);
+
+    public void TurnOn(Plugins.Plugin p)
+    {
+        Disabled.RemoveAll(d => d == p.Id);
+        if (p.Hardware != null && !Enabled.Contains(p.Id)) Enabled.Add(p.Id);
+    }
+
+    public void TurnOff(Plugins.Plugin p)
+    {
+        Enabled.RemoveAll(d => d == p.Id);
+        if (p.Hardware == null && !Disabled.Contains(p.Id)) Disabled.Add(p.Id);
+    }
 
     /// <summary>A plugin's overrides, or null.</summary>
     public IReadOnlyDictionary<string, object>? For(string id) => Plugins.GetValueOrDefault(id);

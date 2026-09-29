@@ -69,7 +69,25 @@ public sealed partial class Plugin
 
     public CoverageTable Coverage { get; } = new();
 
+    /// <summary>
+    /// Hardware: the machines the plugin is for ([hardware]); null for a plugin
+    /// for every machine. A hardware plugin is off until the person turns it
+    /// on (myarch hardware lists the ones for this machine), and does nothing
+    /// on a machine it isn't for, even when on (a config.toml shared with
+    /// another computer).
+    /// </summary>
+    public Hardware.Rules? Hardware { get; set; }
+
     public string Id => Meta.Id;
+
+    /// <summary>Where a plugin may put a system file (system = true): drop-in folders.</summary>
+    public static readonly string[] SystemDirs =
+    [
+        "/etc/modprobe.d", "/etc/modules-load.d", "/etc/mkinitcpio.conf.d", "/etc/udev/rules.d", "/etc/udev/hwdb.d", "/etc/sysctl.d",
+        "/etc/tmpfiles.d", "/etc/systemd/logind.conf.d", "/etc/systemd/sleep.conf.d", "/etc/X11/xorg.conf.d",
+        "/etc/chromium/policies/managed", "/etc/opt/chrome/policies/managed", "/etc/brave/policies/managed",
+        "/etc/opt/edge/policies/managed",
+    ];
 
     static readonly HashSet<string> KnownToolkits =
         ["terminal", "gtk4", "gtk3", "qt6", "qt5", "electron", "chromium", "firefox", "flatpak", "web"];
@@ -217,6 +235,8 @@ public sealed partial class Plugin
                 Merge = t.String("merge"),
                 Each = t.Strings("each"),
                 Busy = t.String("busy"),
+                System = t.Bool("system"),
+                Reboot = t.Bool("reboot"),
             });
         foreach (var c in r.Array("checks"))
             p.Checks.Add(new Check
@@ -225,6 +245,7 @@ public sealed partial class Plugin
                 Run = c.String("run"),
                 Timeout = c.Int("timeout"),
                 Session = c.Bool("session"),
+                Before = c.Bool("before_system"),
             });
         foreach (var a in r.Array("actions"))
             p.Actions.Add(new Action
@@ -238,6 +259,25 @@ public sealed partial class Plugin
         var cov = r.Sub("coverage");
         p.Coverage.Apps = cov.Strings("apps");
         p.Coverage.Toolkits = cov.Strings("toolkits");
+        if (r.Has("hardware"))
+        {
+            var hw = r.Sub("hardware");
+            p.Hardware = new Hardware.Rules
+            {
+                Vendor = hw.Strings("vendor"),
+                Product = hw.Strings("product"),
+                Board = hw.Strings("board"),
+                Pci = hw.Strings("pci"),
+                Usb = hw.Strings("usb"),
+                Gpu = hw.Strings("gpu"),
+                Input = hw.Strings("input"),
+                Modules = hw.Strings("modules"),
+                Gpus = hw.Int("gpus"),
+            };
+            if (p.Hardware.Empty) throw new MyArchException($"{path}: [hardware] needs at least one rule");
+            if (p.Hardware.BadPatterns().FirstOrDefault() is { } bad)
+                throw new MyArchException($"{path}: [hardware] \"{bad}\" isn't a pattern (a literal [ is \\[)");
+        }
         r.Done();
         p.Validate(path);
         return p;
@@ -311,11 +351,28 @@ public sealed partial class Plugin
                 if (Reserved(fixedPart) || Reserved(Paths.Join(fixedPart, "x")))
                     throw new MyArchException($"{path}: targets[{i}]: each {e} is in myarch's own folders");
             }
+            if (t.System)
+            {
+                // A system file is myarch's by its name, in a folder made for
+                // drop-ins: never a file the system or another package owns.
+                if (!SystemDirs.Contains(Paths.Dir(t.Output)) || !Paths.Base(t.Output).StartsWith("myarch") || t.Each.Count > 0 || t.Merge != "")
+                    throw new MyArchException($"{path}: targets[{i}]: a system file is /etc/…/myarch*, in one of: {string.Join(", ", SystemDirs)}");
+            }
+            else if (t.Output.StartsWith('/') && !t.Output.StartsWith(Paths.Home + "/"))
+                throw new MyArchException($"{path}: targets[{i}]: {t.Output} is outside your home: set system = true (written with sudo)");
+            if (t.Reboot && !t.System)
+                throw new MyArchException($"{path}: targets[{i}]: reboot is for system files");
             if (t.Each.Count == 0 && Reserved(Paths.ExpandHome(t.Output)))
                 throw new MyArchException($"{path}: targets[{i}]: {t.Output} is myarch's own");
             if (!File.Exists(Paths.Join(Dir, t.Template)))
                 throw new MyArchException($"{path}: targets[{i}]: open {Paths.Join(Dir, t.Template)}: no such file or directory");
         }
+        // What goes into a file as root comes from the plugin, and numbers and
+        // switches: never text, which any program can put in config.toml.
+        if (Targets.Any(t => t.System) && Settings.FirstOrDefault(kv => kv.Value is string or Tomlyn.Model.TomlArray or Tomlyn.Model.TomlTable) is { Key: { } textKey })
+            throw new MyArchException($"{path}: [settings] {textKey}: a plugin with system files has only number and true/false settings");
+        foreach (var p in Pacman)
+            if (!Applying.AsRoot.IsPackage(p)) throw new MyArchException($"{path}: [packages] \"{p}\" isn't a package name");
         // Commands must say what they run (see Capabilities).
         try
         {
@@ -366,6 +423,13 @@ public sealed class Target
     /// the next apply, since the app would write its own copy back.
     /// </summary>
     public string Busy = "";
+    /// <summary>
+    /// System: a file outside your home (/etc/modprobe.d/myarch-…), written as
+    /// root with sudo, only by `myarch apply --system`; its reload runs as root.
+    /// </summary>
+    public bool System;
+    /// <summary>Reboot: the change takes effect after a reboot (a kernel module option).</summary>
+    public bool Reboot;
 }
 
 public sealed class Check
@@ -382,6 +446,11 @@ public sealed class Check
     /// failed: a skipped check must not roll back a good update.
     /// </summary>
     public bool Session;
+    /// <summary>
+    /// Before (before_system): must pass before `apply --system` writes the
+    /// plugin's system files (kernel headers before a module built from them).
+    /// </summary>
+    public bool Before;
 }
 
 public sealed class Action

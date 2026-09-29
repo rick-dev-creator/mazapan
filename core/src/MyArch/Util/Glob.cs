@@ -61,6 +61,22 @@ public static class Glob
         }
     }
 
+    /// <summary>IsValid: a pattern Match can use (not "[a-", "[]a]", or ending in "\\").</summary>
+    public static bool IsValid(string pattern)
+    {
+        try
+        {
+            MatchOrThrow(pattern, "");
+            // A class only fails on a name it gets to: try one with every rune.
+            MatchOrThrow(pattern, new string('a', Math.Max(1, pattern.Length)));
+            return true;
+        }
+        catch (BadPattern)
+        {
+            return false;
+        }
+    }
+
     static int[] Runes(string s) => s.EnumerateRunes().Select(r => r.Value).ToArray();
 
     static bool MatchOrThrow(string patternText, string nameText)

@@ -34,6 +34,8 @@ myarch apply --set bar-clock.font_size=11 --dry-run --diff   # preview exactly
 myarch undo                     # put back what the last apply changed
 myarch status --json            # the whole state, for agents and scripts
 myarch mcp                      # the same for agents, as an MCP server
+myarch hardware                 # this machine, and the hardware fixes for it
+myarch apply --system           # also system files (/etc) and packages, with sudo
 ```
 
 Agents (Claude Code, any MCP client) change the desktop the way a person

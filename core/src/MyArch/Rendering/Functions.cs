@@ -266,6 +266,23 @@ static class Model
         });
     }
 
+    /// <summary>The machine, for hardware plugins: maker, model, and each GPU's name and driver.</summary>
+    public static ScriptObject Machine(Hardware.Machine m)
+    {
+        var gpus = new ScriptArray(m.Gpus.Select(g => (object)Frozen(new ScriptObject
+        {
+            ["id"] = $"{g.Vendor}:{g.Device}",
+            ["name"] = g.Name,
+            ["driver"] = g.Driver,
+        })));
+        return Frozen(new ScriptObject
+        {
+            ["vendor"] = m.Vendor,
+            ["product"] = m.Product,
+            ["gpus"] = Frozen(gpus),
+        });
+    }
+
     public static ScriptObject Settings(Dictionary<string, object> settings)
     {
         var o = new ScriptObject();

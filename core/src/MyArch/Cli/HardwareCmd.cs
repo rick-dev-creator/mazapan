@@ -1,0 +1,77 @@
+using MyArch.Config;
+using MyArch.Hardware;
+using MyArch.Plugins;
+using MyArch.Util;
+
+namespace MyArch.Cli;
+
+public static partial class Program
+{
+    /// <summary>
+    /// `myarch hardware`: this machine as plugins see it (model, GPUs, USB
+    /// devices), and the hardware plugins for it: which are on, and how to
+    /// turn on the others. Nothing is turned on by itself.
+    /// </summary>
+    static int CmdHardware(string[] args)
+    {
+        var fs = new Flags("hardware")
+            .Bool("json", "as data")
+            .Bool("all", "list the hardware plugins for other machines too")
+            .Parse(args);
+        var m = ThisMachine.Get();
+        var cfg = Settings.Load();
+        var hw = Plugin.Discover(PluginDirs()).Plugins.Where(p => p.Hardware != null).ToList();
+        var rows = hw.Select(p => (Plugin: p, Match: p.Hardware!.Matches(m), On: cfg.IsOn(p))).ToList();
+
+        if (fs.IsSet("json"))
+        {
+            Console.WriteLine(GoJson.Marshal(new Fields
+            {
+                { "version", StatusVersion },
+                {
+                    "machine", new Fields
+                    {
+                        { "vendor", m.Vendor }, { "product", m.Product }, { "version", m.Version }, { "board", m.Board },
+                        { "gpus", m.Gpus.Select(g => new Fields { { "id", $"{g.Vendor}:{g.Device}" }, { "name", g.Name }, { "driver", g.Driver } }).ToList() },
+                        { "usb", m.Usb.Select(u => new Fields { { "id", $"{u.Vendor}:{u.Product}" }, { "name", u.Name } }).ToList() },
+                    }
+                },
+                {
+                    "plugins", rows.Select(r => new Fields
+                    {
+                        { "id", r.Plugin.Id },
+                        { "applies", r.Match.Ok },
+                        { "on", r.On },
+                        { "for", r.Plugin.Hardware!.Describe() },
+                        { "description", r.Plugin.Meta.Description },
+                    }).ToList()
+                },
+            }));
+            return 0;
+        }
+
+        Console.WriteLine($"{Style.Bold}{m.Vendor} {m.Product}{Style.Reset}{(m.Version != "" && m.Version != m.Product ? $" ({m.Version})" : "")}");
+        foreach (var g in m.Gpus)
+            Console.WriteLine($"  GPU  {g.Name}{(g.Driver != "" ? $" {Style.Dim}[{g.Driver}]{Style.Reset}" : "")}");
+        Console.WriteLine();
+        var mine = rows.Where(r => r.Match.Ok).ToList();
+        if (mine.Count == 0) Console.WriteLine("No hardware plugin is for this machine.");
+        foreach (var (p, _, on) in mine)
+        {
+            Console.WriteLine($"  {(on ? Style.Green + "✓" : Style.Amber + "○")}{Style.Reset} {p.Id,-24} {p.Meta.Description}");
+            if (!on) Console.WriteLine($"    {Style.Dim}turn it on: myarch plugins enable {p.Id} && myarch apply --system{Style.Reset}");
+        }
+        if (fs.IsSet("all"))
+        {
+            Console.WriteLine("\nFor other machines:");
+            foreach (var (p, match, _) in rows.Where(r => !r.Match.Ok))
+                Console.WriteLine($"  {Style.Dim}{p.Id,-26} {p.Hardware!.Describe()} (here: {match.Why}){Style.Reset}");
+        }
+        return 0;
+    }
+
+    /// <summary>The hardware plugins for this machine that are off: doctor and status mention them.</summary>
+    static List<Plugin> HardwareToOffer(Settings cfg) =>
+        Plugin.Discover(PluginDirs()).Plugins
+            .Where(p => p.Hardware != null && !cfg.IsOn(p) && p.Hardware.Matches(ThisMachine.Get()).Ok).ToList();
+}

@@ -59,6 +59,7 @@ public static partial class Program
                 "undo" => CmdUndo(rest),
                 "mcp" => CmdMcp(rest),
                 "report" => CmdReport(rest),
+                "hardware" => CmdHardware(rest),
                 "history" => CmdHistory(),
                 "rollback" => CmdRollback(rest),
                 "coverage" => CmdCoverage(rest),

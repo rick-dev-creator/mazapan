@@ -42,6 +42,9 @@ What an agent can't do, on purpose:
 - install, update or remove plugins from git (their capabilities are the
   person's to approve), or update the system (`myarch update` asks, runs
   sudo, and can roll back).
+- anything as root: turn hardware plugins on or off or change them, apply
+  with `--system`, or undo what was done as root (`status --json` marks
+  those undo entries `as_root`).
 
 `apply_change` and `undo` are marked destructive, so clients ask before
 running them. An agent undoing its own change passes the id `apply_change`

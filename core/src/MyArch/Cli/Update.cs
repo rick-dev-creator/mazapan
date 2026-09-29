@@ -459,7 +459,7 @@ public static partial class Program
         List<Result> failed;
         try
         {
-            foreach (var (cmd, e) in Apply.Reload(s.Out.Files.Select(f => new Applying.Change(f))))
+            foreach (var (cmd, e) in Apply.Reload(s.Out.Files.Where(f => !f.System).Select(f => new Applying.Change(f))))
                 Console.Error.WriteLine($"  warning: reload {GoFormat.Quote(cmd)} failed: {e}");
             failed = Checks.Failed(RunChecks(s, "Checks"));
         }

@@ -111,6 +111,69 @@ enabled plugin needs one that is missing, disabled or at a version that
 doesn't do; `enable` and `disable` say what else they'd need to take along.
 A bar widget requires `shell-bar`; a Hyprland fragment, `hypr-base`.
 
+## Hardware plugins
+
+A plugin with a `[hardware]` table is for some machines only:
+
+```toml
+[hardware]            # every rule given must hold; a list holds when any pattern does
+vendor = ["LENOVO"]                  # DMI: maker, model (or its version), board
+product = ["*Yoga Pro 7 14IAH10*"]
+board = ["X870E*"]
+pci = ["10de:*"]                     # vendor:device, hex
+usb = ["05ac:*"]
+gpu = ["NVIDIA*AD1*", "*Radeon*"]    # a GPU's name in the PCI database
+input = ["*Synaptics*"]              # an input device's name
+modules = ["hid_apple"]              # a loaded kernel module
+gpus = 2                             # at least this many GPUs
+```
+
+Patterns are shell patterns, case-insensitive (a literal `[`, common in PCI
+names, is `\\[`; a pattern that can't match is an error). Everything is
+read from `/sys` and `/proc`, without root; `myarch hardware` shows the
+machine as plugins see it (`--json` for scripts) and which hardware plugins
+are for it. Templates see it as `machine` (`vendor`, `product`, `gpus`: each
+GPU's `id`, `name`, `driver`), so a plugin can tell a desktop with one GPU
+from a hybrid laptop.
+
+A hardware plugin is **off until you turn it on** (`myarch plugins enable`;
+`enabled_plugins` in config.toml). All its rules decide whether it's offered
+(`myarch doctor`, `status --json`'s `hardware_to_offer`); once on, it stays
+on while the machine is the same one — maker, model, board, PCI devices,
+GPUs — whatever comes and goes (a keyboard unplugged, a module not loaded
+yet, a dock's GPU): unplugging the keyboard mustn't take the fix away. On
+another machine (a config.toml shared with it) it does nothing. No plugin
+can require a hardware plugin.
+
+Most hardware fixes need root. A target with `system = true` is a file
+written as root, with sudo, only in a drop-in folder (`/etc/modprobe.d`,
+`/etc/modules-load.d`, `/etc/mkinitcpio.conf.d`, `/etc/udev/rules.d`,
+`/etc/udev/hwdb.d`, `/etc/sysctl.d`, `/etc/tmpfiles.d`,
+`/etc/systemd/logind.conf.d`, `/etc/systemd/sleep.conf.d`,
+`/etc/X11/xorg.conf.d`, browsers' `policies/managed`) and named `myarch*`:
+never a file the system or another package owns. Its `reload` runs as
+root; `reboot = true` says it takes effect after a reboot. `[packages]
+pacman` are installed too.
+
+None of that happens on a plain `myarch apply` (the theme picker's, an
+agent's): it says what waits. `myarch apply --system` lists everything it
+will do as root — packages, each file's diff, removals, commands — and asks
+before the first sudo (`-y` to skip the question; without a terminal it's
+required). Then, in order: packages (a driver before the files that load
+it), checks marked `before_system = true` (kernel headers before a module
+built from them), files, and their reloads — also those of files it
+removes, and of files undo puts back, which myarch remembers. `myarch undo`
+takes it all back: system files as they were, packages it installed
+uninstalled unless something else needs them by now.
+
+What's written as root comes from the plugin: a plugin with system files
+has only number and true/false settings (text, which any program can put in
+config.toml, never reaches a root file). Agents (`myarch mcp`) can't turn
+hardware plugins on or off, change their settings, apply as root, or undo
+what was done as root. Every root write, delete and package name is checked
+where sudo runs, whatever asked for it: owned.json and snapshots are yours
+to edit, so a path in them is never enough.
+
 ## Checks
 
 A plugin says how to tell that what it's responsible for still works:

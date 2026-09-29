@@ -1,0 +1,16 @@
+[plugin]
+id = "hw-synaptics-intertouch"
+name = "Synaptics touchpads over SMBus"
+version = "0.1.0"
+api = 1
+description = "Synaptics touchpads through InterTouch (SMBus) instead of PS/2: smooth scrolling and gestures on ThinkPads and other laptops"
+
+[hardware]
+# Only on PS/2: one already on SMBus (RMI4) is named otherwise.
+input = ["SynPS/2 Synaptics TouchPad"]
+
+[[targets]]
+template = "psmouse.conf.tmpl"
+output = "/etc/modprobe.d/myarch-psmouse.conf"
+system = true
+reboot = true

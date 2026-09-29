@@ -1,0 +1,15 @@
+[plugin]
+id = "hw-multi-gpu-cursor"
+name = "Cursor with several GPUs"
+version = "0.1.0"
+api = 1
+description = "Draws the cursor in software when the machine has several GPUs (one renders, another drives screens: a dock on the iGPU, a laptop's panel): the hardware cursor flickers on the other GPU's screens"
+requires = ["hypr-base"]
+
+[hardware]
+gpus = 2
+
+[[targets]]
+template = "cursor.lua.tmpl"
+output = "~/.config/hypr/myarch/hw-cursor.lua"
+reload = "hyprctl reload >/dev/null"
