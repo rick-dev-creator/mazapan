@@ -196,7 +196,7 @@ public static partial class Program
         {
             try
             {
-                s.Write(changes, orphans, owned, false);
+                using (ApplyLock.Take()) s.Write(changes, orphans, owned, false);
             }
             catch (ConflictException ce)
             {
@@ -481,14 +481,6 @@ public static partial class Program
         Console.WriteLine($"\n{Style.Green}Rolled back: the system is as it was before {rec.ID}.{Style.Reset}");
         if (failed.Count > 0)
             Console.WriteLine($"{Style.Amber}{Plural(failed.Count, "check is", "checks are")} still failing: see myarch doctor.{Style.Reset}");
-    }
-
-    static int CmdDoctor()
-    {
-        var s = Load();
-        var failed = Checks.Failed(RunChecks(s, "Checks"));
-        if (failed.Count > 0) throw new MyArchException($"{failed.Count} checks failed");
-        return 0;
     }
 
     static int CmdHistory()

@@ -18,6 +18,9 @@ public sealed class Fields : IEnumerable<KeyValuePair<string, object?>>
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
 
+/// <summary>JSON written as it is (a JSON-RPC id echoed back, whatever it was).</summary>
+public sealed record RawJson(string Text);
+
 /// <summary>
 /// JSON byte for byte as Go's json.Marshal wrote it: maps with their keys
 /// sorted, structs (Fields) in declaration order, HTML-safe strings, floats
@@ -41,6 +44,9 @@ public static class GoJson
                 break;
             case string s:
                 GoFormat.JsonString(b, s);
+                break;
+            case RawJson r:
+                b.Append(r.Text);
                 break;
             case bool x:
                 b.Append(x ? "true" : "false");

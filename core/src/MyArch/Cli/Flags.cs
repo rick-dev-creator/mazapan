@@ -11,6 +11,13 @@ sealed class Flags(string command)
 {
     readonly Dictionary<string, (string Help, bool IsBool)> known = [];
     readonly Dictionary<string, string> values = [];
+    readonly Dictionary<string, List<string>> lists = [];
+
+    /// <summary>
+    /// Throw instead of exiting on a bad flag: the MCP server runs commands
+    /// in its own process, which one bad argument must not end.
+    /// </summary>
+    public static bool Throw;
 
     public List<string> Rest { get; private set; } = [];
 
@@ -25,6 +32,16 @@ sealed class Flags(string command)
         known[name] = (help, false);
         return this;
     }
+
+    /// <summary>A string flag that can be given more than once (--set a=1 --set b=2).</summary>
+    public Flags List(string name, string help)
+    {
+        known[name] = (help, false);
+        lists[name] = [];
+        return this;
+    }
+
+    public List<string> All(string name) => lists.GetValueOrDefault(name) ?? [];
 
     public bool IsSet(string name) => values.TryGetValue(name, out var v) && v == "true";
 
@@ -56,9 +73,10 @@ sealed class Flags(string command)
                 value = name[(eq + 1)..];
                 name = name[..eq];
             }
-            if (name is "h" or "help") Usage(0);
+            if (name is "h" or "help" && !Throw) Usage(0);
             if (!known.TryGetValue(name, out var f))
             {
+                if (Throw) throw new MyArchException($"{command}: no flag -{name}");
                 Console.Error.WriteLine($"flag provided but not defined: -{name}");
                 Usage(2);
             }
@@ -82,7 +100,8 @@ sealed class Flags(string command)
                 }
                 value = args[++i];
             }
-            values[name] = value;
+            if (lists.TryGetValue(name, out var list)) list.Add(value);
+            else values[name] = value;
         }
         Rest = args.Skip(i).ToList();
         return this;
@@ -97,6 +116,7 @@ sealed class Flags(string command)
 
     void Usage(int code)
     {
+        if (Throw && code != 0) throw new MyArchException($"{command}: bad arguments (see myarch {command} -h)");
         var w = code == 0 ? Console.Out : Console.Error;
         w.WriteLine($"Usage of {command}:");
         foreach (var (name, (help, isBool)) in known.OrderBy(k => k.Key, StringComparer.Ordinal))

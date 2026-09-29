@@ -1,0 +1,4 @@
+ask = "Ask an agent about this desktop"
+"ask.kw" = "ai help crash broken fix claude assistant"
+report = "Copy a report of what's wrong"
+"report.kw" = "diagnose logs errors crash help"

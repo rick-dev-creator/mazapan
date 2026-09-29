@@ -1,0 +1,4 @@
+ask = "Preguntar a un agente sobre este escritorio"
+"ask.kw" = "ia ayuda fallo roto arreglar claude asistente"
+report = "Copiar un reporte de lo que falla"
+"report.kw" = "diagnóstico registros errores fallo ayuda"

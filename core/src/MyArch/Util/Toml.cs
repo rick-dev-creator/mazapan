@@ -21,9 +21,9 @@ public static class Toml
 
     public static TomlTable Parse(string text, string path)
     {
-        Duplicates(text, path);
         try
         {
+            Duplicates(text, path);
             return TomlSerializer.Deserialize(text, Strict.TomlTable) ?? new TomlTable();
         }
         catch (TomlException e)

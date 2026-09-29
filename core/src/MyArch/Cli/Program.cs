@@ -14,7 +14,8 @@ public static partial class Program
           update [-y] [--check] [--no-rollback]
                          update the system: preview, upgrade, re-apply, check, and
                          roll back on its own if a check fails
-          doctor         run every plugin's checks now
+          doctor [--json]
+                 run every plugin's checks now
           history        past updates and how they went
           rollback [ID]  put back the packages and files from before an update
                          (the last one by default)
@@ -53,7 +54,11 @@ public static partial class Program
                 "plugins" => CmdPlugins(rest),
                 "apply" => CmdApply(rest),
                 "update" => CmdUpdate(rest),
-                "doctor" => CmdDoctor(),
+                "doctor" => CmdDoctor(rest),
+                "status" => CmdStatus(rest),
+                "undo" => CmdUndo(rest),
+                "mcp" => CmdMcp(rest),
+                "report" => CmdReport(rest),
                 "history" => CmdHistory(),
                 "rollback" => CmdRollback(rest),
                 "coverage" => CmdCoverage(rest),

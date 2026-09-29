@@ -283,6 +283,9 @@ folder, never a path out of it. Scriban's functions are all there but those
 that read or run something else (`include`, `object.eval`) or change on
 every apply (`date.now`, `math.random`).
 
+A text setting that goes into code is always quoted for it (`lq`, `quote`,
+`inline`): its value must never be able to close a string and add code.
+
 What templates see:
 
 | Name           | Meaning                                         |
@@ -315,7 +318,9 @@ Functions, besides Scriban's own (`string.*`, `array.*`, `object.keys`…):
 | `camel "bg_alt"`           | `bgAlt` (QML property names)  |
 | `t "today"`                | `hoy` (this plugin's text)    |
 | `tq "today"`               | `"hoy"` (quoted for QML/Lua)  |
-| `quote settings.format`    | any string, quoted the same way |
+| `quote settings.format`    | any string, quoted the same way (QML/JS) |
+| `lq settings.key`          | any string as a Lua literal: `"SUPER + space"` |
+| `inline settings.style`    | without line breaks: for a comment or an ini value |
 | `under "~/.config/hypr/myarch/"` | every plugin output below that path |
 | `json actions`             | a JSON value, also a valid QML/JS literal |
 

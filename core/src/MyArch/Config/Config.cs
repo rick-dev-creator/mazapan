@@ -62,8 +62,8 @@ public sealed class Settings
                 foreach (var (k, v) in settings) TomlWriter.Key(b, k, v, "    ");
             }
         }
-        Directory.CreateDirectory(System.IO.Path.GetDirectoryName(Path)!);
-        File.WriteAllText(Path, b.ToString());
+        // Atomically, and through a symlink (dotfiles kept with stow or chezmoi).
+        Files.WriteAtomic(Paths.Real(Path) ?? Path, b.ToString());
     }
 
     public bool IsDisabled(string id) => Disabled.Contains(id);

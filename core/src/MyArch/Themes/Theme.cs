@@ -91,6 +91,8 @@ public sealed partial class Theme
     /// <summary>Load finds theme id in the first directory of dirs that has it.</summary>
     public static Theme Load(IEnumerable<string> dirs, string id)
     {
+        // A theme's id is its folder's name: never a path to somewhere else.
+        if (!Plugins.Plugin.IdPattern().IsMatch(id)) throw new MyArchException($"no theme \"{id}\": a theme's id is lowercase letters, digits and dashes");
         var list = dirs.ToList();
         foreach (var d in list)
         {

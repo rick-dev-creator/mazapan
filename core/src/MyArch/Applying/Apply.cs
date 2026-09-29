@@ -245,6 +245,44 @@ public static partial class Apply
     }
 
     /// <summary>
+    /// Proposed is what writing c puts on disk, and what ownership records
+    /// for it: the rendered file, or for a shared one, the file on disk with
+    /// myarch's keys merged in. What --diff shows is exactly this.
+    /// </summary>
+    public static (byte[] Content, string Sum) Proposed(Change c, Owned owned)
+    {
+        var content = Files.Utf8.GetBytes(c.Content);
+        var sum = Sum(content);
+        if (c.Merge != "")
+        {
+            var keys = KeysOf(c.Merge, c.Content);
+            sum = SharedOwned(c.Merge, keys);
+            // Not there yet: written as rendered, comments and all.
+            if (Read(c.Path) is { } disk)
+                content = Files.Utf8.GetBytes(DropKeys(c.Merge,
+                    MergeKeys(c.Merge, Files.Utf8.GetString(disk), keys), NoLonger(owned.Get(c.Path), keys)));
+        }
+        return (content, sum);
+    }
+
+    /// <summary>
+    /// ProposedOrphan is what removing an orphan does to it: null when it's
+    /// deleted, its content when it stays but loses myarch's keys (a shared
+    /// file: user.js, kdeglobals), or its content as it is when it's left
+    /// alone (edited, or gone).
+    /// </summary>
+    public static byte[]? ProposedOrphan(string path, Owned owned)
+    {
+        if (Read(path) is not { } disk) return null;
+        if (IsShared(owned.Get(path)))
+        {
+            FromSharedOwned(owned.Get(path), out var old, out var format);
+            return Files.TryText(disk, out var text) ? Files.Utf8.GetBytes(DropKeys(format, text, old)) : disk;
+        }
+        return Sum(disk) == owned.Get(path) ? null : disk;
+    }
+
+    /// <summary>
     /// Execute writes the plan. Conflicts abort (a ConflictException) unless
     /// adopt is set, in which case the existing file is backed up and taken
     /// over. owned is updated as files are written, even when it stops half
@@ -263,17 +301,7 @@ public static partial class Apply
             {
                 if (c.State is State.Busy or State.Unreadable)
                     continue; // untouched, still ours as it was
-                var content = Files.Utf8.GetBytes(c.Content);
-                var sum = Sum(content);
-                if (c.Merge != "")
-                {
-                    var keys = KeysOf(c.Merge, c.Content);
-                    sum = SharedOwned(c.Merge, keys);
-                    // Not there yet: written as rendered, comments and all.
-                    if (Read(c.Path) is { } disk)
-                        content = Files.Utf8.GetBytes(DropKeys(c.Merge,
-                            MergeKeys(c.Merge, Files.Utf8.GetString(disk), keys), NoLonger(owned.Get(c.Path), keys)));
-                }
+                var (content, sum) = Proposed(c, owned);
                 switch (c.State)
                 {
                     case State.Unchanged:
@@ -445,7 +473,7 @@ public static partial class Apply
     // ---- files ----
 
     /// <summary>A file's bytes, or null when it doesn't exist (Go's fs.ErrNotExist).</summary>
-    internal static byte[]? ReadOrNull(string path)
+    public static byte[]? ReadOrNull(string path)
     {
         try
         {

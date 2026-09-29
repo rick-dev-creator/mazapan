@@ -4,13 +4,13 @@
 -- layout) instead of dwindle, where every new window halves the previous
 -- one. Three arrangements, remembered per workspace:
 --
---   equal  {{ settings.key }}: every column the same width, filling the screen
---   phone  {{ settings.phone_key }}: phone-width columns, centered as a group
---   focus  {{ settings.focus_key }}: the focused window in the middle at {{ settings.focus_ratio }} of the
+--   equal  {{ inline settings.key }}: every column the same width, filling the screen
+--   phone  {{ inline settings.phone_key }}: phone-width columns, centered as a group
+--   focus  {{ inline settings.focus_key }}: the focused window in the middle at {{ inline settings.focus_ratio }} of the
 --          width, the rest stacked in a column on each side
 --
--- Plus, on the focused column: {{ settings.grow_key }} / {{ settings.shrink_key }} grow and
--- shrink it (in focus mode: the middle), {{ settings.move_left_key }} / {{ settings.move_right_key }}
+-- Plus, on the focused column: {{ inline settings.grow_key }} / {{ inline settings.shrink_key }} grow and
+-- shrink it (in focus mode: the middle), {{ inline settings.move_left_key }} / {{ inline settings.move_right_key }}
 -- move it along the row.
 --
 -- Centering in phone mode works through the workspace's outer gaps: the
@@ -186,13 +186,13 @@ myarch_columns = {
   shrink = function() resize("-") end,
 }
 
-hl.bind("{{ settings.key }}", myarch_columns.equal)
-hl.bind("{{ settings.phone_key }}", myarch_columns.phone)
-hl.bind("{{ settings.focus_key }}", myarch_columns.focus)
-hl.bind("{{ settings.grow_key }}", myarch_columns.grow, { repeating = true })
-hl.bind("{{ settings.shrink_key }}", myarch_columns.shrink, { repeating = true })
-hl.bind("{{ settings.move_left_key }}", hl.dsp.layout("swapcol l"))
-hl.bind("{{ settings.move_right_key }}", hl.dsp.layout("swapcol r"))
+hl.bind({{ lq settings.key }}, myarch_columns.equal)
+hl.bind({{ lq settings.phone_key }}, myarch_columns.phone)
+hl.bind({{ lq settings.focus_key }}, myarch_columns.focus)
+hl.bind({{ lq settings.grow_key }}, myarch_columns.grow, { repeating = true })
+hl.bind({{ lq settings.shrink_key }}, myarch_columns.shrink, { repeating = true })
+hl.bind({{ lq settings.move_left_key }}, hl.dsp.layout("swapcol l"))
+hl.bind({{ lq settings.move_right_key }}, hl.dsp.layout("swapcol r"))
 {{- if settings.auto }}
 
 -- Re-apply whatever mode the workspace is in when its windows change.

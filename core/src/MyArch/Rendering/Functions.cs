@@ -17,6 +17,13 @@ static class Functions
         // tq "preview.empty" -> the same, as a quoted string literal that is
         // valid in QML/JS and Lua: "workspace %1 · vacío"
         g.Add("tq", DelegateCustomFunction.CreateFunc((string key) => GoFormat.Quote(cat.T(key))));
+        // lq "SUPER + space" -> "\"SUPER + space\"": a string as a Lua literal,
+        // so a setting can't close the string and add code.
+        g.Add("lq", DelegateCustomFunction.CreateFunc((string s) => LuaQuote(s)));
+        // inline "a\nb" -> "a b": for a comment or an ini value, where a line
+        // break would start something else.
+        g.Add("inline", DelegateCustomFunction.CreateFunc((string s) =>
+            new string(s.Select(ch => char.IsControl(ch) ? ' ' : ch).ToArray())));
         // quote "text" -> "\"text\"": any string as such a literal.
         g.Add("quote", DelegateCustomFunction.CreateFunc((string s) => GoFormat.Quote(s)));
         // c "accent" -> "#ffb000"; fails the render on unknown tokens.
@@ -93,6 +100,27 @@ static class Functions
                 if (parts[i] != "") parts[i] = char.ToUpperInvariant(parts[i][0]) + parts[i][1..];
             return string.Concat(parts);
         }));
+    }
+
+    static string LuaQuote(string s)
+    {
+        var b = new StringBuilder("\"");
+        foreach (var ch in s)
+        {
+            switch (ch)
+            {
+                case '\\': b.Append("\\\\"); break;
+                case '"': b.Append("\\\""); break;
+                case '\n': b.Append("\\n"); break;
+                case '\r': b.Append("\\r"); break;
+                case '\t': b.Append("\\t"); break;
+                default:
+                    if (ch < 0x20 || ch == 0x7f) b.Append('\\').Append(((int)ch).ToString("000", CultureInfo.InvariantCulture));
+                    else b.Append(ch);
+                    break;
+            }
+        }
+        return b.Append('"').ToString();
     }
 
     static string Six(string c)

@@ -171,7 +171,7 @@ public static partial class Commands
     static readonly HashSet<string> Data = ["theme", "settings", "home", "plugin", "lang", "lang_code", "place"];
 
     static readonly HashSet<string> Pure =
-        ["c", "hex", "rgb", "rgba", "cssa", "csv", "speed", "spring", "num", "pct", "quote", "base", "mix", "solid", "camel", "json"];
+        ["c", "hex", "rgb", "rgba", "cssa", "csv", "speed", "spring", "num", "pct", "quote", "lq", "inline", "base", "mix", "solid", "camel", "json"];
 
     [GeneratedRegex(@"\s+\{\{-")]
     private static partial Regex TrimLeft();

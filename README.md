@@ -30,7 +30,15 @@ myarch plugins sync             # the plugins in plugins.lock (on another machin
 myarch themes                   # every theme, with its contrast problems
 myarch coverage                 # installed apps the theme reaches, and not
 myarch apply --accent '#4fa35f' # your accent in any theme ("theme" = its own)
+myarch apply --set bar-clock.font_size=11 --dry-run --diff   # preview exactly
+myarch undo                     # put back what the last apply changed
+myarch status --json            # the whole state, for agents and scripts
+myarch mcp                      # the same for agents, as an MCP server
 ```
+
+Agents (Claude Code, any MCP client) change the desktop the way a person
+does: through myarch, previewed with the exact diff, undoable. See
+[docs/agent-api.md](docs/agent-api.md).
 
 `SUPER + SHIFT + T` opens the theme picker: each theme drawn as a small
 desktop from its own colors, previewed live on yours as you move through

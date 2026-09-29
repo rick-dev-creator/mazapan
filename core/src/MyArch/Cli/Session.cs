@@ -112,6 +112,48 @@ public static partial class Program
             Console.WriteLine($"  {Style.Dim}unreadable: not plain JSON (comments?), left as it is; set what myarch would by hand{Style.Reset}");
     }
 
+    static (string Plugin, string Key) SplitKey(string s, string flag)
+    {
+        var dot = s.IndexOf('.');
+        if (dot <= 0 || dot == s.Length - 1) throw new MyArchException($"{flag} {s}: use plugin.key");
+        return (s[..dot], s[(dot + 1)..]);
+    }
+
+    /// <summary>plugin.key=value: the value as TOML (true, 480, 0.5, "text", ["a"]), or else as text.</summary>
+    static (string Plugin, string Key, object Value) ParseSet(string s)
+    {
+        var eq = s.IndexOf('=');
+        if (eq < 0) throw new MyArchException($"--set {s}: use plugin.key=value");
+        var (plugin, key) = SplitKey(s[..eq], "--set");
+        var raw = s[(eq + 1)..];
+        object value = raw;
+        try
+        {
+            value = Toml.Parse("v = " + raw + "\n", "--set")["v"]!;
+        }
+        catch (Exception e) when (e is MyArchException or Tomlyn.TomlException) { } // not a TOML value: text
+        return (plugin, key, value);
+    }
+
+    /// <summary>PrintDiffs shows, as unified diffs, what writing the plan puts on disk.</summary>
+    static void PrintDiffs(List<Change> changes, List<string> orphans, Owned owned, bool adopt)
+    {
+        foreach (var c in changes)
+        {
+            if (c.State is not (State.New or State.Changed) && !(c.State == State.Conflict && adopt)) continue;
+            var before = Apply.ReadOrNull(c.Path) is { } b ? Files.Utf8.GetString(b) : "";
+            var after = Files.Utf8.GetString(Apply.Proposed(c, owned).Content);
+            Console.Write(Diff.Unified(before, after, c.State == State.New ? "/dev/null" : Tilde(c.Path), Tilde(c.Path)));
+        }
+        foreach (var o in orphans)
+        {
+            if (Apply.ReadOrNull(o) is not { } b) continue;
+            var after = Apply.ProposedOrphan(o, owned);
+            Console.Write(Diff.Unified(Files.Utf8.GetString(b), after == null ? "" : Files.Utf8.GetString(after),
+                Tilde(o), after == null ? "/dev/null" : Tilde(o)));
+        }
+    }
+
     [GeneratedRegex(@"^#[0-9a-fA-F]{6}\z")]
     private static partial Regex AccentPattern();
 
@@ -122,24 +164,93 @@ public static partial class Program
             .String("accent", "use this accent color, #rrggbb; \"theme\" for the theme's own (saved in config)")
             .Bool("dry-run", "show what would change, write nothing")
             .Bool("adopt", "back up and take over files myarch didn't write")
+            .Bool("diff", "show exactly what would be written, as a unified diff")
+            .Bool("changes-only", "list only the files that change")
+            .List("set", "set a plugin's setting in config.toml: plugin.key=value (a TOML value: true, 480, \"text\")")
+            .List("reset", "back to the plugin's default: plugin.key")
+            .List("enable", "enable a plugin")
+            .List("disable", "disable a plugin")
             .Parse(args);
         var themeId = fs.Get("theme");
         var accent = fs.Get("accent");
         if (accent != "" && accent != "theme" && !AccentPattern().IsMatch(accent))
             throw new MyArchException($"--accent {GoFormat.Quote(accent)}: use #rrggbb, or \"theme\" for the theme's own");
+        var edits = new List<string>(); // what changes config.toml, for undo --list
+        var sets = fs.All("set").Select(ParseSet).ToList();
+        var resets = fs.All("reset").Select(r => SplitKey(r, "--reset")).ToList();
         var s = LoadWith(c =>
         {
             if (themeId != "") c.Theme = themeId;
             if (accent == "theme") c.Accent = "";
             else if (accent != "") c.Accent = accent.ToLowerInvariant();
+            foreach (var (plugin, key, value) in sets)
+            {
+                if (!c.Plugins.TryGetValue(plugin, out var m)) c.Plugins[plugin] = m = new(StringComparer.Ordinal);
+                m[key] = value;
+                edits.Add($"{plugin}.{key}");
+            }
+            foreach (var (plugin, key) in resets)
+            {
+                if (c.Plugins.TryGetValue(plugin, out var m) && m.Remove(key) && m.Count == 0) c.Plugins.Remove(plugin);
+                edits.Add($"{plugin}.{key} reset");
+            }
+            foreach (var id in fs.All("enable"))
+            {
+                c.Disabled.RemoveAll(d => d == id);
+                edits.Add("enable " + id);
+            }
+            foreach (var id in fs.All("disable"))
+            {
+                if (!c.Disabled.Contains(id)) c.Disabled.Add(id);
+                edits.Add("disable " + id);
+            }
         });
+        // What's changed is checked even for a plugin that stays disabled: a
+        // wrong key there would break the day it's enabled.
+        var found = Plugin.Discover(PluginDirs()).Plugins;
+        foreach (var id in fs.All("enable").Concat(fs.All("disable")).Concat(sets.Select(x => x.Plugin)).Concat(resets.Select(x => x.Plugin)))
+            if (found.All(p => p.Id != id)) throw new MyArchException($"no plugin \"{id}\"");
+        foreach (var p in found.Where(p => sets.Any(x => x.Plugin == p.Id))) p.Resolve(s.Cfg.For(p.Id));
+        foreach (var (plugin, key) in resets)
+            if (!found.First(p => p.Id == plugin).Settings.ContainsKey(key))
+                throw new MyArchException($"--reset {plugin}.{key}: {plugin} has no setting {key}");
         WarnMissingPackages(s.Plugins);
+        // One apply at a time, from the plan to the end: what it compares
+        // against must still be there when it writes.
+        using var lk = fs.IsSet("dry-run") ? null : ApplyLock.Take();
         var (changes, orphans, owned) = s.Plan();
         Console.WriteLine($"theme {s.Theme.Id}, language {s.Lang}, {s.Plugins.Count} plugins");
-        PrintPlan(changes, orphans, false);
+        // With the diff, the plan lists only what changes: the diff is what to read.
+        PrintPlan(changes, orphans, fs.IsSet("diff") || fs.IsSet("changes-only"));
+        if (fs.IsSet("diff")) PrintDiffs(changes, orphans, owned, fs.IsSet("adopt"));
         if (fs.IsSet("dry-run")) return 0;
-        s.Write(changes, orphans, owned, fs.IsSet("adopt"));
-        if (themeId != "" || accent != "") s.Cfg.Save();
+        // Every apply can be undone: what it touches is kept first.
+        var configChanged = themeId != "" || accent != "" || edits.Count > 0;
+        var what = themeId != "" || accent != "" ? $"theme {s.Theme.Id}" + (s.Cfg.Accent != "" ? $", accent {s.Cfg.Accent}" : "") : "";
+        if (edits.Count > 0) what = (what == "" ? "" : what + "; ") + string.Join(", ", edits);
+        if (what == "") what = "apply";
+        var snap = Snapshots.Begin(changes, orphans, fs.IsSet("adopt"), Settings.Path, what, configOnly: configChanged);
+        try
+        {
+            s.Write(changes, orphans, owned, fs.IsSet("adopt"));
+            if (configChanged) s.Cfg.Save();
+        }
+        catch (ConflictException)
+        {
+            Snapshots.Discard(snap); // nothing was written
+            throw;
+        }
+        catch (Exception)
+        {
+            // Written half way: kept, so what was written can still be undone.
+            if (snap != null) Snapshots.Finish(snap, Settings.Path);
+            throw;
+        }
+        if (snap != null)
+        {
+            Snapshots.Finish(snap, Settings.Path);
+            if (Directory.Exists(snap.Dir())) Console.WriteLine($"undo with: myarch undo (id {snap.ID})");
+        }
         return 0;
     }
 

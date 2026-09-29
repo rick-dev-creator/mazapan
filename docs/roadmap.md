@@ -16,7 +16,7 @@ Suggested start: 1, 2 and 3.
 | 3 | One command palette | **Done** (2026-09-28): first version; follow-ups listed below |
 | 4 | Themes | **Done** (2026-09-28); follow-ups listed below |
 | 5 | Hardware | not started |
-| 6 | An agent-native system | not started |
+| 6 | An agent-native system | **Done** (2026-09-29); follow-ups listed below |
 | 7 | Plugins | **Done** (2026-09-29); follow-ups listed below |
 | 8 | Capture | **Done** (2026-09-29); follow-ups listed below |
 
@@ -270,10 +270,38 @@ software-cursor fix from this machine's Omarchy config.
 **Omarchy today.** `omarchy-agent-crash` opens a coding agent in a terminal
 on a crash.
 
-**Much better.**
-- State an agent can read: `myarch status --json`, doctor checks as data.
-- Whatever an agent proposes is a config or plugin change that goes
-  through `myarch apply`: previewed, reviewable, reversible.
+**Much better.** *Done* — [docs/agent-api.md](agent-api.md):
+- State an agent can read: `myarch status --json` (theme, plugins and where
+  they come from, generated files that differ, updates, what can be undone;
+  versioned), `doctor --json`.
+- Changes previewed exactly: `myarch apply --dry-run --diff`, with settings,
+  enabling and disabling plugins as flags (`--set bar-clock.font_size=11`),
+  checked against each plugin's settings.
+- Every apply undoable: `myarch undo` puts back files, ownership and
+  config.toml, never over what changed since.
+- `myarch mcp`: the same as an MCP server (status, doctor, themes, plugins,
+  coverage, history, preview_change, apply_change, undo), so any agent uses
+  myarch the way a person does. Installing plugins and updating the system
+  stay the person's.
+- `myarch report` and the `agent` plugin: "Ask an agent about this desktop"
+  in the palette opens one with the state, failing checks, recent crashes
+  and the errors Hyprland and the shell logged.
+
+- Audited (14 findings, fixed): an agent could put code in a text setting
+  that a template wrote into Lua (text settings are quoted for the code
+  they go in now, and agents only set numbers and switches); one malformed
+  request ended the MCP server; undo could replace a symlinked config.toml,
+  leave ownership wrong when it stopped half way, or undo the person's
+  change instead of the agent's (undo ids); snapshots were public, piled up
+  when nothing changed, sorted by local time and weren't crash-safe; applies
+  could overlap (a lock now); --set text and settings of disabled plugins
+  went unchecked; a theme id could be a path; the diff missed shared files
+  and final newlines and could take gigabytes; the report could exceed an
+  argument's size.
+
+**Follow-ups.** Offer "ask an agent" on its own when a check fails after an
+update or the shell crashes; edit config.toml in place (today it's rewritten
+whole, as before, so comments in it don't survive a change).
 
 ## 7. Plugins
 
