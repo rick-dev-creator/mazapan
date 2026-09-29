@@ -30,6 +30,8 @@ public class HardwareTests
         d.Write("sys/bus/usb/devices/1-1/product", "Keychron Q5\n");
         d.Write("proc/bus/input/devices", "I: Bus=0011\nN: Name=\"SynPS/2 Synaptics TouchPad\"\n\nN: Name=\"Keychron Q5\"\n");
         d.Write("proc/modules", "hid_apple 28672 0 - Live 0x0\nnvidia_drm 139264 3 - Live 0x0\n");
+        d.Write("proc/mounts", "sysfs /sys sysfs rw 0 0\n/dev/nvme0n1p2 / btrfs rw,subvol=/@ 0 0\n/dev/nvme0n1p2 /home btrfs rw,subvol=/@home 0 0\n");
+        d.Write("boot/limine.conf", "timeout: 3\n");
         d.Write("usr/share/hwdata/pci.ids", "10de  NVIDIA Corporation\n\t2684  AD102 [GeForce RTX 4090]\n1002  Advanced Micro Devices, Inc. [AMD/ATI]\n\t13c0  Granite Ridge [Radeon Graphics]\nC 00  Unclassified device\n");
         return d.Path;
     }
@@ -47,6 +49,8 @@ public class HardwareTests
         Assert.Contains(m.Usb, u => u.Vendor == "3434" && u.Name == "Keychron Q5");
         Assert.Contains("SynPS/2 Synaptics TouchPad", m.Inputs);
         Assert.Contains("hid_apple", m.Modules);
+        Assert.Equal("btrfs", m.Filesystem);
+        Assert.Equal("limine", m.Bootloader);
     }
 
     [Theory]
@@ -62,6 +66,11 @@ public class HardwareTests
     [InlineData("modules = [\"hid_apple\"]", true)]
     [InlineData("vendor = [\"lenovo\"]\nproduct = [\"*Yoga Pro 7 14IAH10*\"]", true)]
     [InlineData("vendor = [\"Apple*\"]\nmodules = [\"hid_apple\"]", false)]
+    [InlineData("filesystem = [\"btrfs\"]", true)]
+    [InlineData("filesystem = [\"ext4\"]", false)]
+    [InlineData("filesystem = [\"btrfs\"]\nbootloader = [\"limine\"]", true)]
+    [InlineData("filesystem = [\"btrfs\"]\nbootloader = [\"grub\"]", false)]
+    [InlineData("filesystem = [\"btrfs\"]\nboot_on_root = true", true)]
     public void RulesMatch(string rules, bool want)
     {
         using var d = new TempDir();
@@ -69,6 +78,27 @@ public class HardwareTests
         d.Write("p/plugin.toml", $"[plugin]\nid = \"p\"\nversion = \"1.0\"\napi = 1\n\n[hardware]\n{rules}\n");
         var p = Plugin.Load(Path.Join(d.Path, "p"));
         Assert.Equal(want, p.Hardware!.Matches(m).Ok);
+    }
+
+    [Fact]
+    public void ABootPartitionAndTheFirmwaresLoaderAreSeen()
+    {
+        using var d = new TempDir();
+        FakeRoot(d);
+        // /boot the EFI partition (unreadable to the user): the firmware says
+        // which loader started; a snapshot of / wouldn't have the kernel.
+        d.Write("proc/mounts", "/dev/nvme0n1p2 / btrfs rw,subvol=/@ 0 0\n/dev/nvme0n1p1 /boot vfat rw,fmask=0077,dmask=0077 0 0\n");
+        File.Delete(Path.Join(d.Path, "boot/limine.conf"));
+        var info = new byte[] { 6, 0, 0, 0 }.Concat(System.Text.Encoding.Unicode.GetBytes("systemd-boot 258\0")).ToArray();
+        d.Dir("sys/firmware/efi/efivars");
+        File.WriteAllBytes(Path.Join(d.Path, "sys/firmware/efi/efivars/LoaderInfo-4a67b082-0a4c-41cf-b6c7-440b29bb8c4f"), info);
+        var m = Machine.Read(d.Path);
+        Assert.False(m.BootOnRoot);
+        Assert.Equal("systemd-boot", m.Bootloader);
+        var rules = new Rules { Filesystem = ["btrfs"], BootOnRoot = true };
+        Assert.False(rules.Matches(m).Ok);
+        // The way it's installed is part of which machine it is.
+        Assert.False(new Rules { Bootloader = ["grub"] }.MatchesIdentity(m));
     }
 
     static Plugin Manifest(TempDir d, string target)
@@ -80,14 +110,17 @@ public class HardwareTests
 
     [Theory]
     [InlineData("output = \"/etc/modprobe.d/myarch-x.conf\"\nsystem = true", true)]
+    [InlineData("output = \"/etc/systemd/system/grub-btrfsd.service.d/myarch-x.conf\"\nsystem = true", null)]
+    [InlineData("output = \"/etc/systemd/system/sshd.service.d/myarch-x.conf\"\nsystem = true", false)]
     [InlineData("output = \"/etc/passwd\"\nsystem = true", false)]
     [InlineData("output = \"/etc/modprobe.d/x.conf\"\nsystem = true", false)]
     [InlineData("output = \"/etc/modprobe.d/myarch-x.conf\"", false)]
     [InlineData("output = \"~/x\"\nreboot = true", false)]
-    public void SystemFilesAreMyarchsDropIns(string target, bool ok)
+    public void SystemFilesAreMyarchsDropIns(string target, bool? ok)
     {
         using var d = new TempDir();
-        if (ok) Assert.Contains("full access, as root: writes /etc/modprobe.d/myarch-x.conf", Manifest(d, target).Capabilities());
+        if (ok == null) Assert.NotNull(Manifest(d, target)); // allowed, elsewhere than modprobe.d
+        else if (ok == true) Assert.Contains("full access, as root: writes /etc/modprobe.d/myarch-x.conf", Manifest(d, target).Capabilities());
         else Assert.Throws<MyArchException>(() => Manifest(d, target));
     }
 

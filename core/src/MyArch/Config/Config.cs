@@ -28,12 +28,15 @@ public sealed class Settings
 
     public static string Path => Paths.ExpandHome("~/.config/myarch/config.toml");
 
-    public static Settings Load()
+    public static Settings Load() => LoadFrom(Path);
+
+    /// <summary>LoadFrom reads a config.toml elsewhere (a snapshot's copy).</summary>
+    public static Settings LoadFrom(string path)
     {
         var c = new Settings();
-        var t = Toml.ReadFile(Path);
+        var t = Toml.ReadFile(path);
         if (t == null) return c;
-        var r = new TomlReader(t, Path);
+        var r = new TomlReader(t, path);
         c.Theme = r.String("theme");
         c.Accent = r.String("accent");
         c.Language = r.String("language");
@@ -43,7 +46,7 @@ public sealed class Settings
         if (r.Raw("plugins") is { } plugins)
             foreach (var (id, v) in plugins)
             {
-                if (v is not TomlTable table) throw new MyArchException($"{Path}: [plugins.{id}] must be a table");
+                if (v is not TomlTable table) throw new MyArchException($"{path}: [plugins.{id}] must be a table");
                 var m = new SortedDictionary<string, object>(StringComparer.Ordinal);
                 foreach (var (k, x) in table) m[k] = x;
                 c.Plugins[id] = m;

@@ -34,6 +34,8 @@ public static partial class Program
                         { "vendor", m.Vendor }, { "product", m.Product }, { "version", m.Version }, { "board", m.Board },
                         { "gpus", m.Gpus.Select(g => new Fields { { "id", $"{g.Vendor}:{g.Device}" }, { "name", g.Name }, { "driver", g.Driver } }).ToList() },
                         { "usb", m.Usb.Select(u => new Fields { { "id", $"{u.Vendor}:{u.Product}" }, { "name", u.Name } }).ToList() },
+                        { "filesystem", m.Filesystem },
+                        { "bootloader", m.Bootloader },
                     }
                 },
                 {
@@ -53,6 +55,8 @@ public static partial class Program
         Console.WriteLine($"{Style.Bold}{m.Vendor} {m.Product}{Style.Reset}{(m.Version != "" && m.Version != m.Product ? $" ({m.Version})" : "")}");
         foreach (var g in m.Gpus)
             Console.WriteLine($"  GPU  {g.Name}{(g.Driver != "" ? $" {Style.Dim}[{g.Driver}]{Style.Reset}" : "")}");
+        if (m.Filesystem != "" || m.Bootloader != "")
+            Console.WriteLine($"  root {(m.Filesystem == "" ? "?" : m.Filesystem)}, boot loader {(m.Bootloader == "" ? "?" : m.Bootloader)}");
         Console.WriteLine();
         var mine = rows.Where(r => r.Match.Ok).ToList();
         if (mine.Count == 0) Console.WriteLine("No hardware plugin is for this machine.");

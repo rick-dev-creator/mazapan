@@ -7,8 +7,9 @@ namespace MyArch.Applying;
 /// <summary>
 /// Snapshots make every apply reversible: before it writes, what it will
 /// touch is copied (each file as it was, or that it wasn't there; owned.json;
-/// config.toml, which --theme, --accent and --set change), and `myarch undo`
-/// puts the latest back. A file changed since (edited, or a later apply) is
+/// config.toml, which --theme, --accent and --set change; and config.toml as
+/// the apply left it, for the timeline to say what changed), and `myarch
+/// undo` puts the latest back. A file changed since (edited, or a later apply) is
 /// left as it is: undo never loses what came after. The last 20 are kept.
 ///
 /// The snapshot is written before the apply starts, marked pending, so an
@@ -52,7 +53,7 @@ public static class Snapshots
         public string Dir() => Paths.Join(Root(), ID);
     }
 
-    static string SumOf(string path) => Apply.ReadOrNull(Paths.Real(path) ?? path) is { } b ? Apply.Sum(b) : "";
+    public static string SumOf(string path) => Apply.ReadOrNull(Paths.Real(path) ?? path) is { } b ? Apply.Sum(b) : "";
 
     /// <summary>
     /// Begin copies what the plan will touch: the files it writes or removes,
@@ -123,6 +124,9 @@ public static class Snapshots
     {
         foreach (var e in s.Files) e.After = SumOf(e.Path);
         s.ConfigAfter = SumOf(configPath);
+        var after = Paths.Join(s.Dir(), "config.after.toml");
+        if (s.ConfigAfter != s.ConfigBefore && Apply.ReadOrNull(Paths.Real(configPath) ?? configPath) is { } config && !File.Exists(after))
+            WritePrivate(after, config);
         s.Pending = false;
         if (s.Files.All(e => e.After == e.BeforeSum) && s.ConfigAfter == s.ConfigBefore && s.Packages.Count == 0)
         {
@@ -172,6 +176,16 @@ public static class Snapshots
             { "config_after", s.ConfigAfter },
         });
         Files.WriteAtomic(Paths.Join(s.Dir(), "snapshot.json"), json + "\n");
+    }
+
+    /// <summary>
+    /// ConfigFile is the snapshot's copy of config.toml before the apply, or
+    /// after it (kept only when it changed); null when there's none.
+    /// </summary>
+    public static string? ConfigFile(Snapshot s, bool after)
+    {
+        var p = Paths.Join(s.Dir(), after ? "config.after.toml" : "config.toml");
+        return File.Exists(p) ? p : null;
     }
 
     /// <summary>List is every snapshot, newest first; one that doesn't read is skipped.</summary>

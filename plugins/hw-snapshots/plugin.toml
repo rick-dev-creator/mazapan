@@ -1,0 +1,33 @@
+[plugin]
+id = "hw-snapshots"
+name = "System snapshots"
+version = "0.1.0"
+api = 1
+description = "A btrfs snapshot of the system before and after every package change (an update, an install), the last ones kept; listed in the desktop's History"
+categories = ["hardware"]
+
+[hardware]
+filesystem = ["btrfs"]
+
+[packages]
+pacman = ["snapper", "snap-pac"]
+
+[settings]
+# How many package changes' snapshots are kept (each one is a pair,
+# before and after).
+keep = { default = 10, min = 3, max = 50 }
+
+# Snapper set up for / (once; a subvolume already mounted at /.snapshots,
+# as archinstall makes, is put back in place after), told how many to keep,
+# and /.snapshots made listable (each snapshot's info.xml is readable
+# already): the History panel lists them without any rights over them.
+# Only while this file is there.
+[[targets]]
+template = "snapshots.conf.tmpl"
+output = "/etc/tmpfiles.d/myarch-snapshots.conf"
+system = true
+reload = "[ -e /etc/tmpfiles.d/myarch-snapshots.conf ] || exit 0; if ! grep -qE '^SNAPPER_CONFIGS=.*[\" ]root[\" ]' /etc/conf.d/snapper 2>/dev/null; then if mountpoint -q /.snapshots; then umount /.snapshots && rmdir /.snapshots && snapper -c root create-config / && btrfs subvolume delete /.snapshots && mkdir /.snapshots && mount /.snapshots || exit 1; else snapper -c root create-config / || exit 1; fi; fi; snapper -c root set-config TIMELINE_CREATE=no NUMBER_CLEANUP=yes NUMBER_LIMIT={{ settings.keep * 2 }} NUMBER_LIMIT_IMPORTANT={{ settings.keep * 2 }} && chmod 0755 /.snapshots && systemctl enable --now snapper-cleanup.timer"
+
+[[checks]]
+name = "{{ t \"check.config\" }}"
+run = "grep -qE '^SNAPPER_CONFIGS=.*[\" ]root[\" ]' /etc/conf.d/snapper"

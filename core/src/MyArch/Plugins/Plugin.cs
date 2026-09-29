@@ -105,6 +105,8 @@ public sealed partial class Plugin
         "/etc/tmpfiles.d", "/etc/systemd/logind.conf.d", "/etc/systemd/sleep.conf.d", "/etc/X11/xorg.conf.d",
         "/etc/chromium/policies/managed", "/etc/opt/chrome/policies/managed", "/etc/brave/policies/managed",
         "/etc/opt/edge/policies/managed",
+        // grub-btrfs's daemon (snapshots in the boot menu): what it passes a snapshot's kernel.
+        "/etc/systemd/system/grub-btrfsd.service.d",
     ];
 
     static readonly HashSet<string> KnownToolkits =
@@ -313,6 +315,9 @@ public sealed partial class Plugin
                 Input = hw.Strings("input"),
                 Modules = hw.Strings("modules"),
                 Gpus = hw.Int("gpus"),
+                Filesystem = hw.Strings("filesystem"),
+                Bootloader = hw.Strings("bootloader"),
+                BootOnRoot = hw.Bool("boot_on_root"),
             };
             if (p.Hardware.Empty) throw new MyArchException($"{path}: [hardware] needs at least one rule");
             if (p.Hardware.BadPatterns().FirstOrDefault() is { } bad)

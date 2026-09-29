@@ -285,6 +285,11 @@ public static partial class Program
         }
         var sets = fs.All("set").Select(ParseSet).ToList();
         var resets = fs.All("reset").Select(r => SplitKey(r, "--reset")).ToList();
+        // One apply at a time, from reading config.toml to the end: two at
+        // once (a theme picked while an undo runs) would each save its own
+        // config.toml over the other's change; and what the plan compares
+        // against must still be there when it writes.
+        using var lk = fs.IsSet("dry-run") ? null : ApplyLock.Take();
         var s = LoadWith(c =>
         {
             if (themeId != "") c.Theme = themeId;
@@ -320,9 +325,6 @@ public static partial class Program
         foreach (var (plugin, key) in resets)
             if (!found.First(p => p.Id == plugin).Settings.ContainsKey(key))
                 throw new MyArchException($"--reset {plugin}.{key}: {plugin} has no setting {key}");
-        // One apply at a time, from the plan to the end: what it compares
-        // against must still be there when it writes.
-        using var lk = fs.IsSet("dry-run") ? null : ApplyLock.Take();
         var (changes, orphans, owned) = s.Plan();
         Console.WriteLine($"theme {s.Theme.Id}, language {s.Lang}, {s.Plugins.Count} plugins");
         // With the diff, the plan lists only what changes: the diff is what to read.

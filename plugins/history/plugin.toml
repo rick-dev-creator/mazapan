@@ -1,0 +1,31 @@
+[plugin]
+id = "history"
+name = "History"
+version = "0.1.0"
+api = 1
+description = "What changed on the desktop, in words (a theme, a setting, a plugin on or off, an update), newest first, each with its own undo"
+categories = ["panel", "tools"]
+requires = ["shell-bar", "hypr-base"]
+
+[packages]
+pacman = ["quickshell"]
+
+[settings]
+# Opens the history.
+key = "SUPER + ALT + H"
+
+[[targets]]
+template = "History.qml.tmpl"
+output = "~/.config/quickshell/myarch/panels/history.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "history.lua.tmpl"
+output = "~/.config/hypr/myarch/history.lua"
+reload = "hyprctl reload >/dev/null"
+
+[[actions]]
+name = "{{ t \"act.open\" }}"
+run = "qs ipc -c myarch call myarch panel history"
+key = "{{ settings.key }}"
+keywords = "{{ t \"act.open.kw\" }}"

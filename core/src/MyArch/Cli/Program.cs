@@ -17,6 +17,12 @@ public static partial class Program
           doctor [--json]
                  run every plugin's checks now
           history        past updates and how they went
+          timeline [--json]
+                         what changed on the desktop, in words: every apply and
+                         update, newest first
+          timeline undo ID [-y]
+                         put back what one apply changed (a theme, a setting, a
+                         plugin on or off), even if others came after it
           rollback [ID]  put back the packages and files from before an update
                          (the last one by default)
           plugins [list]  plugins, where they come from, and their state
@@ -82,6 +88,7 @@ public static partial class Program
                 "report" => CmdReport(rest),
                 "hardware" => CmdHardware(rest),
                 "history" => CmdHistory(),
+                "timeline" => CmdTimeline(rest),
                 "rollback" => CmdRollback(rest),
                 "coverage" => CmdCoverage(rest),
                 "-h" or "--help" or "help" => Help(),

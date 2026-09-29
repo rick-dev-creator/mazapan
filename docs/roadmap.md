@@ -24,7 +24,7 @@ Suggested start: 1, 2 and 3.
 | 9 | Wallpapers, and a theme from any picture | **Done** (2026-09-29) |
 | 10 | The essentials still missing | **Done** (2026-09-29) |
 | 11 | Modes | **Done** (2026-09-29) |
-| 12 | The desktop's history, visible | Planned |
+| 12 | The desktop's history, visible | **Done** (2026-09-29) |
 | 13 | The same desktop anywhere | Planned |
 | 14 | Workspace sessions | Planned |
 | 15 | The CLI in your language | Planned |
@@ -637,6 +637,27 @@ terminal.
 Only what goes through myarch is in the desktop's timeline: a file it
 doesn't manage, edited by hand or by its app, isn't. The system snapshots
 cover the rest.
+
+*Done* (2026-09-29):
+- `myarch timeline [--json]`: every apply in words, from config.toml
+  before and after (each snapshot now keeps both; older ones are read
+  from their neighbours): theme, accent, language, a plugin on or off, a
+  setting from one value to another (the default said), or whose files
+  were rewritten; every update; every system snapshot.
+- `myarch timeline undo ID`: one change undone on its own, even an older
+  one: only what's still as it left it, through a new apply (on the
+  timeline too). Files only: the last apply's. Updates: `myarch rollback`.
+- Plugin `history` (`SUPER + ALT + H`): the timeline by day, a theme's
+  palettes before and after, each entry's undo (run detached: the apply
+  reloads the shell), an update's rollback in a terminal.
+- Hardware plugins `hw-snapshots` (root on btrfs: snapper, and snap-pac
+  before and after every package change) and `hw-snapshots-grub` (GRUB:
+  the snapshots in the boot menu via grub-btrfs). A snapshot started from
+  the menu brings up the whole desktop on an overlay in memory
+  (systemd.volatile=overlay; the initramfs gets what it needs); checked
+  by booting one in the VM. Hardware rules gained `filesystem` and
+  `bootloader`. Limine isn't covered yet (limine-snapper-sync is AUR
+  only).
 
 ## 13. The same desktop anywhere
 

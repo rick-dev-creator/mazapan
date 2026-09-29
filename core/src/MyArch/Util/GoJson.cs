@@ -13,6 +13,9 @@ public sealed class Fields : IEnumerable<KeyValuePair<string, object?>>
 
     public void Add(string name, object? value) => items.Add(new(name, value));
 
+    /// <summary>A field's value (null when there's none).</summary>
+    public object? this[string name] => items.FirstOrDefault(kv => kv.Key == name).Value;
+
     public IEnumerator<KeyValuePair<string, object?>> GetEnumerator() => items.GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

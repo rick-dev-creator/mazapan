@@ -1,0 +1,5 @@
+"plugin.name" = "Snapshots del sistema"
+"plugin.description" = "Un snapshot btrfs del sistema antes y después de cada cambio de paquetes (una actualización, una instalación), se guardan los últimos; aparecen en el Historial del escritorio"
+"setting.keep" = "Cuántos guardar"
+"setting.keep.help" = "De cuántos cambios de paquetes se guardan snapshots (cada uno es un par, antes y después)."
+"check.config" = "Snapper está configurado para /"

@@ -1,0 +1,56 @@
+[plugin]
+id = "hw-snapshots-grub"
+name = "System snapshots in the boot menu"
+version = "0.1.0"
+api = 1
+description = "The system snapshots in GRUB's boot menu (grub-btrfs): start the whole desktop as it was before an update that broke it"
+categories = ["hardware"]
+
+# /boot on the root filesystem: a snapshot then has its own kernel and
+# initramfs. With /boot a partition of its own (the EFI one), every
+# snapshot would start with today's kernel and yesterday's modules.
+[hardware]
+filesystem = ["btrfs"]
+bootloader = ["grub"]
+boot_on_root = true
+
+[packages]
+pacman = ["grub-btrfs", "inotify-tools"]
+
+# A snapshot is read-only: started from the menu, it runs on an overlay in
+# memory (systemd.volatile=overlay), which the initramfs needs to carry.
+# Snapshots taken from then on start whole (they include it).
+[[targets]]
+template = "initramfs.conf.tmpl"
+output = "/etc/mkinitcpio.conf.d/myarch-snapshots-grub.conf"
+system = true
+reload = "mkinitcpio -P"
+
+# grub-btrfsd keeps the menu up to date as snapshots come and go, with
+# that for each one's kernel. Only while this file is there: turned off,
+# the menu goes back to without them.
+[[targets]]
+template = "grub-btrfsd.conf.tmpl"
+output = "/etc/systemd/system/grub-btrfsd.service.d/myarch-snapshots.conf"
+system = true
+# Turned off: the daemon stops, and the entries already there keep
+# starting on the overlay (the snapshots carry it); remove grub-btrfs to
+# take them out of the menu.
+reload = "systemctl daemon-reload; if [ -e /etc/systemd/system/grub-btrfsd.service.d/myarch-snapshots.conf ]; then systemctl enable grub-btrfsd && systemctl restart grub-btrfsd; else systemctl disable --now grub-btrfsd 2>/dev/null; fi; grub-mkconfig -o /boot/grub/grub.cfg; [ -x /etc/grub.d/41_snapshots-btrfs ] && GRUB_BTRFS_SNAPSHOT_KERNEL_PARAMETERS=systemd.volatile=overlay /etc/grub.d/41_snapshots-btrfs >/dev/null; true"
+
+# The initramfs is made by mkinitcpio, reading /etc/mkinitcpio.conf.d
+# (a preset with its own _config= skips it; dracut isn't covered).
+[[checks]]
+name = "{{ t \"check.mkinitcpio\" }}"
+run = "command -v mkinitcpio >/dev/null && ! grep -qsE '^[^#]*_config=' /etc/mkinitcpio.d/*.preset"
+before_system = true
+
+[[checks]]
+name = "{{ t \"check.daemon\" }}"
+run = "systemctl is-active --quiet grub-btrfsd"
+
+# grub-mkconfig run by hand writes the snapshots' entries without the
+# overlay; grub-btrfsd writes them again (with it) at the next snapshot.
+[[checks]]
+name = "{{ t \"check.overlay\" }}"
+run = "f=/boot/grub/grub-btrfs.cfg; [ ! -e $f ] || [ \"$(grep -c '^[[:space:]]*linux' $f)\" = \"$(grep -c 'systemd.volatile=overlay' $f)\" ] || { echo 'fix: sudo env GRUB_BTRFS_SNAPSHOT_KERNEL_PARAMETERS=systemd.volatile=overlay /etc/grub.d/41_snapshots-btrfs'; exit 1; }"

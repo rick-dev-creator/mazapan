@@ -33,7 +33,7 @@ Singleton {
   // awake a mode set, {set: its value, was: the value before}.
   property var touched: ({})
   // Values just put back (a theme being applied still reads as the old
-  // one for a moment): {theme, power, awake, at}.
+  // one for a moment): {theme: {from, to}, …, at}.
   property var restored: ({})
   // Automatic ones turned off by hand: not again until their time is over.
   property var dismissed: []
@@ -156,7 +156,7 @@ Singleton {
       } else if (t[f]) {
         if (now[f] === t[f].set && t[f].was !== undefined && t[f].was !== "") {
           setField(f, t[f].was)
-          back[f] = t[f].was
+          back[f] = { from: t[f].set, to: t[f].was }
         }
         delete t[f]
       }
@@ -170,10 +170,14 @@ Singleton {
     tell(m)
   }
 
-  // A value just put back is what was there, even if it doesn't read so
-  // yet (a theme still being applied).
+  // A theme just put back is what was there, even if it doesn't read so
+  // yet (it's applied in the background): only while it still reads as
+  // what it was put back from. Keep awake and power are put back at once:
+  // what they read is what they are.
   function recent(f, value) {
-    return restored.at && Date.now() - restored.at < 120000 && restored[f] !== undefined ? restored[f] : value
+    if (f !== "theme") return value
+    const r = restored[f]
+    return restored.at && Date.now() - restored.at < 120000 && r && typeof r === "object" && value === r.from ? r.to : value
   }
 
   function setField(f, v) {

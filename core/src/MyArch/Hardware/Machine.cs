@@ -25,6 +25,15 @@ public sealed class Machine
     public List<UsbDevice> Usb = [];
     public List<string> Inputs = [];
     public HashSet<string> Modules = [];
+    /// <summary>The root filesystem's type ("btrfs", "ext4").</summary>
+    public string Filesystem = "";
+    /// <summary>The boot loader: "grub", "limine", "systemd-boot"; "" unknown.</summary>
+    public string Bootloader = "";
+    /// <summary>
+    /// The kernels are on the root filesystem (/boot isn't a partition of
+    /// its own): a snapshot of / has the kernel that goes with its modules.
+    /// </summary>
+    public bool BootOnRoot;
 
     public IEnumerable<PciDevice> Gpus => Pci.Where(p => p.IsGpu);
 
@@ -72,7 +81,47 @@ public sealed class Machine
             if (line.StartsWith("N: Name=")) m.Inputs.Add(line[8..].Trim('"'));
         foreach (var line in Lines(R("proc/modules")))
             if (line.Split(' ') is [var mod, ..] && mod != "") m.Modules.Add(mod);
+        var mounts = Lines(R("proc/mounts")).Select(l => l.Split(' ')).Where(f => f.Length > 2).ToList();
+        foreach (var f in mounts)
+            if (f[1] == "/") m.Filesystem = f[2];
+        // A snapshot started from the menu runs on an overlay: what's under it is btrfs.
+        if (m.Filesystem == "overlay" && Text(R("proc/cmdline")).Contains("rootflags=subvol=")) m.Filesystem = "btrfs";
+        m.BootOnRoot = !mounts.Any(f => f[1] == "/boot");
+        m.Bootloader = BootloaderOf(R);
         return m;
+    }
+
+    /// <summary>
+    /// The boot loader: what the firmware says started (LoaderInfo, set by
+    /// systemd-boot and Limine), else its configuration's files (an EFI
+    /// partition at /boot is often readable by root only), else its package.
+    /// </summary>
+    static string BootloaderOf(Func<string, string> R)
+    {
+        try
+        {
+            foreach (var v in Directory.Exists(R("sys/firmware/efi/efivars")) ? Directory.GetFiles(R("sys/firmware/efi/efivars"), "LoaderInfo-*") : [])
+            {
+                var b = File.ReadAllBytes(v);
+                var s = b.Length > 4 ? System.Text.Encoding.Unicode.GetString(b, 4, b.Length - 4).ToLowerInvariant() : "";
+                if (s.Contains("systemd-boot")) return "systemd-boot";
+                if (s.Contains("limine")) return "limine";
+            }
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
+        bool Any(params string[] ps) => ps.Any(p =>
+        {
+            try { return File.Exists(R(p)); }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException) { return false; }
+        });
+        if (Any("boot/grub/grub.cfg", "boot/grub2/grub.cfg")) return "grub";
+        if (Any("boot/limine.conf", "boot/limine/limine.conf", "boot/EFI/limine/limine.conf", "efi/limine.conf", "boot/EFI/BOOT/limine.conf")) return "limine";
+        if (Any("boot/loader/loader.conf", "efi/loader/loader.conf")) return "systemd-boot";
+        // Only its package is there to say (/boot unreadable): GRUB with its settings.
+        bool Installed(string pkg) => Dirs(R("var/lib/pacman/local")).Any(d => Paths.Base(d).StartsWith(pkg + "-") && char.IsDigit(Paths.Base(d)[pkg.Length + 1]));
+        if (Any("etc/default/grub") && Installed("grub")) return "grub";
+        if (Installed("limine")) return "limine";
+        return "";
     }
 
     static IEnumerable<string> Dirs(string path)
@@ -152,9 +201,13 @@ public sealed class Rules
     public List<string> Modules = [];
     /// <summary>At least this many GPUs (2: one renders, another drives screens).</summary>
     public long Gpus;
+    /// <summary>The root filesystem ("btrfs"), and the boot loader ("grub", "limine", "systemd-boot").</summary>
+    public List<string> Filesystem = [], Bootloader = [];
+    /// <summary>The kernels on the root filesystem (no /boot partition of its own).</summary>
+    public bool BootOnRoot;
 
     public bool Empty => Vendor.Count + Product.Count + Board.Count + Pci.Count + Usb.Count + Gpu.Count +
-        Input.Count + Modules.Count == 0 && Gpus == 0;
+        Input.Count + Modules.Count + Filesystem.Count + Bootloader.Count == 0 && Gpus == 0 && !BootOnRoot;
 
     // Names aren't paths: a "/" in "RX 7900 XT/7900 XTX" is text, which * crosses.
     static string Flat(string s) => s.ToLowerInvariant().Replace('/', '\u2215');
@@ -174,6 +227,9 @@ public sealed class Rules
         if (Gpu.Count > 0 && !Any(Gpu, m.Gpus.Select(g => g.Name))) return No("no such GPU");
         if (Input.Count > 0 && !Any(Input, m.Inputs)) return No("no such input device");
         if (Modules.Count > 0 && !Any(Modules, m.Modules)) return No("no such kernel module loaded");
+        if (Filesystem.Count > 0 && !Any(Filesystem, [m.Filesystem])) return No($"the root filesystem is {(m.Filesystem == "" ? "unknown" : m.Filesystem)}");
+        if (Bootloader.Count > 0 && !Any(Bootloader, [m.Bootloader])) return No($"the boot loader is {(m.Bootloader == "" ? "unknown" : m.Bootloader)}");
+        if (BootOnRoot && !m.BootOnRoot) return No("/boot is a partition of its own (snapshots of / don't have the kernel)");
         if (Gpus > 0 && m.Gpus.Count() < Gpus)
             return No($"{m.Gpus.Count()} GPU{(m.Gpus.Count() == 1 ? "" : "s")}, not {Gpus}");
         return (true, "");
@@ -188,12 +244,15 @@ public sealed class Rules
     public bool MatchesIdentity(Machine m) => new Rules
     {
         Vendor = Vendor, Product = Product, Board = Board, Pci = Pci, Gpu = Gpu,
+        // How the system is installed says which machine too: a config.toml
+        // shared with a laptop on ext4, or on another boot loader, does nothing there.
+        Filesystem = Filesystem, Bootloader = Bootloader, BootOnRoot = BootOnRoot,
     }.Matches(m).Ok;
 
     /// <summary>The patterns that don't parse (a bare "[" is a class: write "\\[").</summary>
     public IEnumerable<string> BadPatterns() =>
         Vendor.Concat(Product).Concat(Board).Concat(Pci).Concat(Usb).Concat(Gpu).Concat(Input).Concat(Modules)
-            .Where(p => !Glob.IsValid(Flat(p)));
+            .Concat(Filesystem).Concat(Bootloader).Where(p => !Glob.IsValid(Flat(p)));
 
     /// <summary>Describe is the rules in words, for listing: "GPUs: 2 or more; PCI 10de:*".</summary>
     public string Describe()
@@ -211,6 +270,9 @@ public sealed class Rules
         Add("GPU", Gpu);
         Add("input", Input);
         Add("module", Modules);
+        Add("root filesystem", Filesystem);
+        Add("boot loader", Bootloader);
+        if (BootOnRoot) parts.Add("/boot on the root filesystem");
         if (Gpus > 0) parts.Add($"{Gpus} or more GPUs");
         return string.Join("; ", parts);
     }

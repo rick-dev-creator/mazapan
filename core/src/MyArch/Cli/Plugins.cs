@@ -526,6 +526,7 @@ public static partial class Program
     {
         Tomlyn.Model.TomlArray a => a.Select(x => JsonValue(x!)).ToList(),
         Tomlyn.Model.TomlTable t => new SortedDictionary<string, object?>(t.ToDictionary(kv => kv.Key, kv => JsonValue(kv.Value!)), StringComparer.Ordinal),
+        Tomlyn.Model.TomlTableArray ta => ta.Select(x => JsonValue(x)).ToList(),
         Tomlyn.TomlDateTime d => d.ToString(),
         _ => v,
     };
