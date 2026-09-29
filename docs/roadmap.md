@@ -19,6 +19,19 @@ Suggested start: 1, 2 and 3.
 | 6 | An agent-native system | **Done** (2026-09-29); follow-ups listed below |
 | 7 | Plugins | **Done** (2026-09-29); follow-ups listed below |
 | 8 | Capture | **Done** (2026-09-29); follow-ups listed below |
+| — | Plugin ecosystem (catalogs, Plugins panel, author tools) | **Done** (2026-09-29), under 7 |
+| — | Notifications | **Done** (2026-09-29) |
+| 9 | Wallpapers, and a theme from any picture | Next |
+| 10 | The essentials still missing | Planned |
+| 11 | Modes | Planned |
+| 12 | The desktop's history, visible | Planned |
+| 13 | The same desktop anywhere | Planned |
+| 14 | Workspace sessions | Planned |
+| 15 | The CLI in your language | Planned |
+
+Part two (items 9–15, 2026-09-29): what's still missing next to Omarchy,
+and what would set this apart from it. Suggested order: 9, then 10, then 11;
+the CLI's own language after them.
 
 ## The core: Go to C#
 
@@ -76,7 +89,7 @@ snapshot first and grep the log for known failures afterwards.
   in the VM: rolling back an update that replaced one package with another.
 
 **Follow-ups.** btrfs snapshots as the safety net for what a package
-rollback can't fix (an unbootable system); AUR packages; an "updates
+rollback can't fix (an unbootable system): now part of 12; AUR packages; an "updates
 available" widget in the bar; reset one plugin's files; the CLI's own text
 localized like the plugins.
 
@@ -455,3 +468,110 @@ text and QR as separate scripts.
 **Follow-ups.** A region across two screens; blur/pixelate as a tool;
 share (upload/send); QR codes; recording with the webcam; a window-follow
 recording.
+
+---
+
+# Part two: what's still missing, and what would set it apart
+
+## 9. Wallpapers, and a theme from any picture
+
+**Omarchy today.** Each theme ships three or four pictures; yours go in a
+folder per theme; a key cycles them, a picker shows thumbnails, the
+change is animated. The picture and the colors know nothing of each
+other: a photo of your own doesn't change the rest.
+
+**Here today.** The wallpaper is drawn from the theme's colors (or is the
+theme's picture). Your own pictures can't be used: behind Omarchy.
+
+**Much better.**
+- A wallpaper picker like the theme picker: your pictures
+  (`~/Pictures/Wallpapers`), the theme's, the drawn ones; previewed live;
+  one per monitor; fill, fit or center.
+- A folder in turn, every so often; dynamic wallpapers as on macOS (a day
+  and a night picture, by the time of day).
+- "Tint with the theme": any picture subtly recolored to the palette, so
+  it belongs.
+- **A theme from any picture**: pick a photo, and its palette becomes a
+  whole theme, contrast-checked (the checker is there), applied to
+  everything the themes reach (terminal, GTK, Qt, browsers, VS Code,
+  Neovim, the shell). Every picture, a coherent and readable desktop.
+
+## 10. The essentials still missing
+
+What Omarchy has and this doesn't yet, in order of need:
+- **A polkit agent**: the password prompt apps need to ask for rights
+  (mount a disk, change the time). Without one those fail silently.
+- **An on-screen display** for volume and brightness keys.
+- **Clipboard history**: find and paste what was copied before.
+- **Emoji and color pickers**.
+- **Idle**: lock and suspend after a while; **night light** (warmer at
+  night).
+- **Brightness and battery** in the bar, for laptops.
+- **Web apps**: a site as an app of its own (WhatsApp, Gmail).
+
+## 11. Modes
+
+**Omarchy today.** Nothing like it: Do Not Disturb, by hand.
+
+**Much better.** A mode changes the whole desktop at once, as macOS's
+Focus does for notifications: the theme and wallpaper, Do Not Disturb and
+which apps may still notify, the power profile, what the bar shows.
+Work (Slack yes, social no), Presentation (no notifications, no ticker,
+larger text), Night (dark theme, warm light), Game (performance, quiet).
+On by hand, on a schedule, or when a monitor is plugged in. Built on what
+9 and 10 add (wallpapers, night light, power) and on notifications.
+
+## 12. The desktop's history, visible
+
+**Elsewhere.** Whole-system rollback is known: NixOS generations (every
+config change one, listed in the boot menu), openSUSE's Snapper on btrfs
+(before and after every install, bootable, YaST lists the files),
+Fedora Silverblue / Bazzite / Vanilla OS (the previous image, booted),
+Linux Mint's Timeshift. Omarchy too: a Snapper snapshot before each
+update, bootable from Limine. Here, today: packages and files rolled
+back (1), every apply undoable (6), but a system that no longer boots
+can't be saved. macOS's Time Machine is the visual timeline, for files.
+
+**Here today.** The data is there: every apply is a snapshot
+(`myarch undo --list`), every update in `myarch history`. Seen only in the
+terminal.
+
+**Much better.** Both, in one place:
+- **The desktop's timeline**: a panel of what changed, in words ("Theme:
+  Gruvbox → Paper", "Plugin Markets turned on", "Update: 34 packages",
+  "Max volume 1.25"), each with a preview and its own undo: one change
+  back, at once, no reboot (NixOS and Snapper take the whole system back
+  to a point).
+- **System snapshots** where the disk is btrfs: Snapper before every
+  update, bootable from the boot menu (as Omarchy and openSUSE), shown in
+  the same timeline. Closes 1's pending safety net.
+
+Only what goes through myarch is in the desktop's timeline: a file it
+doesn't manage, edited by hand or by its app, isn't. The system snapshots
+cover the rest.
+
+## 13. The same desktop anywhere
+
+`config.toml` and `plugins.lock` already make another machine the same
+(`myarch plugins sync && myarch apply`). One step for it: synced through
+git (or a service), with what's per-machine (monitors, hardware) kept
+apart.
+
+## 14. Workspace sessions
+
+A workspace saved as a whole ("trading": these apps, on these
+workspaces, arranged so) and brought back with one key.
+
+## 15. The CLI in your language
+
+The plugins are localized; myarch's own messages (apply, update, doctor)
+are English only. Same locales, same fallbacks.
+
+## Also pending
+
+- Built-in plugins have no README: their page in the Plugins panel is
+  empty (`myarch plugins check` says so).
+- The bar's centered clock overlaps the right side on small screens.
+- An "updates available" widget; `myarch update` offering plugin updates;
+  Chromium's accent through its policy.
+
