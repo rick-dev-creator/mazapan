@@ -29,3 +29,4 @@
 "sky.showers" = "Showers"
 "sky.snow_showers" = "Snow showers"
 "sky.thunderstorm" = "Thunderstorm"
+"setting.refresh_minutes" = "Refresh every (minutes)"

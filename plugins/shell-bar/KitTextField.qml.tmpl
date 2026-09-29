@@ -38,6 +38,9 @@ Rectangle {
   }
 
   Text {
+    // Plain: what it shows can come from a plugin or a catalog, and
+    // rich text could hide part of it, or load an image from anywhere.
+    textFormat: Text.PlainText
     visible: input.text === "" && !input.activeFocus
     anchors.fill: input
     verticalAlignment: Text.AlignVCenter

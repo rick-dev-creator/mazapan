@@ -22,6 +22,8 @@ public sealed partial class Plugin
         public long Api;
         /// <summary>Requires: other plugins it needs, "id" or "id >= 1.2".</summary>
         public List<string> Requires = [];
+        /// <summary>Categories, for the Plugins panel: bar, panel, theme, window, hardware, tools, agent.</summary>
+        public List<string> Categories = [];
     }
 
     public MetaTable Meta { get; } = new();
@@ -35,6 +37,9 @@ public sealed partial class Plugin
     /// result as settings.
     /// </summary>
     public Dictionary<string, object> Settings { get; set; } = [];
+
+    /// <summary>What each setting is: its label, description, choices, range, kind (see SettingInfo).</summary>
+    public Dictionary<string, SettingInfo> SettingsInfo { get; } = [];
 
     /// <summary>
     /// Targets are files the plugin generates. The core renders and writes
@@ -80,6 +85,19 @@ public sealed partial class Plugin
 
     public string Id => Meta.Id;
 
+    /// <summary>Its categories: the ones it says, or what its files make it.</summary>
+    public List<string> CategoriesOrGuess()
+    {
+        if (Meta.Categories.Count > 0) return Meta.Categories;
+        var outs = Targets.Select(t => t.Output).ToList();
+        if (Hardware != null) return ["hardware"];
+        if (outs.Any(o => o.Contains("/quickshell/myarch/widgets/"))) return ["bar"];
+        if (outs.Any(o => o.Contains("/quickshell/myarch/panels/"))) return ["panel"];
+        if (Id.StartsWith("theme-") || Id == "wallpaper") return ["theme"];
+        if (outs.Any(o => o.Contains("/hypr/"))) return ["window"];
+        return ["tools"];
+    }
+
     /// <summary>Where a plugin may put a system file (system = true): drop-in folders.</summary>
     public static readonly string[] SystemDirs =
     [
@@ -111,6 +129,8 @@ public sealed partial class Plugin
                 throw new MyArchException($"[plugins.{Id}] {k}: unknown setting (known: {Keys(Settings)})");
             out_[k] = Coerce(def, v) ?? throw new MyArchException(
                 $"[plugins.{Id}] {k} = {Show(v)}: want a {GoType(def)} like the default {Show(def)}");
+            if (SettingsInfo.TryGetValue(k, out var info) && info.Check(out_[k]) is { } why)
+                throw new MyArchException($"[plugins.{Id}] {k} {why}");
         }
         return out_;
     }
@@ -223,9 +243,29 @@ public sealed partial class Plugin
         p.Meta.Api = meta.Int("api");
         p.Meta.Description = meta.String("description");
         p.Meta.Requires = meta.Strings("requires");
+        p.Meta.Categories = meta.Strings("categories");
+        foreach (var c in p.Meta.Categories)
+            if (!Install.CatalogIndex.KnownCategories.Contains(c))
+                throw new MyArchException($"{path}: [plugin] category \"{c}\": one of {string.Join(", ", Install.CatalogIndex.KnownCategories)}");
         p.Pacman = r.Sub("packages").Strings("pacman");
         if (r.Raw("settings") is { } settings)
-            foreach (var (k, v) in settings) p.Settings[k] = v;
+        {
+            var comments = SettingInfo.Comments(File.ReadAllText(path));
+            foreach (var (k, v) in settings)
+            {
+                SettingInfo info;
+                if (v is TomlTable t && t.ContainsKey("default"))
+                    (p.Settings[k], info) = SettingInfo.Parse(path, k, t);
+                else
+                {
+                    p.Settings[k] = v;
+                    info = new SettingInfo { Kind = SettingInfo.KindOf(k, v) };
+                }
+                if (info.Description == "") info.Description = comments.GetValueOrDefault(k, "");
+                if (info.Label == "") info.Label = SettingInfo.LabelOf(k);
+                p.SettingsInfo[k] = info;
+            }
+        }
         foreach (var t in r.Array("targets"))
             p.Targets.Add(new Target
             {

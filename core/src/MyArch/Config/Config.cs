@@ -19,6 +19,8 @@ public sealed class Settings
     /// <summary>Language to render text in ("es", "es_MX"); empty = the OS's.</summary>
     public string Language = "";
     public List<string> Disabled = [];
+    /// <summary>Catalogs of plugins to add besides myarch's own: URLs or paths of index.toml files.</summary>
+    public List<string> Catalogs = [];
     /// <summary>Hardware plugins are off until turned on: the ones that are.</summary>
     public List<string> Enabled = [];
     /// <summary>Per-plugin setting overrides: [plugins.&lt;id&gt;] key = value</summary>
@@ -37,6 +39,7 @@ public sealed class Settings
         c.Language = r.String("language");
         c.Disabled = r.Strings("disabled_plugins");
         c.Enabled = r.Strings("enabled_plugins");
+        c.Catalogs = r.Strings("catalogs");
         if (r.Raw("plugins") is { } plugins)
             foreach (var (id, v) in plugins)
             {
@@ -57,6 +60,7 @@ public sealed class Settings
         if (Language != "") TomlWriter.Key(b, "language", Language);
         if (Disabled.Count > 0) TomlWriter.Key(b, "disabled_plugins", Disabled);
         if (Enabled.Count > 0) TomlWriter.Key(b, "enabled_plugins", Enabled);
+        if (Catalogs.Count > 0) TomlWriter.Key(b, "catalogs", Catalogs);
         if (Plugins.Count > 0)
         {
             b.Append("\n[plugins]\n");

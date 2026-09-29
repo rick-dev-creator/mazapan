@@ -1,1 +1,8 @@
+"plugin.name" = "Tema de Qt"
+"plugin.description" = "Apps de Qt 6 (también las de KDE) con el tema: paleta, fuente y estilo mediante qt6ct, y el esquema de colores de KDE"
+"setting.icon_theme" = "Tema de iconos"
+"setting.icon_theme.help" = "Los iconos que usan las apps de Qt."
+"setting.style" = "Estilo"
+"setting.style.help" = "El estilo de widgets de Qt: Fusion sigue la paleta por completo."
+
 "check" = "Las apps Qt pueden usar el tema (qt6ct)"

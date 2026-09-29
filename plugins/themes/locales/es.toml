@@ -1,3 +1,8 @@
+"plugin.name" = "Selector de temas"
+"plugin.description" = "Elige un tema y un color de acento, con vista previa en vivo en el escritorio y el contraste de cada tema comprobado"
+"setting.key" = "Tecla"
+"setting.key.help" = "Abre el selector de temas."
+
 "title" = "Temas"
 "hints" = "← → tema   tab acento   ↵ aplicar   esc volver al tuyo"
 "accent" = "acento"

@@ -1,3 +1,12 @@
+"plugin.name" = "Volumen"
+"plugin.description" = "Volumen de salida en la barra: la rueda lo cambia, clic central silencia, clic para salidas y entradas"
+"setting.max_volume" = "Volumen máximo"
+"setting.max_volume.help" = "El volumen más alto al que llegan el deslizador y la rueda: 1.0 = 100 %; hasta 1.5 para subir fuentes bajas (puede distorsionar)."
+"setting.show_percent" = "Mostrar porcentaje"
+"setting.show_percent.help" = "Muestra el volumen en porcentaje junto al icono."
+"setting.step" = "Paso"
+"setting.step.help" = "Cambio por cada paso de la rueda, como fracción (0.05 = 5 %)."
+
 "output" = "salida"
 "input" = "entrada"
 "muted" = "silenciado"

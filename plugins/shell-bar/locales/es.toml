@@ -1,1 +1,6 @@
+"plugin.name" = "Barra"
+"plugin.description" = "Una barra en cada monitor (Quickshell), con los widgets que otros plugins ponen en sus huecos izquierda/centro/derecha; trae un kit de componentes para ellos"
+"setting.height" = "Altura"
+"setting.height.help" = "Altura de la barra en píxeles lógicos."
+
 "check.bar" = "La barra corre y carga su configuración"

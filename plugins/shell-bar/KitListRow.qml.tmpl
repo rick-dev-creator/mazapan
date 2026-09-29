@@ -38,6 +38,9 @@ Rectangle {
     spacing: 10
 
     Text {
+      // Plain: what it shows can come from a plugin or a catalog, and
+      // rich text could hide part of it, or load an image from anywhere.
+      textFormat: Text.PlainText
       text: row.glyph
       // One width for every glyph, so titles line up.
       Layout.preferredWidth: 18
@@ -52,6 +55,9 @@ Rectangle {
       spacing: 1
 
       Text {
+        // Plain: what it shows can come from a plugin or a catalog, and
+        // rich text could hide part of it, or load an image from anywhere.
+        textFormat: Text.PlainText
         Layout.fillWidth: true
         text: row.title
         elide: Text.ElideRight
@@ -62,6 +68,9 @@ Rectangle {
       }
 
       Text {
+        // Plain: what it shows can come from a plugin or a catalog, and
+        // rich text could hide part of it, or load an image from anywhere.
+        textFormat: Text.PlainText
         Layout.fillWidth: true
         visible: row.detail !== ""
         text: row.detail
@@ -73,6 +82,9 @@ Rectangle {
     }
 
     Text {
+      // Plain: what it shows can come from a plugin or a catalog, and
+      // rich text could hide part of it, or load an image from anywhere.
+      textFormat: Text.PlainText
       visible: row.trailing !== ""
       text: row.trailing
       color: Theme.fgSubtle

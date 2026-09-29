@@ -347,7 +347,7 @@ public static partial class Program
         if (edits.Count > 0) what = (what == "" ? "" : what + "; ") + string.Join(", ", edits);
         if (what == "") what = "apply";
         // Packages alone are a change too: undo takes them out.
-        var snap = Snapshots.Begin(changes, orphans, fs.IsSet("adopt"), Settings.Path, what,
+        var snap = noSnapshots ? null : Snapshots.Begin(changes, orphans, fs.IsSet("adopt"), Settings.Path, what,
             configOnly: configChanged || (fs.IsSet("system") && rootWork > 0));
         try
         {

@@ -102,6 +102,21 @@ public class PluginsLockTests
     }
 
     [Fact]
+    public void FromACatalogIsKept()
+    {
+        using var sb = new Sandbox();
+        var l = new PluginsLock();
+        l.Put(new Entry { Id = "a", Source = "s", Ref = "v1.0", Commit = C1, Catalog = true });
+        l.Put(new Entry { Id = "b", Source = "s", Commit = C1 });
+        l.Save();
+        Assert.Contains("  catalog = true\n", File.ReadAllText(PluginsLock.Path));
+        var back = PluginsLock.Load();
+        Assert.True(back.Get("a")!.Catalog);
+        Assert.False(back.Get("b")!.Catalog);
+        Assert.True(back.Get("a")!.Copy().Catalog);
+    }
+
+    [Fact]
     public void PutOverwritesInPlace()
     {
         var l = new PluginsLock();

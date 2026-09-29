@@ -15,8 +15,9 @@ pacman = ["quickshell"]
 # itself comes from Open-Meteo: no account, no key.
 location = "auto"
 # "metric" (°C, km/h) or "imperial" (°F, mph).
-units = "metric"
-refresh_minutes = 15
+units = { default = "metric", choices = ["metric", "imperial"] }
+# How often to ask for the weather again, in minutes.
+refresh_minutes = { default = 15, min = 5, max = 180 }
 
 # Shared by the widget on every bar, so the data is fetched once.
 [[targets]]

@@ -70,4 +70,15 @@ public class LocaleTests
         var e = Assert.Throws<MyArchException>(() => Catalog.Load("p", dir, "es"));
         Assert.Contains("locales/es.toml has \"helo\"", e.Message);
     }
+
+    [Fact]
+    public void WhatTheManifestSaysNeedsNoEnglishKey()
+    {
+        // plugin.toml has the English name, description and settings' labels.
+        using var d = new TempDir();
+        var dir = WriteLocales(d, new() { ["en"] = "hello = 'hello'\n", ["es"] = "'plugin.description' = 'Hola'\n'setting.x' = 'Equis'\n" });
+        var c = Catalog.Load("p", dir, "es");
+        Assert.Equal("Hola", c.TryT("plugin.description"));
+        Assert.Null(c.TryT("plugin.name"));
+    }
 }

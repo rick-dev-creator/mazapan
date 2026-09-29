@@ -1,0 +1,2 @@
+"plugin.name" = "Decodificación de vídeo en gráficos Intel"
+"plugin.description" = "Decodificación de vídeo por hardware (VA-API) en gráficos Intel: los dos drivers, para que libva elija el de tu GPU (iHD desde Broadwell, i965 antes)"

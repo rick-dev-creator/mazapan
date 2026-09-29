@@ -27,12 +27,17 @@ public sealed class Entry
     /// (Plugin.Capabilities); an update that needs more asks again.
     /// </summary>
     public List<string> Approved { get; set; } = [];
+    /// <summary>
+    /// Installed from a catalog entry, whose ref it follows: when the catalog
+    /// moves it, update goes there. A ref the person picks ends that.
+    /// </summary>
+    public bool Catalog { get; set; }
 
     /// <summary>
     /// A copy, as Go's <c>next := *e</c>: changing it leaves the lock's entry
     /// alone.
     /// </summary>
-    public Entry Copy() => new() { Id = Id, Source = Source, Ref = Ref, Commit = Commit, Approved = [.. Approved] };
+    public Entry Copy() => new() { Id = Id, Source = Source, Ref = Ref, Commit = Commit, Approved = [.. Approved], Catalog = Catalog };
 
     /// <summary>Takes every field of e, as Go's <c>*old = e</c>.</summary>
     internal void Assign(Entry e)
@@ -42,6 +47,7 @@ public sealed class Entry
         Ref = e.Ref;
         Commit = e.Commit;
         Approved = e.Approved;
+        Catalog = e.Catalog;
     }
 }
 
@@ -62,7 +68,7 @@ public sealed partial class PluginsLock
 
     public static string Path => Paths.ExpandHome("~/.config/myarch/plugins.lock");
 
-    static readonly string[] EntryKeys = ["id", "source", "ref", "commit", "approved"];
+    static readonly string[] EntryKeys = ["id", "source", "ref", "commit", "approved", "catalog"];
 
     public static PluginsLock Load()
     {
@@ -102,6 +108,7 @@ public sealed partial class PluginsLock
                 Ref = r.String("ref"),
                 Commit = r.String("commit"),
                 Approved = r.Strings("approved"),
+                Catalog = r.Bool("catalog"),
             });
             foreach (var (k, _) in table)
                 if (!EntryKeys.Contains(k)) unknown.Add("plugin." + TomlWriter.BareOrQuoted(k));
@@ -183,6 +190,7 @@ public sealed partial class PluginsLock
             if (e.Ref != "") TomlWriter.Key(b, "ref", e.Ref, "  ");
             TomlWriter.Key(b, "commit", e.Commit, "  ");
             TomlWriter.Key(b, "approved", e.Approved, "  ");
+            if (e.Catalog) TomlWriter.Key(b, "catalog", true, "  ");
         }
         return b.ToString();
     }

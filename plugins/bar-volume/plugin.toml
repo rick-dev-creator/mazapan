@@ -11,10 +11,11 @@ pacman = ["quickshell", "pipewire", "wireplumber"]
 
 [settings]
 # Change per wheel notch, as a fraction (0.05 = 5%).
-step = 0.05
+step = { default = 0.05, min = 0.01, max = 0.25, step = 0.01 }
 # Highest volume the slider and the wheel reach: 1.0 = 100%; up to 1.5 to
 # boost quiet sources (it can distort).
-max_volume = 1.0
+max_volume = { default = 1.0, min = 1.0, max = 1.5, step = 0.05 }
+# Show the volume as a percentage next to the icon.
 show_percent = true
 
 [[targets]]

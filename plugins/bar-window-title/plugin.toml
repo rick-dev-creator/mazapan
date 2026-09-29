@@ -11,9 +11,9 @@ pacman = ["quickshell"]
 
 [settings]
 # Size of the title, in points.
-font_size = 9.5
+font_size = { default = 9.5, min = 6, max = 20, step = 0.5 }
 # Longest the title may get, logical pixels; longer ones end in "…".
-max_width = 520
+max_width = { default = 520, min = 100, max = 2000 }
 
 [[targets]]
 template = "Title.qml.tmpl"

@@ -77,6 +77,42 @@ public sealed partial class Plugin
     }
 
     /// <summary>
+    /// The kinds of capability, as the text begins, each with a key that
+    /// doesn't change with the wording: what the Plugins panel translates
+    /// (cap.KEY, %1 the rest). The longer beginnings first.
+    /// </summary>
+    static readonly (string Prefix, string Key)[] kinds =
+    [
+        ("full access, as root: writes ", "root_file"),
+        ("full access, code in the shell (QML): ", "shell_code"),
+        ("full access, code in Hyprland (Lua): ", "hypr_code"),
+        ("full access, code: ", "code"),
+        ("full access, a config that can run commands: ", "config"),
+        ("changes some settings in ", "settings_in"),
+        ("writes ", "writes"),
+        ("runs as root after writing: ", "root_run"),
+        ("runs after writing: ", "reload"),
+        ("runs as a health check: ", "check"),
+        ("runs when you pick it: ", "action"),
+        ("needs the package ", "package"),
+        ("for machines with ", "hardware"),
+    ];
+
+    /// <summary>A capability's kind (root_file, reload, …; "" for none known) and what it's about.</summary>
+    public static (string Key, string Subject) KindOf(string cap)
+    {
+        foreach (var (prefix, key) in kinds)
+            if (cap.StartsWith(prefix, StringComparison.Ordinal))
+            {
+                var subject = cap[prefix.Length..];
+                if (key == "root_file" && subject.EndsWith(" (after a reboot)"))
+                    return ("root_file_reboot", subject[..^" (after a reboot)".Length]);
+                return (key, subject);
+            }
+        return ("", cap);
+    }
+
+    /// <summary>
     /// FileCapability says what writing a target amounts to. Nearly any config
     /// can run commands (foot's shell=, hyprlock's cmd[], a .desktop's Exec=,
     /// VS Code's terminal profiles, Firefox's autoconfig), so a file is full
@@ -179,7 +215,7 @@ public static partial class Commands
     static readonly HashSet<string> Data = ["theme", "settings", "home", "plugin", "lang", "lang_code", "place", "machine"];
 
     static readonly HashSet<string> Pure =
-        ["c", "hex", "rgb", "rgba", "cssa", "csv", "speed", "spring", "num", "pct", "quote", "lq", "inline", "base", "mix", "solid", "camel", "json"];
+        ["c", "hex", "rgb", "rgba", "cssa", "csv", "speed", "spring", "num", "pct", "quote", "shq", "lq", "inline", "base", "mix", "solid", "camel", "json"];
 
     [GeneratedRegex(@"\s+\{\{-")]
     private static partial Regex TrimLeft();

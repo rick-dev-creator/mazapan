@@ -109,14 +109,18 @@ public sealed class Catalog
             c.names.Add(l);
             c.chain.Add(m);
         }
-        // A key other languages have but en doesn't is a typo somewhere.
+        // A key other languages have but en doesn't is a typo somewhere; but
+        // for what plugin.toml says in English already (the name and
+        // description, the settings' labels and descriptions).
         if (en != null)
             for (var i = 0; i < c.chain.Count - 1; i++)
                 foreach (var k in c.chain[i].Keys.Order(StringComparer.Ordinal))
-                    if (!en.ContainsKey(k))
+                    if (!en.ContainsKey(k) && !FromManifest(k))
                         throw new MyArchException($"plugin {plugin}: locales/{c.names[i]}.toml has \"{k}\", which en.toml doesn't");
         return c;
     }
+
+    static bool FromManifest(string key) => key is "plugin.name" or "plugin.description" || key.StartsWith("setting.", StringComparison.Ordinal);
 
     static Dictionary<string, string>? Read(string path)
     {
@@ -126,6 +130,14 @@ public sealed class Catalog
         foreach (var (k, v) in t)
             m[k] = v as string ?? throw new MyArchException($"{path}: {k}: want a string");
         return m;
+    }
+
+    /// <summary>TryT is T without the error: null when no language has it.</summary>
+    public string? TryT(string key)
+    {
+        foreach (var m in chain)
+            if (m.TryGetValue(key, out var v)) return v;
+        return null;
     }
 
     /// <summary>T returns the text for key in the most specific language that has it.</summary>

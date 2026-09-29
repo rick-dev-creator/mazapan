@@ -11,7 +11,7 @@ modules = ["hid_apple"]
 [settings]
 # 2: function keys first; 1: media keys first; 3: the kernel's guess (its
 # default); 0: no Fn key.
-fnmode = 2
+fnmode = { default = 2, choices = [0, 1, 2, 3] }
 
 [[targets]]
 template = "hid-apple.conf.tmpl"

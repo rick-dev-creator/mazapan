@@ -1,0 +1,37 @@
+[plugin]
+id = "plugin-manager"
+name = "Plugins"
+version = "0.1.0"
+api = 1
+description = "Find, install and set up plugins: the built-in ones, yours and the catalogs', each with its page (README, what it can do, settings)"
+requires = ["shell-bar", "hypr-base"]
+categories = ["panel", "tools"]
+
+[settings]
+# Opens the Plugins panel.
+key = "SUPER + SHIFT + P"
+# What asks for a password or an approval runs in a terminal: this one,
+# kept open to read.
+terminal = "foot --hold"
+
+[[targets]]
+template = "Manager.qml.tmpl"
+output = "~/.config/quickshell/myarch/panels/plugins.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "plugins.lua.tmpl"
+output = "~/.config/hypr/myarch/plugins.lua"
+reload = "hyprctl reload >/dev/null"
+
+[[actions]]
+name = "{{ t \"act.open\" }}"
+run = "qs ipc -c myarch call myarch panel plugins"
+key = "{{ settings.key }}"
+keywords = "{{ t \"act.open.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.update\" }}"
+run = "myarch plugins update"
+terminal = true
+keywords = "{{ t \"act.update.kw\" }}"

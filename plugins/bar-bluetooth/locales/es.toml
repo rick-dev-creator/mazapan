@@ -1,3 +1,8 @@
+"plugin.name" = "Bluetooth"
+"plugin.description" = "Bluetooth en la barra; clic para conectar, emparejar y olvidar dispositivos"
+"setting.hide_without_adapter" = "Ocultar sin adaptador"
+"setting.hide_without_adapter.help" = "Sin adaptador Bluetooth no hay nada que hacer: oculta el widget."
+
 "bluetooth" = "bluetooth"
 "no_adapter" = "Sin adaptador Bluetooth"
 "off" = "El Bluetooth está apagado"

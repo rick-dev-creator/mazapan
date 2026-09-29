@@ -100,6 +100,41 @@ public class PluginTests
         Assert.Single(Plugin.NewCapabilities(caps.Skip(1), caps));
     }
 
+    [Theory]
+    [InlineData("plain", "'plain'")]
+    [InlineData("it's $HOME `x` $(y) *", "'it'\\''s $HOME `x` $(y) *'")]
+    public void ShellQuoteIsOneWordWithNothingExpanded(string s, string quoted) =>
+        Assert.Equal(quoted, MyArch.Rendering.Functions.ShellQuote(s));
+
+    [Fact]
+    public void BuiltInPluginsHaveTheirNameInSpanish()
+    {
+        // The Plugins panel shows each plugin's name and description in the
+        // system's language: every built-in plugin has both in es.
+        var (all, _) = Plugin.Discover([Path.Join(Repo.Root, "plugins")]);
+        foreach (var p in all)
+        {
+            var c = MyArch.Locale.Catalog.Load(p.Id, p.Dir, "es");
+            Assert.True(c.TryT("plugin.name") != null && c.TryT("plugin.description") != null, p.Id);
+            foreach (var k in p.Settings.Keys)
+                Assert.True(c.TryT($"setting.{k}") != null && c.TryT($"setting.{k}.help") != null, $"{p.Id}: setting.{k}");
+        }
+    }
+
+    [Fact]
+    public void EveryCapabilityHasAKind()
+    {
+        // The Plugins panel translates capabilities by kind: every one the
+        // built-in plugins have must have one.
+        var (all, _) = Plugin.Discover([Path.Join(Repo.Root, "plugins")]);
+        foreach (var p in all)
+            foreach (var cap in p.Capabilities())
+                Assert.True(Plugin.KindOf(cap).Key != "", $"{p.Id}: {cap}");
+        Assert.Equal(("root_file_reboot", "/etc/x.conf"), Plugin.KindOf("full access, as root: writes /etc/x.conf (after a reboot)"));
+        Assert.Equal(("reload", "hyprctl reload"), Plugin.KindOf("runs after writing: hyprctl reload"));
+        Assert.Equal(("", "(unreadable: x)"), Plugin.KindOf("(unreadable: x)"));
+    }
+
     [Fact]
     public void CommandsAreShownAsTheyRun()
     {

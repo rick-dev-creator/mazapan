@@ -14,7 +14,8 @@ pacman = ["quickshell"]
 # it (24h in Spanish, 12h in US English). Or a Qt date format of your own,
 # e.g. "dddd d · HH:mm" (https://doc.qt.io/qt-6/qml-qtqml-qt.html#formatDateTime-method).
 format = ""
-font_size = 9.5
+# Size of the text, in points.
+font_size = { default = 9.5, min = 6, max = 20, step = 0.5 }
 
 [[targets]]
 template = "Clock.qml.tmpl"

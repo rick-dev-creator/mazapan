@@ -1,1 +1,6 @@
+"plugin.name" = "Tema de Neovim"
+"plugin.description" = "Un esquema de colores de Neovim a partir del tema (sintaxis, Treesitter, LSP, diagnósticos, git, Telescope), usado si no has elegido otro; los Neovim abiertos cambian de color al aplicar"
+"setting.auto" = "Automático"
+"setting.auto.help" = "Úsalo solo cuando tu configuración no elige esquema de colores. Si elige uno (p. ej. LazyVim), pon el tuyo en \"myarch\"."
+
 # Nada que traducir.

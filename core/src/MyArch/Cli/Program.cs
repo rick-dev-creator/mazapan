@@ -23,14 +23,31 @@ public static partial class Program
           plugins show ID
                          what a plugin needs and does: requirements, settings,
                          files, commands, code
+          plugins catalog [--json] [--refresh]
+                         every plugin: built in, installed, and in the catalogs
+          plugins search TERM...
+          plugins preview ID|URL[#REF] [--json]
+                         a plugin's page (README, what it can do, settings)
+                         without installing it
           plugins enable|disable ID...
-          plugins add URL[#REF] [-y]
+          plugins add ID|URL[#REF] [-y]
                          install a plugin from git, after approving what it can do
           plugins update [ID[#REF]...] [-y]
                          update plugins from git (to another branch or tag with
                          #REF); asks before any new capability
           plugins remove ID...
           plugins sync   install exactly what plugins.lock says (another machine)
+          plugins new ID [--kind bar|panel|window|theme|tools] [--dir DIR]
+                         a working plugin to start from, in the plugin folder (or DIR)
+          plugins check [ID|DIR]
+                         before sharing a plugin: rendered with every theme, in every
+                         language it has; what's missing to translate or describe it
+          plugins dev [ID|DIR]
+                         apply a plugin on every save (a folder elsewhere is linked in)
+          plugins fork ID [NEW]
+                         copy a built-in plugin to change it (NEW: a copy beside it)
+          plugins diff ID
+                         what your fork changed from the built-in
           coverage [--json]
                          installed apps, and whether the theme reaches them
           themes [--json]

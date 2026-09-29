@@ -1,0 +1,2 @@
+"plugin.name" = "Cursor con varias GPU"
+"plugin.description" = "Dibuja el cursor por software cuando el equipo tiene varias GPU (una renderiza y otra lleva pantallas: un dock en la iGPU, la pantalla de un portátil): el cursor por hardware parpadea en las pantallas de la otra GPU"

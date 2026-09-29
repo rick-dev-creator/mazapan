@@ -11,7 +11,7 @@ pacman = ["quickshell"]
 
 [settings]
 # Bar height in logical pixels.
-height = 28
+height = { default = 28, min = 20, max = 64 }
 
 # How every plugin with Quickshell files reloads the shell (their reload
 # command runs it), so it lives in one place.

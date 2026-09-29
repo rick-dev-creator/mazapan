@@ -3,3 +3,6 @@
 "preview.one" = "workspace %1 · 1 window"
 "preview.many" = "workspace %1 · %2 windows"
 "preview.drop_to" = "→ workspace %1"
+"setting.grow_delay_ms" = "Grow delay (ms)"
+"setting.open_delay_ms" = "Open delay (ms)"
+"setting.preview_width_large" = "Grown preview width"

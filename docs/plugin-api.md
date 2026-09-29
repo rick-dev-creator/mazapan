@@ -73,8 +73,55 @@ start with `~/` or `/` and never go up with `..`. Approving "full access"
 is trusting its author, like any extension: that code runs with your
 rights.
 
-Your own plugins (a folder you put there, not a git checkout) aren't
-checked: they're yours.
+Your own plugins (a folder you put there, not a git checkout, or a link
+`plugins dev` made to one) aren't checked: they're yours.
+
+## Catalogs and the Plugins panel
+
+A catalog lists plugins one can add: only where each lives and what it is.
+Adding one is still `plugins add`, with what it can do shown and approved.
+myarch ships one (`catalog/index.toml`); config.toml adds others, paths or
+https URLs (fetched at most once a day, `--refresh` to fetch now):
+
+```toml
+catalogs = ["https://example.com/myarch/index.toml"]
+```
+
+```toml
+[[plugin]]
+id = "bar-uptime"                # its plugin.toml's id
+name = "Uptime"
+description = "How long the machine has been up, in the bar"
+author = "Ana"
+source = "https://github.com/ana/myarch-uptime"
+ref = "v1.3"                     # tag or branch; none: the default branch
+categories = ["bar"]             # bar, panel, theme, window, hardware, tools, agent
+homepage = "https://…"
+translations.es.description = "Cuánto tiempo lleva encendido el equipo, en la barra"
+```
+
+An id in two catalogs is the first one's. A plugin installed from a catalog
+entry (`plugins add ID`) follows its `ref`: when the catalog moves it
+(`v1.3` to `v1.4`), `plugins update` goes there, still asking before
+anything new, and never to a lower version. A ref you pick yourself
+(`plugins update ID#REF`) ends that.
+
+```sh
+myarch plugins catalog [--json]    # every plugin: built in, yours, installed, available
+myarch plugins search TERM…
+myarch plugins preview ID|URL      # its page, without installing it
+myarch plugins add ID              # from a catalog, by id
+```
+
+The **Plugins** panel (the `plugin-manager` plugin, SUPER + SHIFT + P) is
+all of that with a mouse: search, tabs (installed, available, for this
+machine, all), and each plugin's page: its README, what it can do (the
+riskiest marked), its settings as controls. It runs the same commands:
+turning on and off and settings are `apply --enable|--disable|--set`, so
+`myarch undo` takes them back; installing is `plugins add`, of the very
+commit whose capabilities the page showed (after "allow and install"),
+and removing, `plugins remove`. What asks for sudo (a hardware plugin) or
+an approval (an update needing more) opens in a terminal.
 
 ## plugin.toml
 
@@ -86,6 +133,7 @@ version = "0.1.0"
 api = 1                    # manifest API; the core refuses other values
 description = "one line"
 requires = ["shell-bar", "hypr-base >= 0.1"]   # other plugins it needs
+categories = ["theme"]     # bar, panel, theme, window, hardware, tools, agent
 
 [packages]
 pacman = ["foot"]          # checked on apply, warned about if missing
@@ -246,6 +294,27 @@ auto = true
 min_width = 400
 ```
 
+A setting is a default alone, described by the comment above it; or a
+table that says more, which the Plugins panel turns into the right control
+and `apply` enforces:
+
+```toml
+[settings]
+# Show seconds too.
+seconds = false                                   # a switch
+# How often to refresh it, in seconds.
+refresh_seconds = { default = 60, min = 10, max = 3600, step = 10 }
+units = { default = "metric", choices = ["metric", "imperial"], label = "Units" }
+folder = { default = "Pictures", kind = "path" }
+```
+
+`kind` is `text`, `number`, `integer`, `switch`, `choice`, `key`, `command`,
+`color`, `path`, `font` or `list`; left out, it's taken from the default
+(and the name: `key`, `*_key` are keys; `terminal`, `*_command` commands).
+The label is the key made readable (`font_size`: "Font size") unless given;
+both are translated with `setting.KEY` and `setting.KEY.help` in the
+locales.
+
 Overrides must use a key the plugin declares and the same type as the
 default (an integer is accepted where the default is a float). Anything
 else, including a `[plugins.<id>]` section for a plugin that doesn't exist,
@@ -267,12 +336,16 @@ The language comes from the OS (`LC_ALL`, `LC_MESSAGES`, `LANG`, then
 `/etc/locale.conf`), or from `language = "es"` in config.toml. For `es_MX`
 the core tries `es_MX.toml`, `es.toml`, then `en.toml`, key by key. A key
 in another language that en.toml doesn't have stops `apply` (it's a typo);
-a key missing everywhere fails the render.
+a key missing everywhere fails the render. What plugin.toml already says
+in English needs no en.toml key: `plugin.name`, `plugin.description`,
+`setting.KEY` and `setting.KEY.help` translate the name, description and
+settings for the Plugins panel. A `README.es.md` (or `README.es_MX.md`) is
+the page in that language; `README.md` the rest.
 
 In templates, `t "key"` gives the text and `tq "key"` gives it as a quoted
 literal that is valid in QML/JS and Lua. Placeholders are `%1`, `%2`… and
-filled in with QML's `.arg()`: `{{tq "updated"}}.arg(time)`. `.Lang`
-(`es_MX`) and `.LangCode` (`es`) are there for APIs that take a language,
+filled in with QML's `.arg()`: `{{tq "updated"}}.arg(time)`. `lang`
+(`es_MX`) and `lang_code` (`es`) are there for APIs that take a language,
 and for `Qt.locale(…)`, which gives day names and time formats for free.
 
 ## Targets
@@ -346,8 +419,11 @@ folder, never a path out of it. Scriban's functions are all there but those
 that read or run something else (`include`, `object.eval`) or change on
 every apply (`date.now`, `math.random`).
 
-A text setting that goes into code is always quoted for it (`lq`, `quote`,
-`inline`): its value must never be able to close a string and add code.
+A text setting that goes into code is always quoted for it (`lq` for Lua,
+`quote` for QML/JS, `shq` for a shell command, `inline` for a comment or an
+ini value): its value must never be able to close a string and add code.
+`shq` makes it one shell word, nothing expanded (`$`, backticks, globs);
+`quote` in a shell command would still expand `$(…)`.
 
 What templates see:
 
@@ -382,6 +458,7 @@ Functions, besides Scriban's own (`string.*`, `array.*`, `object.keys`…):
 | `t "today"`                | `hoy` (this plugin's text)    |
 | `tq "today"`               | `"hoy"` (quoted for QML/Lua)  |
 | `quote settings.format`    | any string, quoted the same way (QML/JS) |
+| `shq settings.folder`      | one word in a shell command, nothing expanded |
 | `lq settings.key`          | any string as a Lua literal: `"SUPER + space"` |
 | `inline settings.style`    | without line breaks: for a comment or an ini value |
 | `under "~/.config/hypr/myarch/"` | every plugin output below that path |
@@ -470,3 +547,39 @@ the kit as `"../components/kit"`.
 | `TextField`| `text`, `placeholder`, `echoMode`, `accepted`, `focusInput()`  |
 
 They all take their colors, font and shape from the theme.
+
+## Writing a plugin
+
+```sh
+myarch plugins new bar-uptime --kind bar   # bar, panel, window, theme, tools
+myarch plugins dev bar-uptime              # applied again on every save
+myarch plugins check bar-uptime            # before sharing it
+```
+
+`new` writes a working plugin of that kind to start from: its manifest with
+described settings, a template, en and es locales, a README. It goes to the
+plugin folder, on at once, or to `--dir ~/src/bar-uptime` for a repository
+of its own.
+
+`dev` watches the plugin's files and applies on every save until Ctrl+C:
+template errors in the terminal, and for QML, what the shell says when it
+loads the file (a syntax error, a property that isn't there). A folder
+elsewhere is linked into the plugin folder first, and stays linked
+(`plugins remove ID` takes the link, not the folder). Its applies keep no
+undo snapshots: undo's history stays yours.
+
+`check` renders the plugin with every theme, in every language it has,
+with its settings' defaults, and tells what's wrong (errors: it fails) and
+what's missing (warnings): a description, categories, a README, settings
+without a description, text still in English in a language it has. Then
+what it would be able to do, as `plugins add` will show it.
+
+`fork ID` copies a built-in plugin into the plugin folder, where it takes
+the built-in's place; `plugins diff ID` shows what you changed, and deleting
+the copy goes back. `fork ID NEW` copies any plugin under a new id, to start
+from.
+
+To share it: a git repository with plugin.toml at its root, tagged, and an
+entry in a catalog (a pull request to myarch's `catalog/index.toml`, or
+your own catalog file).
+

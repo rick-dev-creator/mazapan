@@ -1,1 +1,6 @@
+"plugin.name" = "Fondo de pantalla"
+"plugin.description" = "El fondo de pantalla, dibujado a partir del tema (o la imagen del tema): cambia con él, vistas previas incluidas"
+"setting.scanlines" = "Líneas de barrido"
+"setting.scanlines.help" = "Líneas de barrido de CRT tenues sobre todo el fondo (temas oscuros)."
+
 # El fondo de pantalla no muestra texto.

@@ -14,8 +14,9 @@ pacman = ["grim", "wl-clipboard", "tesseract", "tesseract-data-eng", "wf-recorde
 # Opens the capture overlay; while recording, stops the recording.
 key = "Print"
 # Where screenshots and recordings go.
-pictures = "~/Pictures/Screenshots"
-videos = "~/Videos/Recordings"
+pictures = { default = "~/Pictures/Screenshots", kind = "path" }
+# Where recordings go.
+videos = { default = "~/Videos/Recordings", kind = "path" }
 # Record the sound too (the default output).
 audio = false
 

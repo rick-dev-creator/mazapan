@@ -1,2 +1,9 @@
+"plugin.name" = "Títulos de ventana"
+"plugin.description" = "Una tecla muestra u oculta una barra de título en cada ventana"
+"setting.height" = "Altura"
+"setting.height.help" = "Altura de la barra de título en píxeles lógicos."
+"setting.key" = "Tecla"
+"setting.key.help" = "Muestra u oculta la barra de título en todas las ventanas."
+
 "toggle" = "Mostrar u ocultar los títulos de las ventanas"
 "toggle.kw" = "títulos barra de título nombres"

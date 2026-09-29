@@ -1,0 +1,17 @@
+# myarch's plugin catalog: plugins from other people, in their own git
+# repositories. Each entry is only where a plugin lives and what it is:
+# adding one (the Plugins panel, or myarch plugins add ID) still shows what
+# it can do, and nothing is installed until you approve it.
+#
+# To list yours, add an entry and open a pull request:
+#
+# [[plugin]]
+# id = "hello"                 # its plugin.toml's id
+# name = "Hello"
+# description = "One line on what it does"
+# author = "You"
+# source = "https://github.com/you/myarch-hello"
+# ref = "v1.0"                 # a tag or branch; none: the default branch
+# categories = ["bar"]         # bar, panel, theme, window, hardware, tools, agent
+# homepage = "https://…"
+# translations.es.description = "Una línea sobre lo que hace"  # other languages

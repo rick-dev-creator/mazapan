@@ -10,9 +10,10 @@ requires = ["hypr-base"]
 pacman = ["hyprland"]
 
 [settings]
+# Shows or hides the title bar on every window.
 key = "SUPER + T"
 # Bar height in logical pixels.
-height = 20
+height = { default = 20, min = 12, max = 48 }
 
 [[targets]]
 template = "titles.lua.tmpl"

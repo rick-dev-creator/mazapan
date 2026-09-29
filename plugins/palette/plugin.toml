@@ -20,7 +20,8 @@ show_commands = true
 # (myarch update) in terminal_hold, which stays open afterwards. Shell
 # commands: quote as you would in a shell.
 terminal = "foot"
-terminal_hold = "foot --hold"
+# The terminal for commands that ask or print: it stays open afterwards, to read.
+terminal_hold = { default = "foot --hold", kind = "command" }
 
 [[targets]]
 template = "palette.lua.tmpl"

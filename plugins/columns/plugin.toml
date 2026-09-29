@@ -18,19 +18,23 @@ key = "SUPER + equal"
 phone_key = "SUPER + SHIFT + equal"
 # Width / height of a column in phone mode; 9:19.5 is a phone held upright.
 # The height is the monitor's, so the width adapts to each screen.
-phone_aspect = 0.4615
+phone_aspect = { default = 0.4615, min = 0.3, max = 0.8, step = 0.01 }
 # Focus mode: the focused window goes to the middle at focus_ratio of the
 # width, the others stack in a column on each side. On a side window it
 # brings that one to the middle; on the middle one it leaves focus mode.
 focus_key = "SUPER + C"
-focus_ratio = 0.55
+# The share of the width the middle window takes in focus mode.
+focus_ratio = { default = 0.55, min = 0.3, max = 0.9, step = 0.05 }
 # Grow / shrink the focused column by resize_step (a fraction of the screen
 # width). Held down, they repeat.
 grow_key = "SUPER + ALT + right"
+# Shrink the focused column by resize_step. Held down, it repeats.
 shrink_key = "SUPER + ALT + left"
-resize_step = 0.05
+# How much the keys grow or shrink a column, as a fraction of the screen width.
+resize_step = { default = 0.05, min = 0.01, max = 0.25, step = 0.01 }
 # Move the focused column one place left / right in the row.
 move_left_key = "SUPER + SHIFT + left"
+# Move the focused column one place right in the row.
 move_right_key = "SUPER + SHIFT + right"
 # Re-apply the workspace's mode whenever a window opens, closes or moves in,
 # so the columns always share the screen. Turn it off to keep columns you
@@ -39,7 +43,7 @@ auto = true
 # Narrowest a column may get, in logical pixels: shrinking stops here, and
 # in equal mode, with more windows than fit at this width, columns keep it
 # and the row scrolls.
-min_width = 400
+min_width = { default = 400, min = 200, max = 1600 }
 
 [[targets]]
 template = "columns.lua.tmpl"

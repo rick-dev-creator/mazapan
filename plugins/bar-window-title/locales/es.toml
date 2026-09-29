@@ -1,0 +1,6 @@
+"plugin.name" = "Título de la ventana"
+"plugin.description" = "El título de la ventana activa en la barra, junto a los espacios de trabajo"
+"setting.font_size" = "Tamaño de letra"
+"setting.font_size.help" = "Tamaño del título, en puntos."
+"setting.max_width" = "Ancho máximo"
+"setting.max_width.help" = "Lo más largo que puede ser el título, en píxeles lógicos; los más largos acaban en \"…\"."

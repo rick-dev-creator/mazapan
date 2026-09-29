@@ -25,7 +25,9 @@ myarch apply --dry-run          # show new / changed / conflict / orphan, write 
 myarch apply --adopt            # back up files myarch didn't write and take them over
 myarch plugins                  # every plugin, where it comes from, on or off
 myarch plugins show palette     # what it needs and what it can do
-myarch plugins add <git-url>    # a plugin from git, after you approve what it can do
+myarch plugins add <id|git-url> # a plugin from a catalog or git, after you approve what it can do
+myarch plugins search clock     # the catalogs; SUPER + SHIFT + P is the Plugins panel
+myarch plugins new my-widget --kind bar   # write your own: then plugins dev, plugins check
 myarch plugins sync             # the plugins in plugins.lock (on another machine)
 myarch themes                   # every theme, with its contrast problems
 myarch coverage                 # installed apps the theme reaches, and not
@@ -48,6 +50,15 @@ them (← →, tab for the accent), terminals already open included; ↵
 applies it, esc goes back. Themes also set how see-through terminals are
 (with the wallpaper blurred behind) and the wallpaper, drawn from their
 own colors.
+
+`SUPER + SHIFT + P` opens the Plugins panel, like an editor's extensions
+view: every plugin (built in, yours, installed, and the catalogs'),
+searchable, each with its page (README, what it can do, settings as
+controls), in your language. Turning plugins on and off and changing
+settings go through `myarch apply`, so `myarch undo` takes them back;
+installing asks first, showing what the plugin will be able to do. Writing your own:
+`myarch plugins new`, `dev`, `check`, `fork` (see
+[docs/plugin-api.md](docs/plugin-api.md#writing-a-plugin)).
 
 It never overwrites a file it didn't write, or one you edited, without
 `--adopt`.

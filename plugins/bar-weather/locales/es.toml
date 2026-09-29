@@ -1,3 +1,12 @@
+"plugin.name" = "Tiempo"
+"plugin.description" = "El tiempo actual en el centro de la barra; clic para detalles y el pronóstico"
+"setting.location" = "Ubicación"
+"setting.location.help" = "\"auto\" te localiza por tu IP pública (ipinfo.io), un nombre de ciudad se busca (geocodificación de Open-Meteo), o da coordenadas como \"lat,lon\". El pronóstico viene de Open-Meteo: sin cuenta ni clave."
+"setting.refresh_minutes" = "Actualizar cada (minutos)"
+"setting.refresh_minutes.help" = "Cada cuántos minutos se vuelve a pedir el tiempo."
+"setting.units" = "Unidades"
+"setting.units.help" = "\"metric\" (°C, km/h) o \"imperial\" (°F, mph)."
+
 "title" = "clima"
 "updated" = "actualizado %1"
 "loading" = "cargando…"

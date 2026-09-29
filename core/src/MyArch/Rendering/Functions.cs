@@ -26,6 +26,9 @@ static class Functions
             new string(s.Select(ch => char.IsControl(ch) ? ' ' : ch).ToArray())));
         // quote "text" -> "\"text\"": any string as such a literal.
         g.Add("quote", DelegateCustomFunction.CreateFunc((string s) => GoFormat.Quote(s)));
+        // shq "it's $HOME" -> "'it'\''s $HOME'": one word in a shell command,
+        // nothing in it expanded ($, `, globs): for settings in commands.
+        g.Add("shq", DelegateCustomFunction.CreateFunc((string s) => ShellQuote(s)));
         // c "accent" -> "#ffb000"; fails the render on unknown tokens.
         g.Add("c", DelegateCustomFunction.CreateFunc((string name) => t.Color(name)));
         // hex "#ffb000" -> "ffb000"
@@ -141,6 +144,8 @@ static class Functions
     }
 
     /// <summary>JSON as Go's encoding/json writes it: objects' keys in order, HTML-safe strings.</summary>
+    public static string ShellQuote(string s) => "'" + s.Replace("'", "'\\''") + "'";
+
     public static string Json(object? v)
     {
         var b = new StringBuilder();

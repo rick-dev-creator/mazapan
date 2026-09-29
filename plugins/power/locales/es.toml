@@ -1,3 +1,10 @@
+"plugin.name" = "Energía"
+"plugin.description" = "Bloquear, suspender, cerrar sesión, reiniciar y apagar: un botón en la barra, la paleta y una pantalla de bloqueo con el tema"
+"setting.bar" = "Barra"
+"setting.bar.help" = "El botón en el centro de la barra, junto al reloj."
+"setting.lock_key" = "Tecla de bloqueo"
+"setting.lock_key.help" = "Bloquea la pantalla."
+
 "lock" = "Bloquear la pantalla"
 "suspend" = "Suspender"
 "logout" = "Cerrar sesión"

@@ -364,9 +364,34 @@ update|remove|sync`:
   manifest broke every command; a checkout without its lock entry passed
   as your own; ref switches that were lost; updates in the wrong order.
 
-**Follow-ups.** A catalog to find plugins; a plugin manager in the shell
-(list, show capabilities, enable); `myarch update` offering plugin updates
-too; signed tags.
+**The ecosystem.** *Done* (2026-09-29), after studying Omarchy's: its
+plugins are QML only (bar widgets, panels, overlays), `manifest.json`, git
+add/update, hot reload, `clone` of a built-in, `validate`, a settings
+schema for widgets; its "catalog" lists only what's installed; no lock, no
+dependencies, no permissions. Ours:
+- Settings with a schema: the comment above a setting is its description;
+  `{ default, choices, min, max, step, kind, label }` for more; enforced by
+  apply, shown as controls, translated (`setting.KEY`).
+- Catalogs (`catalog/index.toml`, and `catalogs = […]` in config.toml, URLs
+  cached a day): `plugins catalog|search|preview`, `add ID`; entries
+  translated (`translations.es.*`); `update` follows the catalog's ref.
+- The Plugins panel (`plugin-manager`, SUPER + SHIFT + P), like VS Code's
+  extensions: search, tabs, each plugin's page (README in your language,
+  what it can do with the risky marked and translated, settings as
+  controls); on/off and settings through `myarch apply` (undo takes them
+  back), install only of the commit it showed; the panel survives the shell
+  reloading under it.
+- Every plugin's name and description translated (`plugin.name`,
+  `plugin.description`, `README.es.md`); all built-ins in Spanish, tested.
+- Tools for authors: `plugins new --kind bar|panel|window|theme|tools`
+  (working, described, in en and es), `dev` (applied on every save, template
+  and QML errors in the terminal, a repo elsewhere linked in), `check`
+  (every theme × every language, what's missing to describe or translate
+  it), `fork` and `diff` (a built-in to change, and what you changed).
+
+**Follow-ups.** A "customize" button in the panel (fork from there);
+ratings or download counts need a server; `myarch update` offering plugin
+updates too; signed tags; screenshots in catalog entries.
 
 ## 8. Capture
 

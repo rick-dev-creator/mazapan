@@ -1,3 +1,12 @@
+"plugin.name" = "Monitores"
+"plugin.description" = "Perfiles de monitores reconocidos por su EDID, aplicados solos cuando las pantallas van y vienen; un gestor visual para colocarlas"
+"setting.bar" = "Barra"
+"setting.bar.help" = "Un icono en la barra (a la derecha) que abre el gestor."
+"setting.key" = "Tecla"
+"setting.key.help" = "Abre el gestor de monitores."
+"setting.notify_unknown" = "Avisar de desconocidos"
+"setting.notify_unknown.help" = "Cuando las pantallas conectadas no coinciden con ningún perfil, explica cómo colocarlas."
+
 "unknown" = "Estas pantallas aún no tienen perfil: ordénalas con %1 y guarda uno."
 "title" = "monitores"
 "no_profile" = "sin perfil para estas pantallas"

@@ -1,3 +1,6 @@
+"plugin.name" = "Red"
+"plugin.description" = "Estado de la red en la barra; clic para el Wi-Fi (buscar, conectar, olvidar) y las conexiones por cable"
+
 "wifi" = "wi-fi"
 "ethernet" = "ethernet"
 "connected" = "conectado"

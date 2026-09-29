@@ -1,1 +1,4 @@
+"plugin.name" = "NVIDIA (Turing y posteriores)"
+"plugin.description" = "El driver abierto de NVIDIA para GeForce RTX 20 y posteriores: paquetes, modesetting del kernel cargado pronto y las variables de Hyprland para él"
+
 "check.headers" = "Los headers del kernel para el módulo de NVIDIA están instalados (linux-headers de tu kernel)"
