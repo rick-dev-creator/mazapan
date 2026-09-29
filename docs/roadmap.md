@@ -21,7 +21,7 @@ Suggested start: 1, 2 and 3.
 | 8 | Capture | **Done** (2026-09-29); follow-ups listed below |
 | — | Plugin ecosystem (catalogs, Plugins panel, author tools) | **Done** (2026-09-29), under 7 |
 | — | Notifications | **Done** (2026-09-29) |
-| 9 | Wallpapers, and a theme from any picture | Next |
+| 9 | Wallpapers, and a theme from any picture | **Done** (2026-09-29) |
 | 10 | The essentials still missing | Planned |
 | 11 | Modes | Planned |
 | 12 | The desktop's history, visible | Planned |
@@ -495,6 +495,37 @@ theme's picture). Your own pictures can't be used: behind Omarchy.
   whole theme, contrast-checked (the checker is there), applied to
   everything the themes reach (terminal, GTK, Qt, browsers, VS Code,
   Neovim, the shell). Every picture, a coherent and readable desktop.
+
+*Done* (2026-09-29):
+- `myarch themes from-image PICTURE [--apply]`: the picture's colors
+  (k-means in OKLab, the same every time) become every token: surfaces
+  barely tinted in its main hue, text neutral, the accent the color that
+  stands out (a color's shades count together, a hue unlike the backdrop
+  wins: a jellyfish's orange, not its sea), the status and terminal
+  colors in their usual hues; every contrast the themes promise, held
+  (tested on light, dark, grey and one-color pictures). Font, shape and
+  motion stay the theme's in use; the picture goes next to theme.toml,
+  as its wallpaper. The same picture again is the same theme, made
+  over; `myarch themes remove ID` takes one away. Pictures are read by
+  ffmpeg or ImageMagick.
+- The wallpaper plugin: your pictures (`~/Pictures/Wallpapers`), per
+  screen or all, fill / fit / center / tile, tinted with the theme (off,
+  subtle, strong), a new one every 15 minutes, hour or day
+  (`SUPER + ALT + W` next), and day/night pairs (`name-day.jpg`,
+  `name-night.jpg`); faded in; kept in its own state file, so a change
+  reloads nothing.
+- The picker (`SUPER + SHIFT + W`): thumbnails, the one under the pointer
+  (or the keys) live on the desktop behind it, a click keeps it; "Theme
+  from this picture" (`t`) makes and applies the theme and says so in a
+  notification.
+- Audited (17 findings, all fixed; every contrast held over 6,012
+  generated palettes): the crossfade could stay on a previewed picture;
+  the whole picture is read (not its middle), transparency counts as grey
+  either way, one tool failing falls to the other, pictures Qt can't show
+  are kept as PNG; the theme is swapped in only once the new one loads;
+  a failed theme leaves the wallpaper as it was; rotation counts from a
+  kept time (reloads and logins don't restart it); a screen can have the
+  theme's own while the others have a picture; names with # or ? load.
 
 ## 10. The essentials still missing
 

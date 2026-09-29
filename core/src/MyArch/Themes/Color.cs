@@ -98,7 +98,7 @@ public static class ColorMath
     /// at least min with every one of bgs: lighter in a dark theme, darker in
     /// a light one.
     /// </summary>
-    static Rgb Against(Rgb c, Rgb[] bgs, double min, bool light)
+    internal static Rgb Against(Rgb c, Rgb[] bgs, double min, bool light)
     {
         bool Ok(Rgb x) => bgs.All(b => Ratio(x, Rounded(b)) >= min);
         c = Rounded(c);

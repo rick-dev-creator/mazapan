@@ -1,20 +1,69 @@
 [plugin]
 id = "wallpaper"
 name = "Wallpaper"
-version = "0.1.0"
+version = "0.2.0"
 api = 1
-description = "The wallpaper, drawn from the theme (or the theme's image): it changes with it, previews included"
+description = "The wallpaper: drawn from the theme, the theme's picture, or yours (per screen, filled, tinted with the theme, in turn, day and night), with a picker that previews live and makes a theme from any picture"
 categories = ["theme"]
-requires = ["shell-bar"]
+requires = ["shell-bar", "hypr-base"]
 
 [packages]
-pacman = ["quickshell"]
+pacman = ["quickshell", "ffmpeg"]
 
 [settings]
 # Faint CRT scanlines over the whole wallpaper (dark themes).
 scanlines = true
+# Your pictures: the picker shows them (and the folders in it).
+folder = { default = "~/Pictures/Wallpapers", kind = "path" }
+# Opens the wallpaper picker.
+key = "SUPER + SHIFT + W"
+# The next picture in your folder.
+next_key = "SUPER + ALT + W"
+# A picture with a day and a night version (name-day.jpg, name-night.jpg)
+# shows the day one from this time…
+day_from = { default = "07:00", kind = "text" }
+# …and the night one from this.
+night_from = { default = "19:00", kind = "text" }
+
+# What each screen shows, shared by the wallpaper and the picker.
+[[targets]]
+template = "qmldir.tmpl"
+output = "~/.config/quickshell/myarch/components/wallpaper/qmldir"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "WallpaperService.qml.tmpl"
+output = "~/.config/quickshell/myarch/components/wallpaper/WallpaperService.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
 
 [[targets]]
 template = "Wallpaper.qml.tmpl"
 output = "~/.config/quickshell/myarch/panels/wallpaper.qml"
 reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "Picker.qml.tmpl"
+output = "~/.config/quickshell/myarch/panels/wallpapers.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "wallpaper.lua.tmpl"
+output = "~/.config/hypr/myarch/wallpaper.lua"
+reload = "hyprctl reload >/dev/null"
+
+[[actions]]
+name = "{{ t \"act.pick\" }}"
+run = "qs ipc -c myarch call myarch panel wallpapers"
+key = "{{ settings.key }}"
+keywords = "{{ t \"act.pick.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.next\" }}"
+run = "qs ipc -c myarch call wallpaper next"
+key = "{{ settings.next_key }}"
+keywords = "{{ t \"act.next.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.theme\" }}"
+run = "qs ipc -c myarch call wallpaper theme"
+keywords = "{{ t \"act.theme.kw\" }}"

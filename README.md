@@ -30,6 +30,7 @@ myarch plugins search clock     # the catalogs; SUPER + SHIFT + P is the Plugins
 myarch plugins new my-widget --kind bar   # write your own: then plugins dev, plugins check
 myarch plugins sync             # the plugins in plugins.lock (on another machine)
 myarch themes                   # every theme, with its contrast problems
+myarch themes from-image ~/Pictures/sea.jpg --apply   # a whole theme from a picture
 myarch coverage                 # installed apps the theme reaches, and not
 myarch apply --accent '#4fa35f' # your accent in any theme ("theme" = its own)
 myarch apply --set bar-clock.font_size=11 --dry-run --diff   # preview exactly

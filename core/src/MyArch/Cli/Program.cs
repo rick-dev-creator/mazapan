@@ -52,6 +52,10 @@ public static partial class Program
                          installed apps, and whether the theme reaches them
           themes [--json]
                          list themes, with their contrast problems
+          themes from-image PICTURE [--name NAME] [--mode dark|light] [--apply] [--json]
+                         a theme from a picture's colors, every contrast checked
+          themes remove ID
+                         a theme of your own (made from a picture) goes
 
         """;
 

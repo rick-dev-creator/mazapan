@@ -136,6 +136,7 @@ public static class TomlWriter
         int n => n.ToString(System.Globalization.CultureInfo.InvariantCulture),
         double d => FloatValue(d),
         IEnumerable<string> list => "[" + string.Join(", ", list.Select(Str)) + "]",
+        IEnumerable<double> nums => "[" + string.Join(", ", nums.Select(FloatValue)) + "]",
         TomlArray a => "[" + string.Join(", ", a.Select(x => Value(x!))) + "]",
         TomlTable t => "{" + string.Join(", ", t.Select(kv => BareOrQuoted(kv.Key) + " = " + Value(kv.Value!))) + "}",
         TomlTableArray ta => "[" + string.Join(", ", ta.Select(t => Value(t))) + "]",

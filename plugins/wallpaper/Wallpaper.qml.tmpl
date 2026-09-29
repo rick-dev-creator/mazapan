@@ -7,13 +7,17 @@
 //           idea of space); light themes: graph paper.
 //   "plain" bg_alt.
 //   a path  the theme's image.
+// Or a picture of yours (WallpaperService: the picker's choice, per
+// screen, filled, tinted, in turn), faded in over the last one.
 // Terminals are see-through (the theme's terminal_opacity): this is what
 // they let through, blurred.
 
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import qs
+import "../components/wallpaper"
 
 Item {
   id: root
@@ -43,20 +47,87 @@ Item {
       WlrLayershell.layer: WlrLayer.Background
       WlrLayershell.namespace: "myarch-wallpaper"
 
-      Image {
+      // A picture: yours, or the theme's (also when yours can't be shown:
+      // deleted, on a drive that isn't there).
+      readonly property string chosen: WallpaperService.sourceFor(modelData.name)
+      property string broken: ""
+      readonly property string shows: chosen !== "" && chosen !== broken ? chosen : root.image ? Theme.wallpaper : ""
+
+      Item {
+        id: pic
         anchors.fill: parent
-        visible: root.image
-        source: root.image ? "file://" + Theme.wallpaper : ""
-        fillMode: Image.PreserveAspectCrop
-        asynchronous: true
-        cache: false
+        visible: win.shows !== ""
+        readonly property int mode: ({ crop: Image.PreserveAspectCrop, fit: Image.PreserveAspectFit, center: Image.Pad, tile: Image.Tile })[
+          win.chosen !== "" ? WallpaperService.fill : "crop"]
+        // Two pictures, the new one faded in over the old once it's loaded.
+        property bool frontA: true
+        readonly property var front: frontA ? imgA : imgB
+        readonly property var back: frontA ? imgB : imgA
+
+        // The one wanted goes behind and comes to the front once loaded;
+        // wanted again while in front, anything loading behind is dropped
+        // (it would arrive late and take its place).
+        property string wanted: ""
+        function load(path) {
+          wanted = WallpaperService.url(path)
+          if (front.source.toString() === wanted) {
+            back.source = ""
+            return
+          }
+          if (back.source.toString() === wanted && back.status === Image.Ready) {
+            frontA = !frontA
+            return
+          }
+          back.source = wanted
+        }
+        function arrived(img) {
+          if (img.source.toString() !== wanted) return
+          if (img === back && img.status === Image.Ready) frontA = !frontA
+          if (img.status === Image.Error) win.broken = win.chosen
+        }
+        Component.onCompleted: {
+          wanted = WallpaperService.url(win.shows)
+          imgA.source = wanted
+        }
+
+        Image {
+          id: imgA
+          anchors.fill: parent
+          fillMode: pic.mode
+          asynchronous: true
+          cache: false
+          opacity: pic.frontA ? 1 : 0
+          Behavior on opacity { NumberAnimation { duration: Theme.motion ? 450 : 0 } }
+          onStatusChanged: pic.arrived(imgA)
+        }
+        Image {
+          id: imgB
+          anchors.fill: parent
+          fillMode: pic.mode
+          asynchronous: true
+          cache: false
+          opacity: pic.frontA ? 0 : 1
+          Behavior on opacity { NumberAnimation { duration: Theme.motion ? 450 : 0 } }
+          onStatusChanged: pic.arrived(imgB)
+        }
+
+        // Tinted with the theme: the picture in the accent's hue, a little
+        // darker in a dark theme, so it belongs to the rest.
+        layer.enabled: win.chosen !== "" && WallpaperService.tint > 0
+        layer.effect: MultiEffect {
+          colorization: WallpaperService.tint
+          colorizationColor: Theme.accent
+          brightness: Theme.mode === "dark" ? -0.15 * WallpaperService.tint : 0.05 * WallpaperService.tint
+        }
       }
+      onShowsChanged: pic.load(shows)
+      onChosenChanged: broken = ""
 
       // Dark: the floor.
       Item {
         id: floor
         anchors.fill: parent
-        visible: Theme.wallpaper === "grid" && Theme.mode === "dark"
+        visible: win.shows === "" && Theme.wallpaper === "grid" && Theme.mode === "dark"
         readonly property real horizon: height * 0.62
 
         // Sky: bg_alt, deepening into the accent's dark tint at the horizon.
@@ -149,7 +220,7 @@ Item {
       // Light: graph paper.
       Item {
         anchors.fill: parent
-        visible: Theme.wallpaper === "grid" && Theme.mode === "light"
+        visible: win.shows === "" && Theme.wallpaper === "grid" && Theme.mode === "light"
         readonly property int step: 28
 
         Repeater {
