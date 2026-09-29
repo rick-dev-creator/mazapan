@@ -28,10 +28,24 @@ Suggested start: 1, 2 and 3.
 | 13 | The same desktop anywhere | Planned |
 | 14 | Workspace sessions | Planned |
 | 15 | The CLI in your language | Planned |
+| 16 | Installation and first boot | In progress: its profiles and catalog first (17), then a first-boot welcome, then the ISO |
+| 17 | Apps: install and remove | In progress: catalog, `myarch apps` and the Apps menu working in the VM; audit fixes under way |
+| 18 | Settings with a face | Planned |
+| 19 | Security | Planned |
+| 20 | Updates, visible | Planned |
+| 21 | Boot and login in the theme | Planned |
+| 22 | Sharing | Planned |
+| 23 | More capture | Planned |
+| 24 | Extras | Planned |
 
 Part two (items 9–15, 2026-09-29): what's still missing next to Omarchy,
 and what would set this apart from it. Suggested order: 9, then 10, then 11;
 the CLI's own language after them.
+
+Part three (items 16–24, 2026-09-29): what Omarchy (4.0 "Quattro", read
+from its scripts) has that this still doesn't, each done better. Without
+16 nobody else can use this, so it comes first; suggested order: 16, 20,
+17, 18, 19, then 13–15, then 21–24.
 
 ## The core: Go to C#
 
@@ -675,6 +689,188 @@ workspaces, arranged so) and brought back with one key.
 
 The plugins are localized; myarch's own messages (apply, update, doctor)
 are English only. Same locales, same fallbacks.
+
+## Part three: what Omarchy has that this doesn't yet
+
+Omarchy today, in general: some 440 bash scripts behind one menu (a
+declarative tree, good), but almost everything that changes the system
+opens a terminal with gum prompts, keyboard, input, monitors and
+keybindings are hand-edited Lua, package operations run `--noconfirm`,
+nothing is localized, and there's no undo but the bootloader's snapshots.
+What follows keeps its good ideas and fixes those.
+
+## 16. Installation and first boot
+
+**Omarchy today.** An ISO, the only supported way: a configurator (gum
+forms on a TTY: keyboard, user, one password, hostname, timezone) writes
+archinstall's JSON, and archinstall installs from an offline mirror
+inside the ISO, so nothing is downloaded and it's fast. The whole disk,
+only which one is asked: btrfs, LUKS optional, Limine with UKIs. A drive
+labeled `cidata` makes it unattended. Opinionated: its whole app
+selection is installed, and you remove what you don't want.
+
+**Much better.** Its base (it works), a better experience on top:
+- The same foundations: an ISO with an offline mirror, archinstall
+  behind it driven by a JSON, the whole disk with only which one asked,
+  btrfs (with `/boot` on it, so the snapshots of 12 boot from day one),
+  encryption optional, unattended with `cidata`.
+- A graphical installer in the desktop's own design (Quickshell), few
+  screens, everything the machine can tell detected: language (and the
+  keyboard from it), Wi-Fi only if there's no cable, the disk, your
+  account (one screen), and profiles.
+- Profiles, as Windows 11 asks "how will you use this device?": cards
+  (Basic, Development, Gaming, Creative, Office, Streaming, Trading…),
+  several at once, each showing a few of its apps; "See details" opens
+  the full list with checkboxes, for whoever wants it. The profiles'
+  apps are in the offline mirror too; the few too big for it arrive in
+  the background after the first boot, with progress in the bar.
+- Apps arrive configured and in the theme: each comes with its myarch
+  plugin (a theme, its integration) where there's one.
+- Built in steps, each usable on its own: the catalog and the Apps menu
+  (17) first, on any Arch; then a first-boot welcome (language, keyboard,
+  theme, profiles, Wi-Fi) for those who installed Arch themselves; then
+  the ISO, reusing both. Tested by booting the ISO in the VM.
+
+## 17. Apps: install and remove
+
+**Omarchy today.** Menu branches (Install / Remove) whose rows hide when
+the app is already there or not (good), each opening a terminal that
+runs `pacman -S --noconfirm`; fzf over raw package names for anything
+else; AUR through yay; a hardcoded list of preinstalls and its removal;
+Remove offers every explicit package, core ones included.
+
+**Much better.** An Apps menu that already knows how to install what it
+offers, from the same catalog as the installer's profiles:
+- The catalog is data, not code: apps (what they are, their packages
+  from the official repositories or their Flatpak, the myarch plugins
+  that go with them) and profiles (sets of apps); in English and
+  Spanish; others can add catalogs, as with plugins.
+- Profiles on top ("Install the Gaming profile"), then every app by
+  category and a search; what's installed marked, with Open and Remove.
+- Simple by default: one button. Before it runs, what it will do in one
+  line (5 apps, 1.2 GB), the detail (every package) one click away.
+- The password through the polkit agent, progress in the panel, no
+  terminal; no AUR (Flatpak for what the repositories don't have).
+- Every install and removal on the timeline (12), with its undo; only
+  what the catalog installed is offered for removal, never the system.
+
+## 18. Settings with a face
+
+**Omarchy today.** Font (monospace, sed into each terminal's config) and
+one text-size knob across shell, GTK and terminals (good); timezone from
+a picker; touchpad and touchscreen toggles; everything else (keyboard
+layout, repeat, natural scroll, monitors, keybindings) is opening a Lua
+file in the editor.
+
+**Much better.**
+- A Settings panel with a page per thing, each one a plugin's settings
+  shown with their kinds (the Plugins panel already renders them):
+  keyboard (layouts and variants, a switch key, repeat, a field to try
+  it), mouse and touchpad (speed, natural scroll, tap), text size and
+  fonts (UI and monospace, from what's installed, previewed), timezone
+  and 24-hour clock, default apps, language.
+- Keybindings: every binding (they're all palette actions already) in
+  one list, changed by pressing the new keys, conflicts said.
+- Changed live with a preview; risky ones (a layout you can't type your
+  password in) with a revert timer like the monitors'.
+- All on the timeline, each undoable.
+
+## 19. Security
+
+**Omarchy today.** Fingerprint set up only after enrolling and verifying
+works (good), with a closed-lid gate; FIDO2 keys for sudo and polkit;
+passwordless sudo for N minutes with an expiry timer (good); hibernation
+(CLI, Limine only); change the disk password; all through sed on PAM
+files, in a terminal, one finger only.
+
+**Much better.**
+- A Security page: fingerprints (add, name, remove several), security
+  keys, where each is used (sudo, polkit, the lock screen, login), each
+  step checked before it's relied on.
+- PAM through drop-ins and myarch's root files (undoable), never sed.
+- Disk unlock by TPM2 or a FIDO2 key where there's one (systemd-cryptenroll),
+  the password kept as fallback; the disk password changed with a
+  strength meter.
+- Hibernation on any boot loader, from the power menu, set up and taken
+  back by a hardware-style plugin.
+- Time-boxed passwordless sudo for agents, shown in the bar while it's on.
+
+## 20. Updates, visible
+
+**Omarchy today.** A bar icon only when Omarchy's own package is behind
+(checked every 6 hours); the update is one terminal flow (snapshot,
+keyring, `pacman -Syu --noconfirm`, migrations, AUR, mise, orphans, a
+reboot prompt); channels (stable, rc, edge); firmware through fwupd in a
+terminal.
+
+**Much better.** Built on `myarch update` (1) and the snapshots (12):
+- The bar says there are updates (the whole system's, not only ours),
+  checked in the background; a click shows them: what, from which
+  version to which, which need a restart, news that needs reading
+  first, in a panel.
+- Downloaded ahead in the background (on AC and unmetered only), applied
+  when you say, with progress in the shell and the checks after.
+- Firmware in the same panel: each device, its version and the new one.
+- Plugin updates (from their catalogs) alongside, with their diffs.
+- After: what needs a restart (the kernel, a service, the shell) said,
+  and restarted for you where it can be.
+
+## 21. Boot and login in the theme
+
+**Omarchy today.** One "unlock" look per theme for the boot splash
+(Plymouth) and the login screen (SDDM), recolored with ImageMagick and
+installed as root with an initramfs rebuild each time; the boot menu
+(Limine) keeps its own colors.
+
+**Much better.**
+- The boot splash, the login screen and the boot menu (GRUB, Limine,
+  systemd-boot) from the theme's tokens, as theme plugins: rendered like
+  any other file, applied with `--system`, undoable.
+- The login screen a Quickshell greeter (greetd) in the same kit as the
+  lock screen: one design from boot to desktop.
+- The initramfs rebuilt only when the splash actually changed.
+
+## 22. Sharing
+
+**Omarchy today.** LocalSend send from a menu (clipboard, file, folder)
+and its app to receive; Taildrop send and a race-free receive into
+Downloads (good); Wi-Fi shared as a QR on screen; a speed test.
+
+**Much better.**
+- Share from anywhere: the clipboard history, a capture, the file
+  manager's selection, to a device nearby (LocalSend) or on your tailnet
+  (Tailscale), with receiving in the notification center (accept, open,
+  show in folder).
+- Wi-Fi as a QR from the network card in the bar; the speed test there
+  too, without a hardcoded token.
+
+## 23. More capture
+
+**Omarchy today.** Text from a region (OCR, English unless an
+environment variable says otherwise); a QR decoded from a region and
+copied as a secret, never shown (good); a webcam overlay while
+recording.
+
+**Much better.**
+- In the capture panel (8): text (OCR in your language, and the
+  document's), QR (copied as a secret, as Omarchy does), and the webcam
+  in a corner while recording, moved and resized with the mouse.
+- Text captures kept in the clipboard history; a capture shared (22).
+
+## 24. Extras
+
+**Omarchy today.** A screensaver (text effects in a terminal per
+monitor); dictation (voxtype, hold F9); reminders as systemd timers,
+with a bar indicator; a crash watcher that offers an AI diagnosis
+(good); a Windows VM (docker + RDP); a media converter; tmux/herdr
+cheatsheets.
+
+**Much better.**
+- Each one a plugin, off until wanted, in the catalog: screensaver in
+  the theme (Quickshell, not a terminal), dictation with the model and
+  language chosen in its settings, reminders in the notification center,
+  the crash watcher feeding the agent API (6).
+- The niche ones (Windows VM, converter) as community plugins.
 
 ## Also pending
 
