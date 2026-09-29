@@ -77,6 +77,7 @@ Item {
   function glyph(e) {
     if (e.kind === "update") return 0xF03D7 // package
     if (e.kind === "snapshot") return 0xF06B0 // restore
+    if (e.kind === "apps") return 0xF003B     // apps
     const c = e.changes[0]
     if (!c) return 0xF0214                  // file
     if (c.kind === "theme" || c.kind === "accent") return 0xF03D8 // palette
@@ -114,6 +115,7 @@ Item {
   function title(e) {
     if (e.kind === "update") return {{ tq "update" }}.arg(e.packages_changed)
     if (e.kind === "snapshot") return {{ tq "snapshot" }}.arg(e.what)
+    if (e.kind === "apps") return (e.action === "install" ? {{ tq "apps_installed" }} : {{ tq "apps_removed" }}).arg(e.names.join(", "))
     if (e.changes.length > 0) return says(e.changes[0]) + (e.changes.length > 1 ? " " + {{ tq "and_more" }}.arg(e.changes.length - 1) : "")
     if (e.known === false) return {{ tq "unknown" }}
     const names = (e.by_plugin || []).map(g => g.plugin_name || {{ tq "others" }})
@@ -142,6 +144,16 @@ Item {
 
   function undo(e) {
     if (!e) return
+    // Apps: removed again (or installed again), the password through polkit.
+    if (e.undo === "apps") {
+      Quickshell.execDetached(["sh", "-c", 'mkdir -p ~/.local/state/myarch; '
+        + 'if myarch apps undo "$0" --gui > ~/.local/state/myarch/undo.log 2>&1; then notify-send -a "$3" -i edit-undo "$1"; '
+        + 'else notify-send -a "$3" -u critical -i dialog-warning "$2" "$(grep "^myarch:" ~/.local/state/myarch/undo.log | tail -n 1 | sed "s/^myarch: //")"; fi',
+        e.id.replace(/^apps-/, ""), {{ tq "undone" }}.arg(title(e)), {{ tq "undo_failed_title" }}, {{ tq "title" }}])
+      message = {{ tq "undoing" }}
+      failed = false
+      return
+    }
     if (e.undo === "rollback" || e.undo === "root") {
       // As root (packages, system files): in a terminal, for the password.
       const run = e.undo === "rollback" ? 'myarch rollback "$0"' : 'myarch undo --id="$0"'

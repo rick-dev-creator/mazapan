@@ -1,0 +1,31 @@
+[plugin]
+id = "apps"
+name = "Apps"
+version = "0.1.0"
+api = 1
+description = "Install apps by what you'll use the computer for (Development, Gaming, Creative…) or one by one, with one button: what it will do said first, no terminal, each undoable"
+categories = ["panel", "tools"]
+requires = ["shell-bar", "hypr-base", "polkit"]
+
+[packages]
+pacman = ["quickshell", "polkit"]
+
+[settings]
+# Opens the Apps menu.
+key = "SUPER + ALT + A"
+
+[[targets]]
+template = "Apps.qml.tmpl"
+output = "~/.config/quickshell/myarch/panels/apps.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "apps.lua.tmpl"
+output = "~/.config/hypr/myarch/apps.lua"
+reload = "hyprctl reload >/dev/null"
+
+[[actions]]
+name = "{{ t \"act.open\" }}"
+run = "qs ipc -c myarch call myarch panel apps"
+key = "{{ settings.key }}"
+keywords = "{{ t \"act.open.kw\" }}"

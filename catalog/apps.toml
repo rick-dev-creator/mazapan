@@ -1,0 +1,502 @@
+# myarch's app catalog: what the Apps menu (and the installer's profiles)
+# know how to install. Data, not code: to add one, add an entry and open a
+# pull request.
+#
+# [[app]]
+# id = "gimp"                    # lowercase letters, digits, dashes
+# name = "GIMP"
+# description = "One line on what it is"
+# category = "graphics"          # see below
+# pacman = ["gimp"]              # from Arch's official repositories, or…
+# flatpak = "org.gimp.GIMP"      # …from Flathub (what the repositories don't have), or…
+# webapp = "https://…"           # …a site as an app of its own (the webapps plugin), or…
+# plugin = "markets"             # …a myarch plugin (from a catalog)
+# desktop = "gimp.desktop"       # its launcher (to open it, and its icon)
+# plugins = ["theme-gimp"]       # myarch plugins that go with it: turned on with it
+# translations.es.description = "Una línea sobre lo que es"
+#
+# Categories: internet, communication, office, development, graphics,
+# video, audio, games, utilities, finance.
+#
+# [[profile]] is a set of apps for a use ("Gaming"), offered as one card.
+# No AUR: the repositories, Flathub or the web.
+
+# --- profiles ---------------------------------------------------------------
+
+[[profile]]
+id = "basic"
+name = "Basic"
+description = "What every computer needs: a browser, files, pictures, documents, music and video"
+glyph = 0xF02DC
+basic = true
+apps = ["chromium", "nautilus", "loupe", "papers", "celluloid", "text-editor", "file-roller", "calculator", "btop"]
+translations.es.name = "Básico"
+translations.es.description = "Lo que todo equipo necesita: navegador, archivos, fotos, documentos, música y video"
+
+[[profile]]
+id = "development"
+name = "Development"
+description = "Code editors, git, containers, languages and the command-line tools developers reach for"
+glyph = 0xF0169
+apps = ["vscode", "neovim", "git", "github-cli", "lazygit", "docker", "mise", "cli-tools", "zed"]
+translations.es.name = "Desarrollo"
+translations.es.description = "Editores de código, git, contenedores, lenguajes y las herramientas de terminal de todo desarrollador"
+
+[[profile]]
+id = "gaming"
+name = "Gaming"
+description = "Steam, other stores and launchers, and what makes games run better"
+glyph = 0xF0297
+apps = ["steam", "heroic", "lutris", "gamemode", "mangohud", "discord"]
+translations.es.name = "Juegos"
+translations.es.description = "Steam, otras tiendas y lanzadores, y lo que hace que los juegos vayan mejor"
+
+[[profile]]
+id = "creative"
+name = "Creative"
+description = "Photos, illustration, 3D and video editing"
+glyph = 0xF03D8
+apps = ["gimp", "inkscape", "krita", "darktable", "blender", "kdenlive"]
+translations.es.name = "Creatividad"
+translations.es.description = "Fotos, ilustración, 3D y edición de video"
+
+[[profile]]
+id = "office"
+name = "Office"
+description = "Documents, spreadsheets, mail and notes"
+glyph = 0xF0219
+apps = ["libreoffice", "thunderbird", "obsidian"]
+translations.es.name = "Oficina"
+translations.es.description = "Documentos, hojas de cálculo, correo y notas"
+
+[[profile]]
+id = "streaming"
+name = "Streaming"
+description = "Record and stream your screen and camera, edit sound, listen to music"
+glyph = 0xF0567
+apps = ["obs", "audacity", "spotify"]
+translations.es.name = "Streaming"
+translations.es.description = "Graba y transmite tu pantalla y cámara, edita audio, escucha música"
+
+[[profile]]
+id = "trading"
+name = "Trading"
+description = "Markets in the bar and a panel, and the trading sites as apps"
+glyph = 0xF0128
+apps = ["markets", "tradingview", "binance"]
+translations.es.name = "Trading"
+translations.es.description = "Los mercados en la barra y un panel, y los sitios de trading como apps"
+
+# --- internet ----------------------------------------------------------------
+
+[[app]]
+id = "chromium"
+name = "Chromium"
+description = "The web browser; web apps open in it"
+category = "internet"
+pacman = ["chromium"]
+desktop = "chromium.desktop"
+plugins = ["theme-chromium"]
+translations.es.description = "El navegador web; las apps web se abren en él"
+
+[[app]]
+id = "firefox"
+name = "Firefox"
+description = "Mozilla's web browser"
+category = "internet"
+pacman = ["firefox"]
+desktop = "firefox.desktop"
+plugins = ["theme-firefox"]
+translations.es.description = "El navegador web de Mozilla"
+
+[[app]]
+id = "localsend"
+name = "LocalSend"
+description = "Send files to phones and computers nearby, no cable or account"
+category = "internet"
+flatpak = "org.localsend.localsend_app"
+desktop = "org.localsend.localsend_app.desktop"
+translations.es.description = "Envía archivos a teléfonos y equipos cercanos, sin cable ni cuenta"
+
+# --- communication ---------------------------------------------------------------
+
+[[app]]
+id = "discord"
+name = "Discord"
+description = "Voice, video and text chat"
+category = "communication"
+pacman = ["discord"]
+desktop = "discord.desktop"
+translations.es.description = "Chat de voz, video y texto"
+
+[[app]]
+id = "signal"
+name = "Signal"
+description = "Private messaging"
+category = "communication"
+pacman = ["signal-desktop"]
+desktop = "signal-desktop.desktop"
+translations.es.description = "Mensajería privada"
+
+[[app]]
+id = "telegram"
+name = "Telegram"
+description = "Messaging"
+category = "communication"
+pacman = ["telegram-desktop"]
+desktop = "org.telegram.desktop.desktop"
+translations.es.description = "Mensajería"
+
+[[app]]
+id = "thunderbird"
+name = "Thunderbird"
+description = "Mail and calendar"
+category = "communication"
+pacman = ["thunderbird"]
+desktop = "org.mozilla.Thunderbird.desktop"
+translations.es.description = "Correo y calendario"
+
+[[app]]
+id = "whatsapp"
+name = "WhatsApp"
+description = "WhatsApp as an app of its own"
+category = "communication"
+webapp = "https://web.whatsapp.com/"
+translations.es.description = "WhatsApp como una app propia"
+
+# --- office ---------------------------------------------------------------------
+
+[[app]]
+id = "libreoffice"
+name = "LibreOffice"
+description = "Documents, spreadsheets and presentations, Microsoft Office files included"
+category = "office"
+pacman = ["libreoffice-fresh"]
+desktop = "libreoffice-startcenter.desktop"
+translations.es.description = "Documentos, hojas de cálculo y presentaciones, también los de Microsoft Office"
+
+[[app]]
+id = "obsidian"
+name = "Obsidian"
+description = "Notes in plain Markdown files, linked"
+category = "office"
+pacman = ["obsidian"]
+desktop = "obsidian.desktop"
+translations.es.description = "Notas en archivos Markdown, enlazadas"
+
+[[app]]
+id = "papers"
+name = "Papers"
+description = "PDF and document viewer"
+category = "office"
+pacman = ["papers"]
+desktop = "org.gnome.Papers.desktop"
+translations.es.description = "Visor de PDF y documentos"
+
+[[app]]
+id = "text-editor"
+name = "Text Editor"
+description = "A simple text editor"
+category = "office"
+pacman = ["gnome-text-editor"]
+desktop = "org.gnome.TextEditor.desktop"
+translations.es.name = "Editor de texto"
+translations.es.description = "Un editor de texto sencillo"
+
+[[app]]
+id = "calculator"
+name = "Calculator"
+description = "A calculator"
+category = "office"
+pacman = ["gnome-calculator"]
+desktop = "org.gnome.Calculator.desktop"
+translations.es.name = "Calculadora"
+translations.es.description = "Una calculadora"
+
+# --- development ------------------------------------------------------------------
+
+[[app]]
+id = "vscode"
+name = "Code - OSS"
+description = "Visual Studio Code, open source build"
+category = "development"
+pacman = ["code"]
+desktop = "code-oss.desktop"
+plugins = ["theme-vscode"]
+translations.es.description = "Visual Studio Code, versión de código abierto"
+
+[[app]]
+id = "zed"
+name = "Zed"
+description = "A fast code editor, with collaboration and AI"
+category = "development"
+pacman = ["zed"]
+desktop = "dev.zed.Zed.desktop"
+translations.es.description = "Un editor de código rápido, con colaboración e IA"
+
+[[app]]
+id = "neovim"
+name = "Neovim"
+description = "The editor in the terminal"
+category = "development"
+pacman = ["neovim"]
+desktop = "nvim.desktop"
+plugins = ["theme-neovim"]
+translations.es.description = "El editor en la terminal"
+
+[[app]]
+id = "git"
+name = "Git"
+description = "Version control"
+category = "development"
+pacman = ["git"]
+translations.es.description = "Control de versiones"
+
+[[app]]
+id = "github-cli"
+name = "GitHub CLI"
+description = "GitHub from the terminal: pull requests, issues, releases"
+category = "development"
+pacman = ["github-cli"]
+translations.es.description = "GitHub desde la terminal: pull requests, issues, releases"
+
+[[app]]
+id = "lazygit"
+name = "Lazygit"
+description = "Git, simpler, in the terminal"
+category = "development"
+pacman = ["lazygit"]
+translations.es.description = "Git más sencillo, en la terminal"
+
+[[app]]
+id = "docker"
+name = "Docker"
+description = "Containers, with Compose and Buildx"
+category = "development"
+pacman = ["docker", "docker-compose", "docker-buildx"]
+translations.es.description = "Contenedores, con Compose y Buildx"
+
+[[app]]
+id = "mise"
+name = "mise"
+description = "Every language's versions (Node, Python, Ruby, Go…), per project"
+category = "development"
+pacman = ["mise"]
+translations.es.description = "Las versiones de cada lenguaje (Node, Python, Ruby, Go…), por proyecto"
+
+[[app]]
+id = "cli-tools"
+name = "Terminal tools"
+description = "ripgrep, fd, fzf, bat, eza, zoxide, jq: faster search, files and JSON"
+category = "development"
+pacman = ["ripgrep", "fd", "fzf", "bat", "eza", "zoxide", "jq"]
+translations.es.name = "Herramientas de terminal"
+translations.es.description = "ripgrep, fd, fzf, bat, eza, zoxide, jq: búsqueda, archivos y JSON más rápidos"
+
+# --- graphics ----------------------------------------------------------------------
+
+[[app]]
+id = "loupe"
+name = "Image Viewer"
+description = "Look at pictures"
+category = "graphics"
+pacman = ["loupe"]
+desktop = "org.gnome.Loupe.desktop"
+translations.es.name = "Visor de imágenes"
+translations.es.description = "Para ver fotos e imágenes"
+
+[[app]]
+id = "gimp"
+name = "GIMP"
+description = "Edit photos and pictures"
+category = "graphics"
+pacman = ["gimp"]
+desktop = "gimp.desktop"
+translations.es.description = "Edita fotos e imágenes"
+
+[[app]]
+id = "inkscape"
+name = "Inkscape"
+description = "Vector drawing: logos, icons, diagrams"
+category = "graphics"
+pacman = ["inkscape"]
+desktop = "org.inkscape.Inkscape.desktop"
+translations.es.description = "Dibujo vectorial: logos, iconos, diagramas"
+
+[[app]]
+id = "krita"
+name = "Krita"
+description = "Digital painting and illustration"
+category = "graphics"
+pacman = ["krita"]
+desktop = "org.kde.krita.desktop"
+translations.es.description = "Pintura digital e ilustración"
+
+[[app]]
+id = "darktable"
+name = "darktable"
+description = "Develop and organize RAW photos"
+category = "graphics"
+pacman = ["darktable"]
+desktop = "org.darktable.darktable.desktop"
+translations.es.description = "Revela y organiza fotos RAW"
+
+[[app]]
+id = "blender"
+name = "Blender"
+description = "3D modeling, animation and rendering"
+category = "graphics"
+pacman = ["blender"]
+desktop = "blender.desktop"
+translations.es.description = "Modelado 3D, animación y render"
+
+# --- video and audio -------------------------------------------------------------------
+
+[[app]]
+id = "celluloid"
+name = "Celluloid"
+description = "Plays any video or music"
+category = "video"
+pacman = ["celluloid"]
+desktop = "io.github.celluloid_player.Celluloid.desktop"
+translations.es.description = "Reproduce cualquier video o música"
+
+[[app]]
+id = "kdenlive"
+name = "Kdenlive"
+description = "Video editing"
+category = "video"
+pacman = ["kdenlive"]
+desktop = "org.kde.kdenlive.desktop"
+translations.es.description = "Edición de video"
+
+[[app]]
+id = "obs"
+name = "OBS Studio"
+description = "Record and stream the screen and cameras"
+category = "video"
+pacman = ["obs-studio"]
+desktop = "com.obsproject.Studio.desktop"
+translations.es.description = "Graba y transmite la pantalla y las cámaras"
+
+[[app]]
+id = "audacity"
+name = "Audacity"
+description = "Record and edit sound"
+category = "audio"
+pacman = ["audacity"]
+desktop = "audacity.desktop"
+translations.es.description = "Graba y edita audio"
+
+[[app]]
+id = "spotify"
+name = "Spotify"
+description = "Music streaming"
+category = "audio"
+pacman = ["spotify-launcher"]
+desktop = "spotify-launcher.desktop"
+translations.es.description = "Música en streaming"
+
+# --- games ---------------------------------------------------------------------------
+
+[[app]]
+id = "steam"
+name = "Steam"
+description = "Valve's store and your Steam library, Windows games included (Proton)"
+category = "games"
+flatpak = "com.valvesoftware.Steam"
+desktop = "com.valvesoftware.Steam.desktop"
+translations.es.description = "La tienda de Valve y tu biblioteca de Steam, también juegos de Windows (Proton)"
+
+[[app]]
+id = "heroic"
+name = "Heroic"
+description = "Epic Games, GOG and Amazon games"
+category = "games"
+flatpak = "com.heroicgameslauncher.hgl"
+desktop = "com.heroicgameslauncher.hgl.desktop"
+translations.es.description = "Juegos de Epic Games, GOG y Amazon"
+
+[[app]]
+id = "lutris"
+name = "Lutris"
+description = "Every other game: emulators, Battle.net, installers"
+category = "games"
+pacman = ["lutris"]
+desktop = "net.lutris.Lutris.desktop"
+translations.es.description = "Todos los demás juegos: emuladores, Battle.net, instaladores"
+
+[[app]]
+id = "gamemode"
+name = "GameMode"
+description = "The computer at full speed while a game runs"
+category = "games"
+pacman = ["gamemode"]
+translations.es.description = "El equipo a toda velocidad mientras juegas"
+
+[[app]]
+id = "mangohud"
+name = "MangoHud"
+description = "Frame rate and temperatures over the game"
+category = "games"
+pacman = ["mangohud"]
+translations.es.description = "FPS y temperaturas sobre el juego"
+
+# --- utilities ------------------------------------------------------------------------
+
+[[app]]
+id = "nautilus"
+name = "Files"
+description = "Browse and manage your files"
+category = "utilities"
+pacman = ["nautilus"]
+desktop = "org.gnome.Nautilus.desktop"
+translations.es.name = "Archivos"
+translations.es.description = "Explora y organiza tus archivos"
+
+[[app]]
+id = "file-roller"
+name = "Archive Manager"
+description = "Open and make zip, tar and other archives"
+category = "utilities"
+pacman = ["file-roller"]
+desktop = "org.gnome.FileRoller.desktop"
+translations.es.name = "Gestor de archivos comprimidos"
+translations.es.description = "Abre y crea zip, tar y otros comprimidos"
+
+[[app]]
+id = "btop"
+name = "btop"
+description = "What's using the computer: processor, memory, disks, network"
+category = "utilities"
+pacman = ["btop"]
+desktop = "btop.desktop"
+plugins = ["theme-btop"]
+translations.es.description = "Qué usa el equipo: procesador, memoria, discos, red"
+
+# --- finance --------------------------------------------------------------------------
+
+[[app]]
+id = "markets"
+name = "Markets"
+description = "Crypto and stocks in the bar and a panel, with charts"
+category = "finance"
+plugin = "markets"
+translations.es.name = "Mercados"
+translations.es.description = "Cripto y acciones en la barra y en un panel, con gráficos"
+
+[[app]]
+id = "tradingview"
+name = "TradingView"
+description = "Charts and analysis, as an app of its own"
+category = "finance"
+webapp = "https://www.tradingview.com/chart/"
+translations.es.description = "Gráficos y análisis, como una app propia"
+
+[[app]]
+id = "binance"
+name = "Binance"
+description = "The exchange, as an app of its own"
+category = "finance"
+webapp = "https://www.binance.com/"
+translations.es.description = "El exchange, como una app propia"

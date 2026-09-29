@@ -20,6 +20,9 @@ public static partial class Program
           timeline [--json]
                          what changed on the desktop, in words: every apply and
                          update, newest first
+          apps [list|plan|plan-remove|install|remove|undo] [ID...] [--json] [--gui] [-y]
+                         the apps the catalog knows how to install, by profile
+                         (Gaming, Development…), and installing or removing them
           timeline undo ID [-y]
                          put back what one apply changed (a theme, a setting, a
                          plugin on or off), even if others came after it
@@ -89,6 +92,7 @@ public static partial class Program
                 "hardware" => CmdHardware(rest),
                 "history" => CmdHistory(),
                 "timeline" => CmdTimeline(rest),
+                "apps" => CmdApps(rest),
                 "rollback" => CmdRollback(rest),
                 "coverage" => CmdCoverage(rest),
                 "-h" or "--help" or "help" => Help(),

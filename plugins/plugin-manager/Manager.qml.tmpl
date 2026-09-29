@@ -64,6 +64,24 @@ Item {
     else show()
   }
 
+  // Opened on one plugin (qs ipc -c myarch call plugins open ID): its page,
+  // where installing it shows what it can do first.
+  property string wanted: ""
+  IpcHandler {
+    target: "plugins"
+    function open(id: string): void {
+      root.wanted = id
+      search.text = ""
+      root.query = ""
+      if (!root.open) root.show()
+      else if (root.rows.some(r => r.id === id)) {
+        root.wanted = ""
+        root.tab = root.rows.find(r => r.id === id).state === "available" ? "available" : "installed"
+        root.select(id, false)
+      }
+    }
+  }
+
   function show() {
     screenAtOpen = Quickshell.screens.find(s => Hyprland.focusedMonitor && s.name === Hyprland.focusedMonitor.name) ?? Quickshell.screens[0]
     open = true
@@ -299,7 +317,12 @@ Item {
         }
         root.rows = (data.plugins || []).sort((a, b) => a.name.localeCompare(b.name))
         root.loading = ""
-        const id = root.selectedId !== "" && root.rows.some(r => r.id === root.selectedId) ? root.selectedId
+        // Asked for one (the Apps menu's plugins): that one.
+        const wanted = root.wanted !== "" && root.rows.some(r => r.id === root.wanted) ? root.wanted : ""
+        root.wanted = ""
+        // On the tab it's in (one to add is on Available).
+        if (wanted !== "") root.tab = root.rows.find(r => r.id === wanted).state === "available" ? "available" : "installed"
+        const id = wanted !== "" ? wanted : root.selectedId !== "" && root.rows.some(r => r.id === root.selectedId) ? root.selectedId
           : (root.shown[0] ? root.shown[0].id : "")
         root.selectedId = ""
         if (id !== "") root.select(id, true)

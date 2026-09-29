@@ -29,7 +29,7 @@ Suggested start: 1, 2 and 3.
 | 14 | Workspace sessions | Planned |
 | 15 | The CLI in your language | Planned |
 | 16 | Installation and first boot | In progress: its profiles and catalog first (17), then a first-boot welcome, then the ISO |
-| 17 | Apps: install and remove | In progress: catalog, `myarch apps` and the Apps menu working in the VM; audit fixes under way |
+| 17 | Apps: install and remove | **Done** (2026-09-29): catalog, `myarch apps`, the Apps menu with profiles (several at once); audited. Pending: catalogs from others, Flatpak apps without a new login |
 | 18 | Settings with a face | Planned |
 | 19 | Security | Planned |
 | 20 | Updates, visible | Planned |

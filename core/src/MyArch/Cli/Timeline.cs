@@ -2,6 +2,7 @@ using System.Globalization;
 using MyArch.Applying;
 using MyArch.Config;
 using MyArch.Plugins;
+using MyArch.Store;
 using MyArch.Themes;
 using MyArch.Updates;
 using MyArch.Util;
@@ -34,7 +35,13 @@ public static partial class Program
         foreach (var e in entries)
         {
             var time = DateTimeOffset.Parse((string)e["time"]!, CultureInfo.InvariantCulture).LocalDateTime;
-            var undo = (string)e["undo"]! switch { "change" or "last" => "  (myarch timeline undo " + e["id"] + ")", "rollback" => "  (myarch rollback " + e["id"] + ")", _ => "" };
+            var undo = (string)e["undo"]! switch
+            {
+                "change" or "last" or "root" => "  (myarch timeline undo " + e["id"] + ")",
+                "rollback" => "  (myarch rollback " + e["id"] + ")",
+                "apps" => "  (myarch apps undo " + ((string)e["id"]!)["apps-".Length..] + ")",
+                _ => "",
+            };
             Console.WriteLine($"{time:yyyy-MM-dd HH:mm}  {e["title"]}{Style.Dim}{undo}{Style.Reset}");
             var cs = (List<Fields>)e["changes"]!;
             if (cs.Count > 1) foreach (var c in cs) Console.WriteLine($"    {c["text"]}");
@@ -156,6 +163,27 @@ public static partial class Program
                 { "undo", r.ID == newestLive && r.Changes.Count > 0 ? "rollback" : "none" },
             }));
         }
+        // Apps installed or removed from the catalog (myarch apps): undone by
+        // doing the other.
+        var txs = AppsLedger.List(AppsState());
+        var appsNow = txs.Count > 0 ? AppsNow.Read() : null;
+        var catalog = txs.Count > 0 ? MyArch.Store.AppCatalog.Load(Paths.Join(Root(), "catalog", "apps.toml")).Apps : [];
+        foreach (var tx in txs)
+            out_.Add((tx.Time, new Fields
+            {
+                { "id", "apps-" + tx.Id },
+                { "kind", "apps" },
+                { "time", JsTime(tx.Time) },
+                { "what", tx.Action },
+                { "title", $"{(tx.Action == "install" ? "installed" : "removed")}: {string.Join(", ", tx.Names)}" },
+                { "action", tx.Action },
+                { "names", tx.Names },
+                { "apps", tx.Apps },
+                { "packages_count", tx.Packages.Count + tx.Flatpaks.Count },
+                { "changes", new List<Fields>() },
+                { "undo", AppsUndoable(tx, catalog, appsNow!) ? "apps" : "none" },
+            }));
+
         // System snapshots (snapper, btrfs): a package change's before and
         // after as one entry; bootable from the boot menu with grub-btrfs.
         var machine = Hardware.ThisMachine.Get();
