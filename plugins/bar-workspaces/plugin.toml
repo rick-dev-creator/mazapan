@@ -4,6 +4,7 @@ name = "Workspaces"
 version = "0.3.0"
 api = 1
 description = "Workspace numbers in the bar, with a live preview on hover whose windows can be dragged out"
+categories = ["bar"]
 requires = ["shell-bar"]
 
 [packages]

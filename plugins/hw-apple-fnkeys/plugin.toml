@@ -4,6 +4,7 @@ name = "Function keys first on Apple keyboards"
 version = "0.1.0"
 api = 1
 description = "F1–F12 as function keys, media keys with Fn, on keyboards the hid_apple driver runs: Apple's, and others in Mac mode (Keychron…)"
+categories = ["hardware"]
 
 [hardware]
 modules = ["hid_apple"]

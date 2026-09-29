@@ -107,6 +107,14 @@ public class PluginTests
         Assert.Equal(quoted, MyArch.Rendering.Functions.ShellQuote(s));
 
     [Fact]
+    public void BuiltInPluginsSayWhatKindTheyAre()
+    {
+        // The Plugins panel's tabs and icons.
+        var (all, _) = Plugin.Discover([Path.Join(Repo.Root, "plugins")]);
+        foreach (var p in all) Assert.True(p.Meta.Categories.Count > 0, $"{p.Id}: categories");
+    }
+
+    [Fact]
     public void BuiltInPluginsHaveTheirNameInSpanish()
     {
         // The Plugins panel shows each plugin's name and description in the

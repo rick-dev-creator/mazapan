@@ -4,6 +4,7 @@ name = "Video decoding on Intel graphics"
 version = "0.1.0"
 api = 1
 description = "Hardware video decoding (VA-API) on Intel graphics: both drivers, so libva picks the one for your GPU (iHD from Broadwell on, i965 before)"
+categories = ["hardware"]
 
 [hardware]
 gpu = ["Intel*"]

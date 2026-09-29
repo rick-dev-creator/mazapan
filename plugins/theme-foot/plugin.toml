@@ -4,6 +4,7 @@ name = "foot theme"
 version = "0.1.0"
 api = 1
 description = "foot terminal: font, palette, opacity and a blinking block cursor in the accent color; open terminals recolored live"
+categories = ["theme"]
 
 [packages]
 pacman = ["foot"]

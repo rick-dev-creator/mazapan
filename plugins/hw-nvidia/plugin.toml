@@ -4,6 +4,7 @@ name = "NVIDIA (Turing and newer)"
 version = "0.1.0"
 api = 1
 description = "NVIDIA's open driver for GeForce RTX 20 and newer: packages, kernel modesetting loaded early, and Hyprland's variables for it"
+categories = ["hardware"]
 requires = ["hypr-base"]
 
 [hardware]

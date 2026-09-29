@@ -4,6 +4,7 @@ name = "Hyprland base"
 version = "0.1.0"
 api = 1
 description = "Hyprland entry point: monitors, input, core bindings; loads every plugin fragment in ~/.config/hypr/myarch/"
+categories = ["window"]
 
 [packages]
 pacman = ["hyprland", "foot"]

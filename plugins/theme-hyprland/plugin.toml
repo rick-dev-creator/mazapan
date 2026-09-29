@@ -4,6 +4,7 @@ name = "Hyprland theme"
 version = "0.1.0"
 api = 1
 description = "Borders, gaps, rounding, background and animations from the theme"
+categories = ["theme"]
 requires = ["hypr-base"]
 
 [packages]

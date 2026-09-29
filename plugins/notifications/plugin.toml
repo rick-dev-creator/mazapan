@@ -1,0 +1,98 @@
+[plugin]
+id = "notifications"
+name = "Notifications"
+version = "0.1.0"
+api = 1
+description = "Every app's notifications, in the theme: banners that stop under the pointer, with their actions and replies; a quiet center stacked by app; Do Not Disturb by hand, on a schedule or in full screen"
+requires = ["shell-bar", "hypr-base"]
+categories = ["panel", "bar"]
+
+[packages]
+pacman = ["libnotify", "sound-theme-freedesktop"]
+
+[settings]
+# Opens the notification center.
+key = "SUPER + N"
+# Turns Do Not Disturb on or off.
+quiet_key = "SUPER + SHIFT + N"
+# Puts the banners away (they stay in the center).
+dismiss_key = "SUPER + comma"
+# Where banners show: on the focused screen, or always on the first.
+screen = { default = "focused", choices = ["focused", "primary"] }
+# Seconds a banner stays when its app doesn't say (low urgency: less; an
+# urgent one stays until dismissed).
+banner_seconds = { default = 6, min = 2, max = 60 }
+# A sound for urgent notifications only, for all, or none.
+sound = { default = "critical", choices = ["critical", "all", "off"] }
+# Do Not Disturb while a window is full screen (a game, a video, a talk).
+quiet_fullscreen = true
+# Do Not Disturb every day from this time ("23:00")… (empty: never)
+quiet_from = { default = "", kind = "text" }
+# …to this one ("07:00").
+quiet_to = { default = "", kind = "text" }
+# Urgent notifications still show during Do Not Disturb.
+quiet_critical = true
+# How many notifications the center keeps.
+keep = { default = 100, min = 10, max = 1000 }
+
+# The server and the card, shared by the banners, the center and the bar.
+[[targets]]
+template = "qmldir.tmpl"
+output = "~/.config/quickshell/myarch/components/notifications/qmldir"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "NotificationService.qml.tmpl"
+output = "~/.config/quickshell/myarch/components/notifications/NotificationService.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "Card.qml.tmpl"
+output = "~/.config/quickshell/myarch/components/notifications/Card.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "Notifications.qml.tmpl"
+output = "~/.config/quickshell/myarch/panels/notifications.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "Bell.qml.tmpl"
+output = "~/.config/quickshell/myarch/widgets/right/90-notifications.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "notifications.lua.tmpl"
+output = "~/.config/hypr/myarch/notifications.lua"
+reload = "hyprctl reload >/dev/null"
+
+# Another notification daemon would take the name first: this one gets
+# nothing, and nothing is in the theme. One installed can start on its own
+# (D-Bus activation) the moment the shell restarts.
+[[checks]]
+name = "{{ t \"check.daemon\" }}"
+run = "! pgrep -x 'mako|dunst|swaync|fnott|xfce4-notifyd' >/dev/null && ! grep -lqsx 'Name=org.freedesktop.Notifications' /usr/share/dbus-1/services/*.service"
+session = true
+
+[[actions]]
+name = "{{ t \"act.open\" }}"
+run = "qs ipc -c myarch call myarch panel notifications"
+key = "{{ settings.key }}"
+keywords = "{{ t \"act.open.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.quiet\" }}"
+run = "qs ipc -c myarch call notifications toggleQuiet"
+key = "{{ settings.quiet_key }}"
+keywords = "{{ t \"act.quiet.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.clear\" }}"
+run = "qs ipc -c myarch call notifications clear"
+keywords = "{{ t \"act.clear.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.dismiss\" }}"
+run = "qs ipc -c myarch call notifications dismiss"
+key = "{{ settings.dismiss_key }}"
+keywords = "{{ t \"act.dismiss.kw\" }}"

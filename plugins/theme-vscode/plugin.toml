@@ -4,6 +4,7 @@ name = "VS Code theme"
 version = "0.1.0"
 api = 1
 description = "VS Code, Code - OSS and VSCodium in the theme: its colors over VS Code's default theme (workbench, syntax, semantic tokens, terminal), following the system's dark/light; open windows follow at once"
+categories = ["theme"]
 
 [packages]
 pacman = []

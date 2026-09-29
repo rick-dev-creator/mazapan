@@ -4,6 +4,7 @@ name = "Qt theme"
 version = "0.1.0"
 api = 1
 description = "Qt 6 apps (KDE's too) in the theme: palette, font and style through qt6ct, and KDE's color scheme"
+categories = ["theme"]
 requires = ["hypr-base"]
 
 [packages]

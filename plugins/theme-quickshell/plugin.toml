@@ -4,6 +4,7 @@ name = "Quickshell theme"
 version = "0.1.0"
 api = 1
 description = "Theme tokens as a QML singleton (Theme.qml) for every shell widget"
+categories = ["theme"]
 
 [packages]
 pacman = ["quickshell"]

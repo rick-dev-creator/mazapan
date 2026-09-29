@@ -51,6 +51,10 @@ applies it, esc goes back. Themes also set how see-through terminals are
 (with the wallpaper blurred behind) and the wallpaper, drawn from their
 own colors.
 
+Notifications come in at the top right, in the theme, with their actions;
+`SUPER + N` opens a quiet center stacked by app, and `SUPER + SHIFT + N`
+turns Do Not Disturb on (it also turns on by schedule and in full screen).
+
 `SUPER + SHIFT + P` opens the Plugins panel, like an editor's extensions
 view: every plugin (built in, yours, installed, and the catalogs'),
 searchable, each with its page (README, what it can do, settings as

@@ -4,6 +4,7 @@ name = "Chromium theme"
 version = "0.1.0"
 api = 1
 description = "Chromium, Chrome, Brave and Edge follow the theme through GTK (theme-gtk), in every profile: frame, tabs, toolbar and font"
+categories = ["theme"]
 
 [packages]
 pacman = []

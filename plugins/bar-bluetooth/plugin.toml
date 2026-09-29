@@ -4,6 +4,7 @@ name = "Bluetooth"
 version = "0.1.0"
 api = 1
 description = "Bluetooth in the bar; click to connect, pair and forget devices"
+categories = ["bar"]
 requires = ["shell-bar"]
 
 # Quickshell talks to BlueZ over D-Bus.

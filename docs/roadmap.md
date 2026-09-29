@@ -124,8 +124,8 @@ mirror, recover the internal monitor, a watcher for removed monitors.
 - Audited once (11 findings, all fixed).
 
 **Follow-ups.** HDR (`cm = "hdr"`, accepted by Hyprland but untested
-without an HDR screen); theming Hyprland's own notifications (or the
-shell's own notification daemon).
+without an HDR screen). Notifications: *done* (2026-09-29), the
+`notifications` plugin, below.
 
 ## 3. One command palette
 
@@ -392,6 +392,37 @@ dependencies, no permissions. Ours:
 **Follow-ups.** A "customize" button in the panel (fork from there);
 ratings or download counts need a server; `myarch update` offering plugin
 updates too; signed tags; screenshots in catalog entries.
+
+## Notifications
+
+**Omarchy today.** Its own server in its shell: themed colors, updates in
+place, Do Not Disturb that survives restarts. But the actions it
+advertises aren't drawn (only a click's default), links don't open,
+banners show on every monitor at once, the app's timeout is ignored below
+5 s, urgent ones from other apps are silenced by Do Not Disturb, the stack
+has no limit, fonts are hardcoded, and there's no center: "history" is the
+last 10 replayed as banners. A notification that says it's Omarchy's gets
+through Do Not Disturb and runs a command when clicked.
+
+**Ours.** *Done* (2026-09-29), the `notifications` plugin, after macOS:
+- Banners on the focused screen, three at most then "+N", in from the
+  right; the pointer stops them all and shows their actions (and Reply);
+  the app's timeout honored, urgent ones stay with a red edge; progress
+  shown; a click runs the app's default action or brings its window.
+- A quiet center (SUPER + N, the bell): only notifications, stacked by
+  app, relative times, actions and inline replies, clear per app or all;
+  per app, banners or center only, and through Do Not Disturb or not.
+  Nothing the bar already shows.
+- Do Not Disturb by hand, on a schedule, and in full screen; urgent ones
+  through (a setting); what was missed told in one banner at the end.
+- Text only (no links opened, no images fetched), no commands from
+  notifications (per-app rules go by the name an app gives, as anywhere);
+  kept across restarts and shell reloads, never shown twice; private to
+  its owner. Held back while a screenshot or a recording is made. Capture
+  and the theme picker notify through it.
+
+**Follow-ups.** Open a screenshot from its notification; the CLI's own
+events (an update done, a check failing) as notifications; per-app sounds.
 
 ## 8. Capture
 

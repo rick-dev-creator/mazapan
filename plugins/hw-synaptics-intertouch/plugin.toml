@@ -4,6 +4,7 @@ name = "Synaptics touchpads over SMBus"
 version = "0.1.0"
 api = 1
 description = "Synaptics touchpads through InterTouch (SMBus) instead of PS/2: smooth scrolling and gestures on ThinkPads and other laptops"
+categories = ["hardware"]
 
 [hardware]
 # Only on PS/2: one already on SMBus (RMI4) is named otherwise.

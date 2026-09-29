@@ -53,8 +53,14 @@ Item {
 
   function q(s) { return "'" + String(s).replace(/'/g, "'\\''") + "'" }
   function tilde(p) { return p.startsWith(home) ? "~" + p.slice(home.length) : p }
+  // A notification (Hyprland's own notice when nothing serves them): with
+  // the picture itself as its icon when there's one.
+  function say(text, warn, icon) {
+    return `(command -v notify-send >/dev/null && notify-send -a ${q({{ tq "app" }})} -i ${q(icon || (warn ? "dialog-warning" : "camera-photo"))} ${q(text)}`
+      + ` || hyprctl notify ${warn ? 3 : 5} 5000 0 ${q(text)})`
+  }
   function notify(text, icon) {
-    Quickshell.execDetached(["hyprctl", "notify", String(icon ?? 5), "5000", "0", text])
+    Quickshell.execDetached(["sh", "-c", say(text, icon === 3)])
   }
 
   // --- opening, closing ------------------------------------------------------
@@ -72,6 +78,7 @@ Item {
     strokes = []
     hint = ""
     crop = null
+    Quickshell.execDetached(["sh", "-c", "qs ipc -c myarch call notifications hold false >/dev/null 2>&1"])
     // The frozen screens: not kept a moment longer than needed.
     Quickshell.execDetached(["sh", "-c", "rm -f \"$0\"/*.frozen.png", dir])
   }
@@ -95,11 +102,16 @@ Item {
   Process {
     id: freezer
     command: ["sh", "-c", "command -v grim >/dev/null || exit 3; hyprctl dismissnotify >/dev/null 2>&1; "
+      // Banners held back while the picture's taken (and the overlay's up).
+      + "qs ipc -c myarch call notifications hold true >/dev/null 2>&1 && sleep 0.1; "
       + "mkdir -p -m 700 \"$0\" && for o in \"$@\"; do grim -l 0 -o \"$o\" \"$0/$o.frozen.png\" || exit 1; done",
       root.dir].concat(Quickshell.screens.map(s => s.name))
     onExited: code => {
       if (code === 3) root.notify({{ tq "missing" }}.arg("grim"), 3)
-      if (code !== 0) return
+      if (code !== 0) {
+        Quickshell.execDetached(["sh", "-c", "qs ipc -c myarch call notifications hold false >/dev/null 2>&1"])
+        return
+      }
       root.shotId++
       root.open = false
       root.chosen = false
@@ -156,9 +168,9 @@ Item {
       const stamp = Qt.formatDateTime(new Date(), "yyyy-MM-dd HH-mm-ss")
       let script
       if (actions.includes("text")) {
-        script = `command -v tesseract >/dev/null || { hyprctl notify 3 6000 0 ${q({{ tq "missing" }}.arg("tesseract"))}; exit; }; ${ocrScript}; `
+        script = `command -v tesseract >/dev/null || { ${say({{ tq "missing" }}.arg("tesseract"), true)}; exit; }; ${ocrScript}; `
           + `t=$(tesseract ${q(shot)} - -l "\${l:-eng}" 2>/dev/null); if [ -n "$(printf %s "$t" | tr -d '[:space:]')" ]; then printf %s "$t" | wl-copy; `
-          + `hyprctl notify 5 5000 0 ${q({{ tq "text_copied" }})}; else hyprctl notify 0 5000 0 ${q({{ tq "no_text" }})}; fi`
+          + `${say({{ tq "text_copied" }}, false, "edit-paste")}; else ${say({{ tq "no_text" }}, false)}; fi`
       } else {
         const said = []
         script = "set -e"
@@ -167,7 +179,8 @@ Item {
           if (a === "copy") said.push({{ tq "copied" }})
           if (a === "save") said.push({{ tq "saved" }}.arg(tilde(pictures)))
         }
-        script += `\nhyprctl notify 5 5000 0 ${q(said.join(" · "))}`
+        const saved = actions.includes("save") ? pictures + "/Screenshot " + stamp + ".png" : ""
+        script += `\n${say(said.join(" · "), false, saved)}`
       }
       // The shot goes too once used (wl-copy has its own copy).
       Quickshell.execDetached(["sh", "-c", `( ${script} ); rm -f ${q(shot)}`])
@@ -181,13 +194,16 @@ Item {
     if (!chosen) return
     const stamp = Qt.formatDateTime(new Date(), "yyyy-MM-dd HH-mm-ss")
     const file = videos + "/Recording " + stamp + ".mp4"
-    const script = `command -v wf-recorder >/dev/null || { hyprctl notify 3 6000 0 ${q({{ tq "missing" }}.arg("wf-recorder"))}; exit; }; `
+    const script = `command -v wf-recorder >/dev/null || { ${say({{ tq "missing" }}.arg("wf-recorder"), true)}; exit; }; `
       + `mkdir -p ${q(videos)}; mkdir -p -m 700 ${q(dir)}; st=${q(state)}; echo "$$ $(date +%s)" > "$st"; `
-      + `trap 'rm -f "$st"' EXIT HUP TERM; sleep 0.3; `
+      // No banners in the video; they come back when it's done.
+      // (after the overlay's close has let them go).
+      + `hold() { qs ipc -c myarch call notifications hold "$1" >/dev/null 2>&1; }; `
+      + `trap 'rm -f "$st"; hold false' EXIT HUP TERM; sleep 0.3; hold true; `
       + `${command("record", stamp)} >/dev/null 2>&1 & p=$!; echo "$p $(date +%s)" > "$st"; `
       + `trap 'kill -INT $p' INT; wait $p; wait $p 2>/dev/null; rm -f "$st"; `
-      + `if [ -s ${q(file)} ]; then hyprctl notify 5 6000 0 ${q({{ tq "recorded" }}.arg(tilde(file)))}; `
-      + `else hyprctl notify 3 6000 0 ${q({{ tq "record_failed" }})}; fi`
+      + `if [ -s ${q(file)} ]; then ${say({{ tq "recorded" }}.arg(tilde(file)), false, "video-x-generic")}; `
+      + `else ${say({{ tq "record_failed" }}, true)}; fi`
     close()
     Quickshell.execDetached(["sh", "-c", script])
   }

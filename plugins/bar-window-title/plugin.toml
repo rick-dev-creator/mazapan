@@ -4,6 +4,7 @@ name = "Window title"
 version = "0.1.0"
 api = 1
 description = "The focused window's title in the bar, next to the workspaces"
+categories = ["bar"]
 requires = ["shell-bar"]
 
 [packages]

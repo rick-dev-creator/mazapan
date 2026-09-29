@@ -4,6 +4,7 @@ name = "Power"
 version = "0.1.0"
 api = 1
 description = "Lock, suspend, log out, reboot and shut down: a button in the bar, the palette, and a lock screen in the theme"
+categories = ["bar", "tools"]
 requires = ["shell-bar", "hypr-base"]
 
 [packages]

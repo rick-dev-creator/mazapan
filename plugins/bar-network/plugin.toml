@@ -4,6 +4,7 @@ name = "Network"
 version = "0.1.0"
 api = 1
 description = "Network state in the bar; click for Wi-Fi (scan, join, forget) and wired connections"
+categories = ["bar"]
 requires = ["shell-bar"]
 
 # Quickshell talks to NetworkManager over D-Bus.

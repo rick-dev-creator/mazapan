@@ -125,8 +125,11 @@ Item {
     message = {{ tq "applying" }}.arg(theme.name)
     Quickshell.execDetached(["sh", "-c",
       'mkdir -p ~/.local/state/myarch; myarch apply --theme "$0" --accent "$1" > ~/.local/state/myarch/theme.log 2>&1 '
-      + '|| { hyprctl notify 3 10000 0 "$2"; hyprctl reload >/dev/null; qs ipc -c myarch call myarch reload >/dev/null; }',
-      theme.id, acc, {{ tq "failed" }}])
+      // Failed: everything back as it was, then said (after the shell's
+      // reload, which would take a notice shown before it along).
+      + '|| { hyprctl reload >/dev/null; qs ipc -c myarch call myarch reload >/dev/null; sleep 2; '
+      + 'notify-send -a "$3" -u critical -i dialog-warning "$2" 2>/dev/null || hyprctl notify 3 10000 0 "$2"; }',
+      theme.id, acc, {{ tq "failed" }}, {{ tq "title" }}])
     open = false
   }
 

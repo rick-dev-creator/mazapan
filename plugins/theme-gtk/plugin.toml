@@ -4,6 +4,7 @@ name = "GTK theme"
 version = "0.1.0"
 api = 1
 description = "GTK4/libadwaita and GTK3 (via adw-gtk3) colors, fonts and dark mode"
+categories = ["theme"]
 
 [packages]
 pacman = ["adw-gtk-theme"]

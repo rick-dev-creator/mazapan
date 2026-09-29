@@ -4,6 +4,7 @@ name = "Lenovo Yoga Pro 7 bass speakers"
 version = "0.1.0"
 api = 1
 description = "Turns on the bass speakers of the Lenovo Yoga Pro 7 (14IAH10), silent without the right codec pin model"
+categories = ["hardware"]
 
 [hardware]
 product = ["*Yoga Pro 7 14IAH10*"]

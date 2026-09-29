@@ -4,6 +4,7 @@ name = "Firefox theme"
 version = "0.1.0"
 api = 1
 description = "Firefox and its forks (Zen, LibreWolf, Floorp, Waterfox) in the theme, in every profile: the browser's frame and its own pages"
+categories = ["theme"]
 
 [packages]
 pacman = []

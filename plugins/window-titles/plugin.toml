@@ -4,6 +4,7 @@ name = "Window titles"
 version = "0.1.0"
 api = 1
 description = "One key shows or hides a title bar on every window"
+categories = ["window"]
 requires = ["hypr-base"]
 
 [packages]

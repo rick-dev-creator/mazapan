@@ -4,6 +4,7 @@ name = "btop theme"
 version = "0.1.0"
 api = 1
 description = "btop in the theme: its boxes, graphs and meters from the theme's colors, over the terminal's background"
+categories = ["theme"]
 
 [packages]
 pacman = ["btop"]

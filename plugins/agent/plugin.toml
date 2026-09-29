@@ -4,6 +4,7 @@ name = "Agent"
 version = "0.1.0"
 api = 1
 description = "Ask a coding agent about this desktop from the palette: it gets myarch's report (state, failing checks, crashes, logged errors) and myarch's own ways to change things safely"
+categories = ["agent", "tools"]
 
 [settings]
 # The agent to open, as its command: it gets the report as its first

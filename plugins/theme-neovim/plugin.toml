@@ -4,6 +4,7 @@ name = "Neovim theme"
 version = "0.1.0"
 api = 1
 description = "A Neovim colorscheme from the theme (syntax, Treesitter, LSP, diagnostics, git, Telescope), used when you haven't chosen another; open Neovims recolor on apply"
+categories = ["theme"]
 
 [packages]
 pacman = ["neovim"]
