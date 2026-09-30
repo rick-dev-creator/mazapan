@@ -41,10 +41,15 @@ Every plugin keeps its text in `plugins/<id>/locales/<lang>.toml`
 (`en.toml` is required; any other language may leave keys out, and they
 show in English). To add a language, add `<lang>.toml` next to `en.toml`
 in the plugins you translate, with the same keys, and the catalog's
-`translations.<lang>.*` in `catalog/apps.toml`. The installer offers every
-language `plugins/installer/locales` has, in its own name; the system's
-locale then comes from the language and the time zone
-(`core/src/MyArch/Setup/Locales.cs`).
+`translations.<lang>.*` in `catalog/apps.toml`, and `self = "<its name>"`
+in `plugins/installer/locales/<lang>.toml`.
+
+The installer offers the world's main languages whether or not myarch is
+translated to them: the system and its apps speak the one chosen (its
+locale comes from the language and the time zone,
+`core/src/MyArch/Setup/Locales.cs`), and myarch's own screens show in
+English where a translation is missing, which the installer says. Those
+with a translation come first; a new one moves up by itself.
 
 ## A plugin
 

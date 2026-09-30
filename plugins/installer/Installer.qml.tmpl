@@ -103,10 +103,12 @@ Item {
     onLoaded: {
       try {
         const o = JSON.parse(text())
-        if (root.steps.includes(o.step)) root.step = o.step
+        // The step last: arriving at it acts on what's already been done
+        // (a time zone asked for, a keyboard picked).
         for (const k of ["timezone", "disk", "fullname", "user", "hostname", "phase", "runId"])
           if (typeof o[k] === "string") root[k] = o[k]
         for (const k of ["encrypt", "userEdited", "hostEdited", "kbPicked", "zoneAsked"]) root[k] = o[k] === true
+        if (root.steps.includes(o.step)) root.step = o.step
         for (const k of ["chosen", "plus", "minus"]) if (o[k] && typeof o[k] === "object") root[k] = o[k]
       } catch (e) {}
       loaded_ = true
@@ -159,11 +161,33 @@ Item {
   // --- what's there ----------------------------------------------------------------
 
   property var zones: []
+  // The languages there are myarch translations for (their locales/*.toml).
   property var languages: ["en"]
+  // The world's main languages, each in its own words. Any of them: the
+  // system and its apps speak it (its locale); myarch's own screens too
+  // where there's a translation, else in English until someone adds it.
+  readonly property var worldLanguages: [
+    ["en", "English"], ["es", "Español"], ["pt", "Português"], ["fr", "Français"], ["de", "Deutsch"],
+    ["it", "Italiano"], ["nl", "Nederlands"], ["pl", "Polski"], ["ru", "Русский"], ["uk", "Українська"],
+    ["tr", "Türkçe"], ["ar", "العربية"], ["he", "עברית"], ["fa", "فارسی"], ["hi", "हिन्दी"],
+    ["bn", "বাংলা"], ["id", "Bahasa Indonesia"], ["ms", "Bahasa Melayu"], ["vi", "Tiếng Việt"], ["th", "ไทย"],
+    ["zh", "中文"], ["ja", "日本語"], ["ko", "한국어"], ["sv", "Svenska"], ["nb", "Norsk"],
+    ["da", "Dansk"], ["fi", "Suomi"], ["cs", "Čeština"], ["el", "Ελληνικά"], ["ro", "Română"],
+    ["hu", "Magyar"], ["ca", "Català"],
+  ]
+  // Translated ones first (in their own names), then the rest.
+  readonly property var languagesShown: {
+    const q = langSearch.text.toLowerCase().trim()
+    const all = languages.map(c => [c, nativeName(c)])
+      .concat(worldLanguages.filter(w => !languages.includes(w[0])))
+    return q === "" ? all : all.filter(l => (l[0] + " " + l[1] + " " + Qt.locale(l[0]).nativeLanguageName).toLowerCase().includes(q))
+  }
   // A language in its own words: "Español", "Français", "日本語".
   property var selfNames: ({})
   function nativeName(code) {
     if (selfNames[code]) return selfNames[code]
+    const w = worldLanguages.find(l => l[0] === code.split("_")[0])
+    if (w) return w[1]
     const n = Qt.locale(code).nativeLanguageName || code
     return n.charAt(0).toUpperCase() + n.slice(1)
   }
@@ -304,7 +328,11 @@ Item {
     const latam = ["mx", "ar", "co", "cl", "pe", "ve", "ec", "gt", "cu", "bo", "do", "hn", "py", "sv", "ni", "cr", "pa", "uy"]
     if (language.startsWith("es") && latam.includes(cc)) add("latam", "")
     if (cc !== "") add(cc, "")
-    add(language.startsWith("en") ? "us" : language.split("_")[0], "")
+    // The language's own keyboard, where its code isn't the layout's.
+    const lang = language.split("_")[0]
+    const byLang = { en: "us", ja: "jp", ko: "kr", uk: "ua", el: "gr", cs: "cz", sv: "se", da: "dk", he: "il",
+                     fa: "ir", ar: "ara", hi: "in", vi: "vn", ca: "es", nb: "no", zh: "cn", bn: "bd", ms: "us", id: "us" }
+    add(byLang[lang] || lang, "")
     return out
   }
   property bool kbPicked: false
@@ -398,7 +426,8 @@ Item {
     }
     onExited: code => {
       root.detecting = false
-      if (code !== 0 || root.suggested === "") root.problem = {{ tq "tz_undetected" }}
+      // Only when there's none yet: one found already stays, said or not.
+      if ((code !== 0 || root.suggested === "") && (root.timezone === "" || root.timezone === "UTC")) root.problem = {{ tq "tz_undetected" }}
     }
   }
 
@@ -685,14 +714,29 @@ Item {
           ColumnLayout {
             visible: root.step === "language"
             anchors.horizontalCenter: parent.horizontalCenter
-            width: 320
-            spacing: 6
-            Repeater {
-              model: root.languages.map(c => [c, root.nativeName(c)])
-              Choice {
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            width: Math.min(460, parent.width)
+            spacing: 8
+            TextField {
+              id: langSearch
+              Layout.fillWidth: true
+              placeholder: {{ tq "lang.search" }}
+              onAccepted: if (root.languagesShown.length > 0) root.setLanguage(root.languagesShown[0][0])
+            }
+            ListView {
+              Layout.fillWidth: true
+              Layout.fillHeight: true
+              clip: true
+              spacing: 2
+              model: root.languagesShown
+              delegate: Choice {
                 required property var modelData
+                width: ListView.view.width
                 text: modelData[1]
-                selected: root.language === modelData[0]
+                // Not translated yet: said, so it's no surprise.
+                detail: root.languages.includes(modelData[0]) ? "" : {{ tq "lang.partial" }}
+                selected: root.language === modelData[0] || root.language.split("_")[0] === modelData[0]
                 onPicked: root.setLanguage(modelData[0])
               }
             }
@@ -1002,7 +1046,7 @@ Item {
             spacing: 10
             Row2 { key: {{ tq "r.disk" }}; value: root.diskNow ? (root.diskNow.model || root.diskNow.path) + " · " + root.size(root.diskNow.size) + (root.encrypt ? " · " + {{ tq "r.encrypted" }} : "") : "" }
             Row2 { key: {{ tq "r.account" }}; value: root.fullname.trim() + " (" + root.user + ") · " + root.hostname }
-            Row2 { key: {{ tq "r.language" }}; value: (root.language === "es" ? "Español" : "English") + " · " + root.layout + (root.variant ? " " + root.variant : "") + " · " + (root.timezone || "UTC").replace(/_/g, " ") }
+            Row2 { key: {{ tq "r.language" }}; value: root.nativeName(root.language) + " · " + root.layout + (root.variant ? " " + root.variant : "") + " · " + (root.timezone || "UTC").replace(/_/g, " ") }
             Row2 { key: {{ tq "r.apps" }}; value: root.appIds.length === 0 ? {{ tq "r.no_apps" }} : root.appIds.map(id => root.appName(id)).join(", ") }
             Row2 { visible: root.sshKeys.length > 0; key: {{ tq "r.ssh" }}; value: {{ tq "r.ssh_d" }}.arg(root.sshKeys.join(", ")) }
             Item { Layout.fillHeight: true }

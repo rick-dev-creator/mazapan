@@ -198,7 +198,7 @@ public class SetupTests
 public class LocalesTests
 {
     const string ZoneTab = "# comment\nPR,AG,CA,AI,AW\t+182806-0660622\tAmerica/Puerto_Rico\nMX\t+1924-09909\tAmerica/Mexico_City\tCentral Mexico\nES\t+4024-00341\tEurope/Madrid\tSpain\nCH,DE,LI\t+4723+00832\tEurope/Zurich\nUS\t+404251-0740023\tAmerica/New_York\n";
-    const string Supported = "en_US.UTF-8 UTF-8\nen_AG.UTF-8 UTF-8\nen_PR.UTF-8 UTF-8\nes_ES.UTF-8 UTF-8\nes_MX.UTF-8 UTF-8\nde_DE.UTF-8 UTF-8\nde_CH.UTF-8 UTF-8\nes_MX ISO-8859-1\n";
+    const string Supported = "ja_JP.UTF-8 UTF-8\nzh_CN.UTF-8 UTF-8\nfr_FR.UTF-8 UTF-8\nfr_CA.UTF-8 UTF-8\npt_BR.UTF-8 UTF-8\nen_US.UTF-8 UTF-8\nen_AG.UTF-8 UTF-8\nen_PR.UTF-8 UTF-8\nes_ES.UTF-8 UTF-8\nes_MX.UTF-8 UTF-8\nde_DE.UTF-8 UTF-8\nde_CH.UTF-8 UTF-8\nes_MX ISO-8859-1\n";
 
     [Theory]
     [InlineData("es", "America/Mexico_City", "es_MX.UTF-8")]
@@ -209,6 +209,10 @@ public class LocalesTests
     [InlineData("es_MX", "Europe/Madrid", "es_MX.UTF-8")]
     [InlineData("en", "America/Puerto_Rico", "en_PR.UTF-8")]
     [InlineData("xx", "UTC", "en_US.UTF-8")]
+    [InlineData("ja", "UTC", "ja_JP.UTF-8")]
+    [InlineData("zh", "Europe/Madrid", "zh_CN.UTF-8")]
+    [InlineData("fr", "UTC", "fr_FR.UTF-8")]
+    [InlineData("pt", "UTC", "pt_BR.UTF-8")]
     public void TheLocaleIsTheLanguageWhereYouAre(string lang, string zone, string locale) =>
         Assert.Equal(locale, Locales.For(lang, zone, ZoneTab, Supported));
 

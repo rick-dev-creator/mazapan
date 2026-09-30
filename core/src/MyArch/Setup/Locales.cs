@@ -22,7 +22,15 @@ public static class Locales
         return "";
     }
 
-    static readonly Dictionary<string, string> Usual = new() { ["en"] = "en_US", ["es"] = "es_ES" };
+    /// <summary>A language's usual locale, where its code isn't its country's ("ja" is Japan's, JP).</summary>
+    static readonly Dictionary<string, string> Usual = new()
+    {
+        ["en"] = "en_US", ["es"] = "es_ES", ["pt"] = "pt_BR", ["zh"] = "zh_CN", ["ja"] = "ja_JP", ["ko"] = "ko_KR",
+        ["ar"] = "ar_EG", ["he"] = "he_IL", ["fa"] = "fa_IR", ["hi"] = "hi_IN", ["bn"] = "bn_BD", ["uk"] = "uk_UA",
+        ["el"] = "el_GR", ["cs"] = "cs_CZ", ["da"] = "da_DK", ["sv"] = "sv_SE", ["nb"] = "nb_NO", ["vi"] = "vi_VN",
+        ["ms"] = "ms_MY", ["ca"] = "ca_ES", ["et"] = "et_EE", ["sl"] = "sl_SI", ["sr"] = "sr_RS", ["ta"] = "ta_IN",
+        ["ur"] = "ur_PK", ["sw"] = "sw_KE", ["fil"] = "fil_PH",
+    };
 
     /// <param name="zoneTab">tzdata's zone1970.tab: codes, coordinates, zone.</param>
     /// <param name="supported">glibc's SUPPORTED: "es_MX.UTF-8 UTF-8" a line.</param>
