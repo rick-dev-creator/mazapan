@@ -1,0 +1,4 @@
+"plugin.name" = "Teclas de função primeiro em teclados Apple"
+"plugin.description" = "F1–F12 como teclas de função e as de mídia com Fn, nos teclados do driver hid_apple: os da Apple e outros em modo Mac (Keychron…)"
+"setting.fnmode" = "Modo Fn"
+"setting.fnmode.help" = "2: teclas de função primeiro; 1: teclas de mídia primeiro; 3: o que o kernel decidir (o padrão dele); 0: sem tecla Fn."

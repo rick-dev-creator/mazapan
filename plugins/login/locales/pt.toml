@@ -1,0 +1,7 @@
+"plugin.name" = "Tela de login"
+"plugin.description" = "A tela de login com o tema: o relógio, seu nome, sua senha (greetd, com um Hyprland próprio e um greeter do Quickshell). O instalador a ativa; num sistema com outro gerenciador de login, ela toma o lugar dele"
+password = "Senha"
+starting = "Iniciando…"
+wrong = "Essa não é a senha"
+restart = "Reiniciar"
+power_off = "Desligar"

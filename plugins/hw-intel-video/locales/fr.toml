@@ -1,0 +1,2 @@
+"plugin.name" = "Décodage vidéo sur les cartes graphiques Intel"
+"plugin.description" = "Décodage vidéo matériel (VA-API) sur les cartes graphiques Intel : les deux pilotes, pour que libva choisisse celui de votre GPU (iHD à partir de Broadwell, i965 avant)"

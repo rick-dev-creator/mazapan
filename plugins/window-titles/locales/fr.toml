@@ -1,0 +1,8 @@
+"plugin.name" = "Titres des fenêtres"
+"plugin.description" = "Un raccourci affiche ou masque une barre de titre sur chaque fenêtre"
+"setting.height" = "Hauteur"
+"setting.height.help" = "Hauteur de la barre de titre en pixels logiques."
+"setting.key" = "Raccourci"
+"setting.key.help" = "Affiche ou masque la barre de titre sur toutes les fenêtres."
+"toggle" = "Afficher ou masquer les titres des fenêtres"
+"toggle.kw" = "titres barre de titre noms"

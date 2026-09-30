@@ -1,0 +1,9 @@
+"plugin.name" = "Agente"
+"plugin.description" = "Pergunte a um agente de programação sobre este desktop pela paleta: ele recebe o relatório do myarch (estado, verificações com falha, travamentos, erros registrados) e as formas do myarch de mudar as coisas com segurança"
+"setting.command" = "Comando"
+"setting.command.help" = "O agente que abre, como comando: recebe o relatório como primeira mensagem. \"claude\" é o Claude Code; serve qualquer agente que aceite um prompt como argumento (\"codex\", \"opencode run\"…). Para que ele use o myarch diretamente (estado, prévias, aplicar, desfazer), registre o servidor MCP nele, ex.: claude mcp add --scope user myarch -- myarch mcp"
+
+ask = "Perguntar a um agente sobre este desktop"
+"ask.kw" = "ia ajuda travou quebrado consertar claude assistente"
+report = "Copiar um relatório do que está errado"
+"report.kw" = "diagnóstico logs erros travamento ajuda"

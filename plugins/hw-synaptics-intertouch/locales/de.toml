@@ -1,0 +1,2 @@
+"plugin.name" = "Synaptics-Touchpads über SMBus"
+"plugin.description" = "Synaptics-Touchpads über InterTouch (SMBus) statt PS/2: flüssiges Scrollen und Gesten auf ThinkPads und anderen Laptops"

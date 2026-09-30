@@ -1,0 +1,5 @@
+"plugin.name" = "Instantanés du système dans le menu de démarrage"
+"plugin.description" = "Les instantanés du système dans le menu de démarrage de GRUB (grub-btrfs) : démarrez tout le bureau tel qu'il était avant une mise à jour qui l'a cassé"
+"check.mkinitcpio" = "mkinitcpio crée l'initramfs, avec ses drop-ins"
+"check.daemon" = "grub-btrfsd garde à jour les instantanés du menu de démarrage"
+"check.overlay" = "Chaque instantané du menu de démarrage démarre sur une couche en mémoire"

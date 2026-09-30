@@ -1,0 +1,6 @@
+"plugin.name" = "Titre de la fenêtre"
+"plugin.description" = "Le titre de la fenêtre active dans la barre, à côté des espaces de travail"
+"setting.font_size" = "Taille du texte"
+"setting.font_size.help" = "Taille du titre, en points."
+"setting.max_width" = "Largeur maximale"
+"setting.max_width.help" = "Longueur maximale du titre, en pixels logiques ; les plus longs se terminent par \"…\"."

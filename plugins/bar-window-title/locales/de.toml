@@ -1,0 +1,6 @@
+"plugin.name" = "Fenstertitel"
+"plugin.description" = "Der Titel des aktiven Fensters in der Leiste, neben den Arbeitsflächen"
+"setting.font_size" = "Schriftgröße"
+"setting.font_size.help" = "Größe des Titels, in Punkt."
+"setting.max_width" = "Maximale Breite"
+"setting.max_width.help" = "Wie lang der Titel höchstens werden darf, in logischen Pixeln; längere enden mit \"…\"."

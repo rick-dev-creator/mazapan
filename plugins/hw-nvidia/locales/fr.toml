@@ -1,0 +1,3 @@
+"plugin.name" = "NVIDIA (Turing et plus récentes)"
+"plugin.description" = "Le pilote ouvert de NVIDIA pour les GeForce RTX 20 et plus récentes : paquets, modesetting du noyau chargé tôt, et les variables de Hyprland qui vont avec"
+"check.headers" = "Les en-têtes du noyau pour le module NVIDIA sont installés (linux-headers de votre noyau)"

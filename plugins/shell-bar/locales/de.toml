@@ -1,0 +1,6 @@
+"plugin.name" = "Leiste"
+"plugin.description" = "Eine Leiste auf jedem Monitor (Quickshell), gefüllt mit den Widgets, die andere Plugins in ihre Plätze links/Mitte/rechts setzen; bringt ein Komponenten-Kit für sie mit"
+"setting.height" = "Höhe"
+"setting.height.help" = "Höhe der Leiste in logischen Pixeln."
+
+"check.bar" = "Die Leiste läuft und lädt ihre Konfiguration"

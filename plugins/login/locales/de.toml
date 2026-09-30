@@ -1,0 +1,7 @@
+"plugin.name" = "Anmeldebildschirm"
+"plugin.description" = "Der Anmeldebildschirm im Theme: die Uhr, dein Name, dein Passwort (greetd, mit eigenem Hyprland und einem Quickshell-Greeter). Der Installer schaltet ihn ein; auf einem System mit einem anderen Anmeldemanager tritt er an dessen Stelle"
+password = "Passwort"
+starting = "Wird gestartet…"
+wrong = "Das ist nicht das Passwort"
+restart = "Neu starten"
+power_off = "Ausschalten"

@@ -90,8 +90,27 @@ public sealed class Machine
         if (m.Filesystem == "overlay" && Text(R("proc/cmdline")).Contains("rootflags=subvol=")) m.Filesystem = "btrfs";
         m.BootOnRoot = !mounts.Any(f => f[1] == "/boot");
         m.Live = Directory.Exists(R("run/archiso"));
-        m.Bootloader = BootloaderOf(R);
+        m.Bootloader = BootloaderOf(R, efi: root != "/" || !InChroot());
         return m;
+    }
+
+    /// <summary>
+    /// In a chroot (an install, from the ISO): the firmware's variables then
+    /// say how the ISO started, not the system being installed.
+    /// </summary>
+    static bool InChroot()
+    {
+        try
+        {
+            using var p = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("systemd-detect-virt", "--chroot")
+                { RedirectStandardOutput = true, RedirectStandardError = true })!;
+            p.WaitForExit();
+            return p.ExitCode == 0;
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            return false;
+        }
     }
 
     /// <summary>
@@ -99,9 +118,9 @@ public sealed class Machine
     /// systemd-boot and Limine), else its configuration's files (an EFI
     /// partition at /boot is often readable by root only), else its package.
     /// </summary>
-    static string BootloaderOf(Func<string, string> R)
+    static string BootloaderOf(Func<string, string> R, bool efi = true)
     {
-        try
+        if (efi) try
         {
             foreach (var v in Directory.Exists(R("sys/firmware/efi/efivars")) ? Directory.GetFiles(R("sys/firmware/efi/efivars"), "LoaderInfo-*") : [])
             {

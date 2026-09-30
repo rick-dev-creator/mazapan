@@ -1,0 +1,4 @@
+"plugin.name" = "Touches de fonction d'abord sur les claviers Apple"
+"plugin.description" = "F1–F12 comme touches de fonction, les touches multimédia avec Fn, sur les claviers gérés par le pilote hid_apple : ceux d'Apple, et d'autres en mode Mac (Keychron…)"
+"setting.fnmode" = "Mode Fn"
+"setting.fnmode.help" = "2 : touches de fonction d'abord ; 1 : touches multimédia d'abord ; 3 : le choix du noyau (sa valeur par défaut) ; 0 : pas de touche Fn."

@@ -1,0 +1,6 @@
+"plugin.name" = "Título da janela"
+"plugin.description" = "O título da janela em foco na barra, ao lado das áreas de trabalho"
+"setting.font_size" = "Tamanho da fonte"
+"setting.font_size.help" = "Tamanho do título, em pontos."
+"setting.max_width" = "Largura máxima"
+"setting.max_width.help" = "O máximo que o título pode ocupar, em pixels lógicos; os mais longos terminam em \"…\"."

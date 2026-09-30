@@ -1,0 +1,2 @@
+"plugin.name" = "Videodekodierung auf Intel-Grafik"
+"plugin.description" = "Hardware-Videodekodierung (VA-API) auf Intel-Grafik: beide Treiber, damit libva den für deine GPU wählt (iHD ab Broadwell, i965 davor)"

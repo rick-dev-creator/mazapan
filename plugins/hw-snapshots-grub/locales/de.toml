@@ -1,0 +1,5 @@
+"plugin.name" = "System-Snapshots im Bootmenü"
+"plugin.description" = "Die System-Snapshots im GRUB-Bootmenü (grub-btrfs): Starte den ganzen Desktop so, wie er vor einem Update war, das ihn kaputt gemacht hat"
+"check.mkinitcpio" = "mkinitcpio erstellt das initramfs, mit seinen Drop-ins"
+"check.daemon" = "grub-btrfsd hält die Snapshots im Bootmenü aktuell"
+"check.overlay" = "Jeder Snapshot im Bootmenü startet auf einem Overlay"

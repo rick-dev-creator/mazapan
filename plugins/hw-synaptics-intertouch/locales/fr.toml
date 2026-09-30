@@ -1,0 +1,2 @@
+"plugin.name" = "Pavés tactiles Synaptics via SMBus"
+"plugin.description" = "Les pavés tactiles Synaptics via InterTouch (SMBus) au lieu de PS/2 : défilement fluide et gestes sur les ThinkPad et d'autres portables"

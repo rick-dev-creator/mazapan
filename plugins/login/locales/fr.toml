@@ -1,0 +1,7 @@
+"plugin.name" = "Écran de connexion"
+"plugin.description" = "L'écran de connexion aux couleurs du thème : l'horloge, votre nom, votre mot de passe (greetd, avec son propre Hyprland et un greeter Quickshell). L'installateur l'active ; sur un système avec un autre gestionnaire de connexion, il prend sa place"
+password = "Mot de passe"
+starting = "Démarrage…"
+wrong = "Ce n'est pas le mot de passe"
+restart = "Redémarrer"
+power_off = "Éteindre"

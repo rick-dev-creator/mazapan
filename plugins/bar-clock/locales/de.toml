@@ -1,0 +1,8 @@
+"plugin.name" = "Uhr"
+"plugin.description" = "Tag, Datum und Uhrzeit in der Mitte der Leiste, in der Systemsprache; klicken für einen Kalender"
+"setting.font_size" = "Schriftgröße"
+"setting.font_size.help" = "Größe des Texts, in Punkt."
+"setting.format" = "Format"
+"setting.format.help" = "Leer: Tag und Datum (\"Sa. 28. Sept.\") und die Uhrzeit, wie die Sprache sie schreibt (24 h auf Deutsch, 12 h in US-Englisch). Oder ein eigenes Qt-Datumsformat, z. B. \"dddd d · HH:mm\" (https://doc.qt.io/qt-6/qml-qtqml-qt.html#formatDateTime-method)."
+
+"today" = "Heute"

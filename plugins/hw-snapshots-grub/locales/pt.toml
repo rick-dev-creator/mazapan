@@ -1,0 +1,5 @@
+"plugin.name" = "Snapshots do sistema no menu de inicialização"
+"plugin.description" = "Os snapshots do sistema no menu de inicialização do GRUB (grub-btrfs): inicie o desktop como estava antes de uma atualização que o quebrou"
+"check.mkinitcpio" = "O mkinitcpio gera o initramfs, com seus drop-ins"
+"check.daemon" = "O grub-btrfsd mantém em dia os snapshots do menu de inicialização"
+"check.overlay" = "Cada snapshot do menu de inicialização inicia sobre um overlay"

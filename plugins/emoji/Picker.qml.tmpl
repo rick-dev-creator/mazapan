@@ -28,7 +28,10 @@ Item {
   property var recent: []
 
   readonly property string home: Quickshell.env("HOME")
-  readonly property bool es: "{{ lang_code }}" === "es"
+  // emoji.tsv: the emoji, its group, then a name and words for each of
+  // these languages (CLDR's): English's always searched, and the desktop's.
+  readonly property var languages: ["en", "es", "pt", "fr", "de"]
+  readonly property int lang: Math.max(0, languages.indexOf("{{ lang_code }}".split("_")[0]))
   readonly property var groups: [
     ["recent", 0xF02DA], ["smileys", 0xF01F5], ["people", 0xF0004], ["nature", 0xF032A], ["food", 0xF025A],
     ["travel", 0xF010B], ["activities", 0xF0806], ["objects", 0xF0335], ["symbols", 0xF02D5], ["flags", 0xF023B],
@@ -101,11 +104,12 @@ Item {
       const list = []
       for (const line of text().split("\n")) {
         const f = line.split("\t")
-        if (f.length < 6) continue
-        const name = root.es && f[4] ? f[4] : f[2]
-        const names = root.fold("|" + f[2] + "|" + f[4] + "|")
+        if (f.length < 4) continue
+        const own = f[2 + 2 * root.lang] || "", ownWords = f[3 + 2 * root.lang] || ""
+        const name = own || f[2]
+        const names = root.fold("|" + f[2] + "|" + own + "|")
         list.push({ e: f[0], g: f[1], name: name, names: names, nameWords: names.split(/[|\s]+/),
-          words: root.fold(f[2] + " " + f[3] + " " + f[4] + " " + f[5]) })
+          words: root.fold(f[2] + " " + f[3] + " " + own + " " + ownWords) })
       }
       root.all = list
     }

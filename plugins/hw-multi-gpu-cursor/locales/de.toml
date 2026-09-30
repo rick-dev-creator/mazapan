@@ -1,0 +1,2 @@
+"plugin.name" = "Cursor bei mehreren GPUs"
+"plugin.description" = "Zeichnet den Cursor per Software, wenn der Rechner mehrere GPUs hat (eine rendert, eine andere steuert Bildschirme: ein Dock an der iGPU, das Display eines Laptops): Der Hardware-Cursor flackert auf den Bildschirmen der anderen GPU"

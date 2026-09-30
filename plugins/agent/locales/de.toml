@@ -1,0 +1,9 @@
+"plugin.name" = "Agent"
+"plugin.description" = "Frag einen Coding-Agenten aus der Palette zu diesem Desktop: Er bekommt den Bericht von myarch (Zustand, fehlgeschlagene Prüfungen, Abstürze, protokollierte Fehler) und die Wege von myarch, Dinge sicher zu ändern"
+"setting.command" = "Befehl"
+"setting.command.help" = "Der Agent, der geöffnet wird, als Befehl: Er bekommt den Bericht als erste Nachricht. \"claude\" ist Claude Code; jeder Agent, der eine Anfrage als Argument annimmt, funktioniert (\"codex\", \"opencode run\"…). Damit er myarch direkt nutzen kann (Status, Vorschauen, Anwenden, Rückgängig), registriere den MCP-Server bei ihm, z. B. claude mcp add --scope user myarch -- myarch mcp"
+
+ask = "Einen Agenten zu diesem Desktop fragen"
+"ask.kw" = "ki hilfe absturz kaputt reparieren claude assistent"
+report = "Bericht über Probleme kopieren"
+"report.kw" = "diagnose logs protokolle fehler absturz hilfe"

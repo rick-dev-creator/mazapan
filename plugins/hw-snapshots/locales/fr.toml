@@ -1,0 +1,5 @@
+"plugin.name" = "Instantanés du système"
+"plugin.description" = "Un instantané btrfs du système avant et après chaque changement de paquets (une mise à jour, une installation), les derniers sont gardés ; listés dans l'Historique du bureau"
+"setting.keep" = "Nombre à garder"
+"setting.keep.help" = "Pour combien de changements de paquets les instantanés sont gardés (chacun est une paire, avant et après)."
+"check.config" = "Snapper est configuré pour /"

@@ -52,5 +52,6 @@ noto-fonts-cjk
 
 # Snapshots that boot (the hw-snapshots plugins)
 snapper
+snap-pac
 grub-btrfs
 inotify-tools

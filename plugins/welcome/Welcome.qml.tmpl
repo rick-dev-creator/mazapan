@@ -133,6 +133,8 @@ Item {
   // --- what's there ----------------------------------------------------------------
 
   property string language: {{ quote lang_code }}
+  // Until the probe says which there are.
+  property var languages: [["en", "English"], ["es", "Español"]]
   property string layout: ""
   property string variant: ""
   property string timezone: ""
@@ -152,11 +154,20 @@ Item {
     command: ["sh", "-c", 'echo "tz:$(timedatectl show -p Timezone --value 2>/dev/null)"; '
       + 'echo "zones:$(timedatectl list-timezones 2>/dev/null | tr "\\n" " ")"; '
       + 'echo "themes:$(myarch themes --json 2>/dev/null | tr -d "\\n")"; '
-      + 'echo "apps:$(myarch apps list --json 2>/dev/null | tr -d "\\n")"']
+      + 'echo "apps:$(myarch apps list --json 2>/dev/null | tr -d "\\n")"; '
+      // The languages myarch speaks, each in its own name (the installer's self = "…").
+      + 'r=$(dirname "$(dirname "$(readlink -f "$(command -v myarch)")")"); '
+      + "for f in \"$r\"/plugins/installer/locales/*.toml; do c=${f##*/}; echo \"lang:${c%.toml}=$(sed -n 's/^self *= *\"\\(.*\\)\"$/\\1/p' \"$f\")\"; done"]
     stdout: StdioCollector {
       onStreamFinished: {
         const get = k => (text.split("\n").find(l => l.startsWith(k + ":")) || "").slice(k.length + 1)
         root.timezone = get("tz").trim()
+        const langs = []
+        for (const l of text.split("\n")) {
+          const m = /^lang:([a-z]{2,3}(?:_[A-Z]{2})?)=(.+)$/.exec(l)
+          if (m) langs.push([m[1], m[2]])
+        }
+        if (langs.length > 0) root.languages = langs.sort((a, b) => a[1].localeCompare(b[1]))
         root.zones = get("zones").trim().split(" ").filter(z => z !== "")
         try {
           const t = JSON.parse(get("themes"))
@@ -538,7 +549,7 @@ Item {
             width: 320
             spacing: 6
             Repeater {
-              model: [["en", "English"], ["es", "Español"]]
+              model: root.languages
               Choice {
                 required property var modelData
                 text: modelData[1]

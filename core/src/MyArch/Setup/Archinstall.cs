@@ -27,6 +27,14 @@ public static class Archinstall
         "https://mirror.rackspace.com/archlinux/$repo/os/$arch",
     ];
 
+    /// <summary>
+    /// Snapshots from day one (plugins hw-snapshots and, with /boot on
+    /// btrfs, hw-snapshots-grub: bootable from the menu): what they need,
+    /// so turning them on while installing downloads nothing.
+    /// </summary>
+    static string[] Snapshots(Answers a) =>
+        a.Encrypt ? ["snapper", "snap-pac"] : ["snapper", "snap-pac", "grub-btrfs", "inotify-tools"];
+
     public static string Config(Answers a, long diskBytes, string consoleKeymap)
     {
         var esp = a.Encrypt ? 2048 * MiB : 512 * MiB;
@@ -92,7 +100,7 @@ public static class Archinstall
             } },
             { "network_config", new Fields { { "type", "nm" } } },
             { "ntp", true },
-            { "packages", Packages.Concat(a.Encrypt ? [] : ["greetd"]).Concat(a.SshKeys.Count > 0 ? ["openssh"] : [])
+            { "packages", Packages.Concat(Snapshots(a)).Concat(a.Encrypt ? [] : ["greetd"]).Concat(a.SshKeys.Count > 0 ? ["openssh"] : [])
                 .Concat(NeedsCjk(a) ? ["noto-fonts-cjk"] : []).Cast<object>().ToList() },
             { "parallel_downloads", 8 },
             { "services", new List<object> { "power-profiles-daemon" }.Concat(a.SshKeys.Count > 0 ? ["sshd"] : []).ToList() },
@@ -196,6 +204,10 @@ public static class Archinstall
         // Its desktop, now (reloads fail here, nothing runs yet: warnings only).
         s.Append($"HOME={home} USER={a.User} myarch apply --system -y > /var/log/myarch-first-apply.log 2>&1 || echo \"myarch apply failed: /var/log/myarch-first-apply.log\"\n");
         s.Append($"chown -R {a.User}:{a.User} {home}\n");
+        // The first one: the system as installed, to go back to.
+        s.Append("if grep -qE '^SNAPPER_CONFIGS=.*[\" ]root[\" ]' /etc/conf.d/snapper 2>/dev/null; then snapper --no-dbus -c root create -c number -d 'myarch installed' --userdata important=yes || true; fi\n");
+        // In the boot menu already (its daemon only sees the ones that come later).
+        s.Append("if [ -x /etc/grub.d/41_snapshots-btrfs ] && [ -e /etc/systemd/system/grub-btrfsd.service.d/myarch-snapshots.conf ]; then GRUB_BTRFS_SNAPSHOT_KERNEL_PARAMETERS=systemd.volatile=overlay /etc/grub.d/41_snapshots-btrfs >/dev/null 2>&1 || true; fi\n");
         return s.ToString();
     }
 
@@ -205,6 +217,10 @@ public static class Archinstall
     public static string UserConfig(Answers a)
     {
         var c = new Config.Settings { Theme = a.Theme, Language = a.Language };
+        // Snapshots before and after every package change, from the start;
+        // in the boot menu when /boot is on btrfs (each has its kernel).
+        c.Enabled.Add("hw-snapshots");
+        if (!a.Encrypt) c.Enabled.Add("hw-snapshots-grub");
         // The login screen, unless the disk's password is the login.
         if (!a.Encrypt) c.Enabled.Add("login");
         c.Plugins["hypr-base"] = new(StringComparer.Ordinal) { ["kb_layout"] = a.KbLayout, ["kb_variant"] = a.KbVariant };

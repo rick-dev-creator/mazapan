@@ -1,0 +1,8 @@
+"plugin.name" = "Agent"
+"plugin.description" = "Interrogez un agent de programmation sur ce bureau depuis la palette : il reçoit le rapport de myarch (état, vérifications en échec, plantages, erreurs journalisées) et les moyens de myarch pour changer les choses sans risque"
+"setting.command" = "Commande"
+"setting.command.help" = "L'agent à ouvrir, sous forme de commande : il reçoit le rapport comme premier message. \"claude\" est Claude Code ; tout agent qui accepte une consigne en argument fonctionne (\"codex\", \"opencode run\"…). Pour qu'il utilise myarch directement (état, aperçus, appliquer, annuler), enregistrez-y le serveur MCP, par ex. claude mcp add --scope user myarch -- myarch mcp"
+ask = "Interroger un agent sur ce bureau"
+"ask.kw" = "ia aide plantage cassé réparer claude assistant"
+report = "Copier un rapport de ce qui ne va pas"
+"report.kw" = "diagnostic journaux erreurs plantage aide"

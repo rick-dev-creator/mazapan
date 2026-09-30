@@ -1,0 +1,2 @@
+"plugin.name" = "Touchpads Synaptics via SMBus"
+"plugin.description" = "Touchpads Synaptics via InterTouch (SMBus) em vez de PS/2: rolagem suave e gestos em ThinkPads e outros notebooks"

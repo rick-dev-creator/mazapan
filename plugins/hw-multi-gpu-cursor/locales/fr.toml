@@ -1,0 +1,2 @@
+"plugin.name" = "Curseur avec plusieurs GPU"
+"plugin.description" = "Dessine le curseur de manière logicielle quand la machine a plusieurs GPU (l'un fait le rendu, un autre gère des écrans : une station d'accueil sur l'iGPU, l'écran d'un portable) : le curseur matériel scintille sur les écrans de l'autre GPU"

@@ -137,6 +137,9 @@ public class SetupTests
         Assert.Equal(a.Password, creds.RootElement.GetProperty("users")[0].GetProperty("!password").GetString());
         Assert.Contains("--autologin rick", Decoded(Archinstall.Post(a)));
         Assert.DoesNotContain("login", Archinstall.UserConfig(a));
+        // Snapshots still (not in the boot menu: /boot isn't on btrfs).
+        Assert.Contains("enabled_plugins = [\"hw-snapshots\"]", Archinstall.UserConfig(a));
+        Assert.DoesNotContain("grub-btrfs", doc.RootElement.GetProperty("packages").GetRawText());
         Assert.DoesNotContain("greetd", doc.RootElement.GetProperty("packages").GetRawText());
     }
 
@@ -175,7 +178,9 @@ public class SetupTests
         Assert.Contains("vscode\nsteam\n", files);
         Assert.Contains("start-hyprland", files);
         Assert.DoesNotContain("--autologin", files);
-        Assert.Contains("enabled_plugins = [\"login\"]", files);
+        Assert.Contains("enabled_plugins = [\"hw-snapshots\", \"hw-snapshots-grub\", \"login\"]", files);
+        Assert.Contains("snapper --no-dbus -c root create", post);
+        Assert.True(post.IndexOf("myarch apply") < post.IndexOf("snapper --no-dbus -c root create"));
         Assert.Contains("Option \"XkbLayout\" \"latam\"", files);
         Assert.Contains("myarch apply --system -y", post);
         Assert.Contains("--removable", post);

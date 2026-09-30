@@ -7,7 +7,8 @@ off, it only copies); the arrows move, Tab goes to the next category, Esc
 leaves.
 
 The emoji are Unicode's (emoji-test.txt, 18.0), without the skin-tone
-variants; their names and keywords are CLDR's, in English and Spanish.
+variants; their names and keywords are CLDR's, in English, Spanish,
+Portuguese, French and German.
 Both are © Unicode, Inc., under the Unicode License v3
 (https://www.unicode.org/license.txt). They're drawn with Noto Color Emoji.
 

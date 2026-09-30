@@ -1,0 +1,5 @@
+"plugin.name" = "System-Snapshots"
+"plugin.description" = "Ein btrfs-Snapshot des Systems vor und nach jeder Paketänderung (ein Update, eine Installation), die letzten werden behalten; aufgeführt im Verlauf des Desktops"
+"setting.keep" = "Anzahl behalten"
+"setting.keep.help" = "Von wie vielen Paketänderungen Snapshots behalten werden (jede ist ein Paar, davor und danach)."
+"check.config" = "Snapper ist für / eingerichtet"

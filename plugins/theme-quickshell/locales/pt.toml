@@ -1,0 +1,2 @@
+"plugin.name" = "Tema do Quickshell"
+"plugin.description" = "Os tokens do tema como um singleton QML (Theme.qml) para cada widget do shell"

@@ -1,0 +1,7 @@
+"plugin.name" = "Horloge"
+"plugin.description" = "Jour, date et heure au milieu de la barre, dans la langue du système ; cliquez pour un calendrier"
+"setting.font_size" = "Taille du texte"
+"setting.font_size.help" = "Taille du texte, en points."
+"setting.format" = "Format"
+"setting.format.help" = "Vide : le jour et la date (\"sáb 28 sept\") plus l'heure telle que la langue l'écrit (24 h en espagnol, 12 h en anglais américain). Ou votre propre format de date Qt, par ex. \"dddd d · HH:mm\" (https://doc.qt.io/qt-6/qml-qtqml-qt.html#formatDateTime-method)."
+"today" = "aujourd'hui"

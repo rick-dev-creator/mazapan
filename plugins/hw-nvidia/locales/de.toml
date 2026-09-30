@@ -1,0 +1,4 @@
+"plugin.name" = "NVIDIA (Turing und neuer)"
+"plugin.description" = "Der offene NVIDIA-Treiber für GeForce RTX 20 und neuer: Pakete, früh geladenes Kernel-Modesetting und die Hyprland-Variablen dafür"
+
+"check.headers" = "Kernel-Header für das NVIDIA-Modul sind installiert (linux-headers für deinen Kernel)"

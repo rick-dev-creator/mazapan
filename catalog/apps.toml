@@ -31,7 +31,13 @@ glyph = 0xF02DC
 basic = true
 apps = ["chromium", "nautilus", "loupe", "papers", "celluloid", "text-editor", "file-roller", "calculator", "btop"]
 translations.es.name = "Básico"
+translations.de.name = "Basis"
+translations.fr.name = "Essentiel"
+translations.pt.name = "Básico"
 translations.es.description = "Lo que todo equipo necesita: navegador, archivos, fotos, documentos, música y video"
+translations.de.description = "Was jeder Computer braucht: ein Browser, Dateien, Bilder, Dokumente, Musik und Video"
+translations.fr.description = "Ce dont tout ordinateur a besoin : un navigateur, des fichiers, des images, des documents, de la musique et de la vidéo"
+translations.pt.description = "O que todo computador precisa: navegador, arquivos, fotos, documentos, música e vídeo"
 
 [[profile]]
 id = "development"
@@ -40,7 +46,13 @@ description = "Code editors, git, containers, languages and the command-line too
 glyph = 0xF0169
 apps = ["vscode", "neovim", "git", "github-cli", "lazygit", "docker", "mise", "cli-tools", "zed"]
 translations.es.name = "Desarrollo"
+translations.de.name = "Entwicklung"
+translations.fr.name = "Développement"
+translations.pt.name = "Desenvolvimento"
 translations.es.description = "Editores de código, git, contenedores, lenguajes y las herramientas de terminal de todo desarrollador"
+translations.de.description = "Code-Editoren, git, Container, Sprachen und die Kommandozeilen-Tools, zu denen Entwickler greifen"
+translations.fr.description = "Éditeurs de code, git, conteneurs, langages et les outils en ligne de commande qu'utilisent les développeurs"
+translations.pt.description = "Editores de código, git, contêineres, linguagens e as ferramentas de terminal que todo desenvolvedor usa"
 
 [[profile]]
 id = "gaming"
@@ -49,7 +61,13 @@ description = "Steam, other stores and launchers, and what makes games run bette
 glyph = 0xF0297
 apps = ["steam", "heroic", "lutris", "gamemode", "mangohud", "discord"]
 translations.es.name = "Juegos"
+translations.de.name = "Gaming"
+translations.fr.name = "Jeux"
+translations.pt.name = "Jogos"
 translations.es.description = "Steam, otras tiendas y lanzadores, y lo que hace que los juegos vayan mejor"
+translations.de.description = "Steam, weitere Stores und Launcher und alles, was Spiele besser laufen lässt"
+translations.fr.description = "Steam, d'autres boutiques et lanceurs, et ce qui fait mieux tourner les jeux"
+translations.pt.description = "Steam, outras lojas e launchers, e o que faz os jogos rodarem melhor"
 
 [[profile]]
 id = "creative"
@@ -58,7 +76,13 @@ description = "Photos, illustration, 3D and video editing"
 glyph = 0xF03D8
 apps = ["gimp", "inkscape", "krita", "darktable", "blender", "kdenlive"]
 translations.es.name = "Creatividad"
+translations.de.name = "Kreatives"
+translations.fr.name = "Création"
+translations.pt.name = "Criatividade"
 translations.es.description = "Fotos, ilustración, 3D y edición de video"
+translations.de.description = "Fotos, Illustration, 3D und Videoschnitt"
+translations.fr.description = "Photos, illustration, 3D et montage vidéo"
+translations.pt.description = "Fotos, ilustração, 3D e edição de vídeo"
 
 [[profile]]
 id = "office"
@@ -67,7 +91,13 @@ description = "Documents, spreadsheets, mail and notes"
 glyph = 0xF0219
 apps = ["libreoffice", "thunderbird", "obsidian"]
 translations.es.name = "Oficina"
+translations.de.name = "Büro"
+translations.fr.name = "Bureautique"
+translations.pt.name = "Escritório"
 translations.es.description = "Documentos, hojas de cálculo, correo y notas"
+translations.de.description = "Dokumente, Tabellen, E-Mail und Notizen"
+translations.fr.description = "Documents, tableurs, courrier et notes"
+translations.pt.description = "Documentos, planilhas, e-mail e notas"
 
 [[profile]]
 id = "streaming"
@@ -76,7 +106,13 @@ description = "Record and stream your screen and camera, edit sound, listen to m
 glyph = 0xF0567
 apps = ["obs", "audacity", "spotify"]
 translations.es.name = "Streaming"
+translations.de.name = "Streaming"
+translations.fr.name = "Streaming"
+translations.pt.name = "Streaming"
 translations.es.description = "Graba y transmite tu pantalla y cámara, edita audio, escucha música"
+translations.de.description = "Bildschirm und Kamera aufnehmen und streamen, Ton bearbeiten, Musik hören"
+translations.fr.description = "Enregistrez et diffusez votre écran et votre caméra, retouchez le son, écoutez de la musique"
+translations.pt.description = "Grave e transmita sua tela e câmera, edite áudio, ouça música"
 
 [[profile]]
 id = "trading"
@@ -85,7 +121,13 @@ description = "Markets in the bar and a panel, and the trading sites as apps"
 glyph = 0xF0128
 apps = ["markets", "tradingview", "binance"]
 translations.es.name = "Trading"
+translations.de.name = "Trading"
+translations.fr.name = "Trading"
+translations.pt.name = "Trading"
 translations.es.description = "Los mercados en la barra y un panel, y los sitios de trading como apps"
+translations.de.description = "Märkte in der Leiste und in einem Panel, und die Trading-Websites als Apps"
+translations.fr.description = "Les marchés dans la barre et un panneau, et les sites de trading comme applications"
+translations.pt.description = "Os mercados na barra e em um painel, e os sites de trading como apps"
 
 # --- internet ----------------------------------------------------------------
 
@@ -98,6 +140,9 @@ pacman = ["chromium"]
 desktop = "chromium.desktop"
 plugins = ["theme-chromium"]
 translations.es.description = "El navegador web; las apps web se abren en él"
+translations.de.description = "Der Webbrowser; Web-Apps öffnen sich darin"
+translations.fr.description = "Le navigateur web ; les applications web s'ouvrent dedans"
+translations.pt.description = "O navegador web; os apps web abrem nele"
 
 [[app]]
 id = "firefox"
@@ -108,6 +153,9 @@ pacman = ["firefox"]
 desktop = "firefox.desktop"
 plugins = ["theme-firefox"]
 translations.es.description = "El navegador web de Mozilla"
+translations.de.description = "Der Webbrowser von Mozilla"
+translations.fr.description = "Le navigateur web de Mozilla"
+translations.pt.description = "O navegador web da Mozilla"
 
 [[app]]
 id = "localsend"
@@ -117,6 +165,9 @@ category = "internet"
 flatpak = "org.localsend.localsend_app"
 desktop = "org.localsend.localsend_app.desktop"
 translations.es.description = "Envía archivos a teléfonos y equipos cercanos, sin cable ni cuenta"
+translations.de.description = "Dateien an Handys und Computer in der Nähe senden, ohne Kabel oder Konto"
+translations.fr.description = "Envoyez des fichiers aux téléphones et ordinateurs à proximité, sans câble ni compte"
+translations.pt.description = "Envie arquivos para celulares e computadores por perto, sem cabo nem conta"
 
 # --- communication ---------------------------------------------------------------
 
@@ -128,6 +179,9 @@ category = "communication"
 pacman = ["discord"]
 desktop = "discord.desktop"
 translations.es.description = "Chat de voz, video y texto"
+translations.de.description = "Sprach-, Video- und Textchat"
+translations.fr.description = "Discussion vocale, vidéo et texte"
+translations.pt.description = "Chat de voz, vídeo e texto"
 
 [[app]]
 id = "signal"
@@ -137,6 +191,9 @@ category = "communication"
 pacman = ["signal-desktop"]
 desktop = "signal-desktop.desktop"
 translations.es.description = "Mensajería privada"
+translations.de.description = "Private Nachrichten"
+translations.fr.description = "Messagerie privée"
+translations.pt.description = "Mensagens privadas"
 
 [[app]]
 id = "telegram"
@@ -146,6 +203,9 @@ category = "communication"
 pacman = ["telegram-desktop"]
 desktop = "org.telegram.desktop.desktop"
 translations.es.description = "Mensajería"
+translations.de.description = "Nachrichten"
+translations.fr.description = "Messagerie"
+translations.pt.description = "Mensagens"
 
 [[app]]
 id = "thunderbird"
@@ -155,6 +215,9 @@ category = "communication"
 pacman = ["thunderbird"]
 desktop = "org.mozilla.Thunderbird.desktop"
 translations.es.description = "Correo y calendario"
+translations.de.description = "E-Mail und Kalender"
+translations.fr.description = "Courrier et agenda"
+translations.pt.description = "E-mail e calendário"
 
 [[app]]
 id = "whatsapp"
@@ -163,6 +226,9 @@ description = "WhatsApp as an app of its own"
 category = "communication"
 webapp = "https://web.whatsapp.com/"
 translations.es.description = "WhatsApp como una app propia"
+translations.de.description = "WhatsApp als eigene App"
+translations.fr.description = "WhatsApp comme une application à part entière"
+translations.pt.description = "WhatsApp como um app próprio"
 
 # --- office ---------------------------------------------------------------------
 
@@ -174,6 +240,9 @@ category = "office"
 pacman = ["libreoffice-fresh"]
 desktop = "libreoffice-startcenter.desktop"
 translations.es.description = "Documentos, hojas de cálculo y presentaciones, también los de Microsoft Office"
+translations.de.description = "Dokumente, Tabellen und Präsentationen, auch Microsoft-Office-Dateien"
+translations.fr.description = "Documents, tableurs et présentations, fichiers Microsoft Office compris"
+translations.pt.description = "Documentos, planilhas e apresentações, inclusive arquivos do Microsoft Office"
 
 [[app]]
 id = "obsidian"
@@ -183,6 +252,9 @@ category = "office"
 pacman = ["obsidian"]
 desktop = "obsidian.desktop"
 translations.es.description = "Notas en archivos Markdown, enlazadas"
+translations.de.description = "Notizen in einfachen Markdown-Dateien, verknüpft"
+translations.fr.description = "Des notes en simples fichiers Markdown, reliées entre elles"
+translations.pt.description = "Notas em arquivos Markdown simples, com links entre elas"
 
 [[app]]
 id = "papers"
@@ -192,6 +264,9 @@ category = "office"
 pacman = ["papers"]
 desktop = "org.gnome.Papers.desktop"
 translations.es.description = "Visor de PDF y documentos"
+translations.de.description = "Betrachter für PDFs und Dokumente"
+translations.fr.description = "Visionneuse de PDF et de documents"
+translations.pt.description = "Visualizador de PDF e documentos"
 
 [[app]]
 id = "text-editor"
@@ -201,7 +276,13 @@ category = "office"
 pacman = ["gnome-text-editor"]
 desktop = "org.gnome.TextEditor.desktop"
 translations.es.name = "Editor de texto"
+translations.de.name = "Texteditor"
+translations.fr.name = "Éditeur de texte"
+translations.pt.name = "Editor de texto"
 translations.es.description = "Un editor de texto sencillo"
+translations.de.description = "Ein einfacher Texteditor"
+translations.fr.description = "Un éditeur de texte simple"
+translations.pt.description = "Um editor de texto simples"
 
 [[app]]
 id = "calculator"
@@ -211,7 +292,13 @@ category = "office"
 pacman = ["gnome-calculator"]
 desktop = "org.gnome.Calculator.desktop"
 translations.es.name = "Calculadora"
+translations.de.name = "Rechner"
+translations.fr.name = "Calculatrice"
+translations.pt.name = "Calculadora"
 translations.es.description = "Una calculadora"
+translations.de.description = "Ein Taschenrechner"
+translations.fr.description = "Une calculatrice"
+translations.pt.description = "Uma calculadora"
 
 # --- development ------------------------------------------------------------------
 
@@ -224,6 +311,9 @@ pacman = ["code"]
 desktop = "code-oss.desktop"
 plugins = ["theme-vscode"]
 translations.es.description = "Visual Studio Code, versión de código abierto"
+translations.de.description = "Visual Studio Code, Open-Source-Build"
+translations.fr.description = "Visual Studio Code, version open source"
+translations.pt.description = "Visual Studio Code, versão de código aberto"
 
 [[app]]
 id = "zed"
@@ -233,6 +323,9 @@ category = "development"
 pacman = ["zed"]
 desktop = "dev.zed.Zed.desktop"
 translations.es.description = "Un editor de código rápido, con colaboración e IA"
+translations.de.description = "Ein schneller Code-Editor, mit Zusammenarbeit und KI"
+translations.fr.description = "Un éditeur de code rapide, avec collaboration et IA"
+translations.pt.description = "Um editor de código rápido, com colaboração e IA"
 
 [[app]]
 id = "neovim"
@@ -243,6 +336,9 @@ pacman = ["neovim"]
 desktop = "nvim.desktop"
 plugins = ["theme-neovim"]
 translations.es.description = "El editor en la terminal"
+translations.de.description = "Der Editor im Terminal"
+translations.fr.description = "L'éditeur dans le terminal"
+translations.pt.description = "O editor no terminal"
 
 [[app]]
 id = "git"
@@ -251,6 +347,9 @@ description = "Version control"
 category = "development"
 pacman = ["git"]
 translations.es.description = "Control de versiones"
+translations.de.description = "Versionsverwaltung"
+translations.fr.description = "Gestion de versions"
+translations.pt.description = "Controle de versão"
 
 [[app]]
 id = "github-cli"
@@ -259,6 +358,9 @@ description = "GitHub from the terminal: pull requests, issues, releases"
 category = "development"
 pacman = ["github-cli"]
 translations.es.description = "GitHub desde la terminal: pull requests, issues, releases"
+translations.de.description = "GitHub aus dem Terminal: Pull Requests, Issues, Releases"
+translations.fr.description = "GitHub depuis le terminal : pull requests, issues, releases"
+translations.pt.description = "GitHub pelo terminal: pull requests, issues, releases"
 
 [[app]]
 id = "lazygit"
@@ -267,6 +369,9 @@ description = "Git, simpler, in the terminal"
 category = "development"
 pacman = ["lazygit"]
 translations.es.description = "Git más sencillo, en la terminal"
+translations.de.description = "Git, einfacher, im Terminal"
+translations.fr.description = "Git, en plus simple, dans le terminal"
+translations.pt.description = "Git mais simples, no terminal"
 
 [[app]]
 id = "docker"
@@ -275,6 +380,9 @@ description = "Containers, with Compose and Buildx"
 category = "development"
 pacman = ["docker", "docker-compose", "docker-buildx"]
 translations.es.description = "Contenedores, con Compose y Buildx"
+translations.de.description = "Container, mit Compose und Buildx"
+translations.fr.description = "Conteneurs, avec Compose et Buildx"
+translations.pt.description = "Contêineres, com Compose e Buildx"
 
 [[app]]
 id = "mise"
@@ -283,6 +391,9 @@ description = "Every language's versions (Node, Python, Ruby, Go…), per projec
 category = "development"
 pacman = ["mise"]
 translations.es.description = "Las versiones de cada lenguaje (Node, Python, Ruby, Go…), por proyecto"
+translations.de.description = "Die Versionen jeder Sprache (Node, Python, Ruby, Go…), pro Projekt"
+translations.fr.description = "Les versions de chaque langage (Node, Python, Ruby, Go…), par projet"
+translations.pt.description = "As versões de cada linguagem (Node, Python, Ruby, Go…), por projeto"
 
 [[app]]
 id = "cli-tools"
@@ -291,7 +402,13 @@ description = "ripgrep, fd, fzf, bat, eza, zoxide, jq: faster search, files and 
 category = "development"
 pacman = ["ripgrep", "fd", "fzf", "bat", "eza", "zoxide", "jq"]
 translations.es.name = "Herramientas de terminal"
+translations.de.name = "Terminal-Tools"
+translations.fr.name = "Outils en ligne de commande"
+translations.pt.name = "Ferramentas de terminal"
 translations.es.description = "ripgrep, fd, fzf, bat, eza, zoxide, jq: búsqueda, archivos y JSON más rápidos"
+translations.de.description = "ripgrep, fd, fzf, bat, eza, zoxide, jq: schnellere Suche, Dateien und JSON"
+translations.fr.description = "ripgrep, fd, fzf, bat, eza, zoxide, jq : recherche, fichiers et JSON plus rapides"
+translations.pt.description = "ripgrep, fd, fzf, bat, eza, zoxide, jq: busca, arquivos e JSON mais rápidos"
 
 # --- graphics ----------------------------------------------------------------------
 
@@ -303,7 +420,13 @@ category = "graphics"
 pacman = ["loupe"]
 desktop = "org.gnome.Loupe.desktop"
 translations.es.name = "Visor de imágenes"
+translations.de.name = "Bildbetrachter"
+translations.fr.name = "Visionneuse d'images"
+translations.pt.name = "Visualizador de imagens"
 translations.es.description = "Para ver fotos e imágenes"
+translations.de.description = "Bilder ansehen"
+translations.fr.description = "Regarder des images"
+translations.pt.description = "Para ver fotos e imagens"
 
 [[app]]
 id = "gimp"
@@ -313,6 +436,9 @@ category = "graphics"
 pacman = ["gimp"]
 desktop = "gimp.desktop"
 translations.es.description = "Edita fotos e imágenes"
+translations.de.description = "Fotos und Bilder bearbeiten"
+translations.fr.description = "Retouchez photos et images"
+translations.pt.description = "Edite fotos e imagens"
 
 [[app]]
 id = "inkscape"
@@ -322,6 +448,9 @@ category = "graphics"
 pacman = ["inkscape"]
 desktop = "org.inkscape.Inkscape.desktop"
 translations.es.description = "Dibujo vectorial: logos, iconos, diagramas"
+translations.de.description = "Vektorgrafik: Logos, Symbole, Diagramme"
+translations.fr.description = "Dessin vectoriel : logos, icônes, diagrammes"
+translations.pt.description = "Desenho vetorial: logos, ícones, diagramas"
 
 [[app]]
 id = "krita"
@@ -331,6 +460,9 @@ category = "graphics"
 pacman = ["krita"]
 desktop = "org.kde.krita.desktop"
 translations.es.description = "Pintura digital e ilustración"
+translations.de.description = "Digitales Malen und Illustration"
+translations.fr.description = "Peinture numérique et illustration"
+translations.pt.description = "Pintura digital e ilustração"
 
 [[app]]
 id = "darktable"
@@ -340,6 +472,9 @@ category = "graphics"
 pacman = ["darktable"]
 desktop = "org.darktable.darktable.desktop"
 translations.es.description = "Revela y organiza fotos RAW"
+translations.de.description = "RAW-Fotos entwickeln und organisieren"
+translations.fr.description = "Développez et organisez vos photos RAW"
+translations.pt.description = "Revele e organize fotos RAW"
 
 [[app]]
 id = "blender"
@@ -349,6 +484,9 @@ category = "graphics"
 pacman = ["blender"]
 desktop = "blender.desktop"
 translations.es.description = "Modelado 3D, animación y render"
+translations.de.description = "3D-Modellierung, Animation und Rendering"
+translations.fr.description = "Modélisation 3D, animation et rendu"
+translations.pt.description = "Modelagem 3D, animação e renderização"
 
 # --- video and audio -------------------------------------------------------------------
 
@@ -360,6 +498,9 @@ category = "video"
 pacman = ["celluloid"]
 desktop = "io.github.celluloid_player.Celluloid.desktop"
 translations.es.description = "Reproduce cualquier video o música"
+translations.de.description = "Spielt jedes Video und jede Musik ab"
+translations.fr.description = "Lit n'importe quelle vidéo ou musique"
+translations.pt.description = "Reproduz qualquer vídeo ou música"
 
 [[app]]
 id = "kdenlive"
@@ -369,6 +510,9 @@ category = "video"
 pacman = ["kdenlive"]
 desktop = "org.kde.kdenlive.desktop"
 translations.es.description = "Edición de video"
+translations.de.description = "Videoschnitt"
+translations.fr.description = "Montage vidéo"
+translations.pt.description = "Edição de vídeo"
 
 [[app]]
 id = "obs"
@@ -378,6 +522,9 @@ category = "video"
 pacman = ["obs-studio"]
 desktop = "com.obsproject.Studio.desktop"
 translations.es.description = "Graba y transmite la pantalla y las cámaras"
+translations.de.description = "Bildschirm und Kameras aufnehmen und streamen"
+translations.fr.description = "Enregistrez et diffusez l'écran et les caméras"
+translations.pt.description = "Grave e transmita a tela e as câmeras"
 
 [[app]]
 id = "audacity"
@@ -387,6 +534,9 @@ category = "audio"
 pacman = ["audacity"]
 desktop = "audacity.desktop"
 translations.es.description = "Graba y edita audio"
+translations.de.description = "Ton aufnehmen und bearbeiten"
+translations.fr.description = "Enregistrez et retouchez du son"
+translations.pt.description = "Grave e edite áudio"
 
 [[app]]
 id = "spotify"
@@ -396,6 +546,9 @@ category = "audio"
 pacman = ["spotify-launcher"]
 desktop = "spotify-launcher.desktop"
 translations.es.description = "Música en streaming"
+translations.de.description = "Musik-Streaming"
+translations.fr.description = "Musique en streaming"
+translations.pt.description = "Música por streaming"
 
 # --- games ---------------------------------------------------------------------------
 
@@ -407,6 +560,9 @@ category = "games"
 flatpak = "com.valvesoftware.Steam"
 desktop = "com.valvesoftware.Steam.desktop"
 translations.es.description = "La tienda de Valve y tu biblioteca de Steam, también juegos de Windows (Proton)"
+translations.de.description = "Der Store von Valve und deine Steam-Bibliothek, auch Windows-Spiele (Proton)"
+translations.fr.description = "La boutique de Valve et votre bibliothèque Steam, jeux Windows compris (Proton)"
+translations.pt.description = "A loja da Valve e sua biblioteca Steam, inclusive jogos de Windows (Proton)"
 
 [[app]]
 id = "heroic"
@@ -416,6 +572,9 @@ category = "games"
 flatpak = "com.heroicgameslauncher.hgl"
 desktop = "com.heroicgameslauncher.hgl.desktop"
 translations.es.description = "Juegos de Epic Games, GOG y Amazon"
+translations.de.description = "Spiele von Epic Games, GOG und Amazon"
+translations.fr.description = "Les jeux Epic Games, GOG et Amazon"
+translations.pt.description = "Jogos da Epic Games, GOG e Amazon"
 
 [[app]]
 id = "lutris"
@@ -425,6 +584,9 @@ category = "games"
 pacman = ["lutris"]
 desktop = "net.lutris.Lutris.desktop"
 translations.es.description = "Todos los demás juegos: emuladores, Battle.net, instaladores"
+translations.de.description = "Alle anderen Spiele: Emulatoren, Battle.net, Installer"
+translations.fr.description = "Tous les autres jeux : émulateurs, Battle.net, installateurs"
+translations.pt.description = "Todos os outros jogos: emuladores, Battle.net, instaladores"
 
 [[app]]
 id = "gamemode"
@@ -433,6 +595,9 @@ description = "The computer at full speed while a game runs"
 category = "games"
 pacman = ["gamemode"]
 translations.es.description = "El equipo a toda velocidad mientras juegas"
+translations.de.description = "Der Computer auf voller Leistung, während ein Spiel läuft"
+translations.fr.description = "L'ordinateur à pleine vitesse pendant que vous jouez"
+translations.pt.description = "O computador em velocidade máxima enquanto você joga"
 
 [[app]]
 id = "mangohud"
@@ -441,6 +606,9 @@ description = "Frame rate and temperatures over the game"
 category = "games"
 pacman = ["mangohud"]
 translations.es.description = "FPS y temperaturas sobre el juego"
+translations.de.description = "Bildrate und Temperaturen über dem Spiel"
+translations.fr.description = "Images par seconde et températures par-dessus le jeu"
+translations.pt.description = "FPS e temperaturas sobre o jogo"
 
 # --- utilities ------------------------------------------------------------------------
 
@@ -452,7 +620,13 @@ category = "utilities"
 pacman = ["nautilus"]
 desktop = "org.gnome.Nautilus.desktop"
 translations.es.name = "Archivos"
+translations.de.name = "Dateien"
+translations.fr.name = "Fichiers"
+translations.pt.name = "Arquivos"
 translations.es.description = "Explora y organiza tus archivos"
+translations.de.description = "Deine Dateien durchsuchen und verwalten"
+translations.fr.description = "Parcourez et gérez vos fichiers"
+translations.pt.description = "Navegue e organize seus arquivos"
 
 [[app]]
 id = "file-roller"
@@ -462,7 +636,13 @@ category = "utilities"
 pacman = ["file-roller"]
 desktop = "org.gnome.FileRoller.desktop"
 translations.es.name = "Gestor de archivos comprimidos"
+translations.de.name = "Archivverwaltung"
+translations.fr.name = "Gestionnaire d'archives"
+translations.pt.name = "Gerenciador de arquivos compactados"
 translations.es.description = "Abre y crea zip, tar y otros comprimidos"
+translations.de.description = "Zip, tar und andere Archive öffnen und erstellen"
+translations.fr.description = "Ouvrez et créez des archives zip, tar et autres"
+translations.pt.description = "Abra e crie zip, tar e outros arquivos compactados"
 
 [[app]]
 id = "btop"
@@ -473,6 +653,9 @@ pacman = ["btop"]
 desktop = "btop.desktop"
 plugins = ["theme-btop"]
 translations.es.description = "Qué usa el equipo: procesador, memoria, discos, red"
+translations.de.description = "Was den Computer auslastet: Prozessor, Speicher, Festplatten, Netzwerk"
+translations.fr.description = "Ce qui occupe l'ordinateur : processeur, mémoire, disques, réseau"
+translations.pt.description = "O que está usando o computador: processador, memória, discos, rede"
 
 # --- finance --------------------------------------------------------------------------
 
@@ -483,7 +666,13 @@ description = "Crypto and stocks in the bar and a panel, with charts"
 category = "finance"
 plugin = "markets"
 translations.es.name = "Mercados"
+translations.de.name = "Märkte"
+translations.fr.name = "Marchés"
+translations.pt.name = "Mercados"
 translations.es.description = "Cripto y acciones en la barra y en un panel, con gráficos"
+translations.de.description = "Krypto und Aktien in der Leiste und in einem Panel, mit Charts"
+translations.fr.description = "Cryptos et actions dans la barre et un panneau, avec graphiques"
+translations.pt.description = "Cripto e ações na barra e em um painel, com gráficos"
 
 [[app]]
 id = "tradingview"
@@ -492,6 +681,9 @@ description = "Charts and analysis, as an app of its own"
 category = "finance"
 webapp = "https://www.tradingview.com/chart/"
 translations.es.description = "Gráficos y análisis, como una app propia"
+translations.de.description = "Charts und Analysen, als eigene App"
+translations.fr.description = "Graphiques et analyses, comme une application à part entière"
+translations.pt.description = "Gráficos e análises, como um app próprio"
 
 [[app]]
 id = "binance"
@@ -500,3 +692,6 @@ description = "The exchange, as an app of its own"
 category = "finance"
 webapp = "https://www.binance.com/"
 translations.es.description = "El exchange, como una app propia"
+translations.de.description = "Die Börse, als eigene App"
+translations.fr.description = "La plateforme d'échange, comme une application à part entière"
+translations.pt.description = "A exchange, como um app próprio"

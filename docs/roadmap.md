@@ -775,8 +775,15 @@ password typed at boot, straight in) and not. Audited: the live system
 never locks or sleeps, installs are started by a click (never Enter), the
 stick it runs from is never offered, a failed install's leftovers are
 taken down, SSH keys (only when the live system was reached with them)
-are shown and keys-only. Next: snapshots on from the install,
-unattended installs with `cidata`.
+are shown and keys-only. Snapshots from the install on (2026-09-30):
+hw-snapshots and, with `/boot` on btrfs, hw-snapshots-grub turned on
+while installing, with a first snapshot of the system as installed,
+already in the boot menu; every package change adds its pair (the
+History panel lists them). myarch speaks Portuguese, French and German
+too (every plugin, the app catalog, the emoji names, the password
+dialog), and the installer offers the world's main languages, in
+English where myarch isn't translated yet. Next: unattended installs
+with `cidata`, and trying it on real hardware.
 
 ## 17. Apps: install and remove
 

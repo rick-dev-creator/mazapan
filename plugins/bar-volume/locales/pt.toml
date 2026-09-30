@@ -1,0 +1,16 @@
+"plugin.name" = "Volume"
+"plugin.description" = "Volume de saída na barra: a roda do mouse muda, clique do meio silencia, clique para saídas e entradas"
+"setting.max_volume" = "Volume máximo"
+"setting.max_volume.help" = "O volume mais alto que o controle deslizante e a roda alcançam: 1.0 = 100%; até 1.5 para reforçar fontes baixas (pode distorcer)."
+"setting.show_percent" = "Mostrar porcentagem"
+"setting.show_percent.help" = "Mostra o volume em porcentagem ao lado do ícone."
+"setting.step" = "Passo"
+"setting.step.help" = "Mudança por passo da roda, como fração (0.05 = 5%)."
+
+"output" = "saída"
+"input" = "entrada"
+"muted" = "sem som"
+"no_device" = "Nenhum dispositivo de áudio"
+"devices" = "dispositivos"
+
+"check" = "O áudio funciona (se houver placa de som)"

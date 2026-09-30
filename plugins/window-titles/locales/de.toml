@@ -1,0 +1,9 @@
+"plugin.name" = "Titelleisten"
+"plugin.description" = "Eine Taste blendet auf jedem Fenster eine Titelleiste ein oder aus"
+"setting.height" = "Höhe"
+"setting.height.help" = "Höhe der Titelleiste in logischen Pixeln."
+"setting.key" = "Tastenkürzel"
+"setting.key.help" = "Blendet die Titelleiste auf allen Fenstern ein oder aus."
+
+"toggle" = "Fenstertitel ein- oder ausblenden"
+"toggle.kw" = "titel titelleiste namen"

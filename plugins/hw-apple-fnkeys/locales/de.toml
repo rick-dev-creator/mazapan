@@ -1,0 +1,4 @@
+"plugin.name" = "Funktionstasten zuerst auf Apple-Tastaturen"
+"plugin.description" = "F1–F12 als Funktionstasten, Medientasten mit Fn, auf Tastaturen mit dem Treiber hid_apple: die von Apple und andere im Mac-Modus (Keychron…)"
+"setting.fnmode" = "Fn-Modus"
+"setting.fnmode.help" = "2: zuerst Funktionstasten; 1: zuerst Medientasten; 3: was der Kernel vermutet (sein Standard); 0: keine Fn-Taste."

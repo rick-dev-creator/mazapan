@@ -1,0 +1,16 @@
+"plugin.name" = "Lautstärke"
+"plugin.description" = "Ausgabelautstärke in der Leiste: Mausrad ändert sie, Mittelklick schaltet stumm, Klick für Aus- und Eingänge"
+"setting.max_volume" = "Maximale Lautstärke"
+"setting.max_volume.help" = "Die höchste Lautstärke, die Regler und Mausrad erreichen: 1.0 = 100 %; bis 1.5, um leise Quellen anzuheben (kann verzerren)."
+"setting.show_percent" = "Prozent anzeigen"
+"setting.show_percent.help" = "Zeigt die Lautstärke in Prozent neben dem Symbol."
+"setting.step" = "Schrittweite"
+"setting.step.help" = "Änderung pro Raste des Mausrads, als Bruchteil (0.05 = 5 %)."
+
+"output" = "Ausgang"
+"input" = "Eingang"
+"muted" = "stumm"
+"no_device" = "Kein Audiogerät"
+"devices" = "Geräte"
+
+"check" = "Audio funktioniert (falls es eine Soundkarte gibt)"
