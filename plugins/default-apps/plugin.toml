@@ -30,5 +30,5 @@ email = { default = "", kind = "text", label = "Email" }
 # Set on every apply, and after the Apps menu installs or removes one.
 [[targets]]
 template = "default-apps.sh.tmpl"
-output = "~/.local/share/myarch/bin/default-apps"
-reload = "sh ~/.local/share/myarch/bin/default-apps"
+output = "~/.local/share/mazapan/bin/default-apps"
+reload = "sh ~/.local/share/mazapan/bin/default-apps"

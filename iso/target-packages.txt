@@ -1,6 +1,6 @@
 # What an install puts on the disk, for the ISO's offline repository: what
-# archinstall installs by itself for the configuration myarch gives it
-# (core/src/MyArch/Setup/Archinstall.cs), and myarch's own. Their
+# archinstall installs by itself for the configuration mazapan gives it
+# (core/src/Mazapan/Setup/Archinstall.cs), and mazapan's own. Their
 # dependencies come along. Missing one here, the install stops asking for it.
 
 # archinstall's base, and for btrfs, LUKS, GRUB on UEFI, zram
@@ -44,7 +44,7 @@ ghostscript
 avahi
 
 # Setup.Archinstall.Packages: the desktop, and building from the AUR
-myarch
+mazapan
 base-devel
 git
 
@@ -72,7 +72,7 @@ snap-pac
 grub-btrfs
 inotify-tools
 
-# What hardware plugins install (myarch hardware --enable, while
+# What hardware plugins install (mazapan hardware --enable, while
 # installing): offline too, a GPU's drivers can't wait for a connection.
 intel-media-driver
 libva-intel-driver

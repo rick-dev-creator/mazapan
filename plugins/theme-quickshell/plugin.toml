@@ -11,8 +11,8 @@ pacman = ["quickshell"]
 
 [[targets]]
 template = "Theme.qml.tmpl"
-output = "~/.config/quickshell/myarch/Theme.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/Theme.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 # The shell itself.
 [coverage]

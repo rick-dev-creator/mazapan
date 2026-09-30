@@ -7,7 +7,7 @@
 "setting.show_commands" = "Afficher les commandes"
 "setting.show_commands.help" = "Affiche la commande derrière chaque résultat, pour que vous l'appreniez au fil de l'eau."
 "setting.terminal" = "Terminal"
-"setting.terminal.help" = "Les applications en terminal (btop…) s'ouvrent dans ce terminal ; les commandes qui posent des questions ou affichent du texte (myarch update), dans terminal_hold, qui reste ouvert ensuite. Commandes shell : mettez les guillemets comme dans un shell."
+"setting.terminal.help" = "Les applications en terminal (btop…) s'ouvrent dans ce terminal ; les commandes qui posent des questions ou affichent du texte (mazapan update), dans terminal_hold, qui reste ouvert ensuite. Commandes shell : mettez les guillemets comme dans un shell."
 "setting.terminal_hold" = "Terminal qui reste ouvert"
 "setting.terminal_hold.help" = "Le terminal pour les commandes qui posent des questions ou affichent du texte : il reste ouvert ensuite, pour lire."
 "placeholder" = "Applications, fenêtres, actions…   (> actions et raccourcis seulement)"

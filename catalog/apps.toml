@@ -1,4 +1,4 @@
-# myarch's app catalog: what the Apps menu (and the installer's profiles)
+# mazapan's app catalog: what the Apps menu (and the installer's profiles)
 # know how to install. Data, not code: to add one, add an entry and open a
 # pull request.
 #
@@ -10,9 +10,9 @@
 # pacman = ["gimp"]              # from Arch's official repositories, or…
 # flatpak = "org.gimp.GIMP"      # …from Flathub (what the repositories don't have), or…
 # webapp = "https://…"           # …a site as an app of its own (the webapps plugin), or…
-# plugin = "markets"             # …a myarch plugin (from a catalog)
+# plugin = "markets"             # …a mazapan plugin (from a catalog)
 # desktop = "gimp.desktop"       # its launcher (to open it, and its icon)
-# plugins = ["theme-gimp"]       # myarch plugins that go with it: turned on with it
+# plugins = ["theme-gimp"]       # mazapan plugins that go with it: turned on with it
 # translations.es.description = "Una línea sobre lo que es"
 #
 # Categories: internet, communication, office, development, graphics,

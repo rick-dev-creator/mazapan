@@ -22,8 +22,8 @@ Every app's notifications, in the theme.
 
 It's the desktop's notification server (`org.freedesktop.Notifications`):
 another one running or installed (mako, dunst…) would take its place;
-`myarch doctor` says so. Banners hold back while a screenshot or a
+`mazapan doctor` says so. Banners hold back while a screenshot or a
 recording is made. Apps are known by the name they give: a rule for one
 (Do Not Disturb) is for whatever uses its name. Notifications are kept in
-`~/.local/state/myarch-notifications/`. What they say is shown as text:
+`~/.local/state/mazapan-notifications/`. What they say is shown as text:
 no links opened, no images fetched from anywhere.

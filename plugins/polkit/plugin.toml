@@ -12,13 +12,13 @@ pacman = ["polkit", "quickshell"]
 
 [[targets]]
 template = "Agent.qml.tmpl"
-output = "~/.config/quickshell/myarch/panels/polkit.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/panels/polkit.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 # Polkit takes one agent per session: another one there first (a polkit
 # agent from GNOME, KDE, Hyprland's) keeps this one out, and it's the
 # other that asks, out of the theme.
 [[checks]]
 name = "{{ t \"check.agent\" }}"
-run = "test \"$(qs ipc -c myarch call polkit registered 2>/dev/null)\" = true"
+run = "test \"$(qs ipc -c mazapan call polkit registered 2>/dev/null)\" = true"
 session = true

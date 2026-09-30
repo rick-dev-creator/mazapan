@@ -1,5 +1,5 @@
 "plugin.name" = "Base do Hyprland"
-"plugin.description" = "Ponto de entrada do Hyprland: monitores, entrada, atalhos básicos; carrega cada fragmento de plugin em ~/.config/hypr/myarch/"
+"plugin.description" = "Ponto de entrada do Hyprland: monitores, entrada, atalhos básicos; carrega cada fragmento de plugin em ~/.config/hypr/mazapan/"
 
 "check.config" = "O Hyprland aceita a configuração"
 "act.terminal" = "Abrir um terminal"

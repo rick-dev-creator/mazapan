@@ -32,7 +32,7 @@
 "mirror" = "miroir de"
 "mirror_none" = "aucun"
 "unsupported" = "Non pris en charge, laissé éteint : %1."
-"unreadable" = "Impossible de lire ~/.config/myarch/monitors.json (%1) : corrigez-le ou déplacez-le avant d'enregistrer, pour ne perdre aucun profil."
+"unreadable" = "Impossible de lire ~/.config/mazapan/monitors.json (%1) : corrigez-le ou déplacez-le avant d'enregistrer, pour ne perdre aucun profil."
 "nothing_visible" = "Au moins un écran doit rester allumé et ne pas être un miroir."
 "open" = "Disposer les écrans"
 "open.kw" = "écrans moniteurs affichage résolution échelle disposer displays"

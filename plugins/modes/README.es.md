@@ -23,7 +23,7 @@ uno a mano, espera a la próxima vez; uno activado a mano sigue hasta que
 lo desactives. Mientras uno está activo, la barra lo muestra; un clic
 cambia de modo o lo desactiva.
 
-Los modos se guardan en `~/.local/state/myarch-modes/modes.json`. Un modo
+Los modos se guardan en `~/.local/state/mazapan-modes/modes.json`. Un modo
 hace lo que pueden hacer los plugins que tengas: el silencio necesita
 `notifications`, la luz nocturna `night-light`, mantener despierto
 `idle`, el perfil de energía power-profiles-daemon.

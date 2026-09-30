@@ -14,9 +14,9 @@ has its own kernel: with `/boot` a partition of its own (the EFI one,
 archinstall's default), a snapshot would start with today's kernel and
 its own, older modules. Needs mkinitcpio (not dracut); a drop-in of
 yours in `/etc/mkinitcpio.conf.d` that sets `HOOKS=(…)` after this one
-takes the overlay out (`myarch doctor` can't see inside the initramfs).
+takes the overlay out (`mazapan doctor` can't see inside the initramfs).
 
-Off until you turn it on: `myarch plugins enable hw-snapshots-grub &&
-myarch apply --system`. Turned off, grub-btrfsd stops and the entries
+Off until you turn it on: `mazapan plugins enable hw-snapshots-grub &&
+mazapan apply --system`. Turned off, grub-btrfsd stops and the entries
 already there stay bootable; remove grub-btrfs to take them out of the
 menu. Limine: not yet (limine-snapper-sync isn't in Arch's repositories).

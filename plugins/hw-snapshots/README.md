@@ -7,7 +7,7 @@ desktop's History with what changed; with `hw-snapshots-grub` they're in
 the boot menu too, to start the system as it was.
 
 Like any hardware plugin it's off until you turn it on:
-`myarch plugins enable hw-snapshots && myarch apply --system` (it lists
+`mazapan plugins enable hw-snapshots && mazapan apply --system` (it lists
 what it will do as root first).
 
 Best with `/home` on a subvolume of its own (archinstall's default): the
@@ -17,6 +17,6 @@ snapshots are of the system, not of your files (where `/home` is inside
 without any rights over the snapshots; each file in them keeps its own
 permissions.
 
-Turned off, myarch stops managing it, but snap-pac keeps taking them
-until it's removed (`sudo pacman -R snap-pac`, or `myarch undo` right
+Turned off, Mazapán stops managing it, but snap-pac keeps taking them
+until it's removed (`sudo pacman -R snap-pac`, or `mazapan undo` right
 after turning it on); the ones there stay (`sudo snapper -c root list`).

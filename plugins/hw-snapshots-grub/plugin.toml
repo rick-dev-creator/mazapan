@@ -22,7 +22,7 @@ pacman = ["grub-btrfs", "inotify-tools"]
 # Snapshots taken from then on start whole (they include it).
 [[targets]]
 template = "initramfs.conf.tmpl"
-output = "/etc/mkinitcpio.conf.d/myarch-snapshots-grub.conf"
+output = "/etc/mkinitcpio.conf.d/mazapan-snapshots-grub.conf"
 system = true
 reload = "mkinitcpio -P"
 
@@ -31,12 +31,12 @@ reload = "mkinitcpio -P"
 # the menu goes back to without them.
 [[targets]]
 template = "grub-btrfsd.conf.tmpl"
-output = "/etc/systemd/system/grub-btrfsd.service.d/myarch-snapshots.conf"
+output = "/etc/systemd/system/grub-btrfsd.service.d/mazapan-snapshots.conf"
 system = true
 # Turned off: the daemon stops, and the entries already there keep
 # starting on the overlay (the snapshots carry it); remove grub-btrfs to
 # take them out of the menu.
-reload = "systemctl daemon-reload; if [ -e /etc/systemd/system/grub-btrfsd.service.d/myarch-snapshots.conf ]; then systemctl enable grub-btrfsd && systemctl restart grub-btrfsd; else systemctl disable --now grub-btrfsd 2>/dev/null; fi; grub-mkconfig -o /boot/grub/grub.cfg; [ -x /etc/grub.d/41_snapshots-btrfs ] && GRUB_BTRFS_SNAPSHOT_KERNEL_PARAMETERS=systemd.volatile=overlay /etc/grub.d/41_snapshots-btrfs >/dev/null; true"
+reload = "systemctl daemon-reload; if [ -e /etc/systemd/system/grub-btrfsd.service.d/mazapan-snapshots.conf ]; then systemctl enable grub-btrfsd && systemctl restart grub-btrfsd; else systemctl disable --now grub-btrfsd 2>/dev/null; fi; grub-mkconfig -o /boot/grub/grub.cfg; [ -x /etc/grub.d/41_snapshots-btrfs ] && GRUB_BTRFS_SNAPSHOT_KERNEL_PARAMETERS=systemd.volatile=overlay /etc/grub.d/41_snapshots-btrfs >/dev/null; true"
 
 # The initramfs is made by mkinitcpio, reading /etc/mkinitcpio.conf.d
 # (a preset with its own _config= skips it; dracut isn't covered).

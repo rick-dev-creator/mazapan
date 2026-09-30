@@ -6,7 +6,7 @@ there), where you are, the disk (all of it: only which one, with what's on
 it now said), your account (name, user, password, the computer's name,
 from your name), and what you'll use the computer for: profiles, several
 at once, each app to see and change for whoever wants to. A review, and
-then `myarch install run` does it with archinstall, from the ISO's own
+then `mazapan install run` does it with archinstall, from the ISO's own
 repository: nothing is downloaded.
 
 Only on the ISO's live system (`[hardware] live = true`). On the first

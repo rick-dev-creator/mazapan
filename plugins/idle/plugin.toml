@@ -26,39 +26,39 @@ lock_on_sleep = true
 
 [[targets]]
 template = "idle.sh.tmpl"
-output = "~/.local/share/myarch/bin/idle"
+output = "~/.local/share/mazapan/bin/idle"
 
 [[targets]]
 template = "hypridle.conf.tmpl"
 output = "~/.config/hypr/hypridle.conf"
-reload = "sh ~/.local/share/myarch/bin/idle restart"
+reload = "sh ~/.local/share/mazapan/bin/idle restart"
 
 [[targets]]
 template = "idle.lua.tmpl"
-output = "~/.config/hypr/myarch/idle.lua"
+output = "~/.config/hypr/mazapan/idle.lua"
 reload = "hyprctl reload >/dev/null"
 
 [[targets]]
 template = "qmldir.tmpl"
-output = "~/.config/quickshell/myarch/components/idle/qmldir"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/idle/qmldir"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "IdleService.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/idle/IdleService.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/idle/IdleService.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "Dim.qml.tmpl"
-output = "~/.config/quickshell/myarch/panels/idle.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/panels/idle.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "Awake.qml.tmpl"
-output = "~/.config/quickshell/myarch/widgets/right/85-awake.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/widgets/right/85-awake.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[actions]]
 name = "{{ t \"act.awake\" }}"
-run = "sh ~/.local/share/myarch/bin/idle awake toggle"
+run = "sh ~/.local/share/mazapan/bin/idle awake toggle"
 keywords = "{{ t \"act.awake.kw\" }}"

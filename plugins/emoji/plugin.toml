@@ -20,20 +20,20 @@ type = { default = true, label = "Type it" }
 
 [[targets]]
 template = "emoji.tsv.tmpl"
-output = "~/.local/share/myarch-emoji/emoji.tsv"
+output = "~/.local/share/mazapan-emoji/emoji.tsv"
 
 [[targets]]
 template = "Picker.qml.tmpl"
-output = "~/.config/quickshell/myarch/panels/emoji.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/panels/emoji.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "emoji.lua.tmpl"
-output = "~/.config/hypr/myarch/emoji.lua"
+output = "~/.config/hypr/mazapan/emoji.lua"
 reload = "hyprctl reload >/dev/null"
 
 [[actions]]
 name = "{{ t \"act.open\" }}"
-run = "qs ipc -c myarch call myarch panel emoji"
+run = "qs ipc -c mazapan call mazapan panel emoji"
 key = "{{ settings.key }}"
 keywords = "{{ t \"act.open.kw\" }}"

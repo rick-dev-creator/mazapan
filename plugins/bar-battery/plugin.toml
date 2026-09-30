@@ -20,10 +20,10 @@ critical = { default = 5, min = 1, max = 20 }
 
 [[targets]]
 template = "Battery.qml.tmpl"
-output = "~/.config/quickshell/myarch/widgets/right/35-battery.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/widgets/right/35-battery.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "Watch.qml.tmpl"
-output = "~/.config/quickshell/myarch/panels/battery.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/panels/battery.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"

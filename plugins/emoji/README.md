@@ -12,5 +12,5 @@ Portuguese, French and German.
 Both are © Unicode, Inc., under the Unicode License v3
 (https://www.unicode.org/license.txt). They're drawn with Noto Color Emoji.
 
-What you used is in `~/.local/state/myarch-emoji/recent.json` (`recent`
+What you used is in `~/.local/state/mazapan-emoji/recent.json` (`recent`
 of them, 32).

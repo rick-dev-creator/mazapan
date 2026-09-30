@@ -48,36 +48,36 @@ min_width = { default = 400, min = 200, max = 1600 }
 
 [[targets]]
 template = "columns.lua.tmpl"
-output = "~/.config/hypr/myarch/columns.lua"
+output = "~/.config/hypr/mazapan/columns.lua"
 reload = "hyprctl reload >/dev/null"
 
 [[actions]]
 name = "{{ t \"equal\" }}"
-run = "hyprctl eval 'myarch_columns.equal()'"
+run = "hyprctl eval 'mazapan_columns.equal()'"
 key = "{{ settings.key }}"
 keywords = "{{ t \"equal.kw\" }}"
 
 [[actions]]
 name = "{{ t \"phone\" }}"
-run = "hyprctl eval 'myarch_columns.phone()'"
+run = "hyprctl eval 'mazapan_columns.phone()'"
 key = "{{ settings.phone_key }}"
 keywords = "{{ t \"phone.kw\" }}"
 
 [[actions]]
 name = "{{ t \"focus\" }}"
-run = "hyprctl eval 'myarch_columns.focus()'"
+run = "hyprctl eval 'mazapan_columns.focus()'"
 key = "{{ settings.focus_key }}"
 keywords = "{{ t \"focus.kw\" }}"
 
 [[actions]]
 name = "{{ t \"grow\" }}"
-run = "hyprctl eval 'myarch_columns.grow()'"
+run = "hyprctl eval 'mazapan_columns.grow()'"
 key = "{{ settings.grow_key }}"
 keywords = "{{ t \"grow.kw\" }}"
 
 [[actions]]
 name = "{{ t \"shrink\" }}"
-run = "hyprctl eval 'myarch_columns.shrink()'"
+run = "hyprctl eval 'mazapan_columns.shrink()'"
 key = "{{ settings.shrink_key }}"
 keywords = "{{ t \"shrink.kw\" }}"
 

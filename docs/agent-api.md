@@ -1,19 +1,19 @@
-# myarch for agents
+# Mazapán for agents
 
 An agent (Claude Code, Codex, any MCP client) can read this desktop's state
-and change it the way a person would: through myarch, previewed with the
-exact diff, and undoable. Never by editing generated files: myarch would take
+and change it the way a person would: through Mazapán, previewed with the
+exact diff, and undoable. Never by editing generated files: Mazapán would take
 the edit for a conflict and stop managing the file.
 
 ## The MCP server
 
 ```sh
-claude mcp add --scope user myarch -- myarch mcp     # Claude Code; others alike
+claude mcp add --scope user mazapan -- mazapan mcp     # Claude Code; others alike
 ```
 
-`myarch mcp` speaks the Model Context Protocol on stdin/stdout (JSON-RPC, one
+`mazapan mcp` speaks the Model Context Protocol on stdin/stdout (JSON-RPC, one
 message per line; protocol 2025-06-18, 2025-03-26 and 2024-11-05). Each tool
-runs the `myarch` command it's named after, so an agent can do exactly what
+runs the `mazapan` command it's named after, so an agent can do exactly what
 the CLI does, and nothing else:
 
 | Tool             | Does                                                        | Changes anything |
@@ -37,10 +37,10 @@ plugins too; a theme is one of the themes, never a path.
 What an agent can't do, on purpose:
 - set a text setting: text can be a command (`palette.terminal`), a key
   binding, anything a template puts in code. It gets the exact command for
-  the person instead (`myarch apply --set palette.key="SUPER + space"`).
+  the person instead (`mazapan apply --set palette.key="SUPER + space"`).
   Numbers and switches are its to change.
 - install, update or remove plugins from git (their capabilities are the
-  person's to approve), or update the system (`myarch update` asks, runs
+  person's to approve), or update the system (`mazapan update` asks, runs
   sudo, and can roll back).
 - anything as root: turn hardware plugins on or off or change them, apply
   with `--system`, or undo what was done as root (`status --json` marks
@@ -54,22 +54,22 @@ theirs.
 ## The CLI underneath
 
 ```sh
-myarch status [--json] [--checks]
-myarch doctor [--json]
-myarch apply --dry-run --diff [--theme ID] [--accent #RRGGBB] [--set PLUGIN.KEY=VALUE]…
+mazapan status [--json] [--checks]
+mazapan doctor [--json]
+mazapan apply --dry-run --diff [--theme ID] [--accent #RRGGBB] [--set PLUGIN.KEY=VALUE]…
              [--reset PLUGIN.KEY]… [--enable ID]… [--disable ID]…
-myarch apply …                   # the same, written; config.toml saved with it
-myarch undo [--list] [-y]
-myarch report                    # what's wrong, as Markdown
+mazapan apply …                   # the same, written; config.toml saved with it
+mazapan undo [--list] [-y]
+mazapan report                    # what's wrong, as Markdown
 ```
 
 `--set` takes a TOML value (`true`, `480`, `0.5`, `"text"`, `["a", "b"]`);
 anything that isn't one is taken as text.
 
-Every apply is undoable: before writing, myarch keeps what it will touch
+Every apply is undoable: before writing, Mazapán keeps what it will touch
 (each file as it was, or that it wasn't there, owned.json, config.toml) in
-`~/.local/state/myarch/applies/` (private: 0600 copies in 0700 folders);
-`myarch undo` puts the latest back. A file changed since (edited by hand, or
+`~/.local/state/mazapan/applies/` (private: 0600 copies in 0700 folders);
+`mazapan undo` puts the latest back. A file changed since (edited by hand, or
 written by a later apply) is left as it is: undo never loses what came after.
 An apply that changed nothing leaves nothing to undo; one killed half way
 can still be undone. The last 20 are kept. One apply or undo runs at a time
@@ -103,7 +103,7 @@ values; numbers and switches are checked against their default's type.
 
 - `origin`: `built-in`, `local` (a folder you put in the plugin folder) or
   `git` (then `source` and `commit` too).
-- `files.changes[].state`: `new`, `changed` (myarch would rewrite it),
+- `files.changes[].state`: `new`, `changed` (Mazapán would rewrite it),
   `conflict` (someone edited it: apply stops unless `--adopt`), `busy` (its
   app is running), `unreadable` (not plain JSON: left alone).
 - `checks` only with `--checks` (they run commands). `theme` and `files` are
@@ -120,7 +120,7 @@ reader bumps it.
 
 The `agent` plugin adds to the palette "Ask an agent about this desktop": it
 opens the agent (setting `command`, `claude` by default) in a terminal with
-`myarch report` as its first message: the state, failing checks with their
+`mazapan report` as its first message: the state, failing checks with their
 output, generated files that differ, the last update, crashes in the last
 day (coredumpctl), and the errors Hyprland and the shell logged, repeated
 lines counted once. "Copy a report of what's wrong" puts it on the

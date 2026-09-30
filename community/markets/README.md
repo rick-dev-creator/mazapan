@@ -31,6 +31,6 @@ same symbol in several timeframes.
 
 Prices are in USD (a stock in another currency shows it). The pinned
 symbols are fetched every `refresh_seconds`; the rest only while the panel
-is open. Your lists are in `~/.local/state/myarch-markets/watchlist.json`.
+is open. Your lists are in `~/.local/state/mazapan-markets/watchlist.json`.
 
 Not investment advice; data can be delayed.

@@ -33,7 +33,7 @@
 "mirror" = "Spiegel von"
 "mirror_none" = "keiner"
 "unsupported" = "Nicht unterstützt, bleibt aus: %1."
-"unreadable" = "~/.config/myarch/monitors.json kann nicht gelesen werden (%1): Korrigiere die Datei oder verschiebe sie vor dem Speichern, damit kein Profil verloren geht."
+"unreadable" = "~/.config/mazapan/monitors.json kann nicht gelesen werden (%1): Korrigiere die Datei oder verschiebe sie vor dem Speichern, damit kein Profil verloren geht."
 "nothing_visible" = "Mindestens ein Bildschirm muss an bleiben und darf kein Spiegel sein."
 "open" = "Monitore anordnen"
 "open.kw" = "bildschirme displays monitore auflösung skalierung anordnen"

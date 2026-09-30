@@ -33,10 +33,10 @@ output = "~/.config/hypr/hyprsunset.conf"
 
 [[targets]]
 template = "NightLight.qml.tmpl"
-output = "~/.config/quickshell/myarch/panels/night-light.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/panels/night-light.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[actions]]
 name = "{{ t \"act.toggle\" }}"
-run = "qs ipc -c myarch call nightlight toggle"
+run = "qs ipc -c mazapan call nightlight toggle"
 keywords = "{{ t \"act.toggle.kw\" }}"

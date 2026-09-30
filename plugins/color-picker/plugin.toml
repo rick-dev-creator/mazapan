@@ -18,15 +18,15 @@ format = { default = "hex", choices = ["hex", "rgb", "hsl"] }
 
 [[targets]]
 template = "color-pick.sh.tmpl"
-output = "~/.local/share/myarch/bin/color-pick"
+output = "~/.local/share/mazapan/bin/color-pick"
 
 [[targets]]
 template = "color.lua.tmpl"
-output = "~/.config/hypr/myarch/color-picker.lua"
+output = "~/.config/hypr/mazapan/color-picker.lua"
 reload = "hyprctl reload >/dev/null"
 
 [[actions]]
 name = "{{ t \"act.pick\" }}"
-run = "sh ~/.local/share/myarch/bin/color-pick"
+run = "sh ~/.local/share/mazapan/bin/color-pick"
 key = "{{ settings.key }}"
 keywords = "{{ t \"act.pick.kw\" }}"

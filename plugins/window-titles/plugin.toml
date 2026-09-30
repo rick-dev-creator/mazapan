@@ -18,11 +18,11 @@ height = { default = 20, min = 12, max = 48 }
 
 [[targets]]
 template = "titles.lua.tmpl"
-output = "~/.config/hypr/myarch/titles.lua"
+output = "~/.config/hypr/mazapan/titles.lua"
 reload = "hyprctl reload >/dev/null"
 
 [[actions]]
 name = "{{ t \"toggle\" }}"
-run = "hyprctl eval 'myarch_titles_toggle()'"
+run = "hyprctl eval 'mazapan_titles_toggle()'"
 key = "{{ settings.key }}"
 keywords = "{{ t \"toggle.kw\" }}"

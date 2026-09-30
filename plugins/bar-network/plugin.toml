@@ -13,8 +13,8 @@ pacman = ["quickshell", "networkmanager"]
 
 [[targets]]
 template = "Network.qml.tmpl"
-output = "~/.config/quickshell/myarch/widgets/right/10-network.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/widgets/right/10-network.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 # NetworkManager runs and the machine is on some network.
 [[checks]]

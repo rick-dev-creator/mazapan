@@ -16,7 +16,7 @@ pacman = ["nvidia-open-dkms", "nvidia-utils", "libva-nvidia-driver", "linux-head
 
 [[targets]]
 template = "modprobe.conf.tmpl"
-output = "/etc/modprobe.d/myarch-nvidia.conf"
+output = "/etc/modprobe.d/mazapan-nvidia.conf"
 system = true
 reboot = true
 # The initramfs carries modprobe.d too (the modconf hook).
@@ -24,7 +24,7 @@ reload = "mkinitcpio -P"
 
 [[targets]]
 template = "mkinitcpio.conf.tmpl"
-output = "/etc/mkinitcpio.conf.d/myarch-nvidia.conf"
+output = "/etc/mkinitcpio.conf.d/mazapan-nvidia.conf"
 system = true
 reboot = true
 # The initramfs carries the modules, so the driver starts before the screen does.
@@ -32,7 +32,7 @@ reload = "mkinitcpio -P"
 
 [[targets]]
 template = "nvidia.lua.tmpl"
-output = "~/.config/hypr/myarch/hw-nvidia.lua"
+output = "~/.config/hypr/mazapan/hw-nvidia.lua"
 
 # The open modules are built for the running kernel on install (DKMS): its
 # headers must be there first, or the driver never loads.

@@ -24,12 +24,12 @@ seconds = { default = 1.5, min = 0.5, max = 5, step = 0.5 }
 
 [[targets]]
 template = "Osd.qml.tmpl"
-output = "~/.config/quickshell/myarch/panels/osd.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/panels/osd.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "keys.lua.tmpl"
-output = "~/.config/hypr/myarch/media-keys.lua"
+output = "~/.config/hypr/mazapan/media-keys.lua"
 reload = "hyprctl reload >/dev/null"
 
 # In the palette, with their keys.
@@ -59,31 +59,31 @@ keywords = "{{ t \"act.mic.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.play\" }}"
-run = "qs ipc -c myarch call osd playPause"
+run = "qs ipc -c mazapan call osd playPause"
 key = "XF86AudioPlay"
 keywords = "{{ t \"act.play.kw\" }}"
 
 # XF86AudioPause does what Play does: one action for both.
 [[actions]]
 name = "{{ t \"act.next\" }}"
-run = "qs ipc -c myarch call osd next"
+run = "qs ipc -c mazapan call osd next"
 key = "XF86AudioNext"
 keywords = "{{ t \"act.play.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.previous\" }}"
-run = "qs ipc -c myarch call osd previous"
+run = "qs ipc -c mazapan call osd previous"
 key = "XF86AudioPrev"
 keywords = "{{ t \"act.play.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.brighter\" }}"
-run = 'p=$(brightnessctl -c backlight -m -e4 -n2 set {{ settings.brightness_step }}%+ | cut -d, -f4 | tr -d %); [ -n "$p" ] && qs ipc -c myarch call osd brightness "$p"'
+run = 'p=$(brightnessctl -c backlight -m -e4 -n2 set {{ settings.brightness_step }}%+ | cut -d, -f4 | tr -d %); [ -n "$p" ] && qs ipc -c mazapan call osd brightness "$p"'
 key = "XF86MonBrightnessUp"
 keywords = "{{ t \"act.light.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.dimmer\" }}"
-run = 'p=$(brightnessctl -c backlight -m -e4 -n2 set {{ settings.brightness_step }}%- | cut -d, -f4 | tr -d %); [ -n "$p" ] && qs ipc -c myarch call osd brightness "$p"'
+run = 'p=$(brightnessctl -c backlight -m -e4 -n2 set {{ settings.brightness_step }}%- | cut -d, -f4 | tr -d %); [ -n "$p" ] && qs ipc -c mazapan call osd brightness "$p"'
 key = "XF86MonBrightnessDown"
 keywords = "{{ t \"act.light.kw\" }}"

@@ -15,7 +15,7 @@ pantalla cada cosa, con todo lo que el equipo puede saber ya puesto.
 7. **Listo**: las pocas teclas que abren casi todo.
 
 Se abre sola en el primer inicio después de instalar (el primer
-`myarch apply` del equipo deja la marca), no en un escritorio que ya
+`mazapan apply` del equipo deja la marca), no en un escritorio que ya
 estaba configurado. Cada elección se aplica al avanzar (el aspecto, al
 Continuar), y se guarda dónde ibas, así que si el escritorio se recarga
 por el camino sigue ahí. Esc la cierra hasta el próximo inicio de sesión;

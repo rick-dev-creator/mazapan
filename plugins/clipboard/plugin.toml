@@ -26,30 +26,30 @@ max_kb = { default = 5120, min = 64, max = 51200, label = "Largest copy kept (KB
 
 [[targets]]
 template = "clip-store.sh.tmpl"
-output = "~/.local/share/myarch/bin/clip-store"
+output = "~/.local/share/mazapan/bin/clip-store"
 
 [[targets]]
 template = "qmldir.tmpl"
-output = "~/.config/quickshell/myarch/components/clipboard/qmldir"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/clipboard/qmldir"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "ClipboardService.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/clipboard/ClipboardService.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/clipboard/ClipboardService.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "History.qml.tmpl"
-output = "~/.config/quickshell/myarch/panels/clipboard.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/panels/clipboard.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "clipboard.lua.tmpl"
-output = "~/.config/hypr/myarch/clipboard.lua"
+output = "~/.config/hypr/mazapan/clipboard.lua"
 reload = "hyprctl reload >/dev/null"
 
 [[actions]]
 name = "{{ t \"act.open\" }}"
-run = "qs ipc -c myarch call myarch panel clipboard"
+run = "qs ipc -c mazapan call mazapan panel clipboard"
 key = "{{ settings.key }}"
 keywords = "{{ t \"act.open.kw\" }}"

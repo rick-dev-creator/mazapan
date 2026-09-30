@@ -12,5 +12,5 @@ su HTML). Lo marcado como secreto nunca se guarda: KeePassXC lo marca (el
 tipo x-kde-passwordManagerHint), y también `wl-copy --sensitive`; no todos
 los gestores de contraseñas lo hacen, así que revisa el tuyo. Tampoco las
 copias más grandes que `max_kb`. El historial está en
-`~/.local/state/myarch-clipboard/`, legible solo por ti; como mucho `keep`
+`~/.local/state/mazapan-clipboard/`, legible solo por ti; como mucho `keep`
 entradas (100), `keep_images` de ellas imágenes (20).

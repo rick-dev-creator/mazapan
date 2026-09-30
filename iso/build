@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
-# Builds the myarch ISO: Arch's own live profile (archiso's releng) with a
-# desktop live session on top (iso/airootfs), and myarch as a package
+# Builds the mazapan ISO: Arch's own live profile (archiso's releng) with a
+# desktop live session on top (iso/airootfs), and mazapan as a package
 # (pkg/PKGBUILD) from this checkout, in a repository of the ISO's own.
 #
 #   iso/build [outdir]     default: out/ in the checkout
 #
 # On Arch, with archiso, as a user with sudo (makepkg won't run as root);
 # the dev VM does it: vm/vm iso. Build core first (core/build): the package
-# takes bin/myarch as it is.
+# takes bin/mazapan as it is.
 set -euo pipefail
 
 repo="$(cd "$(dirname "$0")/.." && pwd)"
 out="${1:-$repo/out}"
-work="${MYARCH_ISO_WORK:-/var/tmp/myarch-iso}"
+work="${MAZAPAN_ISO_WORK:-/var/tmp/mazapan-iso}"
 releng=/usr/share/archiso/configs/releng
 
 log() { printf '\e[1;35m[iso]\e[0m %s\n' "$*"; }
@@ -20,25 +20,25 @@ die() { printf '\e[1;31m[iso]\e[0m %s\n' "$*" >&2; exit 1; }
 
 [[ $EUID -ne 0 ]] || die "run as a user with sudo, not root"
 [[ -d $releng ]] || die "needs archiso (pacman -S archiso)"
-[[ -x $repo/bin/myarch ]] || die "no bin/myarch: core/build first"
+[[ -x $repo/bin/mazapan ]] || die "no bin/mazapan: core/build first"
 
 sudo rm -rf "$work"
 mkdir -p "$work"/{pkg,repo} "$out"
 
-log "myarch package"
+log "mazapan package"
 cp "$repo/pkg/PKGBUILD" "$work/pkg/"
-(cd "$work/pkg" && MYARCH_REPO="$repo" BUILDDIR="$work/pkg/build" PKGDEST="$work/repo" \
+(cd "$work/pkg" && MAZAPAN_REPO="$repo" BUILDDIR="$work/pkg/build" PKGDEST="$work/repo" \
   SRCDEST="$work/pkg" LOGDEST="$work/pkg" makepkg --nodeps --force --noconfirm >"$work/pkg/makepkg.log" 2>&1) \
   || { tail -20 "$work/pkg/makepkg.log" >&2; die "makepkg failed"; }
-repo-add -q "$work/repo/myarch.db.tar.gz" "$work"/repo/*.pkg.tar.zst
+repo-add -q "$work/repo/mazapan.db.tar.gz" "$work"/repo/*.pkg.tar.zst
 
 # Arch's repositories, and this one: to build with (mkarchiso), and to fill
 # the offline repository from.
 conf="$work/pacman.conf"
-sed '/^\[myarch\]/,$d' "$releng/pacman.conf" > "$conf"
+sed '/^\[mazapan\]/,$d' "$releng/pacman.conf" > "$conf"
 cat >> "$conf" <<CONF
 
-[myarch]
+[mazapan]
 SigLevel = Optional TrustAll
 Server = file://$work/repo
 CONF
@@ -76,28 +76,28 @@ ln -s /usr/lib/systemd/system/NetworkManager-wait-online.service "$w/network-onl
 
 sed -e '/^#/d' -e '/^\s*$/d' "$repo/iso/packages.txt" >> "$p/packages.x86_64"
 cp "$conf" "$p/pacman.conf"
-mkdir -p "$p/airootfs/var/cache/myarch"
-cp -a "$offline" "$p/airootfs/var/cache/myarch/offline"
+mkdir -p "$p/airootfs/var/cache/mazapan"
+cp -a "$offline" "$p/airootfs/var/cache/mazapan/offline"
 
-sed -i -e 's/^iso_name=.*/iso_name="myarch"/' \
-  -e 's/^iso_label=.*/iso_label="MYARCH_$(date --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y%m)"/' \
-  -e 's/^iso_publisher=.*/iso_publisher="myarch"/' \
-  -e 's/^iso_application=.*/iso_application="myarch live and installer"/' "$p/profiledef.sh"
+sed -i -e 's/^iso_name=.*/iso_name="mazapan"/' \
+  -e 's/^iso_label=.*/iso_label="MAZAPAN_$(date --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y%m)"/' \
+  -e 's/^iso_publisher=.*/iso_publisher="mazapan"/' \
+  -e 's/^iso_application=.*/iso_application="mazapan live and installer"/' "$p/profiledef.sh"
 # zstd, not xz: a little bigger, much faster to build and to boot from.
 sed -i "s/^airootfs_image_tool_options=.*/airootfs_image_tool_options=('-comp' 'zstd' '-Xcompression-level' '15' '-b' '1M')/" "$p/profiledef.sh"
 cat >> "$p/profiledef.sh" <<'CONF'
 file_permissions+=(
   ["/home/live/"]="1000:1000:750"
   ["/etc/sudoers.d"]="0:0:750"
-  ["/etc/sudoers.d/myarch-live"]="0:0:440"
+  ["/etc/sudoers.d/mazapan-live"]="0:0:440"
 )
 CONF
 # The boot menus say what this is.
-sed -i 's/Arch Linux install medium/myarch/' "$p"/efiboot/loader/entries/*.conf "$p"/syslinux/*.cfg "$p"/grub/*.cfg
+sed -i 's/Arch Linux install medium/mazapan/' "$p"/efiboot/loader/entries/*.conf "$p"/syslinux/*.cfg "$p"/grub/*.cfg
 
 log "mkarchiso (a few minutes)"
 sudo mkarchiso -v -w "$work/mkarchiso" -o "$out" "$p" >"$work/mkarchiso.log" 2>&1 \
   || { tail -30 "$work/mkarchiso.log" >&2; die "mkarchiso failed (log: $work/mkarchiso.log)"; }
 sudo rm -rf "$work/mkarchiso"
-iso=$(ls -t "$out"/myarch-*.iso | head -1)
+iso=$(ls -t "$out"/mazapan-*.iso | head -1)
 log "built $iso ($(du -h "$iso" | cut -f1))"

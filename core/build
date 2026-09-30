@@ -1,14 +1,14 @@
 #!/bin/sh
-# Builds bin/myarch: one native binary (.NET Native AOT), nothing to install
+# Builds bin/mazapan: one native binary (.NET Native AOT), nothing to install
 # next to it. Needs the .NET 10 SDK and clang.
 #   core/build          build
 #   core/build test     run the tests first
 set -e
 cd "$(dirname "$0")"
 if [ "$1" = test ]; then
-  dotnet test tests/MyArch.Tests --nologo -v q
+  dotnet test tests/Mazapan.Tests --nologo -v q
 fi
-dotnet publish src/MyArch -c Release -r linux-x64 -o obj/publish --nologo -v q
+dotnet publish src/Mazapan -c Release -r linux-x64 -o obj/publish --nologo -v q
 mkdir -p ../bin
-install -m 755 obj/publish/myarch ../bin/myarch
-echo "built ../bin/myarch"
+install -m 755 obj/publish/mazapan ../bin/mazapan
+echo "built ../bin/mazapan"

@@ -38,32 +38,32 @@ keep = { default = 100, min = 10, max = 1000 }
 # The server and the card, shared by the banners, the center and the bar.
 [[targets]]
 template = "qmldir.tmpl"
-output = "~/.config/quickshell/myarch/components/notifications/qmldir"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/notifications/qmldir"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "NotificationService.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/notifications/NotificationService.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/notifications/NotificationService.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "Card.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/notifications/Card.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/notifications/Card.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "Notifications.qml.tmpl"
-output = "~/.config/quickshell/myarch/panels/notifications.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/panels/notifications.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "Bell.qml.tmpl"
-output = "~/.config/quickshell/myarch/widgets/right/90-notifications.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/widgets/right/90-notifications.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "notifications.lua.tmpl"
-output = "~/.config/hypr/myarch/notifications.lua"
+output = "~/.config/hypr/mazapan/notifications.lua"
 reload = "hyprctl reload >/dev/null"
 
 # Another notification daemon would take the name first: this one gets
@@ -76,23 +76,23 @@ session = true
 
 [[actions]]
 name = "{{ t \"act.open\" }}"
-run = "qs ipc -c myarch call myarch panel notifications"
+run = "qs ipc -c mazapan call mazapan panel notifications"
 key = "{{ settings.key }}"
 keywords = "{{ t \"act.open.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.quiet\" }}"
-run = "qs ipc -c myarch call notifications toggleQuiet"
+run = "qs ipc -c mazapan call notifications toggleQuiet"
 key = "{{ settings.quiet_key }}"
 keywords = "{{ t \"act.quiet.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.clear\" }}"
-run = "qs ipc -c myarch call notifications clear"
+run = "qs ipc -c mazapan call notifications clear"
 keywords = "{{ t \"act.clear.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.dismiss\" }}"
-run = "qs ipc -c myarch call notifications dismiss"
+run = "qs ipc -c mazapan call notifications dismiss"
 key = "{{ settings.dismiss_key }}"
 keywords = "{{ t \"act.dismiss.kw\" }}"

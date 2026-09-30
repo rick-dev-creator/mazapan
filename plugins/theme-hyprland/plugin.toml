@@ -12,5 +12,5 @@ pacman = ["hyprland"]
 
 [[targets]]
 template = "theme.lua.tmpl"
-output = "~/.config/hypr/myarch/theme.lua"
+output = "~/.config/hypr/mazapan/theme.lua"
 reload = "hyprctl reload >/dev/null"

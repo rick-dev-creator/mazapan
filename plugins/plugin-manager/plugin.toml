@@ -16,22 +16,22 @@ terminal = "foot --hold"
 
 [[targets]]
 template = "Manager.qml.tmpl"
-output = "~/.config/quickshell/myarch/panels/plugins.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/panels/plugins.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "plugins.lua.tmpl"
-output = "~/.config/hypr/myarch/plugins.lua"
+output = "~/.config/hypr/mazapan/plugins.lua"
 reload = "hyprctl reload >/dev/null"
 
 [[actions]]
 name = "{{ t \"act.open\" }}"
-run = "qs ipc -c myarch call myarch panel plugins"
+run = "qs ipc -c mazapan call mazapan panel plugins"
 key = "{{ settings.key }}"
 keywords = "{{ t \"act.open.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.update\" }}"
-run = "myarch plugins update"
+run = "mazapan plugins update"
 terminal = true
 keywords = "{{ t \"act.update.kw\" }}"

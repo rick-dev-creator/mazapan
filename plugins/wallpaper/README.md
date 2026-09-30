@@ -16,8 +16,8 @@ What the desktop shows behind the windows.
 - **A theme from any picture**: "Theme from this picture" (or `t`) makes a
   whole theme of its colors, every contrast checked, and switches to it:
   the terminal, GTK and Qt apps, the browsers, VS Code, Neovim and the
-  shell, all in the picture's colors. Also `myarch themes from-image
-  PICTURE [--apply]`; `myarch themes remove ID` takes one away.
+  shell, all in the picture's colors. Also `mazapan themes from-image
+  PICTURE [--apply]`; `mazapan themes remove ID` takes one away.
 
-Your choice is kept in `~/.local/state/myarch-wallpaper/`: changing it
+Your choice is kept in `~/.local/state/mazapan-wallpaper/`: changing it
 reloads nothing. Reading a picture's colors needs ffmpeg (or ImageMagick).

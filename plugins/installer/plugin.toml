@@ -3,7 +3,7 @@ id = "installer"
 name = "Installer"
 version = "0.1.0"
 api = 1
-description = "The ISO's installer: this system onto a disk in a few screens (language, keyboard, where you are, the disk, your account, what you'll use it for), then myarch install does it"
+description = "The ISO's installer: this system onto a disk in a few screens (language, keyboard, where you are, the disk, your account, what you'll use it for), then mazapan install does it"
 categories = ["hardware", "tools"]
 
 # Only on the ISO's live system (its config.toml turns it on).
@@ -15,10 +15,10 @@ pacman = ["quickshell", "archinstall", "curl", "networkmanager"]
 
 [[targets]]
 template = "Installer.qml.tmpl"
-output = "~/.config/quickshell/myarch/panels/installer.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/panels/installer.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[actions]]
 name = "{{ t \"act.open\" }}"
-run = "qs ipc -c myarch call myarch panel installer"
+run = "qs ipc -c mazapan call mazapan panel installer"
 keywords = "{{ t \"act.open.kw\" }}"

@@ -21,22 +21,22 @@
 #   vm/vm iso         build the ISO inside this VM (iso/build) into vm/.state/iso
 #
 # A second VM, to try the ISO: UEFI, a blank disk, the newest ISO in
-# vm/.state/iso as its CD (or $MYARCH_ISO). The same commands after "try",
+# vm/.state/iso as its CD (or $MAZAPAN_ISO). The same commands after "try",
 # as root over SSH; run/exec/shot act in the live session's desktop.
 #   vm/vm try start | headless | wait | ssh | run | exec | key | mouse | shot | stop | reset
-# Once installed: MYARCH_TRY_USER=<the account> vm/vm try ssh|run|shot…
+# Once installed: MAZAPAN_TRY_USER=<the account> vm/vm try ssh|run|shot…
 set -euo pipefail
 
 repo="$(cd "$(dirname "$0")/.." && pwd)"
 state="$repo/vm/.state"
 
-image_url="${MYARCH_IMAGE_URL:-https://geo.mirror.pkgbuild.com/images/latest/Arch-Linux-x86_64-cloudimg.qcow2}"
-disk_size="${MYARCH_DISK:-40G}"
-mem="${MYARCH_MEM:-8G}"
-cpus="${MYARCH_CPUS:-8}"
-res="${MYARCH_RES:-1920x1080}"
-ssh_port="${MYARCH_SSH_PORT:-2222}"
-outputs="${MYARCH_OUTPUTS:-1}" # screens the guest sees (each one a window here)
+image_url="${MAZAPAN_IMAGE_URL:-https://geo.mirror.pkgbuild.com/images/latest/Arch-Linux-x86_64-cloudimg.qcow2}"
+disk_size="${MAZAPAN_DISK:-40G}"
+mem="${MAZAPAN_MEM:-8G}"
+cpus="${MAZAPAN_CPUS:-8}"
+res="${MAZAPAN_RES:-1920x1080}"
+ssh_port="${MAZAPAN_SSH_PORT:-2222}"
+outputs="${MAZAPAN_OUTPUTS:-1}" # screens the guest sees (each one a window here)
 
 base="$state/base.qcow2"
 key="$state/id_ed25519"
@@ -49,8 +49,8 @@ if [[ $mode == try ]]; then
   vars="$state/try-vars.fd"
   pidfile="$state/try.pid"
   # Root on the live system; on what it installed, the account it made
-  # (the installer gives it the live system's SSH keys): MYARCH_TRY_USER.
-  ssh_port="${MYARCH_TRY_SSH_PORT:-2223}" ssh_user="${MYARCH_TRY_USER:-root}"
+  # (the installer gives it the live system's SSH keys): MAZAPAN_TRY_USER.
+  ssh_port="${MAZAPAN_TRY_SSH_PORT:-2223}" ssh_user="${MAZAPAN_TRY_USER:-root}"
 else
   name=myarch-vm tag=
   disk="$state/disk.qcow2"
@@ -116,8 +116,8 @@ boot() {
   [[ -f $disk && -f $seed ]] || cmd_create
   local w=${res%x*} h=${res#*x} machine
   if [[ $mode == try ]]; then
-    local iso="${MYARCH_ISO:-$(ls -t "$state"/iso/*.iso 2>/dev/null | head -1)}"
-    [[ -f $iso ]] || die "no ISO: vm/vm iso first (or MYARCH_ISO=path)"
+    local iso="${MAZAPAN_ISO:-$(ls -t "$state"/iso/*.iso 2>/dev/null | head -1)}"
+    [[ -f $iso ]] || die "no ISO: vm/vm iso first (or MAZAPAN_ISO=path)"
     [[ -f $vars ]] || cmd_create
     log "booting ${iso##*/} (UEFI, blank disk $disk_size)"
     machine=(
@@ -154,7 +154,7 @@ boot() {
   running || { cat "$state/${tag}qemu.log" >&2; die "qemu failed to start"; }
 }
 
-cmd_start()    { boot -display "${MYARCH_DISPLAY:-gtk,gl=on,zoom-to-fit=off,grab-on-hover=on}"; }
+cmd_start()    { boot -display "${MAZAPAN_DISPLAY:-gtk,gl=on,zoom-to-fit=off,grab-on-hover=on}"; }
 cmd_headless() { boot -display egl-headless; }
 
 cmd_wait() {

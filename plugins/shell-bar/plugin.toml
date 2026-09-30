@@ -18,73 +18,79 @@ height = { default = 28, min = 20, max = 64 }
 # command runs it), so it lives in one place.
 [[targets]]
 template = "shell-reload.sh.tmpl"
-output = "~/.local/share/myarch/bin/shell-reload"
+output = "~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "shell.qml.tmpl"
-output = "~/.config/quickshell/myarch/shell.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/shell.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "shell.lua.tmpl"
-output = "~/.config/hypr/myarch/shell.lua"
+output = "~/.config/hypr/mazapan/shell.lua"
 reload = "hyprctl reload >/dev/null"
 
 # The kit: components every widget can use (import "../../components/kit").
 [[targets]]
 template = "KitBarPopup.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/kit/BarPopup.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/kit/BarPopup.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "KitBarItem.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/kit/BarItem.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/kit/BarItem.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "KitGlyph.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/kit/Glyph.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/kit/Glyph.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "KitLabel.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/kit/Label.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/kit/Label.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "KitCaption.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/kit/Caption.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/kit/Caption.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "KitRule.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/kit/Rule.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/kit/Rule.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "KitToggle.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/kit/Toggle.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/kit/Toggle.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "KitSlider.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/kit/Slider.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/kit/Slider.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "KitListRow.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/kit/ListRow.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/kit/ListRow.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "KitButton.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/kit/Button.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/kit/Button.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "KitTextField.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/kit/TextField.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/kit/TextField.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+# Mazapán's icon (assets/mazapan.svg, drawn by assets/make-icon.py), for
+# the bar and the panels.
+[[targets]]
+template = "mazapan.svg.tmpl"
+output = "~/.config/quickshell/mazapan/assets/mazapan.svg"
 
 # The bar runs on the Quickshell that is installed now and its config
 # loaded. After an update the running bar is still the old binary (its
@@ -97,11 +103,11 @@ session = true
 timeout = 25
 run = '''
 set -u
-cfg=myarch
+cfg=mazapan
 
 pid() { qs list -c "$cfg" 2>/dev/null | awk '/Process ID/ { print $3; exit }'; }
-start() { hyprctl dispatch 'hl.dsp.exec_cmd("qs -c myarch --no-duplicate")' >/dev/null; }
-answers() { qs ipc -c "$cfg" call myarch ping >/dev/null 2>&1; }
+start() { hyprctl dispatch 'hl.dsp.exec_cmd("qs -c mazapan --no-duplicate")' >/dev/null; }
+answers() { qs ipc -c "$cfg" call mazapan ping >/dev/null 2>&1; }
 
 p=$(pid)
 if [ -z "$p" ]; then

@@ -7,6 +7,11 @@ means here. Ordered by impact.
 
 Suggested start: 1, 2 and 3.
 
+The project was called myarch until 2026-09-30; it is Mazapán (`mazapan`)
+now. A desktop that used the old name moves to the new one by itself the
+first time `mazapan` runs (its folders, what it owns, web apps, plugins
+from git that still write to the old places).
+
 ## Progress
 
 | # | Item | State |
@@ -29,7 +34,7 @@ Suggested start: 1, 2 and 3.
 | 14 | Workspace sessions | Planned |
 | 15 | The CLI in your language | Planned |
 | 16 | Installation and first boot | **Done** (2026-09-30): catalog (17), welcome, the ISO with its graphical installer (any language, time zone, keyboard), snapshots from the install on; audited. Pending: unattended installs (`cidata`), real hardware |
-| 17 | Apps: install and remove | **Done** (2026-09-29): catalog, `myarch apps`, the Apps menu with profiles (several at once); Flatpak apps show without a new login (2026-09-30); audited. Pending: catalogs from others |
+| 17 | Apps: install and remove | **Done** (2026-09-29): catalog, `mazapan apps`, the Apps menu with profiles (several at once); Flatpak apps show without a new login (2026-09-30); audited. Pending: catalogs from others |
 | 18 | Settings with a face | In progress: the Settings panel (keyboard, touchpad and mouse, default apps, language and time zone) done (2026-09-30); fonts, keybindings, preview to do |
 | 19 | Security | Planned |
 | 20 | Updates, visible | **Done** (2026-09-30): the bar says when there are, a panel shows them (news, restart), updated with a click (pkexec), Flatpak apps too. Pending: firmware, downloading ahead |
@@ -71,8 +76,8 @@ that didn't read back; duplicated TOML keys silently won.
 copies a shipped config over yours (with a backup). Updates take a snapper
 snapshot first and grep the log for known failures afterwards.
 
-**Much better.** *Done* — `myarch update`, `doctor`, `history`, `rollback`:
-- No config migrations: config is declarative and `myarch` knows which
+**Much better.** *Done* — `mazapan update`, `doctor`, `history`, `rollback`:
+- No config migrations: config is declarative and `mazapan` knows which
   files it owns, so an update is just a new `apply`.
 - A preview before anything changes: packages (★ the ones the desktop
   depends on), Arch news since the last update (flagging manual
@@ -89,7 +94,7 @@ snapshot first and grep the log for known failures afterwards.
   versions of exactly the changed packages, from pacman's cache or else the
   Arch Linux Archive, in one transaction (replaced packages resolved); the
   generated files as they were, hand edits backed up, never lost, and
-  files a later `myarch apply` rewrote left alone.
+  files a later `mazapan apply` rewrote left alone.
 - A record from before anything changes, so an interrupted update is still
   in the history and can be rolled back. Rollbacks go newest first: an old
   update can't be undone under newer ones.
@@ -113,7 +118,7 @@ localized like the plugins.
 mirror, recover the internal monitor, a watcher for removed monitors.
 
 **Much better.** *Done* — plugin `monitors`:
-- Profiles matched by EDID (`~/.config/myarch/monitors.json`), applied by
+- Profiles matched by EDID (`~/.config/mazapan/monitors.json`), applied by
   a Hyprland Lua engine at startup and on every hotplug: mode, position,
   scale, rotation, adaptive sync (VRR), 10-bit color, mirroring, screens
   off, and which workspaces live on each screen. Screens without an EDID,
@@ -170,13 +175,13 @@ logo at the start of the bar):
   commands, so the key and the command do exactly the same.
 - Keybindings listed from the plugins that define them (`[[actions]]` in
   plugin.toml, rendered and handed to every template as `.Actions`), so
-  the list is always right. Commands that ask or print (`myarch update`,
+  the list is always right. Commands that ask or print (`mazapan update`,
   `doctor`, `rollback`…) open in a terminal that stays.
 - Audited once (9 findings, all fixed). Tested in the dev VM: open with
   the key, search, run an action, launch a terminal app, launch
   an app, run a terminal action, copy a command, close with SUPER + Q.
 
-**Follow-ups.** Files (plocate/fd) and settings (needs `myarch set`);
+**Follow-ups.** Files (plocate/fd) and settings (needs `mazapan set`);
 remembering what you pick often; plugin actions with arguments; a check
 that every `hl.bind` has its action.
 
@@ -204,15 +209,15 @@ manager unthemed.
   light ones; or the theme's own image.
 - *Done* — the accent is yours to pick in any theme: the theme's own or
   the ones it suggests (`accents` in theme.toml, or any #rrggbb with
-  `myarch apply --accent`). The other accent tokens (text on it, as text,
+  `mazapan apply --accent`). The other accent tokens (text on it, as text,
   a deep tint, the selection) are derived in OKLab with contrast kept.
-- *Done* — contrast checked for every theme and accent (`myarch themes`,
+- *Done* — contrast checked for every theme and accent (`mazapan themes`,
   and in the picker): the pairs plugins rely on against WCAG's minimums.
   It caught Gruvbox's red at 4.3:1 on its background. Derived accents keep
   every pair: tested over a grid of 216 accents in every bundled theme.
 - Audited once (8 findings, all fixed); a demo recorded in the dev VM.
 - Three more themes: Amber (the 80s amber CRT), Gruvbox, and Paper (light).
-- *Done* — coverage: `myarch coverage` lists the installed apps (their
+- *Done* — coverage: `mazapan coverage` lists the installed apps (their
   .desktop files) and whether the theme reaches them. Plugins declare what
   they theme (`[coverage]`: apps and toolkits); an app's toolkit comes
   from the libraries its binary links, what its script imports, or its
@@ -225,7 +230,7 @@ manager unthemed.
   kdeglobals. Both files are shared with their apps (`merge = "ini"`: the
   core manages only its keys), since qt6ct and KDE apps write there too:
   a person's own values for those keys are a conflict the first time
-  (--adopt backs them up), a rollback puts back only myarch's keys and
+  (--adopt backs them up), a rollback puts back only Mazapán's keys and
   never deletes the file, symlinked dotfiles stay links. On a real machine
   it took coverage from 19 to 27 of 61 apps. Audited (6 findings, all
   fixed).
@@ -245,7 +250,7 @@ manager unthemed.
     mode.
   - Audited (12 findings, all fixed): a JSON file that doesn't parse is
     never rewritten; keys with dots; an @import only counts at the head of
-    the file; taking myarch's line out of your own file is respected, and
+    the file; taking Mazapán's line out of your own file is respected, and
     its lines leave with the plugin; profiles linked twice count once;
     rollbacks don't bring back deleted profiles; permissions kept (0600
     Preferences); contrast of Firefox's buttons and links; high contrast
@@ -257,7 +262,7 @@ manager unthemed.
     (syntax, Treesitter, LSP, diagnostics, diff, git, Telescope, which-key,
     its terminal's 16 colors), see-through when the terminals are; in
     Neovim's data folder, never in your ~/.config/nvim; used on its own
-    when your config sets no colorscheme (else set yours to "myarch");
+    when your config sets no colorscheme (else set yours to "Mazapán");
     running Neovims recolor on apply.
   - VS Code, Code - OSS, VSCodium, and their Flatpaks (plugin
     `theme-vscode`): the theme as color customizations in settings.json
@@ -272,7 +277,7 @@ manager unthemed.
   - Audited (10 findings, all fixed): a rollback never rewrites a
     settings.json it can't read; reload commands time out (a Neovim
     suspended with ctrl-z hung apply); busy and unreadable files aren't
-    counted as an update; JSON keeps its layout; myarch's JSON keys leave
+    counted as an update; JSON keeps its layout; Mazapán's JSON keys leave
     with the plugin; readable fuzzy matches on VS Code's selected rows;
     colors with alpha trimmed for Neovim and btop.
 
@@ -291,13 +296,13 @@ Framework 16, Surface…), matched on the DMI product name.
 - Declarative match rules in the manifest (`[hardware]`: DMI maker, model
   and board; PCI and USB ids; a GPU's name from the PCI database; input
   devices; loaded modules; how many GPUs), read from /sys without root.
-  `myarch hardware` shows the machine and the fixes for it; `doctor` offers
+  `mazapan hardware` shows the machine and the fixes for it; `doctor` offers
   the ones that are off. Never applied on their own, never on a machine they
   aren't for (a config.toml shared with another computer).
-- System files, as root with sudo, only as `myarch*` drop-ins in folders
+- System files, as root with sudo, only as `mazapan*` drop-ins in folders
   made for them (modprobe.d, udev, mkinitcpio.conf.d, sysctl.d…), and
-  packages: only on `myarch apply --system`, previewed with `--dry-run
-  --diff`, undone with `myarch undo` (files back, packages out). A plain
+  packages: only on `mazapan apply --system`, previewed with `--dry-run
+  --diff`, undone with `mazapan undo` (files back, packages out). A plain
   apply, the theme picker's or an agent's, never asks for a password.
 - First plugins: the several-GPUs software cursor (this machine's fix: an
   RTX 4090 rendering for screens on the Radeon iGPU through a dock), Apple
@@ -308,7 +313,7 @@ Framework 16, Surface…), matched on the DMI product name.
 
 - Audited (15 findings, fixed): user-writable state (owned.json, snapshots)
   reached root writes, deletes and pacman arguments (one guard where sudo
-  runs now: only myarch* drop-ins, package names that can't be options);
+  runs now: only mazapan* drop-ins, package names that can't be options);
   what's a system file was decided by the path under $HOME; every plugin's
   packages were installed (hardware plugins' only now); undo could stick on
   a package something needed; removing a system file skipped its reload
@@ -328,19 +333,19 @@ Chromium accent through its policy (the system files are there now).
 on a crash.
 
 **Much better.** *Done* — [docs/agent-api.md](agent-api.md):
-- State an agent can read: `myarch status --json` (theme, plugins and where
+- State an agent can read: `mazapan status --json` (theme, plugins and where
   they come from, generated files that differ, updates, what can be undone;
   versioned), `doctor --json`.
-- Changes previewed exactly: `myarch apply --dry-run --diff`, with settings,
+- Changes previewed exactly: `mazapan apply --dry-run --diff`, with settings,
   enabling and disabling plugins as flags (`--set bar-clock.font_size=11`),
   checked against each plugin's settings.
-- Every apply undoable: `myarch undo` puts back files, ownership and
+- Every apply undoable: `mazapan undo` puts back files, ownership and
   config.toml, never over what changed since.
-- `myarch mcp`: the same as an MCP server (status, doctor, themes, plugins,
+- `mazapan mcp`: the same as an MCP server (status, doctor, themes, plugins,
   coverage, history, preview_change, apply_change, undo), so any agent uses
-  myarch the way a person does. Installing plugins and updating the system
+  Mazapán the way a person does. Installing plugins and updating the system
   stay the person's.
-- `myarch report` and the `agent` plugin: "Ask an agent about this desktop"
+- `mazapan report` and the `agent` plugin: "Ask an agent about this desktop"
   in the palette opens one with the state, failing checks, recent crashes
   and the errors Hyprland and the shell logged.
 
@@ -369,7 +374,7 @@ schema.
 bar widgets), with typed settings, localization, and clean removal that
 never touches files you edited.
 
-**Much better.** *Done* — `myarch plugins list|show|enable|disable|add|
+**Much better.** *Done* — `mazapan plugins list|show|enable|disable|add|
 update|remove|sync`:
 - Dependencies: `requires = ["shell-bar", "hypr-base >= 0.1"]`. apply
   refuses while one is missing, disabled or too old; `disable` says what
@@ -378,13 +383,13 @@ update|remove|sync`:
   (code, and configs that can run commands), the commands it runs written
   out as they'll run (defines inlined, settings' defaults), the files, the
   packages. Approved at `add`; an `update` that needs more asks again.
-- Plugins from git, pinned in `~/.config/myarch/plugins.lock` (source,
+- Plugins from git, pinned in `~/.config/mazapan/plugins.lock` (source,
   ref, commit, approvals): `sync` reproduces them on another machine.
   apply refuses one that moved, was edited (even an ignored file), or
   needs more than approved.
 - Audited (17 findings, all fixed): commands were approved as raw
   templates, so a changed define or default ran unasked; a plugin could
-  write into myarch's own folders (plugins.lock, a decoy plugin); symlinks
+  write into Mazapán's own folders (plugins.lock, a decoy plugin); symlinks
   and submodules in a repo; index flags and ignored files hid edits; git
   ran with the user's hooks and config; the lock's values reached git
   arguments; an update was checked out before it was approved; a broken
@@ -405,7 +410,7 @@ dependencies, no permissions. Ours:
 - The Plugins panel (`plugin-manager`, SUPER + SHIFT + P), like VS Code's
   extensions: search, tabs, each plugin's page (README in your language,
   what it can do with the risky marked and translated, settings as
-  controls); on/off and settings through `myarch apply` (undo takes them
+  controls); on/off and settings through `mazapan apply` (undo takes them
   back), install only of the commit it showed; the panel survives the shell
   reloading under it.
 - Every plugin's name and description translated (`plugin.name`,
@@ -417,7 +422,7 @@ dependencies, no permissions. Ours:
   it), `fork` and `diff` (a built-in to change, and what you changed).
 
 **Follow-ups.** A "customize" button in the panel (fork from there);
-ratings or download counts need a server; `myarch update` offering plugin
+ratings or download counts need a server; `mazapan update` offering plugin
 updates too; signed tags; screenshots in catalog entries.
 
 ## Notifications
@@ -511,7 +516,7 @@ theme's picture). Your own pictures can't be used: behind Omarchy.
   Neovim, the shell). Every picture, a coherent and readable desktop.
 
 *Done* (2026-09-29):
-- `myarch themes from-image PICTURE [--apply]`: the picture's colors
+- `mazapan themes from-image PICTURE [--apply]`: the picture's colors
   (k-means in OKLab, the same every time) become every token: surfaces
   barely tinted in its main hue, text neutral, the accent the color that
   stands out (a color's shades count together, a hue unlike the backdrop
@@ -520,7 +525,7 @@ theme's picture). Your own pictures can't be used: behind Omarchy.
   (tested on light, dark, grey and one-color pictures). Font, shape and
   motion stay the theme's in use; the picture goes next to theme.toml,
   as its wallpaper. The same picture again is the same theme, made
-  over; `myarch themes remove ID` takes one away. Pictures are read by
+  over; `mazapan themes remove ID` takes one away. Pictures are read by
   ffmpeg or ImageMagick.
 - The wallpaper plugin: your pictures (`~/Pictures/Wallpapers`), per
   screen or all, fill / fit / center / tile, tinted with the theme (off,
@@ -558,7 +563,7 @@ What Omarchy has and this doesn't yet, in order of need:
 - `polkit`: the password prompt, in the theme, over a dimmed screen: what
   is asked for and by what, whose password (several: pick one), a shake
   on a wrong one, the fingerprint reader's messages; Esc, Cancel or
-  SUPER + Q refuse it; `myarch doctor` checks it's the session's agent.
+  SUPER + Q refuse it; `mazapan doctor` checks it's the session's agent.
 - `osd`: the volume, microphone, brightness and media keys (on the lock
   screen too, repeating when held). What they did, for a moment, on the
   focused screen, never in the way (clicks go through). Volume and the
@@ -620,7 +625,7 @@ An automatic one turned off by hand waits for its next time. Four to
 start with (Work, Presentation, Night, Game), edited in a panel; the
 bar shows the one that's on by its glyph, as macOS does. The plugins it
 drives each gained a small IPC for it: `notifications setMode`,
-`nightlight hold`, `myarch hide`/`widgets`. Left for later: larger text
+`nightlight hold`, `mazapan hide`/`widgets`. Left for later: larger text
 for presentations.
 
 ## 12. The desktop's history, visible
@@ -635,7 +640,7 @@ back (1), every apply undoable (6), but a system that no longer boots
 can't be saved. macOS's Time Machine is the visual timeline, for files.
 
 **Here today.** The data is there: every apply is a snapshot
-(`myarch undo --list`), every update in `myarch history`. Seen only in the
+(`mazapan undo --list`), every update in `mazapan history`. Seen only in the
 terminal.
 
 **Much better.** Both, in one place:
@@ -648,19 +653,19 @@ terminal.
   update, bootable from the boot menu (as Omarchy and openSUSE), shown in
   the same timeline. Closes 1's pending safety net.
 
-Only what goes through myarch is in the desktop's timeline: a file it
+Only what goes through Mazapán is in the desktop's timeline: a file it
 doesn't manage, edited by hand or by its app, isn't. The system snapshots
 cover the rest.
 
 *Done* (2026-09-29):
-- `myarch timeline [--json]`: every apply in words, from config.toml
+- `mazapan timeline [--json]`: every apply in words, from config.toml
   before and after (each snapshot now keeps both; older ones are read
   from their neighbours): theme, accent, language, a plugin on or off, a
   setting from one value to another (the default said), or whose files
   were rewritten; every update; every system snapshot.
-- `myarch timeline undo ID`: one change undone on its own, even an older
+- `mazapan timeline undo ID`: one change undone on its own, even an older
   one: only what's still as it left it, through a new apply (on the
-  timeline too). Files only: the last apply's. Updates: `myarch rollback`.
+  timeline too). Files only: the last apply's. Updates: `mazapan rollback`.
 - Plugin `history` (`SUPER + ALT + H`): the timeline by day, a theme's
   palettes before and after, each entry's undo (run detached: the apply
   reloads the shell), an update's rollback in a terminal.
@@ -676,7 +681,7 @@ cover the rest.
 ## 13. The same desktop anywhere
 
 `config.toml` and `plugins.lock` already make another machine the same
-(`myarch plugins sync && myarch apply`). One step for it: synced through
+(`mazapan plugins sync && mazapan apply`). One step for it: synced through
 git (or a service), with what's per-machine (monitors, hardware) kept
 apart.
 
@@ -687,7 +692,7 @@ workspaces, arranged so) and brought back with one key.
 
 ## 15. The CLI in your language
 
-The plugins are localized; myarch's own messages (apply, update, doctor)
+The plugins are localized; Mazapán's own messages (apply, update, doctor)
 are English only. Same locales, same fallbacks.
 
 ## Part three: what Omarchy has that this doesn't yet
@@ -724,7 +729,7 @@ selection is installed, and you remove what you don't want.
   the full list with checkboxes, for whoever wants it. The profiles'
   apps are in the offline mirror too; the few too big for it arrive in
   the background after the first boot, with progress in the bar.
-- Apps arrive configured and in the theme: each comes with its myarch
+- Apps arrive configured and in the theme: each comes with its Mazapán
   plugin (a theme, its integration) where there's one.
 - Built in steps, each usable on its own: the catalog and the Apps menu
   (17) first, on any Arch; then a first-boot welcome (language, keyboard,
@@ -733,7 +738,7 @@ selection is installed, and you remove what you don't want.
 
 *Done so far* (2026-09-30): the catalog and the Apps menu (17), and the
 welcome (plugin `welcome`): on the first login after the machine's first
-`myarch apply`, a screen each for the language (the whole desktop
+`mazapan apply`, a screen each for the language (the whole desktop
 switches at once), the keyboard (the common ones in your language, any
 other by search, a field to try it), the time zone (by city, or from the
 connection when asked), Wi-Fi when there's none, the look, and the
@@ -742,7 +747,7 @@ shows the keys as they are on that machine. Where it was is kept across
 the reloads it causes; Esc closes it until the next login.
 
 *The ISO* (2026-09-30): `iso/build` (in the dev VM: `vm/vm iso`) makes it
-from archiso's own profile, with myarch as a package (`pkg/PKGBUILD`) and
+from archiso's own profile, with Mazapán as a package (`pkg/PKGBUILD`) and
 an offline repository inside (everything an install puts on the disk,
 ~550 packages): an install downloads nothing and takes a minute or two.
 It starts into the live desktop, in the theme, and the installer (plugin
@@ -751,7 +756,7 @@ itself: language (the live desktop switches at once), keyboard (tried
 there), where you are, Wi-Fi only without a connection, the disk (all of
 it, only which one, with what's on it now said), the account (user and
 computer names from yours), profiles (several at once, each app to see
-for whoever wants to), a review, and a progress bar. `myarch install run`
+for whoever wants to), a review, and a progress bar. `mazapan install run`
 turns it into archinstall's configuration: GPT, btrfs (/, /home, logs,
 pacman's cache), `/boot` on btrfs (the snapshots boot with their kernel;
 encrypted, `/boot` is the EFI partition), GRUB, NetworkManager, PipeWire,
@@ -779,10 +784,10 @@ are shown and keys-only. Snapshots from the install on (2026-09-30):
 hw-snapshots and, with `/boot` on btrfs, hw-snapshots-grub turned on
 while installing, with a first snapshot of the system as installed,
 already in the boot menu; every package change adds its pair (the
-History panel lists them). myarch speaks Portuguese, French and German
+History panel lists them). Mazapán speaks Portuguese, French and German
 too (every plugin, the app catalog, the emoji names, the password
 dialog), and the installer offers the world's main languages, in
-English where myarch isn't translated yet. Next: unattended installs
+English where Mazapán isn't translated yet. Next: unattended installs
 with `cidata`, and trying it on real hardware.
 
 ## 17. Apps: install and remove
@@ -796,7 +801,7 @@ Remove offers every explicit package, core ones included.
 **Much better.** An Apps menu that already knows how to install what it
 offers, from the same catalog as the installer's profiles:
 - The catalog is data, not code: apps (what they are, their packages
-  from the official repositories or their Flatpak, the myarch plugins
+  from the official repositories or their Flatpak, the mazapan plugins
   that go with them) and profiles (sets of apps); in English and
   Spanish; others can add catalogs, as with plugins.
 - Profiles on top ("Install the Gaming profile"), then every app by
@@ -841,7 +846,7 @@ files, in a terminal, one finger only.
 - A Security page: fingerprints (add, name, remove several), security
   keys, where each is used (sudo, polkit, the lock screen, login), each
   step checked before it's relied on.
-- PAM through drop-ins and myarch's root files (undoable), never sed.
+- PAM through drop-ins and Mazapán's root files (undoable), never sed.
 - Disk unlock by TPM2 or a FIDO2 key where there's one (systemd-cryptenroll),
   the password kept as fallback; the disk password changed with a
   strength meter.
@@ -857,7 +862,7 @@ keyring, `pacman -Syu --noconfirm`, migrations, AUR, mise, orphans, a
 reboot prompt); channels (stable, rc, edge); firmware through fwupd in a
 terminal.
 
-**Much better.** Built on `myarch update` (1) and the snapshots (12):
+**Much better.** Built on `mazapan update` (1) and the snapshots (12):
 - The bar says there are updates (the whole system's, not only ours),
   checked in the background; a click shows them: what, from which
   version to which, which need a restart, news that needs reading
@@ -929,7 +934,7 @@ cheatsheets.
 ## Also pending
 
 - Built-in plugins have no README: their page in the Plugins panel is
-  empty (`myarch plugins check` says so).
-- An "updates available" widget; `myarch update` offering plugin updates;
+  empty (`mazapan plugins check` says so).
+- An "updates available" widget; `mazapan update` offering plugin updates;
   Chromium's accent through its policy.
 

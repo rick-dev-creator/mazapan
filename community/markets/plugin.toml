@@ -36,41 +36,41 @@ chart = { default = "candles", choices = ["candles", "line"] }
 # Prices and candles, fetched once for the bar and the panel.
 [[targets]]
 template = "qmldir.tmpl"
-output = "~/.config/quickshell/myarch/components/markets/qmldir"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/markets/qmldir"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "MarketsService.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/markets/MarketsService.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/markets/MarketsService.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "Sparkline.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/markets/Sparkline.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/markets/Sparkline.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "CandleChart.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/markets/CandleChart.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/markets/CandleChart.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "Ticker.qml.tmpl"
-output = "~/.config/quickshell/myarch/widgets/right/45-markets.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/widgets/right/45-markets.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "Markets.qml.tmpl"
-output = "~/.config/quickshell/myarch/panels/markets.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/panels/markets.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "markets.lua.tmpl"
-output = "~/.config/hypr/myarch/markets.lua"
+output = "~/.config/hypr/mazapan/markets.lua"
 reload = "hyprctl reload >/dev/null"
 
 [[actions]]
 name = "{{ t \"act.open\" }}"
-run = "qs ipc -c myarch call myarch panel markets"
+run = "qs ipc -c mazapan call mazapan panel markets"
 key = "{{ settings.key }}"
 keywords = "{{ t \"act.open.kw\" }}"

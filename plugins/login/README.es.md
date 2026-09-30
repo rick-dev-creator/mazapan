@@ -13,6 +13,6 @@ disco es el inicio de sesión). En un sistema con otro gestor de inicio de
 sesión (SDDM, GDM…), activarla lo reemplaza desde el siguiente arranque;
 desactivarla deja el inicio de sesión en texto.
 
-Sus archivos son del sistema: `myarch apply --system` los escribe, y un
+Sus archivos son del sistema: `mazapan apply --system` los escribe, y un
 tema nuevo llega a la pantalla de inicio de sesión con el siguiente
-`myarch apply --system`.
+`mazapan apply --system`.

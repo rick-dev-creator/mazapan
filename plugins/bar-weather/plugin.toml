@@ -23,15 +23,15 @@ refresh_minutes = { default = 15, min = 5, max = 180 }
 # Shared by the widget on every bar, so the data is fetched once.
 [[targets]]
 template = "qmldir.tmpl"
-output = "~/.config/quickshell/myarch/components/weather/qmldir"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/weather/qmldir"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "WeatherService.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/weather/WeatherService.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/weather/WeatherService.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "Weather.qml.tmpl"
-output = "~/.config/quickshell/myarch/widgets/center/10-weather.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/widgets/center/10-weather.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"

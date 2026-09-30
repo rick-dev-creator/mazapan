@@ -11,5 +11,5 @@ tono de piel; sus nombres y palabras clave son los de CLDR, en inglés,
 español, portugués, francés y alemán. Ambos son © Unicode, Inc., bajo la Unicode License v3
 (https://www.unicode.org/license.txt). Se dibujan con Noto Color Emoji.
 
-Lo que usaste está en `~/.local/state/myarch-emoji/recent.json` (`recent`
+Lo que usaste está en `~/.local/state/mazapan-emoji/recent.json` (`recent`
 de ellos, 32).

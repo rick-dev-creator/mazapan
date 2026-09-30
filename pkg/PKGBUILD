@@ -1,10 +1,10 @@
-# myarch as a package: the core (built beforehand with core/build), the
+# mazapan as a package: the core (built beforehand with core/build), the
 # built-in plugins, themes and catalog, and what they run. Built from this
 # checkout, not downloaded:
 #   cd pkg && makepkg
 # (iso/build does it for the ISO's own repository.)
 
-pkgname=myarch
+pkgname=mazapan
 pkgver=0.1.0
 pkgrel=1
 pkgdesc="A desktop on plain Arch: Hyprland + Quickshell, one theme across the whole system, everything a plugin"
@@ -12,10 +12,13 @@ arch=(x86_64)
 license=(unknown)
 options=(!strip !debug)
 
-_repo=$(realpath "${MYARCH_REPO:-$startdir/..}")
+_repo=$(realpath "${MAZAPAN_REPO:-$startdir/..}")
 
 # The desktop itself, and what every plugin that's on by default names in
 # its [packages] (hardware plugins are off until the machine needs them).
+# Mazapán was myarch until 2026-09-30: an update takes the old package's place.
+replaces=(myarch)
+conflicts=(myarch)
 depends=(
   hyprland quickshell qt6-wayland qt6-svg qt6-imageformats xdg-desktop-portal-hyprland
   pipewire pipewire-pulse wireplumber networkmanager polkit
@@ -34,15 +37,18 @@ pkgver() {
 }
 
 package() {
-  [[ -x $_repo/bin/myarch ]] || { echo "no $_repo/bin/myarch: run core/build first" >&2; return 1; }
-  # myarch finds its plugins/, themes/ and catalog/ next to the directory
+  [[ -x $_repo/bin/mazapan ]] || { echo "no $_repo/bin/mazapan: run core/build first" >&2; return 1; }
+  # mazapan finds its plugins/, themes/ and catalog/ next to the directory
   # its binary is in (through the symlink).
-  install -Dm755 "$_repo/bin/myarch" "$pkgdir/usr/lib/myarch/bin/myarch"
-  cp -r --no-preserve=ownership "$_repo/plugins" "$_repo/themes" "$_repo/catalog" "$pkgdir/usr/lib/myarch/"
+  install -Dm755 "$_repo/bin/mazapan" "$pkgdir/usr/lib/mazapan/bin/mazapan"
+  cp -r --no-preserve=ownership "$_repo/plugins" "$_repo/themes" "$_repo/catalog" "$pkgdir/usr/lib/mazapan/"
   install -d "$pkgdir/usr/bin"
-  ln -s /usr/lib/myarch/bin/myarch "$pkgdir/usr/bin/myarch"
+  ln -s /usr/lib/mazapan/bin/mazapan "$pkgdir/usr/bin/mazapan"
+  # Mazapán's icon: the mazapán alone, and the app's (on its sunset).
+  install -Dm644 "$_repo/assets/mazapan.svg" "$pkgdir/usr/share/pixmaps/mazapan.svg"
+  install -Dm644 "$_repo/assets/mazapan-app.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/mazapan.svg"
   # The password dialog's words for pacman through pkexec.
-  install -Dm644 "$_repo/pkg/org.myarch.pacman.policy" "$pkgdir/usr/share/polkit-1/actions/org.myarch.pacman.policy"
-  install -Dm644 "$_repo/README.md" "$pkgdir/usr/share/doc/myarch/README.md"
-  cp -r --no-preserve=ownership "$_repo/docs/." "$pkgdir/usr/share/doc/myarch/"
+  install -Dm644 "$_repo/pkg/org.mazapan.pacman.policy" "$pkgdir/usr/share/polkit-1/actions/org.mazapan.pacman.policy"
+  install -Dm644 "$_repo/README.md" "$pkgdir/usr/share/doc/mazapan/README.md"
+  cp -r --no-preserve=ownership "$_repo/docs/." "$pkgdir/usr/share/doc/mazapan/"
 }

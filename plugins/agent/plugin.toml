@@ -3,24 +3,24 @@ id = "agent"
 name = "Agent"
 version = "0.1.0"
 api = 1
-description = "Ask a coding agent about this desktop from the palette: it gets myarch's report (state, failing checks, crashes, logged errors) and myarch's own ways to change things safely"
+description = "Ask a coding agent about this desktop from the palette: it gets mazapan's report (state, failing checks, crashes, logged errors) and mazapan's own ways to change things safely"
 categories = ["agent", "tools"]
 
 [settings]
 # The agent to open, as its command: it gets the report as its first
 # message. "claude" is Claude Code; any agent that takes a prompt as its
-# argument works ("codex", "opencode run"…). To let it use myarch directly
+# argument works ("codex", "opencode run"…). To let it use mazapan directly
 # (status, previews, apply, undo), register the MCP server with it, e.g.
-#   claude mcp add --scope user myarch -- myarch mcp
+#   claude mcp add --scope user mazapan -- mazapan mcp
 command = "claude"
 
 [[actions]]
 name = "{{ t \"ask\" }}"
-run = "{{ settings.command }} \"$(myarch report)\""
+run = "{{ settings.command }} \"$(mazapan report)\""
 terminal = true
 keywords = "{{ t \"ask.kw\" }}"
 
 [[actions]]
 name = "{{ t \"report\" }}"
-run = "myarch report | wl-copy"
+run = "mazapan report | wl-copy"
 keywords = "{{ t \"report.kw\" }}"

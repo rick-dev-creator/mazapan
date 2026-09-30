@@ -7,7 +7,7 @@ agrupado por día (`SUPER + ALT + H`, o "Historial" en la paleta):
 - un plugin activado o desactivado;
 - archivos reescritos sin cambios en tus ajustes (la nueva versión de un
   plugin), por plugin;
-- una actualización (`myarch update`), y cómo fue;
+- una actualización (`mazapan update`), y cómo fue;
 - un snapshot del sistema, con `hw-snapshots`: el sistema antes y
   después de un cambio de paquetes, arrancable desde el menú de arranque
   con `hw-snapshots-grub`.
@@ -18,4 +18,4 @@ mañana, sin perder el tema que elegiste después), con un nuevo apply que
 también aparece aquí. Solo archivos: los del último cambio. Una
 actualización: se revierte en una terminal (pide tu contraseña).
 
-Desde una terminal: `myarch timeline` y `myarch timeline undo ID`.
+Desde una terminal: `mazapan timeline` y `mazapan timeline undo ID`.

@@ -16,8 +16,8 @@ Lo que muestra el escritorio detrás de las ventanas.
 - **Un tema desde cualquier foto**: "Tema desde esta foto" (o `t`) hace un
   tema completo con sus colores, con todos los contrastes comprobados, y lo
   pone: el terminal, las apps GTK y Qt, los navegadores, VS Code, Neovim y
-  el shell, todo con los colores de la foto. También `myarch themes
-  from-image FOTO [--apply]`; `myarch themes remove ID` quita uno.
+  el shell, todo con los colores de la foto. También `mazapan themes
+  from-image FOTO [--apply]`; `mazapan themes remove ID` quita uno.
 
-Tu elección se guarda en `~/.local/state/myarch-wallpaper/`: cambiarla no
+Tu elección se guarda en `~/.local/state/mazapan-wallpaper/`: cambiarla no
 recarga nada. Leer los colores de una foto necesita ffmpeg (o ImageMagick).

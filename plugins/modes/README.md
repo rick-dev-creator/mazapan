@@ -21,7 +21,7 @@ waits for its next time; one turned on by hand stays until you turn it
 off. While one is on, the bar shows it; a click switches or turns it
 off.
 
-The modes are kept in `~/.local/state/myarch-modes/modes.json`. A mode
+The modes are kept in `~/.local/state/mazapan-modes/modes.json`. A mode
 does what the plugins you have can do: quiet needs `notifications`,
 night light `night-light`, keep awake `idle`, the power profile
 power-profiles-daemon.

@@ -1,7 +1,7 @@
 "plugin.name" = "Agente"
-"plugin.description" = "Pregunta a un agente de programación sobre este escritorio desde la paleta: recibe el informe de myarch (estado, comprobaciones que fallan, cierres inesperados, errores registrados) y las formas de myarch de cambiar las cosas con seguridad"
+"plugin.description" = "Pregunta a un agente de programación sobre este escritorio desde la paleta: recibe el informe de Mazapán (estado, comprobaciones que fallan, cierres inesperados, errores registrados) y las formas de Mazapán de cambiar las cosas con seguridad"
 "setting.command" = "Comando"
-"setting.command.help" = "El agente que se abre, como comando: recibe el informe como primer mensaje. \"claude\" es Claude Code; sirve cualquier agente que acepte una petición como argumento (\"codex\", \"opencode run\"…). Para que use myarch directamente (estado, vistas previas, aplicar, deshacer), registra el servidor MCP con él, p. ej. claude mcp add --scope user myarch -- myarch mcp"
+"setting.command.help" = "El agente que se abre, como comando: recibe el informe como primer mensaje. \"claude\" es Claude Code; sirve cualquier agente que acepte una petición como argumento (\"codex\", \"opencode run\"…). Para que use Mazapán directamente (estado, vistas previas, aplicar, deshacer), registra el servidor MCP con él, p. ej. claude mcp add --scope user mazapan -- mazapan mcp"
 
 ask = "Preguntar a un agente sobre este escritorio"
 "ask.kw" = "ia ayuda fallo roto arreglar claude asistente"

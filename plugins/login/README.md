@@ -12,5 +12,5 @@ password is the login). On a system with another login manager (SDDM,
 GDM…), turning it on takes its place from the next start; turning it off
 leaves the text login.
 
-Its files are system files: `myarch apply --system` writes them, and a
-new theme reaches the login screen on the next `myarch apply --system`.
+Its files are system files: `mazapan apply --system` writes them, and a
+new theme reaches the login screen on the next `mazapan apply --system`.

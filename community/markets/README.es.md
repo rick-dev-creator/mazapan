@@ -36,6 +36,6 @@ mismo símbolo en varias temporalidades.
 Los precios están en USD (una acción en otra moneda la indica). Los
 símbolos fijados se actualizan cada `refresh_seconds`; el resto, solo con
 el panel abierto. Tus listas están en
-`~/.local/state/myarch-markets/watchlist.json`.
+`~/.local/state/mazapan-markets/watchlist.json`.
 
 No es asesoría de inversión; los datos pueden llegar con retraso.

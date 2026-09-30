@@ -16,7 +16,7 @@ fnmode = { default = 2, choices = [0, 1, 2, 3] }
 
 [[targets]]
 template = "hid-apple.conf.tmpl"
-output = "/etc/modprobe.d/myarch-hid-apple.conf"
+output = "/etc/modprobe.d/mazapan-hid-apple.conf"
 system = true
 # Now, without a reboot: the loaded driver takes it too.
 reload = "[ -w /sys/module/hid_apple/parameters/fnmode ] && echo {{ settings.fnmode }} > /sys/module/hid_apple/parameters/fnmode || true"

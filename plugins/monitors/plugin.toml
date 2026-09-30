@@ -18,25 +18,25 @@ notify_unknown = true
 # An icon in the bar (right side) that opens the manager.
 bar = true
 
-# The engine: reads ~/.config/myarch/monitors.json (your profiles; the
+# The engine: reads ~/.config/mazapan/monitors.json (your profiles; the
 # manager writes it, you can too) and applies the one that matches.
 [[targets]]
 template = "monitors.lua.tmpl"
-output = "~/.config/hypr/myarch/monitors.lua"
+output = "~/.config/hypr/mazapan/monitors.lua"
 reload = "hyprctl reload >/dev/null"
 
 [[targets]]
 template = "Manager.qml.tmpl"
-output = "~/.config/quickshell/myarch/panels/monitors.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/panels/monitors.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "Widget.qml.tmpl"
-output = "~/.config/quickshell/myarch/widgets/right/05-monitors.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/widgets/right/05-monitors.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[actions]]
 name = "{{ t \"open\" }}"
-run = "qs ipc -c myarch call myarch panel monitors"
+run = "qs ipc -c mazapan call mazapan panel monitors"
 key = "{{ settings.key }}"
 keywords = "{{ t \"open.kw\" }}"

@@ -10,7 +10,7 @@ lector de huellas también salen ahí.
 
 Sin un agente, esas peticiones fallan sin decir nada. Polkit admite un
 agente por sesión: si otro (el de GNOME, el de KDE, hyprpolkitagent) llegó
-antes, `myarch doctor` lo avisa.
+antes, `mazapan doctor` lo avisa.
 
 La contraseña va a polkit y a ningún otro sitio: el campo se vacía en
 cuanto se envía.

@@ -7,7 +7,7 @@
 "setting.show_commands" = "Mostrar comandos"
 "setting.show_commands.help" = "Mostra o comando por trás de cada resultado, para você aprender no caminho."
 "setting.terminal" = "Terminal"
-"setting.terminal.help" = "Os apps de terminal (btop…) abrem neste terminal; os comandos que perguntam ou imprimem (myarch update), no terminal_hold, que fica aberto depois. Comandos de shell: use aspas como num shell."
+"setting.terminal.help" = "Os apps de terminal (btop…) abrem neste terminal; os comandos que perguntam ou imprimem (mazapan update), no terminal_hold, que fica aberto depois. Comandos de shell: use aspas como num shell."
 "setting.terminal_hold" = "Terminal que fica aberto"
 "setting.terminal_hold.help" = "O terminal para os comandos que perguntam ou imprimem: fica aberto ao terminar, para você ler."
 

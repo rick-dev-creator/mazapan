@@ -16,16 +16,16 @@ key = "SUPER + ALT + A"
 
 [[targets]]
 template = "Apps.qml.tmpl"
-output = "~/.config/quickshell/myarch/panels/apps.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/panels/apps.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "apps.lua.tmpl"
-output = "~/.config/hypr/myarch/apps.lua"
+output = "~/.config/hypr/mazapan/apps.lua"
 reload = "hyprctl reload >/dev/null"
 
 [[actions]]
 name = "{{ t \"act.open\" }}"
-run = "qs ipc -c myarch call myarch panel apps"
+run = "qs ipc -c mazapan call mazapan panel apps"
 key = "{{ settings.key }}"
 keywords = "{{ t \"act.open.kw\" }}"

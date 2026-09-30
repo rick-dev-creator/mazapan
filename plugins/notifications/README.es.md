@@ -22,9 +22,9 @@ Las notificaciones de todas las apps, con el tema.
 
 Es el servidor de notificaciones del escritorio
 (`org.freedesktop.Notifications`): otro en marcha o instalado (mako,
-dunst…) ocuparía su lugar; `myarch doctor` lo avisa. Los avisos esperan
+dunst…) ocuparía su lugar; `mazapan doctor` lo avisa. Los avisos esperan
 mientras se hace una captura o una grabación. Las apps se reconocen por el
 nombre que dan: una regla para una (No molestar) vale para lo que use su
 nombre. Las notificaciones se guardan en
-`~/.local/state/myarch-notifications/`. Lo que dicen se muestra como texto:
+`~/.local/state/mazapan-notifications/`. Lo que dicen se muestra como texto:
 no se abren enlaces ni se descargan imágenes de ningún sitio.

@@ -1,6 +1,6 @@
 # Contributing
 
-myarch is for anyone, anywhere: any language, keyboard, time zone and
+Mazapán is for anyone, anywhere: any language, keyboard, time zone and
 machine. Contributions that make it work better somewhere it doesn't yet
 are the most welcome.
 
@@ -10,15 +10,15 @@ their language.
 ## Build and test
 
 ```sh
-core/build test        # the core (needs the .NET 10 SDK and clang): tests, then bin/myarch
+core/build test        # the core (needs the .NET 10 SDK and clang): tests, then bin/mazapan
 ```
 
-Everything that runs myarch runs in a VM, never on the machine you work
+Everything that runs Mazapán runs in a VM, never on the machine you work
 on (it rewrites your desktop's files):
 
 ```sh
 vm/vm start            # the dev VM: Arch + Hyprland, this checkout shared at ~/my-arch
-vm/vm run 'myarch apply'
+vm/vm run 'mazapan apply'
 vm/vm shot             # a screenshot of its desktop
 ```
 
@@ -26,12 +26,12 @@ The ISO is built in the dev VM and tried in a second one, with a blank
 disk:
 
 ```sh
-vm/vm iso              # iso/build in the dev VM: vm/.state/iso/myarch-*.iso
+vm/vm iso              # iso/build in the dev VM: vm/.state/iso/mazapan-*.iso
 vm/vm try headless     # boot it (UEFI); vm/vm try start to watch it
 vm/vm try shot         # the live desktop; vm/vm try mouse/key to go through the installer
 ```
 
-After an install, `MYARCH_TRY_USER=<the account> vm/vm try ssh` reaches
+After an install, `MAZAPAN_TRY_USER=<the account> vm/vm try ssh` reaches
 the installed system (the installer gives it the live system's SSH keys,
 which `vm/vm` puts there).
 
@@ -44,18 +44,18 @@ in the plugins you translate, with the same keys, and the catalog's
 `translations.<lang>.*` in `catalog/apps.toml`, and `self = "<its name>"`
 in `plugins/installer/locales/<lang>.toml`.
 
-The installer offers the world's main languages whether or not myarch is
+The installer offers the world's main languages whether or not Mazapán is
 translated to them: the system and its apps speak the one chosen (its
 locale comes from the language and the time zone,
-`core/src/MyArch/Setup/Locales.cs`), and myarch's own screens show in
+`core/src/Mazapan/Setup/Locales.cs`), and Mazapán's own screens show in
 English where a translation is missing, which the installer says. Those
 with a translation come first; a new one moves up by itself.
 
 ## A plugin
 
 ```sh
-myarch plugins new my-widget --kind bar    # in the VM
-myarch plugins check my-widget             # every theme × every language, and what it can do
+mazapan plugins new my-widget --kind bar    # in the VM
+mazapan plugins check my-widget             # every theme × every language, and what it can do
 ```
 
 See [docs/plugin-api.md](docs/plugin-api.md). A plugin says what it

@@ -18,8 +18,8 @@ bar = true
 
 [[targets]]
 template = "Power.qml.tmpl"
-output = "~/.config/quickshell/myarch/widgets/center/30-power.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/widgets/center/30-power.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "hyprlock.conf.tmpl"
@@ -27,7 +27,7 @@ output = "~/.config/hypr/hyprlock.conf"
 
 [[targets]]
 template = "power.lua.tmpl"
-output = "~/.config/hypr/myarch/power.lua"
+output = "~/.config/hypr/mazapan/power.lua"
 reload = "hyprctl reload >/dev/null"
 
 # The same commands the button runs (see Power.qml.tmpl).

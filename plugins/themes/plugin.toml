@@ -16,22 +16,22 @@ key = "SUPER + SHIFT + T"
 
 [[targets]]
 template = "themes.lua.tmpl"
-output = "~/.config/hypr/myarch/themes.lua"
+output = "~/.config/hypr/mazapan/themes.lua"
 reload = "hyprctl reload >/dev/null"
 
 [[targets]]
 template = "Picker.qml.tmpl"
-output = "~/.config/quickshell/myarch/panels/themes.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/panels/themes.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[actions]]
 name = "{{ t \"act.pick\" }}"
-run = "qs ipc -c myarch call myarch panel themes"
+run = "qs ipc -c mazapan call mazapan panel themes"
 key = "{{ settings.key }}"
 keywords = "{{ t \"act.pick.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.list\" }}"
-run = "myarch themes"
+run = "mazapan themes"
 terminal = true
 keywords = "{{ t \"act.list.kw\" }}"

@@ -17,8 +17,8 @@ hide_without_adapter = true
 
 [[targets]]
 template = "Bluetooth.qml.tmpl"
-output = "~/.config/quickshell/myarch/widgets/right/20-bluetooth.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/widgets/right/20-bluetooth.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 # If you use Bluetooth (an adapter, and bluetooth.service enabled), BlueZ
 # runs. No adapter, or a service you never enabled (Arch doesn't by

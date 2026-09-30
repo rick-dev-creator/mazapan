@@ -13,7 +13,7 @@
 "disabled" = "off"
 "loading" = "Reading the plugins…"
 "fetching" = "Fetching %1 to look at it…"
-"unreadable" = "Couldn't read the plugins (myarch plugins catalog --json)"
+"unreadable" = "Couldn't read the plugins (mazapan plugins catalog --json)"
 "none" = "Nothing here"
 "install" = "Install"
 "enable" = "Turn on"

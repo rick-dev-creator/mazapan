@@ -10,7 +10,7 @@ categories = ["theme"]
 pacman = []
 
 # Every profile's Preferences, which the browser rewrites all the time:
-# only the theme key is myarch's. While the browser runs (SingletonLock in
+# only the theme key is mazapan's. While the browser runs (SingletonLock in
 # its data folder) it's left alone: it would write its own copy back.
 # Its accent stays the browser's: only a system policy sets that, and one
 # that sets a theme color (BrowserThemeColor) wins over GTK mode.

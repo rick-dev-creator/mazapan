@@ -38,7 +38,7 @@ done
 
 # myarch as built from the mounted repo, on everyone's PATH: the desktop
 # runs it too (the command palette's actions), not just shells.
-ln -sf "/home/$user/my-arch/bin/myarch" /usr/local/bin/myarch
+ln -sf "/home/$user/my-arch/bin/mazapan" /usr/local/bin/mazapan
 
 # Quickshell's network module talks to NetworkManager; the cloud image
 # ships systemd-networkd. The switch drops the network for a moment, which

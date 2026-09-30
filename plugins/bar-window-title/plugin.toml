@@ -18,5 +18,5 @@ max_width = { default = 520, min = 100, max = 2000 }
 
 [[targets]]
 template = "Title.qml.tmpl"
-output = "~/.config/quickshell/myarch/widgets/left/20-title.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/widgets/left/20-title.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"

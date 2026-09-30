@@ -12,18 +12,18 @@ pacman = ["curl", "file", "jq", "libnotify", "xdg-utils", "qt6-imageformats"]
 
 [[targets]]
 template = "webapp.sh.tmpl"
-output = "~/.local/share/myarch/bin/webapp"
+output = "~/.local/share/mazapan/bin/webapp"
 
 [[targets]]
 template = "Webapps.qml.tmpl"
-output = "~/.config/quickshell/myarch/panels/webapps.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/panels/webapps.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[actions]]
 name = "{{ t \"act.open\" }}"
-run = "qs ipc -c myarch call myarch panel webapps"
+run = "qs ipc -c mazapan call mazapan panel webapps"
 keywords = "{{ t \"act.open.kw\" }}"
 
 [[checks]]
 name = "{{ t \"check.browser\" }}"
-run = "sh ~/.local/share/myarch/bin/webapp browser >/dev/null"
+run = "sh ~/.local/share/mazapan/bin/webapp browser >/dev/null"

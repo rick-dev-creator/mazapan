@@ -28,42 +28,42 @@ night_from = { default = "19:00", kind = "text" }
 # What each screen shows, shared by the wallpaper and the picker.
 [[targets]]
 template = "qmldir.tmpl"
-output = "~/.config/quickshell/myarch/components/wallpaper/qmldir"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/wallpaper/qmldir"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "WallpaperService.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/wallpaper/WallpaperService.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/wallpaper/WallpaperService.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "Wallpaper.qml.tmpl"
-output = "~/.config/quickshell/myarch/panels/wallpaper.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/panels/wallpaper.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "Picker.qml.tmpl"
-output = "~/.config/quickshell/myarch/panels/wallpapers.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/panels/wallpapers.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "wallpaper.lua.tmpl"
-output = "~/.config/hypr/myarch/wallpaper.lua"
+output = "~/.config/hypr/mazapan/wallpaper.lua"
 reload = "hyprctl reload >/dev/null"
 
 [[actions]]
 name = "{{ t \"act.pick\" }}"
-run = "qs ipc -c myarch call myarch panel wallpapers"
+run = "qs ipc -c mazapan call mazapan panel wallpapers"
 key = "{{ settings.key }}"
 keywords = "{{ t \"act.pick.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.next\" }}"
-run = "qs ipc -c myarch call wallpaper next"
+run = "qs ipc -c mazapan call wallpaper next"
 key = "{{ settings.next_key }}"
 keywords = "{{ t \"act.next.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.theme\" }}"
-run = "qs ipc -c myarch call wallpaper theme"
+run = "qs ipc -c mazapan call wallpaper theme"
 keywords = "{{ t \"act.theme.kw\" }}"

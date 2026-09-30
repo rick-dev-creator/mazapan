@@ -7,7 +7,7 @@
 "setting.show_commands" = "Befehle anzeigen"
 "setting.show_commands.help" = "Zeigt den Befehl hinter jedem Ergebnis, damit du ihn nebenbei lernst."
 "setting.terminal" = "Terminal"
-"setting.terminal.help" = "Terminal-Apps (btop…) öffnen sich in diesem Terminal; Befehle, die nachfragen oder etwas ausgeben (myarch update), in terminal_hold, das danach offen bleibt. Shell-Befehle: Setze Anführungszeichen wie in einer Shell."
+"setting.terminal.help" = "Terminal-Apps (btop…) öffnen sich in diesem Terminal; Befehle, die nachfragen oder etwas ausgeben (mazapan update), in terminal_hold, das danach offen bleibt. Shell-Befehle: Setze Anführungszeichen wie in einer Shell."
 "setting.terminal_hold" = "Terminal, das offen bleibt"
 "setting.terminal_hold.help" = "Das Terminal für Befehle, die nachfragen oder etwas ausgeben: Es bleibt danach offen, zum Nachlesen."
 

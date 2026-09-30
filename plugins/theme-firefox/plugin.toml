@@ -13,16 +13,16 @@ pacman = []
 # Firefox reads these when it starts: restart it to see a new theme.
 [[targets]]
 template = "theme.css.tmpl"
-output = "chrome/myarch.css"
+output = "chrome/mazapan.css"
 each = ["~/.config/mozilla/firefox/*/prefs.js", "~/.mozilla/firefox/*/prefs.js", "~/.config/zen/*/prefs.js", "~/.zen/*/prefs.js", "~/.librewolf/*/prefs.js", "~/.floorp/*/prefs.js", "~/.waterfox/*/prefs.js"]
 
 [[targets]]
 template = "content.css.tmpl"
-output = "chrome/myarch-content.css"
+output = "chrome/mazapan-content.css"
 each = ["~/.config/mozilla/firefox/*/prefs.js", "~/.mozilla/firefox/*/prefs.js", "~/.config/zen/*/prefs.js", "~/.zen/*/prefs.js", "~/.librewolf/*/prefs.js", "~/.floorp/*/prefs.js", "~/.waterfox/*/prefs.js"]
 
 # userChrome.css and userContent.css may be yours (Zen mods, your own CSS):
-# only the @import of the theme is myarch's.
+# only the @import of the theme is mazapan's.
 [[targets]]
 template = "userChrome.css.tmpl"
 output = "chrome/userChrome.css"
@@ -35,7 +35,7 @@ output = "chrome/userContent.css"
 merge = "lines"
 each = ["~/.config/mozilla/firefox/*/prefs.js", "~/.mozilla/firefox/*/prefs.js", "~/.config/zen/*/prefs.js", "~/.zen/*/prefs.js", "~/.librewolf/*/prefs.js", "~/.floorp/*/prefs.js", "~/.waterfox/*/prefs.js"]
 
-# user.js may be yours too (arkenfox…): only these prefs are myarch's.
+# user.js may be yours too (arkenfox…): only these prefs are mazapan's.
 [[targets]]
 template = "user.js.tmpl"
 output = "user.js"

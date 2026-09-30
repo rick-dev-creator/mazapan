@@ -15,10 +15,10 @@ propia (la EFI, lo que hace archinstall por defecto), un snapshot
 arrancaría con el kernel de hoy y sus propios módulos, más viejos.
 Necesita mkinitcpio (no dracut); un drop-in tuyo en
 `/etc/mkinitcpio.conf.d` que ponga `HOOKS=(…)` después de este le quita
-la capa (`myarch doctor` no puede mirar dentro del initramfs).
+la capa (`mazapan doctor` no puede mirar dentro del initramfs).
 
-Desactivado hasta que lo activas: `myarch plugins enable
-hw-snapshots-grub && myarch apply --system`. Si lo desactivas,
+Desactivado hasta que lo activas: `mazapan plugins enable
+hw-snapshots-grub && mazapan apply --system`. Si lo desactivas,
 grub-btrfsd se detiene y las entradas que ya están siguen arrancando;
 quita grub-btrfs para sacarlas del menú. Limine: todavía no
 (limine-snapper-sync no está en los repositorios de Arch).

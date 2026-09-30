@@ -18,5 +18,5 @@ pacman = ["fcitx5", "fcitx5-gtk", "fcitx5-qt", "fcitx5-configtool", "fcitx5-mozc
 # through XMODIFIERS, Wayland ones through the compositor (text-input).
 [[targets]]
 template = "input-method.lua.tmpl"
-output = "~/.config/hypr/myarch/input-method.lua"
+output = "~/.config/hypr/mazapan/input-method.lua"
 reload = "hyprctl reload >/dev/null; pgrep -x fcitx5 >/dev/null || hyprctl dispatch 'hl.dsp.exec_cmd(\"fcitx5 -d --replace\")' >/dev/null"

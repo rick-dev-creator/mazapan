@@ -25,9 +25,9 @@ keep = { default = 10, min = 3, max = 50 }
 # daemon otherwise): the same as root, and it works while installing too.
 [[targets]]
 template = "snapshots.conf.tmpl"
-output = "/etc/tmpfiles.d/myarch-snapshots.conf"
+output = "/etc/tmpfiles.d/mazapan-snapshots.conf"
 system = true
-reload = "[ -e /etc/tmpfiles.d/myarch-snapshots.conf ] || exit 0; if ! grep -qE '^SNAPPER_CONFIGS=.*[\" ]root[\" ]' /etc/conf.d/snapper 2>/dev/null; then if mountpoint -q /.snapshots; then umount /.snapshots && rmdir /.snapshots && snapper --no-dbus -c root create-config / && btrfs subvolume delete /.snapshots && mkdir /.snapshots && mount /.snapshots || exit 1; else snapper --no-dbus -c root create-config / || exit 1; fi; fi; snapper --no-dbus -c root set-config TIMELINE_CREATE=no NUMBER_CLEANUP=yes NUMBER_LIMIT={{ settings.keep * 2 }} NUMBER_LIMIT_IMPORTANT={{ settings.keep * 2 }} && chmod 0755 /.snapshots && systemctl enable --now snapper-cleanup.timer"
+reload = "[ -e /etc/tmpfiles.d/mazapan-snapshots.conf ] || exit 0; if ! grep -qE '^SNAPPER_CONFIGS=.*[\" ]root[\" ]' /etc/conf.d/snapper 2>/dev/null; then if mountpoint -q /.snapshots; then umount /.snapshots && rmdir /.snapshots && snapper --no-dbus -c root create-config / && btrfs subvolume delete /.snapshots && mkdir /.snapshots && mount /.snapshots || exit 1; else snapper --no-dbus -c root create-config / || exit 1; fi; fi; snapper --no-dbus -c root set-config TIMELINE_CREATE=no NUMBER_CLEANUP=yes NUMBER_LIMIT={{ settings.keep * 2 }} NUMBER_LIMIT_IMPORTANT={{ settings.keep * 2 }} && chmod 0755 /.snapshots && systemctl enable --now snapper-cleanup.timer"
 
 [[checks]]
 name = "{{ t \"check.config\" }}"

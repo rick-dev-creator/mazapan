@@ -33,7 +33,7 @@
 "mirror" = "espejo de"
 "mirror_none" = "ninguna"
 "unsupported" = "No compatible, se quedó apagado: %1."
-"unreadable" = "No se puede leer ~/.config/myarch/monitors.json (%1): corrígelo o apártalo antes de guardar, para no perder ningún perfil."
+"unreadable" = "No se puede leer ~/.config/mazapan/monitors.json (%1): corrígelo o apártalo antes de guardar, para no perder ningún perfil."
 "nothing_visible" = "Al menos una pantalla tiene que quedar encendida y no ser espejo."
 "open" = "Acomodar monitores"
 "open.kw" = "pantallas monitores resolución escala acomodar"

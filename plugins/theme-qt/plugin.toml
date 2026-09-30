@@ -18,7 +18,7 @@ icon_theme = "Adwaita"
 
 # Qt apps read these when they start: open ones keep their colors.
 # qt6ct rewrites its file (and KDE apps kdeglobals, with their own
-# settings): shared, myarch only manages the keys it writes.
+# settings): shared, mazapan only manages the keys it writes.
 [[targets]]
 template = "qt6ct.conf.tmpl"
 output = "~/.config/qt6ct/qt6ct.conf"
@@ -26,7 +26,7 @@ merge = "ini"
 
 [[targets]]
 template = "colors.conf.tmpl"
-output = "~/.config/qt6ct/colors/myarch.conf"
+output = "~/.config/qt6ct/colors/mazapan.conf"
 
 [[targets]]
 template = "kdeglobals.tmpl"
@@ -35,7 +35,7 @@ merge = "ini"
 
 [[targets]]
 template = "qt.lua.tmpl"
-output = "~/.config/hypr/myarch/qt.lua"
+output = "~/.config/hypr/mazapan/qt.lua"
 reload = "hyprctl reload >/dev/null"
 
 [[checks]]

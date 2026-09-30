@@ -1,6 +1,6 @@
-# Added to releng's packages for the live system. myarch brings the
+# Added to releng's packages for the live system. mazapan brings the
 # desktop with it (pkg/PKGBUILD's depends).
-myarch
+mazapan
 # Names and text in Chinese, Japanese, Korean (the rest of the world's
-# scripts are in noto-fonts, which myarch brings).
+# scripts are in noto-fonts, which mazapan brings).
 noto-fonts-cjk

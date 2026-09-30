@@ -11,23 +11,23 @@ pacman = ["neovim"]
 
 [settings]
 # Use it on its own when your config sets no colorscheme. With one (e.g.
-# LazyVim), set yours to "myarch".
+# LazyVim), set yours to "mazapan".
 auto = true
 
 # In Neovim's data folder (on its runtimepath, kept by lazy.nvim), not in
 # ~/.config/nvim: that one is yours (and LazyVim's installer wants it empty).
 [[targets]]
-template = "myarch.lua.tmpl"
-output = "~/.local/share/nvim/site/colors/myarch.lua"
-reload = "sh ~/.local/share/myarch/bin/nvim-recolor"
+template = "mazapan.lua.tmpl"
+output = "~/.local/share/nvim/site/colors/mazapan.lua"
+reload = "sh ~/.local/share/mazapan/bin/nvim-recolor"
 
 [[targets]]
 template = "auto.lua.tmpl"
-output = "~/.local/share/nvim/site/plugin/myarch-theme.lua"
+output = "~/.local/share/nvim/site/plugin/mazapan-theme.lua"
 
 [[targets]]
 template = "recolor.sh.tmpl"
-output = "~/.local/share/myarch/bin/nvim-recolor"
+output = "~/.local/share/mazapan/bin/nvim-recolor"
 
 [coverage]
 apps = ["nvim", "neovim"]

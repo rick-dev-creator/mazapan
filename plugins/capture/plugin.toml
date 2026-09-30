@@ -23,27 +23,27 @@ audio = false
 
 [[targets]]
 template = "capture.lua.tmpl"
-output = "~/.config/hypr/myarch/capture.lua"
+output = "~/.config/hypr/mazapan/capture.lua"
 reload = "hyprctl reload >/dev/null"
 
 [[targets]]
 template = "Capture.qml.tmpl"
-output = "~/.config/quickshell/myarch/panels/capture.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/panels/capture.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 # The recording, in the bar while it lasts: click to stop.
 [[targets]]
 template = "Recording.qml.tmpl"
-output = "~/.config/quickshell/myarch/widgets/center/40-recording.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/widgets/center/40-recording.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[actions]]
 name = "{{ t \"act.capture\" }}"
-run = "qs ipc -c myarch call myarch panel capture"
+run = "qs ipc -c mazapan call mazapan panel capture"
 key = "{{ settings.key }}"
 keywords = "{{ t \"act.capture.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.stop\" }}"
-run = "kill -INT \"$(cut -d' ' -f1 \"${XDG_RUNTIME_DIR}/myarch-capture/recording\")\""
+run = "kill -INT \"$(cut -d' ' -f1 \"${XDG_RUNTIME_DIR}/mazapan-capture/recording\")\""
 keywords = "{{ t \"act.stop.kw\" }}"

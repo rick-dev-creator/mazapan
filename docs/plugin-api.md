@@ -1,20 +1,20 @@
 # Plugin API v1
 
-Everything myarch does is a plugin, built-ins included: they use exactly
+Everything Mazapán does is a plugin, built-ins included: they use exactly
 the API described here. If something can't be expressed with it, the API
 grows; built-ins never get a private path.
 
 ## Where plugins live
 
 ```
-~/.local/share/myarch/plugins/<id>/plugin.toml    from git, or your own (searched first)
+~/.local/share/mazapan/plugins/<id>/plugin.toml    from git, or your own (searched first)
 <repo>/plugins/<dir>/plugin.toml                  built-ins
 ```
 
 A plugin in the user directory shadows the built-in with the same id (your
 own; one from git can't take a built-in's id). Turn plugins on and off with
-`myarch plugins enable|disable <id>…`, which is `disabled_plugins` in
-`~/.config/myarch/config.toml`:
+`mazapan plugins enable|disable <id>…`, which is `disabled_plugins` in
+`~/.config/mazapan/config.toml`:
 
 ```toml
 theme = "phosphor"
@@ -24,11 +24,11 @@ disabled_plugins = ["theme-foot"]
 ## Plugins from git
 
 ```sh
-myarch plugins add https://github.com/you/myarch-hello[#ref]   # asks first
-myarch plugins show hello        # requirements, settings, what it can do
-myarch plugins update [hello[#ref]]
-myarch plugins remove hello      # myarch apply then takes its files away
-myarch plugins sync              # install what plugins.lock says (another machine)
+mazapan plugins add https://github.com/you/mazapan-hello[#ref]   # asks first
+mazapan plugins show hello        # requirements, settings, what it can do
+mazapan plugins update [hello[#ref]]
+mazapan plugins remove hello      # mazapan apply then takes its files away
+mazapan plugins sync              # install what plugins.lock says (another machine)
 ```
 
 `add` clones the repository (its root holds plugin.toml; no symlinks or
@@ -54,21 +54,21 @@ its manifest, not taken from its word:
 Nothing is installed until you say yes (`-y` says it without asking;
 without a terminal there is no other yes).
 
-`~/.config/myarch/plugins.lock` keeps, for each one, its source, the branch
+`~/.config/mazapan/plugins.lock` keeps, for each one, its source, the branch
 or tag it follows, the exact commit, and what you approved. With
-config.toml, it's all another machine needs: `myarch plugins sync && myarch
+config.toml, it's all another machine needs: `mazapan plugins sync && Mazapán
 apply`.
 
 `update` looks at the new version beside the installed one, shows its
 commits, and asks again only when it needs something you didn't approve;
-the plugin moves only then. `myarch apply` (and doctor, and the rest)
+the plugin moves only then. `mazapan apply` (and doctor, and the rest)
 refuses a plugin from git that isn't what the lock says: at another commit,
 with any file edited or added (even ignored ones: every `*.tmpl` in the
 folder is parsed), needing more than was approved, or a checkout the lock
 doesn't list. git runs without your git config or hooks.
 
-No plugin writes into myarch's own folders (`~/.config/myarch`,
-`~/.local/share/myarch` but its `bin/`, `~/.local/state/myarch`); outputs
+No plugin writes into Mazapán's own folders (`~/.config/mazapan`,
+`~/.local/share/mazapan` but its `bin/`, `~/.local/state/mazapan`); outputs
 start with `~/` or `/` and never go up with `..`. Approving "full access"
 is trusting its author, like any extension: that code runs with your
 rights.
@@ -80,11 +80,11 @@ Your own plugins (a folder you put there, not a git checkout, or a link
 
 A catalog lists plugins one can add: only where each lives and what it is.
 Adding one is still `plugins add`, with what it can do shown and approved.
-myarch ships one (`catalog/index.toml`); config.toml adds others, paths or
+Mazapán ships one (`catalog/index.toml`); config.toml adds others, paths or
 https URLs (fetched at most once a day, `--refresh` to fetch now):
 
 ```toml
-catalogs = ["https://example.com/myarch/index.toml"]
+catalogs = ["https://example.com/mazapan/index.toml"]
 ```
 
 ```toml
@@ -93,7 +93,7 @@ id = "bar-uptime"                # its plugin.toml's id
 name = "Uptime"
 description = "How long the machine has been up, in the bar"
 author = "Ana"
-source = "https://github.com/ana/myarch-uptime"
+source = "https://github.com/ana/mazapan-uptime"
 ref = "v1.3"                     # tag or branch; none: the default branch
 categories = ["bar"]             # bar, panel, theme, window, hardware, tools, agent
 homepage = "https://…"
@@ -107,10 +107,10 @@ anything new, and never to a lower version. A ref you pick yourself
 (`plugins update ID#REF`) ends that.
 
 ```sh
-myarch plugins catalog [--json]    # every plugin: built in, yours, installed, available
-myarch plugins search TERM…
-myarch plugins preview ID|URL      # its page, without installing it
-myarch plugins add ID              # from a catalog, by id
+mazapan plugins catalog [--json]    # every plugin: built in, yours, installed, available
+mazapan plugins search TERM…
+mazapan plugins preview ID|URL      # its page, without installing it
+mazapan plugins add ID              # from a catalog, by id
 ```
 
 The **Plugins** panel (the `plugin-manager` plugin, SUPER + SHIFT + P) is
@@ -118,7 +118,7 @@ all of that with a mouse: search, tabs (installed, available, for this
 machine, all), and each plugin's page: its README, what it can do (the
 riskiest marked), its settings as controls. It runs the same commands:
 turning on and off and settings are `apply --enable|--disable|--set`, so
-`myarch undo` takes them back; installing is `plugins add`, of the very
+`mazapan undo` takes them back; installing is `plugins add`, of the very
 commit whose capabilities the page showed (after "allow and install"),
 and removing, `plugins remove`. What asks for sudo (a hardware plugin) or
 an approval (an update needing more) opens in a terminal.
@@ -154,7 +154,7 @@ version, numbers and dots. A plugin that doesn't load is listed as broken
 and blocks apply (unless disabled), but never the other commands.
 
 `requires` lists plugins this one needs, with an optional version (`>=`,
-`>`, `=`, `<=`, `<`; `1.2` is `1.2.0`). myarch refuses to apply while an
+`>`, `=`, `<=`, `<`; `1.2` is `1.2.0`). Mazapán refuses to apply while an
 enabled plugin needs one that is missing, disabled or at a version that
 doesn't do; `enable` and `disable` say what else they'd need to take along.
 A bar widget requires `shell-bar`; a Hyprland fragment, `hypr-base`.
@@ -183,15 +183,15 @@ any = true                           # any machine: for all, but it changes the 
 
 Patterns are shell patterns, case-insensitive (a literal `[`, common in PCI
 names, is `\\[`; a pattern that can't match is an error). Everything is
-read from `/sys` and `/proc`, without root; `myarch hardware` shows the
+read from `/sys` and `/proc`, without root; `mazapan hardware` shows the
 machine as plugins see it (`--json` for scripts) and which hardware plugins
 are for it. Templates see it as `machine` (`vendor`, `product`, `gpus`: each
 GPU's `id`, `name`, `driver`), so a plugin can tell a desktop with one GPU
 from a hybrid laptop.
 
-A hardware plugin is **off until you turn it on** (`myarch plugins enable`;
+A hardware plugin is **off until you turn it on** (`mazapan plugins enable`;
 `enabled_plugins` in config.toml). All its rules decide whether it's offered
-(`myarch doctor`, `status --json`'s `hardware_to_offer`); once on, it stays
+(`mazapan doctor`, `status --json`'s `hardware_to_offer`); once on, it stays
 on while the machine is the same one — maker, model, board, PCI devices,
 GPUs — whatever comes and goes (a keyboard unplugged, a module not loaded
 yet, a dock's GPU): unplugging the keyboard mustn't take the fix away. On
@@ -206,25 +206,25 @@ written as root, with sudo, only in a drop-in folder (`/etc/modprobe.d`,
 `/etc/X11/xorg.conf.d`, browsers' `policies/managed`,
 `/etc/systemd/system/grub-btrfsd.service.d`, and for the login screen
 `/etc/greetd`, `/etc/systemd/system/greetd.service.d` and `/etc/pam.d`,
-a service of its own) and named `myarch*`:
+a service of its own) and named `mazapan*`:
 never a file the system or another package owns. Its `reload` runs as
 root; `reboot = true` says it takes effect after a reboot. `[packages]
 pacman` are installed too.
 
-None of that happens on a plain `myarch apply` (the theme picker's, an
-agent's): it says what waits. `myarch apply --system` lists everything it
+None of that happens on a plain `mazapan apply` (the theme picker's, an
+agent's): it says what waits. `mazapan apply --system` lists everything it
 will do as root — packages, each file's diff, removals, commands — and asks
 before the first sudo (`-y` to skip the question; without a terminal it's
 required). Then, in order: packages (a driver before the files that load
 it), checks marked `before_system = true` (kernel headers before a module
 built from them), files, and their reloads — also those of files it
-removes, and of files undo puts back, which myarch remembers. `myarch undo`
+removes, and of files undo puts back, which Mazapán remembers. `mazapan undo`
 takes it all back: system files as they were, packages it installed
 uninstalled unless something else needs them by now.
 
 What's written as root comes from the plugin: a plugin with system files
 has only number and true/false settings (text, which any program can put in
-config.toml, never reaches a root file). Agents (`myarch mcp`) can't turn
+config.toml, never reaches a root file). Agents (`mazapan mcp`) can't turn
 hardware plugins on or off, change their settings, apply as root, or undo
 what was done as root. Every root write, delete and package name is checked
 where sudo runs, whatever asked for it: owned.json and snapshots are yours
@@ -243,8 +243,8 @@ session = false                          # needs the graphical session?
 ```
 
 `run` is a shell command (rendered as a template, like `reload`); exit 0
-means healthy, and its output is shown when it fails. `myarch doctor` runs
-every check; `myarch update` runs them after updating and rolls the update
+means healthy, and its output is shown when it fails. `mazapan doctor` runs
+every check; `mazapan update` runs them after updating and rolls the update
 back when one fails. A check that needs the graphical session (Hyprland,
 the bar, the user's PipeWire) sets `session = true`: outside it (a TTY,
 SSH) it's skipped, never failed, so it can't roll back a good update.
@@ -260,7 +260,7 @@ What a plugin lets you do, for the command palette (`SUPER + Space`):
 ```toml
 [[actions]]
 name = "{{ t \"open\" }}"                         # rendered: translatable
-run = "qs ipc -c myarch call myarch panel monitors"   # the command it runs
+run = "qs ipc -c mazapan call mazapan panel monitors"   # the command it runs
 key = "{{ settings.key }}"                         # its keybinding
 terminal = false                                      # run it in a terminal
 keywords = "displays screens resolution"              # other words for it
@@ -269,16 +269,16 @@ keywords = "displays screens resolution"              # other words for it
 `run` is a shell command, and the palette shows it next to the action: the
 point is that people learn it. When the plugin's keybinding calls a Lua
 function, expose that function as a global and make `run` call it through
-`hyprctl eval` (see `columns`: `myarch_columns.equal()`), so the key and
+`hyprctl eval` (see `columns`: `mazapan_columns.equal()`), so the key and
 the command do exactly the same thing. An action with a `key` and no `run`
 is a keybinding that only makes sense as a key ("SUPER + 1…0"). Every
 keybinding a plugin binds should be one of its actions: that's how the
 palette's list of keys stays right. `terminal = true` is for commands that
-ask or print (`myarch update`); the terminal stays open afterwards.
+ask or print (`mazapan update`); the terminal stays open afterwards.
 
 ## Coverage
 
-What a plugin themes, so `myarch coverage` (and the theme picker) can tell
+What a plugin themes, so `mazapan coverage` (and the theme picker) can tell
 which installed apps the theme doesn't reach:
 
 ```toml
@@ -294,7 +294,7 @@ An app counts as covered when a plugin names it, or names its toolkit.
 ## Settings
 
 A plugin declares its settings with defaults; people override them in
-`~/.config/myarch/config.toml`:
+`~/.config/mazapan/config.toml`:
 
 ```toml
 [plugins.columns]
@@ -326,7 +326,7 @@ locales.
 Overrides must use a key the plugin declares and the same type as the
 default (an integer is accepted where the default is a float). Anything
 else, including a `[plugins.<id>]` section for a plugin that doesn't exist,
-stops `apply` with an error naming the section. `myarch plugins` prints each
+stops `apply` with an error naming the section. `mazapan plugins` prints each
 plugin's effective settings and marks the ones set in config.toml.
 
 ## Localization
@@ -362,9 +362,9 @@ The core renders every target and writes it; plugins never touch the disk.
 That gives three guarantees:
 
 - **Ownership.** The core records a hash of each file it writes
-  (`~/.local/state/myarch/owned.json`). A file it didn't write, or one a
+  (`~/.local/state/mazapan/owned.json`). A file it didn't write, or one a
   person edited afterwards, is a *conflict*: `apply` stops and lists it.
-  `apply --adopt` backs it up (`*.myarch-bak-<time>`) and takes it over.
+  `apply --adopt` backs it up (`*.mazapan-bak-<time>`) and takes it over.
 - **Clean removal.** When a plugin is disabled, its files are deleted on the
   next `apply`, unless someone edited them; those are left in place and
   released.
@@ -381,8 +381,8 @@ That gives three guarantees:
   at the head of the file, missing ones go on top: an `@import`); `json`
   (the template's leaves in a JSON object; one that doesn't parse is a
   conflict, never rewritten). `prefs` and `lines` are the person's own
-  files: taking one of myarch's lines out is an edit (a conflict, not put
-  back), and myarch's lines leave with the plugin (or when a newer version
+  files: taking one of Mazapán's lines out is an edit (a conflict, not put
+  back), and Mazapán's lines leave with the plugin (or when a newer version
   stops writing them).
 - **In every place.** `each = ["~/.config/mozilla/firefox/*/prefs.js"]`
   writes the target into every directory holding a file those patterns
@@ -420,7 +420,7 @@ what it runs (see `theme-gtk`). A function can take parameters:
 `{{ func roles(role) }}…{{ end }}`, called as `{{ roles "fg" }}`.
 
 Each template gets 10 seconds, then the render fails: a plugin from git
-whose template loops forever can't hang myarch. A template gets the data
+whose template loops forever can't hang Mazapán. A template gets the data
 made anew: what it changes (an item of `actions`, say) no other template,
 plugin or command sees. A template is a `*.tmpl` file in the plugin's own
 folder, never a path out of it. Scriban's functions are all there but those
@@ -469,29 +469,29 @@ Functions, besides Scriban's own (`string.*`, `array.*`, `object.keys`…):
 | `shq settings.folder`      | one word in a shell command, nothing expanded |
 | `lq settings.key`          | any string as a Lua literal: `"SUPER + space"` |
 | `inline settings.style`    | without line breaks: for a comment or an ini value |
-| `under "~/.config/hypr/myarch/"` | every plugin output below that path |
+| `under "~/.config/hypr/mazapan/"` | every plugin output below that path |
 | `json actions`             | a JSON value, also a valid QML/JS literal |
 
 `under` is how an entry point includes fragments without knowing which
 plugins exist: `hypr-base` loads every file other plugins generate under
-`~/.config/hypr/myarch/`, each one isolated so a broken fragment can't stop
+`~/.config/hypr/mazapan/`, each one isolated so a broken fragment can't stop
 the rest from loading.
 
 ## Theme tokens
 
-The token names in `core/src/MyArch/Themes/Theme.cs` (`RequiredColors`,
+The token names in `core/src/Mazapan/Themes/Theme.cs` (`RequiredColors`,
 `RequiredAnsi`) are part of this API. Ask for meaning (`danger`,
 `surface_raised`), not for a hue; `[ansi]` is for terminals and TUIs.
 
 The accent tokens (`accent`, `accent_fg`, `accent_text`, `accent_deep`,
 `selection`) may not be the theme's: when the person picks another accent
-(`myarch apply --accent`, the theme picker), they're derived from it with
+(`mazapan apply --accent`, the theme picker), they're derived from it with
 their contrast kept. Rely on what each one is for, not on its value.
 
 The theme picker previews themes live: QML that reads `Theme.<token>` in
 bindings morphs with it for free. A color copied into a plain value
 (`property string c: "" + Theme.accent`) doesn't follow; Hyprland-side
-colors follow through `myarch_theme({...})` (plugin `theme-hyprland`).
+colors follow through `mazapan_theme({...})` (plugin `theme-hyprland`).
 
 A theme's `[effects]` are optional: `terminal_opacity` (0.5–1),
 `blur` (see-through windows blur what's behind), and `wallpaper`: `"grid"`
@@ -501,7 +501,7 @@ theme.toml. Templates read them as `theme.effects.terminal_opacity`,
 `Theme.wallpaper`, `Theme.mode`.
 
 A theme can suggest accents besides its own, in `[meta]`:
-`accents = ["#d99a2b", "#4fa35f"]`. `myarch themes` lists every theme with
+`accents = ["#d99a2b", "#4fa35f"]`. `mazapan themes` lists every theme with
 the contrast pairs it fails (WCAG: 4.5:1 for text, 3:1 for fills).
 
 ## Bar widgets
@@ -510,9 +510,9 @@ The bar (plugin `shell-bar`) has no widgets of its own. A plugin adds one by
 generating a QML file into a slot:
 
 ```
-~/.config/quickshell/myarch/widgets/left/<NN>-<name>.qml
-~/.config/quickshell/myarch/widgets/center/<NN>-<name>.qml
-~/.config/quickshell/myarch/widgets/right/<NN>-<name>.qml
+~/.config/quickshell/mazapan/widgets/left/<NN>-<name>.qml
+~/.config/quickshell/mazapan/widgets/center/<NN>-<name>.qml
+~/.config/quickshell/mazapan/widgets/right/<NN>-<name>.qml
 ```
 
 `NN` orders widgets within a slot. Each one loads on its own: one that
@@ -528,28 +528,28 @@ first. Shared, non-widget files (a
 data service, a component) go under `components/<name>/`.
 
 After writing, a widget plugin asks the running shell to reload with
-`reload = "sh ~/.local/share/myarch/bin/shell-reload"` (generated by
+`reload = "sh ~/.local/share/mazapan/bin/shell-reload"` (generated by
 `shell-bar`; it also starts the shell if it isn't running).
 
 Panels are windows that aren't part of the bar (the monitor manager, a
-launcher): a plugin generates `~/.config/quickshell/myarch/panels/<name>.qml`,
+launcher): a plugin generates `~/.config/quickshell/mazapan/panels/<name>.qml`,
 whose root item has `function toggle()`, `property bool open` and
 `function close()`, and creates its own windows. The shell loads it once;
-`qs ipc -c myarch call myarch panel <name>` opens or closes it (bind that to
+`qs ipc -c mazapan call mazapan panel <name>` opens or closes it (bind that to
 a key from the plugin's Hyprland fragment). A panel window that takes the
-keyboard uses the layer namespace `myarch-panel-<name>`: then SUPER + Q
-closes it, like any window (`qs ipc -c myarch call myarch close` closes
+keyboard uses the layer namespace `mazapan-panel-<name>`: then SUPER + Q
+closes it, like any window (`qs ipc -c mazapan call mazapan close` closes
 every open panel), instead of closing the window behind it. Panels import
 the kit as `"../components/kit"`.
 
 The shell and some plugins answer other plugins through IPC, so one can
 drive another without depending on it (a missing one just doesn't
-answer). Those a mode uses: `myarch hide "markets,weather"` takes widgets
+answer). Those a mode uses: `mazapan hide "markets,weather"` takes widgets
 out of the bar (by file name without `NN-` and `.qml`; `""` puts them
-back), `myarch widgets` lists them; `notifications setMode NAME QUIET
+back), `mazapan widgets` lists them; `notifications setMode NAME QUIET
 "app,app"` is a mode's Do Not Disturb and the apps it lets through;
 `nightlight hold on|off|none`; `idle` (the helper at
-`~/.local/share/myarch/bin/idle awake on|off`).
+`~/.local/share/mazapan/bin/idle awake on|off`).
 
 `shell-bar` ships a kit for widgets, `import "../../components/kit"`:
 
@@ -575,9 +575,9 @@ Esc) never reaches the text; the rest is typed.
 ## Writing a plugin
 
 ```sh
-myarch plugins new bar-uptime --kind bar   # bar, panel, window, theme, tools
-myarch plugins dev bar-uptime              # applied again on every save
-myarch plugins check bar-uptime            # before sharing it
+mazapan plugins new bar-uptime --kind bar   # bar, panel, window, theme, tools
+mazapan plugins dev bar-uptime              # applied again on every save
+mazapan plugins check bar-uptime            # before sharing it
 ```
 
 `new` writes a working plugin of that kind to start from: its manifest with
@@ -604,6 +604,6 @@ the copy goes back. `fork ID NEW` copies any plugin under a new id, to start
 from.
 
 To share it: a git repository with plugin.toml at its root, tagged, and an
-entry in a catalog (a pull request to myarch's `catalog/index.toml`, or
+entry in a catalog (a pull request to Mazapán's `catalog/index.toml`, or
 your own catalog file).
 

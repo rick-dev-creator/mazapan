@@ -7,7 +7,7 @@ What changed on the desktop, in words, newest first, grouped by day
 - a plugin turned on or off;
 - files rewritten with nothing changed in your settings (a plugin's new
   version), by plugin;
-- an update (`myarch update`), and how it went;
+- an update (`mazapan update`), and how it went;
 - a system snapshot, with `hw-snapshots`: the system before and after a
   package change, bootable from the boot menu with `hw-snapshots-grub`.
 
@@ -17,4 +17,4 @@ morning, without losing the theme you picked since), through a new apply
 that shows up here too. Files only: the last change's. An update: rolled
 back in a terminal (it asks for your password).
 
-From a terminal: `myarch timeline` and `myarch timeline undo ID`.
+From a terminal: `mazapan timeline` and `mazapan timeline undo ID`.

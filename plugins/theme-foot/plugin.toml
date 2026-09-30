@@ -14,12 +14,12 @@ pacman = ["foot"]
 [[targets]]
 template = "foot.ini.tmpl"
 output = "~/.config/foot/foot.ini"
-reload = "sh ~/.local/share/myarch/bin/term-colors"
+reload = "sh ~/.local/share/mazapan/bin/term-colors"
 
 [[targets]]
 template = "term-colors.sh.tmpl"
-output = "~/.local/share/myarch/bin/term-colors"
-reload = "sh ~/.local/share/myarch/bin/term-colors"
+output = "~/.local/share/mazapan/bin/term-colors"
+reload = "sh ~/.local/share/mazapan/bin/term-colors"
 
 # foot itself, and every app that runs in a terminal (its 16 colors).
 [coverage]

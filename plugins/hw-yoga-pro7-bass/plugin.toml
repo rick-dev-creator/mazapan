@@ -11,6 +11,6 @@ product = ["*Yoga Pro 7 14IAH10*"]
 
 [[targets]]
 template = "bass.conf.tmpl"
-output = "/etc/modprobe.d/myarch-yoga-pro7-bass.conf"
+output = "/etc/modprobe.d/mazapan-yoga-pro7-bass.conf"
 system = true
 reboot = true

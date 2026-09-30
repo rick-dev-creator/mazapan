@@ -15,7 +15,7 @@ first one installed (Chromium, Chrome, Brave, Vivaldi, Edge…); Firefox
 has no app windows. Logins are the browser's: signed in there, signed in
 here.
 
-Each one is yours, not myarch's: `~/.local/share/applications/myarch-webapp-*.desktop`
-and its icon in `~/.local/share/myarch-webapps/`; they stay if the plugin
-is turned off. From a terminal: `sh ~/.local/share/myarch/bin/webapp add
+Each one is yours, not Mazapán's: `~/.local/share/applications/mazapan-webapp-*.desktop`
+and its icon in `~/.local/share/mazapan-webapps/`; they stay if the plugin
+is turned off. From a terminal: `sh ~/.local/share/mazapan/bin/webapp add
 NAME URL`, `remove ID`, `list`, `open ID`.

@@ -10,10 +10,10 @@ categories = ["theme"]
 pacman = ["btop"]
 
 [[targets]]
-template = "myarch.theme.tmpl"
-output = "~/.config/btop/themes/myarch.theme"
+template = "mazapan.theme.tmpl"
+output = "~/.config/btop/themes/mazapan.theme"
 
-# btop writes its own settings here: only the theme's are myarch's.
+# btop writes its own settings here: only the theme's are mazapan's.
 [[targets]]
 template = "btop.conf.tmpl"
 output = "~/.config/btop/btop.conf"

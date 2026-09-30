@@ -11,6 +11,6 @@ copy is one entry (a picture copied in a browser isn't also kept as its
 HTML). What's marked as secret is never kept: KeePassXC marks it (the
 x-kde-passwordManagerHint type), and so does `wl-copy --sensitive`; not
 every password manager does, so check yours. Nor copies larger than
-`max_kb`. The history is in `~/.local/state/myarch-clipboard/`, readable
+`max_kb`. The history is in `~/.local/state/mazapan-clipboard/`, readable
 only by you; `keep` entries at most (100), `keep_images` of them
 pictures (20).

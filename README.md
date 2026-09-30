@@ -1,4 +1,6 @@
-# my-arch
+<p align="center"><img src="assets/mazapan-app.svg" width="128" alt="Mazapán"></p>
+
+# Mazapán
 
 A desktop on plain Arch Linux: Hyprland + Quickshell, one theme applied
 consistently across the whole OS, and everything extensible through plugins.
@@ -9,42 +11,42 @@ the layer on top.
 ## Layout
 
 ```
-core/      CLI `myarch` (C#, Native AOT): plugin loader, merge, generate, apply, rollback, doctor
+core/      CLI `mazapan` (C#, Native AOT): plugin loader, merge, generate, apply, rollback, doctor
 plugins/   built-in plugins, same API as third-party ones: theme targets,
            window layouts, the Quickshell bar and its widgets…
 themes/    token palettes
 docs/      plugin API and design notes
 iso/       the ISO: archiso's live profile + the installer (built in the dev VM: vm/vm iso)
-pkg/       myarch as a pacman package (the ISO installs it)
+pkg/       mazapan as a pacman package (the ISO installs it)
 vm/        dev VM, and a second one to try the ISO (vm/vm try)
 ```
 
 ## Core
 
 ```sh
-myarch apply --theme phosphor   # render every enabled plugin and write the files
-myarch apply --dry-run          # show new / changed / conflict / orphan, write nothing
-myarch apply --adopt            # back up files myarch didn't write and take them over
-myarch plugins                  # every plugin, where it comes from, on or off
-myarch plugins show palette     # what it needs and what it can do
-myarch plugins add <id|git-url> # a plugin from a catalog or git, after you approve what it can do
-myarch plugins search clock     # the catalogs; SUPER + SHIFT + P is the Plugins panel
-myarch plugins new my-widget --kind bar   # write your own: then plugins dev, plugins check
-myarch plugins sync             # the plugins in plugins.lock (on another machine)
-myarch themes                   # every theme, with its contrast problems
-myarch themes from-image ~/Pictures/sea.jpg --apply   # a whole theme from a picture
-myarch coverage                 # installed apps the theme reaches, and not
-myarch apply --accent '#4fa35f' # your accent in any theme ("theme" = its own)
-myarch apply --set bar-clock.font_size=11 --dry-run --diff   # preview exactly
-myarch undo                     # put back what the last apply changed
-myarch status --json            # the whole state, for agents and scripts
-myarch mcp                      # the same for agents, as an MCP server
-myarch hardware                 # this machine, and the hardware fixes for it
-myarch apply --system           # also system files (/etc) and packages, with sudo
+mazapan apply --theme phosphor   # render every enabled plugin and write the files
+mazapan apply --dry-run          # show new / changed / conflict / orphan, write nothing
+mazapan apply --adopt            # back up files mazapan didn't write and take them over
+mazapan plugins                  # every plugin, where it comes from, on or off
+mazapan plugins show palette     # what it needs and what it can do
+mazapan plugins add <id|git-url> # a plugin from a catalog or git, after you approve what it can do
+mazapan plugins search clock     # the catalogs; SUPER + SHIFT + P is the Plugins panel
+mazapan plugins new my-widget --kind bar   # write your own: then plugins dev, plugins check
+mazapan plugins sync             # the plugins in plugins.lock (on another machine)
+mazapan themes                   # every theme, with its contrast problems
+mazapan themes from-image ~/Pictures/sea.jpg --apply   # a whole theme from a picture
+mazapan coverage                 # installed apps the theme reaches, and not
+mazapan apply --accent '#4fa35f' # your accent in any theme ("theme" = its own)
+mazapan apply --set bar-clock.font_size=11 --dry-run --diff   # preview exactly
+mazapan undo                     # put back what the last apply changed
+mazapan status --json            # the whole state, for agents and scripts
+mazapan mcp                      # the same for agents, as an MCP server
+mazapan hardware                 # this machine, and the hardware fixes for it
+mazapan apply --system           # also system files (/etc) and packages, with sudo
 ```
 
 Agents (Claude Code, any MCP client) change the desktop the way a person
-does: through myarch, previewed with the exact diff, undoable. See
+does: through Mazapán, previewed with the exact diff, undoable. See
 [docs/agent-api.md](docs/agent-api.md).
 
 `SUPER + SHIFT + T` opens the theme picker: each theme drawn as a small
@@ -62,9 +64,9 @@ turns Do Not Disturb on (it also turns on by schedule and in full screen).
 view: every plugin (built in, yours, installed, and the catalogs'),
 searchable, each with its page (README, what it can do, settings as
 controls), in your language. Turning plugins on and off and changing
-settings go through `myarch apply`, so `myarch undo` takes them back;
+settings go through `mazapan apply`, so `mazapan undo` takes them back;
 installing asks first, showing what the plugin will be able to do. Writing your own:
-`myarch plugins new`, `dev`, `check`, `fork` (see
+`mazapan plugins new`, `dev`, `check`, `fork` (see
 [docs/plugin-api.md](docs/plugin-api.md#writing-a-plugin)).
 
 It never overwrites a file it didn't write, or one you edited, without
@@ -73,13 +75,13 @@ It never overwrites a file it didn't write, or one you edited, without
 Updating the system:
 
 ```sh
-myarch update --check   # preview: packages (★ = your desktop depends on it),
+mazapan update --check   # preview: packages (★ = your desktop depends on it),
                         # Arch news since your last update, generated files
-myarch update           # preview, confirm, upgrade, re-apply, run the checks;
+mazapan update           # preview, confirm, upgrade, re-apply, run the checks;
                         # if one fails, roll back on its own
-myarch doctor           # run every plugin's health check now
-myarch history          # past updates and how they went
-myarch rollback [ID]    # undo an update: previous packages from pacman's
+mazapan doctor           # run every plugin's health check now
+mazapan history          # past updates and how they went
+mazapan rollback [ID]    # undo an update: previous packages from pacman's
                         # cache, generated files as they were
 ```
 
@@ -95,21 +97,21 @@ that needs nothing installed next to it. Build and test (needs the .NET 10
 SDK and clang), then try it in the VM:
 
 ```sh
-core/build test                 # run the tests, build bin/myarch
-vm/vm run 'myarch apply'
+core/build test                 # run the tests, build bin/mazapan
+vm/vm run 'mazapan apply'
 ```
 
-The desktop runs `myarch` too (the command palette's actions), so it has
+The desktop runs `mazapan` too (the command palette's actions), so it has
 to be on the PATH of the graphical session, not just your shell's. The dev
 VM links it into `/usr/local/bin`; on your own machine:
 
 ```sh
-sudo ln -sf "$PWD/bin/myarch" /usr/local/bin/myarch
+sudo ln -sf "$PWD/bin/mazapan" /usr/local/bin/mazapan
 ```
 
 ## Monitors
 
-Profiles live in `~/.config/myarch/monitors.json`: which screens, where,
+Profiles live in `~/.config/mazapan/monitors.json`: which screens, where,
 at what mode, scale and rotation, adaptive sync (VRR), 10-bit color, which
 ones mirror another or are off, and which workspaces each one holds.
 Screens are identified by their EDID, so connector names that move around
@@ -134,7 +136,7 @@ reported) and save it as a profile.
 `SUPER + Space`, or the Arch logo at the start of the bar, searches
 everything at once: open windows, installed apps,
 and every plugin's actions and keybindings. Each result shows the command
-it runs (`$ hyprctl eval 'myarch_columns.equal()'`) and its key: you start
+it runs (`$ hyprctl eval 'mazapan_columns.equal()'`) and its key: you start
 by clicking and end up knowing the command. ↑↓ to pick, ↵ to run, `ctrl+c`
 copies the command, `>` searches only actions and keys. The keybindings
 come from the plugins that bind them, so the list is always right.
@@ -177,9 +179,9 @@ vm/vm reset        # fresh first boot, keeps the downloaded image
 The guest autologins on tty1 and starts Hyprland. Output from its startup goes
 to `~/.cache/start-hyprland.log` in the guest.
 
-Knobs (env vars): `MYARCH_MEM` (8G), `MYARCH_CPUS` (8), `MYARCH_DISK` (40G),
-`MYARCH_OUTPUTS` (1; extra outputs stay disconnected with the GTK window),
-`MYARCH_RES` (1920x1080), `MYARCH_SSH_PORT` (2222), `MYARCH_DISPLAY`
+Knobs (env vars): `MAZAPAN_MEM` (8G), `MAZAPAN_CPUS` (8), `MAZAPAN_DISK` (40G),
+`MAZAPAN_OUTPUTS` (1; extra outputs stay disconnected with the GTK window),
+`MAZAPAN_RES` (1920x1080), `MAZAPAN_SSH_PORT` (2222), `MAZAPAN_DISPLAY`
 (`gtk,gl=on,zoom-to-fit=off,grab-on-hover=on`).
 
 The QEMU window follows its own size: resize it and the guest's resolution

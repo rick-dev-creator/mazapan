@@ -9,7 +9,7 @@ A fingerprint reader's prompts show there too.
 
 Without an agent, those requests fail without a word. Polkit takes one
 agent per session: if another one (GNOME's, KDE's, hyprpolkitagent) got
-there first, `myarch doctor` says so.
+there first, `mazapan doctor` says so.
 
 The password goes to polkit and nowhere else: the field is emptied as soon
 as it's sent.

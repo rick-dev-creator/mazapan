@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<!-- What the password dialog says when pacman runs through pkexec (the
+     Apps menu, the welcome, updates): in words, and in the person's
+     language, instead of the command line. Kept a few minutes once given
+     (auth_admin_keep): an update that has to roll back doesn't ask again. -->
+<policyconfig>
+  <vendor>mazapan</vendor>
+  <action id="org.mazapan.pacman">
+    <description>Install, update or remove software</description>
+    <description xml:lang="es">Instalar, actualizar o quitar software</description>
+    <description xml:lang="pt">Instalar, atualizar ou remover programas</description>
+    <description xml:lang="fr">Installer, mettre à jour ou supprimer des logiciels</description>
+    <description xml:lang="de">Software installieren, aktualisieren oder entfernen</description>
+    <message>Your password is needed to install, update or remove software</message>
+    <message xml:lang="es">Se necesita tu contraseña para instalar, actualizar o quitar software</message>
+    <message xml:lang="pt">Sua senha é necessária para instalar, atualizar ou remover programas</message>
+    <message xml:lang="fr">Votre mot de passe est nécessaire pour installer, mettre à jour ou supprimer des logiciels</message>
+    <message xml:lang="de">Dein Passwort wird benötigt, um Software zu installieren, zu aktualisieren oder zu entfernen</message>
+    <icon_name>system-software-install</icon_name>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/pacman</annotate>
+  </action>
+</policyconfig>

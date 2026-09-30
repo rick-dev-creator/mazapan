@@ -15,7 +15,7 @@ no, en el primero instalado (Chromium, Chrome, Brave, Vivaldi, Edge…);
 Firefox no tiene ventanas de app. Las sesiones son las del navegador: si
 iniciaste sesión allí, también aquí.
 
-Cada una es tuya, no de myarch: `~/.local/share/applications/myarch-webapp-*.desktop`
-y su icono en `~/.local/share/myarch-webapps/`; se quedan aunque desactives
-el plugin. Desde una terminal: `sh ~/.local/share/myarch/bin/webapp add
+Cada una es tuya, no de Mazapán: `~/.local/share/applications/mazapan-webapp-*.desktop`
+y su icono en `~/.local/share/mazapan-webapps/`; se quedan aunque desactives
+el plugin. Desde una terminal: `sh ~/.local/share/mazapan/bin/webapp add
 NOMBRE URL`, `remove ID`, `list`, `open ID`.

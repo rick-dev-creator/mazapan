@@ -18,7 +18,7 @@ bar = true
 # Show the command behind every result, so you learn it as you go.
 show_commands = true
 # Terminal apps (btop…) open in this terminal; commands that ask or print
-# (myarch update) in terminal_hold, which stays open afterwards. Shell
+# (mazapan update) in terminal_hold, which stays open afterwards. Shell
 # commands: quote as you would in a shell.
 terminal = "foot"
 # The terminal for commands that ask or print: it stays open afterwards, to read.
@@ -26,18 +26,18 @@ terminal_hold = { default = "foot --hold", kind = "command" }
 
 [[targets]]
 template = "palette.lua.tmpl"
-output = "~/.config/hypr/myarch/palette.lua"
+output = "~/.config/hypr/mazapan/palette.lua"
 reload = "hyprctl reload >/dev/null"
 
 [[targets]]
 template = "Widget.qml.tmpl"
-output = "~/.config/quickshell/myarch/widgets/left/05-palette.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/widgets/left/05-palette.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "Palette.qml.tmpl"
-output = "~/.config/quickshell/myarch/panels/palette.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/panels/palette.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[actions]]
 name = "{{ t \"act.palette\" }}"
@@ -46,30 +46,30 @@ keywords = "{{ t \"act.palette.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.update\" }}"
-run = "myarch update"
+run = "mazapan update"
 terminal = true
 keywords = "{{ t \"act.update.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.doctor\" }}"
-run = "myarch doctor"
+run = "mazapan doctor"
 terminal = true
 keywords = "{{ t \"act.doctor.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.history\" }}"
-run = "myarch history"
+run = "mazapan history"
 terminal = true
 keywords = "{{ t \"act.history.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.rollback\" }}"
-run = "myarch rollback"
+run = "mazapan rollback"
 terminal = true
 keywords = "{{ t \"act.rollback.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.apply\" }}"
-run = "myarch apply"
+run = "mazapan apply"
 terminal = true
 keywords = "{{ t \"act.apply.kw\" }}"

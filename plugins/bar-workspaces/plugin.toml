@@ -39,10 +39,10 @@ preview_aspect = { default = 1.6, min = 1.0, max = 3.0, step = 0.1 }
 
 [[targets]]
 template = "Workspaces.qml.tmpl"
-output = "~/.config/quickshell/myarch/widgets/left/10-workspaces.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/widgets/left/10-workspaces.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "Preview.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/workspaces/Preview.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/workspaces/Preview.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"

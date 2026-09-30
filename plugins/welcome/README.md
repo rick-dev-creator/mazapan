@@ -15,7 +15,7 @@ everything the machine can tell already filled in.
 7. **Ready**: the few keys that open almost everything.
 
 It opens by itself on the first login after installing (the machine's
-first `myarch apply` leaves the marker), not on a desktop that was already
+first `mazapan apply` leaves the marker), not on a desktop that was already
 set up. Each choice takes effect as you go (the look, on Continue), and
 where you were is kept, so the desktop reloading on the way picks up
 there. Esc closes it until the next login; "Skip" for good. "Welcome" in

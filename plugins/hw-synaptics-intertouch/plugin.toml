@@ -12,6 +12,6 @@ input = ["SynPS/2 Synaptics TouchPad"]
 
 [[targets]]
 template = "psmouse.conf.tmpl"
-output = "/etc/modprobe.d/myarch-psmouse.conf"
+output = "/etc/modprobe.d/mazapan-psmouse.conf"
 system = true
 reboot = true

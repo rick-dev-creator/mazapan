@@ -1,0 +1,8 @@
+# The live session's mazapan configuration: the installer (a plugin for the
+# live system only), instead of the first-boot welcome (that one is for
+# after the install).
+theme = "phosphor"
+# idle: nothing locks or sleeps on the live system (its user has no password
+# to unlock with), least of all while it installs.
+disabled_plugins = ["welcome", "idle"]
+enabled_plugins = ["installer"]

@@ -33,7 +33,7 @@
 "mirror" = "espelho de"
 "mirror_none" = "nenhuma"
 "unsupported" = "Não compatível, ficou desligada: %1."
-"unreadable" = "Não foi possível ler ~/.config/myarch/monitors.json (%1): corrija ou mova o arquivo antes de salvar, para não perder nenhum perfil."
+"unreadable" = "Não foi possível ler ~/.config/mazapan/monitors.json (%1): corrija ou mova o arquivo antes de salvar, para não perder nenhum perfil."
 "nothing_visible" = "Pelo menos uma tela precisa ficar ligada e não ser espelho."
 "open" = "Organizar monitores"
 "open.kw" = "telas monitores resolução escala organizar"

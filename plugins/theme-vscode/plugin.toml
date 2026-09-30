@@ -12,7 +12,7 @@ pacman = []
 # In your settings.json, as color customizations of VS Code's default theme
 # (VS Code's own way to recolor a theme, applied live), and VS Code set to
 # follow the system's dark/light (which the theme sets): only those keys
-# are myarch's. Pick another theme and these simply don't apply to it. A
+# are mazapan's. Pick another theme and these simply don't apply to it. A
 # settings.json with comments is left alone ("unreadable").
 [[targets]]
 template = "settings.json.tmpl"

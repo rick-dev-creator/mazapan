@@ -12,5 +12,5 @@ gpus = 2
 
 [[targets]]
 template = "cursor.lua.tmpl"
-output = "~/.config/hypr/myarch/hw-cursor.lua"
+output = "~/.config/hypr/mazapan/hw-cursor.lua"
 reload = "hyprctl reload >/dev/null"

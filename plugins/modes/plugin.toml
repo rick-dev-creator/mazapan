@@ -16,36 +16,36 @@ key = "SUPER + ALT + M"
 
 [[targets]]
 template = "qmldir.tmpl"
-output = "~/.config/quickshell/myarch/components/modes/qmldir"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/modes/qmldir"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "ModesService.qml.tmpl"
-output = "~/.config/quickshell/myarch/components/modes/ModesService.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/components/modes/ModesService.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "Modes.qml.tmpl"
-output = "~/.config/quickshell/myarch/panels/modes.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/panels/modes.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "Indicator.qml.tmpl"
-output = "~/.config/quickshell/myarch/widgets/center/50-mode.qml"
-reload = "sh ~/.local/share/myarch/bin/shell-reload"
+output = "~/.config/quickshell/mazapan/widgets/center/50-mode.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
 template = "modes.lua.tmpl"
-output = "~/.config/hypr/myarch/modes.lua"
+output = "~/.config/hypr/mazapan/modes.lua"
 reload = "hyprctl reload >/dev/null"
 
 [[actions]]
 name = "{{ t \"act.open\" }}"
-run = "qs ipc -c myarch call myarch panel modes"
+run = "qs ipc -c mazapan call mazapan panel modes"
 key = "{{ settings.key }}"
 keywords = "{{ t \"act.open.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.off\" }}"
-run = "qs ipc -c myarch call modes off"
+run = "qs ipc -c mazapan call modes off"
 keywords = "{{ t \"act.open.kw\" }}"
