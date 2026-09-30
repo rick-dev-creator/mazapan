@@ -21,17 +21,18 @@ Suggested start: 1, 2 and 3.
 | 8 | Capture | **Done** (2026-09-29); follow-ups listed below |
 | — | Plugin ecosystem (catalogs, Plugins panel, author tools) | **Done** (2026-09-29), under 7 |
 | — | Notifications | **Done** (2026-09-29) |
+| — | The name: Mazapán, and its icon | **Done** (2026-09-30): was myarch; a bitten mazapán in pixel art, in the bar, the installer and the login screen |
 | 9 | Wallpapers, and a theme from any picture | **Done** (2026-09-29) |
 | 10 | The essentials still missing | **Done** (2026-09-29) |
 | 11 | Modes | **Done** (2026-09-29) |
 | 12 | The desktop's history, visible | **Done** (2026-09-29) |
 | 13 | The same desktop anywhere | Planned |
-| 14 | Workspace sessions | Planned |
-| 15 | The CLI in your language | Planned |
-| 16 | Installation and first boot | **Done** (2026-09-30): catalog (17), welcome, the ISO with its graphical installer (any language, time zone, keyboard), snapshots from the install on; audited. Pending: unattended installs (`cidata`), real hardware |
+| 14 | Workspace sessions | Dropped (2026-09-30): Hyprland's workspaces are enough |
+| 15 | The CLI in your language | Dropped (2026-09-30): the CLI stays in English; everything graphical is localized |
+| 16 | Installation and first boot | **Done** (2026-09-30): catalog (17), welcome, the ISO with its graphical installer (any language, time zone, keyboard), snapshots from the install on; what any machine needs (its hardware's drivers chosen live and installed offline, touchpad, keyring, default apps, printing, input methods); audited. Pending: Mazapán's own signed package repository and publishing the ISO (both need a hosting and signing decision), unattended installs (`cidata`), real hardware |
 | 17 | Apps: install and remove | **Done** (2026-09-29): catalog, `mazapan apps`, the Apps menu with profiles (several at once); Flatpak apps show without a new login (2026-09-30); audited. Pending: catalogs from others |
 | 18 | Settings with a face | In progress: the Settings panel (keyboard, touchpad and mouse, default apps, language and time zone) done (2026-09-30); fonts, keybindings, preview to do |
-| 19 | Security | Planned |
+| 19 | Security | Planned, researched (2026-09-30): what a macOS user expects, each part copied from established practice; order below |
 | 20 | Updates, visible | **Done** (2026-09-30): the bar says when there are, a panel shows them (news, restart), updated with a click (pkexec), Flatpak apps too. Pending: firmware, downloading ahead |
 | 21 | Boot and login in the theme | In progress: the login screen (plugin `login`, greetd) done; the boot splash and menu to do |
 | 22 | Sharing | Planned |
@@ -39,13 +40,13 @@ Suggested start: 1, 2 and 3.
 | 24 | Extras | Planned |
 
 Part two (items 9–15, 2026-09-29): what's still missing next to Omarchy,
-and what would set this apart from it. Suggested order: 9, then 10, then 11;
-the CLI's own language after them.
+and what would set this apart from it. 9–12 done; 13 left; 14 and 15
+dropped.
 
 Part three (items 16–24, 2026-09-29): what Omarchy (4.0 "Quattro", read
 from its scripts) has that this still doesn't, each done better. Without
-16 nobody else can use this, so it comes first; suggested order: 16, 20,
-17, 18, 19, then 13–15, then 21–24.
+16 nobody else can use this, so it came first; 16, 17 and 20 done.
+Next: 19 (security), then finishing 18 and 21, then 13, then 22–24.
 
 ## The core: Go to C#
 
@@ -680,15 +681,17 @@ cover the rest.
 git (or a service), with what's per-machine (monitors, hardware) kept
 apart.
 
-## 14. Workspace sessions
+## 14. Workspace sessions (dropped)
 
 A workspace saved as a whole ("trading": these apps, on these
-workspaces, arranged so) and brought back with one key.
+workspaces, arranged so) and brought back with one key. Dropped on
+2026-09-30: Hyprland's workspaces already do what's needed.
 
-## 15. The CLI in your language
+## 15. The CLI in your language (dropped)
 
 The plugins are localized; Mazapán's own messages (apply, update, doctor)
-are English only. Same locales, same fallbacks.
+are English only. Dropped on 2026-09-30: the CLI stays in English, as
+most command-line tools do; everything with a window is localized.
 
 ## Part three: what Omarchy has that this doesn't yet
 
@@ -837,17 +840,99 @@ passwordless sudo for N minutes with an expiry timer (good); hibernation
 (CLI, Limine only); change the disk password; all through sed on PAM
 files, in a terminal, one finger only.
 
-**Much better.**
-- A Security page: fingerprints (add, name, remove several), security
-  keys, where each is used (sudo, polkit, the lock screen, login), each
-  step checked before it's relied on.
-- PAM through drop-ins and Mazapán's root files (undoable), never sed.
-- Disk unlock by TPM2 or a FIDO2 key where there's one (systemd-cryptenroll),
-  the password kept as fallback; the disk password changed with a
-  strength meter.
-- Hibernation on any boot loader, from the power menu, set up and taken
-  back by a hardware-style plugin.
-- Time-boxed passwordless sudo for agents, shown in the bar while it's on.
+**Much better: what a macOS user expects, built the way it's already
+proven.** Touch ID, FileVault, a lock that's there before the lid opens,
+the orange and green dots, a firewall switch, no work lost when the
+battery dies; all from a Security page in Settings, no terminal, each
+step undoable. This is where a mistake locks people out of their own
+machine, so nothing here is invented: each part copies what Arch-based
+distros, GNOME, KDE and the Arch Wiki have done for years, and avoids
+what's broken for others (research of 2026-09-30, sources below).
+
+Order: 1, then 2, 3, 4, 5.
+
+1. **The disk, like FileVault.**
+   - Encrypted by default in the installer (a switch turns it off), the
+     person's password as the disk's (as Omarchy). LUKS2 (argon2id) on the
+     root only; the ESP unencrypted at /boot, GRUB never opening LUKS
+     (as archinstall, Fedora, Ubuntu). Not an encrypted /boot, as the
+     Calamares distros do: GRUB can't open argon2id, and in 2026 Garuda
+     and CachyOS installs don't boot because of it.
+   - The initramfs with systemd's hooks (sd-encrypt, sd-vconsole) and the
+     installer's keymap in it: a password typed in another layout is
+     the known "my password stopped working".
+   - A recovery key always (`systemd-cryptenroll --recovery-key`), shown
+     at the end of the install as Ubuntu does: as text and a QR code,
+     and not finished until the person says it's kept.
+   - One password: typed once at boot, then straight into the desktop
+     (greetd logs in by itself that boot), the keyring opened by the same
+     password through pam_systemd_loadkey (systemd 255+; what GDM has
+     long done). Not Omarchy's keyring without a password: its secrets
+     sit in plain text, and it has broken for them more than once.
+     greetd's autologin may skip PAM's auth step: checked in the VM
+     first.
+   - Changing the password: one place for the disk, the account and the
+     keyring. The disk first, then checked that the new one opens it,
+     then the account; the keyring follows through PAM. Stopped halfway,
+     running it again finishes it.
+   - TPM2 unlock later, opt-in: only with Secure Boot on the machine's
+     own keys and a PIN (a TPM tied to PCR 7 alone can be fooled, 2025;
+     firmware updates make it ask for the key: Ubuntu 23.10, Arch forum
+     2024). The recovery key covers it.
+2. **Locked before it sleeps, and the dots.**
+   - The lock is in place before the machine suspends (logind's delay
+     inhibitor, as xss-lock did; hypridle's `inhibit_sleep = 3` with
+     `before_sleep_cmd = loginctl lock-session`): nothing on screen when
+     the lid opens. A "require the password after" delay applies only to
+     idle blanking, never to sleep (GNOME's lock-delay).
+   - Microphone, camera and screen sharing shown in the bar while in
+     use, and which app: PipeWire's running nodes by media.class (as
+     Waybar's privacy module), open /dev/video* handles for browsers that
+     skip PipeWire, Hyprland's screencast event.
+   - Per-app permissions: the portal's permission store and Flatpak
+     overrides (Flatseal's model), said plainly to hold for Flatpak apps
+     only (as Plasma 6.5 does); screen capture asked for any app through
+     Hyprland's permissions.
+3. **Fingerprint, like Touch ID.**
+   - Password and fingerprint at the same time, each in its own PAM
+     stack (GNOME's gdm-fingerprint, KDE's kscreenlocker, Omarchy's lock):
+     the lock screen and the polkit agent run both, whichever comes
+     first. Never pam-fprint-grosshack.
+   - The password always after a reboot (the keyring needs it), as macOS.
+   - The system's PAM files are never rewritten (Arch keeps edited ones
+     and leaves .pacnew: the 2020 pam_tally2 lockout). Mazapán's own
+     services, owned by its package; sudo and polkit-1 get one marked
+     line pointing to them. polkit-1 starts from the /usr/lib/pam.d copy
+     polkit ships now (Omarchy's short one dropped faillock and more).
+   - On only after enrolling and verifying; `max-tries=3 timeout=10`; not
+     with the lid closed, not over SSH (polkit 127+ can't tell); no
+     faillock in the fingerprint stack (it counts successes as failures).
+   - FIDO2 keys the same way: a root-owned file in /etc, `cue`, never
+     `nouserok`.
+4. **The firewall, one switch.** ufw on, nothing in, everything out (as
+   Omarchy and CachyOS); what a plugin needs (LocalSend) opened only to
+   the local network (Omarchy's is open to the internet over IPv6, their
+   #11560); no SSH port; ufw-docker only when Docker is there; ufw's
+   own rules keep printers and mDNS discovery working.
+5. **Nothing lost when the battery dies.** A swap file the size of RAM in
+   its own top-level @swap subvolume (inside root, a snapshot rollback
+   takes it: Omarchy's), below zram; the lid suspends, then hibernates
+   after a while or at 5 % (suspend-then-hibernate), and at critical
+   battery (UPower); resume found by systemd, with resume= on GRUB's
+   line as well.
+
+Not now: AppArmor (no Arch-based distro turns it on; CachyOS warns it
+breaks things); time-boxed passwordless sudo for agents (sudo stays per
+terminal, never global or NOPASSWD).
+
+Sources: Arch Wiki (dm-crypt, systemd-cryptenroll, Fprint, Session lock,
+Universal 2nd Factor, Suspend and hibernate, Uncomplicated Firewall),
+systemd-cryptenroll(1), pam_fprintd(8), sleep.conf.d(5); Lennart
+Poettering, "Brave New Trusted Boot World" (2022); oddlama, TPM unlock
+bypass (2025); Omarchy's scripts and issues; Calamares' LUKS wiki;
+EndeavourOS, Manjaro, Garuda and CachyOS forums and wikis; GNOME
+gnome-shell !2840, KDE kscreenlocker !15; Waybar's privacy module;
+chaifeng/ufw-docker; Yubico pam-u2f and YSA-2025-01.
 
 ## 20. Updates, visible
 
@@ -928,8 +1013,8 @@ cheatsheets.
 
 ## Also pending
 
-- Built-in plugins have no README: their page in the Plugins panel is
-  empty (`mazapan plugins check` says so).
-- An "updates available" widget; `mazapan update` offering plugin updates;
-  Chromium's accent through its policy.
+- 34 of the 57 built-in plugins have no README: their page in the
+  Plugins panel is empty (`mazapan plugins check` says so).
+- `mazapan update` offering plugin updates; Chromium's accent through its
+  policy. (The "updates available" widget is item 20's.)
 
