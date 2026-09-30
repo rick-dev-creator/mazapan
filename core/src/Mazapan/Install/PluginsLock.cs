@@ -107,8 +107,7 @@ public sealed partial class PluginsLock
                 Source = r.String("source"),
                 Ref = r.String("ref"),
                 Commit = r.String("commit"),
-                // Approved before the name changed: the same paths, where they are now.
-                Approved = [.. r.Strings("approved").Select(LegacyName.Path)],
+                Approved = r.Strings("approved"),
                 Catalog = r.Bool("catalog"),
             });
             foreach (var (k, _) in table)

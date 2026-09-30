@@ -25,9 +25,8 @@ public static partial class AsRoot
         var dir = Paths.Dir(path);
         var name = Paths.Base(path);
         // PAM: only the login screen's own service, never another name.
-        if (dir == "/etc/pam.d" && name is not ("mazapan-greetd" or "myarch-greetd")) return false;
-        // myarch* too: what was written under the old name, to take away.
-        return Plugins.Plugin.SystemDirs.Contains(dir) && (name.StartsWith("mazapan") || LegacyName.IsOldSystemName(name)) &&
+        if (dir == "/etc/pam.d" && name != "mazapan-greetd") return false;
+        return Plugins.Plugin.SystemDirs.Contains(dir) && name.StartsWith("mazapan") &&
             (Paths.Real(dir) is not { } real || real == dir);
     }
 

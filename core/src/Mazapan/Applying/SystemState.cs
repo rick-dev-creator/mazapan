@@ -20,8 +20,7 @@ public static class SystemState
             using var doc = JsonDocument.Parse(File.ReadAllText(Path()));
             return doc.RootElement.EnumerateObject()
                 .Where(p => AsRoot.IsSystem(p.Name) && p.Value.ValueKind == JsonValueKind.String)
-                // Saved before the name changed: the commands name the new places.
-                .ToDictionary(p => p.Name, p => LegacyName.Path(p.Value.GetString()!));
+                .ToDictionary(p => p.Name, p => p.Value.GetString()!);
         }
         catch (Exception e) when (e is IOException or JsonException or UnauthorizedAccessException or InvalidOperationException)
         {

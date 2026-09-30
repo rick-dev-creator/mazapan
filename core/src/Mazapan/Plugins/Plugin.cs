@@ -275,9 +275,8 @@ public sealed partial class Plugin
             p.Targets.Add(new Target
             {
                 Template = t.String("template"),
-                // From before the name changed: where Mazapán reads it now.
-                Output = LegacyName.Path(t.String("output")),
-                Reload = LegacyName.Path(t.String("reload")),
+                Output = t.String("output"),
+                Reload = t.String("reload"),
                 Merge = t.String("merge"),
                 Each = t.Strings("each"),
                 Busy = t.String("busy"),

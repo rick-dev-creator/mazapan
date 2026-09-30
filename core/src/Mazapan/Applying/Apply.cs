@@ -361,14 +361,14 @@ public static partial class Apply
 
     /// <summary>
     /// PruneEmpty takes away the folders a removed file leaves empty, up
-    /// through Mazapán's own (~/.config/quickshell/mazapan/widgets/right…,
-    /// or myarch's, from before the name changed): never an app's folder.
+    /// through Mazapán's own (~/.config/quickshell/mazapan/widgets/right…):
+    /// never an app's folder.
     /// </summary>
     static void PruneEmpty(string dir)
     {
         static bool Ours(string d) =>
             d.StartsWith(Paths.Home + "/", StringComparison.Ordinal)
-            && d[(Paths.Home.Length + 1)..].Split('/').Any(s => s.StartsWith("mazapan", StringComparison.Ordinal) || LegacyName.IsOldSystemName(s));
+            && d[(Paths.Home.Length + 1)..].Split('/').Any(s => s.StartsWith("mazapan", StringComparison.Ordinal));
         while (Ours(dir) && Directory.Exists(dir) && !Directory.EnumerateFileSystemEntries(dir).Any())
         {
             Directory.Delete(dir);

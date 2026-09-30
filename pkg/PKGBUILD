@@ -16,9 +16,6 @@ _repo=$(realpath "${MAZAPAN_REPO:-$startdir/..}")
 
 # The desktop itself, and what every plugin that's on by default names in
 # its [packages] (hardware plugins are off until the machine needs them).
-# Mazapán was myarch until 2026-09-30: an update takes the old package's place.
-replaces=(myarch)
-conflicts=(myarch)
 depends=(
   hyprland quickshell qt6-wayland qt6-svg qt6-imageformats xdg-desktop-portal-hyprland
   pipewire pipewire-pulse wireplumber networkmanager polkit

@@ -72,9 +72,6 @@ public static partial class Program
 
     public static int Main(string[] args)
     {
-        // Once, on a machine that had myarch (Mazapán's old name).
-        try { LegacyName.Migrate(); }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException or MazapanException) { Console.Error.WriteLine("mazapan: " + e.Message); }
         if (args.Length < 1)
         {
             Console.Error.Write(Usage);

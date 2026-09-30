@@ -2,9 +2,6 @@
 # its files again, or start it if it isn't running. Every plugin with
 # Quickshell files uses this as its reload command, so how the shell is
 # reloaded lives in one place.
-# The shell from before the name changed (qs -c myarch), if it still
-# runs: it would be a second bar, holding the notifications and polkit.
-pkill -u "$(id -u)" -f '^qs -c myarch( |$)' >/dev/null 2>&1
 qs ipc -c mazapan call mazapan reload >/dev/null 2>&1 && exit 0
 qs kill -c mazapan >/dev/null 2>&1
 # A shell being killed still counts for a moment: started now, the new one

@@ -237,7 +237,6 @@ public static partial class Program
         var asRoot = snap.Files.Any(e => AsRoot.IsSystem(e.Path)) || snap.Packages.Count > 0;
         if (asRoot && fs.IsSet("agent"))
             throw new MazapanException($"{snap.ID} ({snap.What}) was done as root: undoing it is the person's (mazapan undo)");
-        LegacyName.RefuseOld(snap.Files.Select(e => e.Path), $"{snap.ID} ({snap.What})");
         Header($"Undo {snap.What} ({snap.ID})");
         foreach (var e in snap.Files)
             Console.WriteLine($"  {(e.Before == "" ? "remove " : "restore"),-8} {Tilde(e.Path)}");

@@ -154,7 +154,7 @@ public static partial class Program
         var conflicts = changes.Where(c => c.State == State.Conflict).Select(c => c.Path).ToList();
         if (conflicts.Count > 0 && !adopt) throw new ConflictException(conflicts);
         var reloads = SystemState.Reloads();
-        var removals = orphans.Where(o => Apply.ReadOrNull(o) is { } b && Apply.Sum(b) == owned.Get(o) && !LegacyName.LoginUses(o)).ToList();
+        var removals = orphans.Where(o => Apply.ReadOrNull(o) is { } b && Apply.Sum(b) == owned.Get(o)).ToList();
 
         // Everything it will do as root, in full, before the first sudo.
         Header("As root, with sudo");
@@ -166,10 +166,7 @@ public static partial class Program
                 before == "" ? "/dev/null" : c.Path, c.Path));
         }
         foreach (var o in removals) Console.WriteLine($"  remove   {o}");
-        // A file myarch wrote that Mazapán's replaces (myarch.conf → mazapan.conf):
-        // the new one's command counts, not the old one's (it would undo it).
-        var renamed = removals.Where(o => LegacyName.Path(o) != o && changes.Any(c => c.Path == LegacyName.Path(o))).ToHashSet();
-        var commands = changes.Select(c => c.Reload).Concat(removals.Where(o => !renamed.Contains(o)).Select(o => reloads.GetValueOrDefault(o, "")))
+        var commands = changes.Select(c => c.Reload).Concat(removals.Select(o => reloads.GetValueOrDefault(o, "")))
             .Where(r => r != "").Distinct().ToList();
         foreach (var cmd in commands) Console.WriteLine($"  run      {cmd}");
         if (!yes)
@@ -206,12 +203,6 @@ public static partial class Program
             }
             foreach (var o in orphans)
             {
-                if (LegacyName.LoginUses(o))
-                {
-                    // Still owned: an apply after the next boot takes it away.
-                    Console.WriteLine($"  left {o} until the next boot: the login screen running now uses it");
-                    continue;
-                }
                 if (removals.Contains(o))
                 {
                     AsRoot.Remove(o);

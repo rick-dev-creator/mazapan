@@ -608,7 +608,6 @@ public static partial class Program
         if (newer.Count > 0)
             throw new MazapanException($"newer updates are still in place ({string.Join(", ", newer.Select(r => r.ID))}): roll those back first, newest first");
 
-        LegacyName.RefuseOld(rec.Owned?.Keys ?? Enumerable.Empty<string>(), $"update {rec.ID}");
         rec.WorkOutChanges(Packages.Installed);
         Header($"Update {rec.ID} changed {Plural(rec.Changes.Count, "package", "packages")}");
         foreach (var c in rec.Changes)

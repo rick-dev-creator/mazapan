@@ -7,11 +7,6 @@ means here. Ordered by impact.
 
 Suggested start: 1, 2 and 3.
 
-The project was called myarch until 2026-09-30; it is Mazapán (`mazapan`)
-now. A desktop that used the old name moves to the new one by itself the
-first time `mazapan` runs (its folders, what it owns, web apps, plugins
-from git that still write to the old places).
-
 ## Progress
 
 | # | Item | State |
