@@ -259,7 +259,11 @@ public static partial class Program
                 if (now.Found.FirstOrDefault(x => x.Id == id) is { } pl && pl.Hardware == null && (now.Cfg == null || !now.Cfg.IsOn(pl)) && !p.Enable.Contains(id))
                     p.Enable.Add(id);
         p.Targets = p.Targets.Distinct().ToList();
-        if (p.Targets.Count > 0)
+        // Never synced (installed offline, from the ISO): nothing to plan
+        // against yet; the install syncs and upgrades first (AppsInstall).
+        if (p.Targets.Count > 0 && NeverSynced())
+            foreach (var t in p.Targets) p.Packages.Add((t, "?", 0, 0));
+        else if (p.Targets.Count > 0)
         {
             var (code, out_, err) = AppsCapture("pacman", ["-Sp", "--needed", "--print-format", "%n %v", "--", .. p.Targets]);
             if (code != 0) throw new MyArchException("pacman: " + (err.Trim() != "" ? err.Trim() : "can't plan it") + " (myarch update first?)");
@@ -433,6 +437,9 @@ public static partial class Program
         return p.ExitCode;
     }
 
+    /// <summary>No repository database yet: a system installed offline, from the ISO.</summary>
+    static bool NeverSynced() => !File.Exists("/var/lib/pacman/sync/core.db");
+
     /// <summary>pacman as root; a password refused or the dialog closed is "cancelled", not a failure.</summary>
     static void Pacman(bool gui, string[] args, string what)
     {
@@ -491,7 +498,9 @@ public static partial class Program
         if (plan.Targets.Count > 0)
         {
             Step("packages");
-            Pacman(gui, ["-S", "--needed", "--noconfirm", .. gui ? new[] { "--noprogressbar" } : [], "--", .. plan.Targets], "installed");
+            // A system that never synced gets the repositories and the updates
+            // with them: -Syu, never -Sy alone (Arch has no partial upgrades).
+            Pacman(gui, [NeverSynced() ? "-Syu" : "-S", "--needed", "--noconfirm", .. gui ? new[] { "--noprogressbar" } : [], "--", .. plan.Targets], "installed");
             tx.Packages = plan.Targets;
         }
         foreach (var a in plan.Apps.Where(a => a.Kind == "pacman")) okApps.Add(a.Id);

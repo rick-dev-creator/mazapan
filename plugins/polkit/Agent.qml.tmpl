@@ -181,7 +181,9 @@ Item {
 
         Label {
           visible: text !== ""
-          text: root.flow && root.flow.inputPrompt ? root.flow.inputPrompt : ""
+          // PAM's plain "Password:" says nothing the field doesn't (in the
+          // person's language); anything else (a PIN, a token) is shown.
+          text: root.flow && root.flow.inputPrompt && !/^\s*password:?\s*$/i.test(root.flow.inputPrompt) ? root.flow.inputPrompt : ""
           color: Theme.fgMuted
         }
         TextField {

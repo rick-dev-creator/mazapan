@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<!-- What the password dialog says when pacman runs through pkexec (the
+     Apps menu, the welcome, updates): in words, and in the person's
+     language, instead of the command line. -->
+<policyconfig>
+  <vendor>myarch</vendor>
+  <action id="org.myarch.pacman">
+    <description>Install, update or remove software</description>
+    <description xml:lang="es">Instalar, actualizar o quitar software</description>
+    <message>Your password is needed to install, update or remove software</message>
+    <message xml:lang="es">Se necesita tu contraseña para instalar, actualizar o quitar software</message>
+    <icon_name>system-software-install</icon_name>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/pacman</annotate>
+  </action>
+</policyconfig>

@@ -311,12 +311,11 @@ Item {
   onStepChanged: {
     // The account's first field takes the keys; elsewhere the card (Enter, Esc).
     if (open) Qt.callLater(() => step === "account" ? nameField.focusInput() : card.forceActiveFocus())
-    // Once: the keyboard it suggests, taken already (one click to change it);
+    // The keyboard it suggests, taken already (one click to change it);
     // the time zone from the connection, when there's one.
-    if (step === "keyboard" && !kbPicked && suggestedLayouts.length > 0) {
-      kbPicked = true
-      setKeyboard(suggestedLayouts[0].layout, suggestedLayouts[0].variant)
-    }
+    // Until one is picked by hand, it follows where you are (changed on the way back).
+    const k = suggestedLayouts[0]
+    if (step === "keyboard" && !kbPicked && k && (k.layout !== layout || k.variant !== variant)) setKeyboard(k.layout, k.variant)
     if (step === "region" && online && !zoneAsked) {
       zoneAsked = true
       detectZone()
@@ -355,7 +354,7 @@ Item {
   function setLanguage(code) {
     if (code === language) return
     language = code
-    go("keyboard")
+    next()
     Quickshell.execDetached(["sh", "-c", 'mkdir -p ~/.local/state/myarch; myarch apply "$@" > "$0" 2>&1', root.applyLog, "--language=" + code])
   }
 
@@ -430,6 +429,9 @@ Item {
     if (!/^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/.test(hostname)) return {{ tq "acc.bad_host" }}
     return ""
   }
+
+  // What's wrong with the account, said as it's fixed (never a stale one).
+  onAccountProblemChanged: if (step === "account" && problem !== "") problem = accountProblem
 
   function canGo() {
     if (step === "disk") return !!diskNow && !diskNow.too_small

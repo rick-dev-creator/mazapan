@@ -369,6 +369,28 @@ Item {
     installIds(ids)
   }
 
+  // While it's open, whether pkexec is waiting for a password (the apps it
+  // started installing, even before a reload): the polkit agent's dialog is
+  // up, and this steps aside.
+  property bool asking: false
+  Timer {
+    interval: 700
+    repeat: true
+    running: root.open
+    onTriggered: if (!askProbe.running) askProbe.running = true
+    onRunningChanged: if (!running) root.asking = false
+  }
+  Process {
+    id: askProbe
+    // -U: the real user (pkexec runs setuid, as root).
+    command: ["pgrep", "-U", Quickshell.env("USER") || "", "-x", "pkexec"]
+    onExited: code => {
+      const was = root.asking
+      root.asking = code === 0
+      if (was && !root.asking) Qt.callLater(() => card.forceActiveFocus())
+    }
+  }
+
   function installChosen() {
     const ids = Object.keys(chosen).filter(k => chosen[k])
     chosen = {}
@@ -436,12 +458,16 @@ Item {
 
   PanelWindow {
     id: win
-    visible: root.open
+    // Out of the way while the password is asked for: the dialog gets the
+    // keys (a layer that has them keeps them), and it's back right after.
+    visible: root.open && !root.asking
     screen: root.screenAtOpen
     anchors { top: true; bottom: true; left: true; right: true }
     color: Qt.alpha(Theme.bg, 0.8)
     exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.layer: WlrLayer.Overlay
+    // Top, not Overlay: what asks for a password on the way (the apps it
+    // installs, pkexec through the polkit agent) stays above it.
+    WlrLayershell.layer: WlrLayer.Top
     // "myarch-panel-…": SUPER + Q closes it (see hypr-base).
     WlrLayershell.namespace: "myarch-panel-welcome"
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive

@@ -41,6 +41,8 @@ package() {
   cp -r --no-preserve=ownership "$_repo/plugins" "$_repo/themes" "$_repo/catalog" "$pkgdir/usr/lib/myarch/"
   install -d "$pkgdir/usr/bin"
   ln -s /usr/lib/myarch/bin/myarch "$pkgdir/usr/bin/myarch"
+  # The password dialog's words for pacman through pkexec.
+  install -Dm644 "$_repo/pkg/org.myarch.pacman.policy" "$pkgdir/usr/share/polkit-1/actions/org.myarch.pacman.policy"
   install -Dm644 "$_repo/README.md" "$pkgdir/usr/share/doc/myarch/README.md"
   cp -r --no-preserve=ownership "$_repo/docs/." "$pkgdir/usr/share/doc/myarch/"
 }

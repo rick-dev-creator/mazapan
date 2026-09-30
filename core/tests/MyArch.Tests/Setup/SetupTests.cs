@@ -179,14 +179,20 @@ public class SetupTests
         Assert.Contains("Option \"XkbLayout\" \"latam\"", files);
         Assert.Contains("myarch apply --system -y", post);
         Assert.Contains("--removable", post);
+        // Arch's pacman.conf, not the ISO's offline-only one; multilib on; synced when online.
+        Assert.Contains("bsdtar -xOf \"$p\" etc/pacman.conf", post);
+        Assert.Contains("[core]", files);
+        Assert.Contains("s/^#//", post);
+        Assert.Contains("pacman -Syu --noconfirm", post);
+        Assert.True(post.IndexOf("pacman -Syu") < post.IndexOf("myarch apply"));
         Assert.Contains("usermod -c \"$(printf %s " + Convert.ToBase64String(Encoding.UTF8.GetBytes("Rick")) + " | base64 -d)\" rick", post);
         Assert.True(post.IndexOf("myarch apply") < post.IndexOf("chown -R"));
     }
 
     /// <summary>Post's files, decoded (they go in as base64).</summary>
-    internal static string Decoded(string post) => string.Join("\n", post.Split('\n')
-        .Where(l => l.StartsWith("printf %s "))
-        .Select(l => Encoding.UTF8.GetString(Convert.FromBase64String(l.Split(' ')[2]))));
+    internal static string Decoded(string post) => string.Join("\n",
+        System.Text.RegularExpressions.Regex.Matches(post, @"printf %s ([A-Za-z0-9+/=]+) \| base64 -d")
+            .Select(m => Encoding.UTF8.GetString(Convert.FromBase64String(m.Groups[1].Value))));
 }
 
 public class LocalesTests

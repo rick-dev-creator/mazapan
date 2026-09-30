@@ -153,6 +153,14 @@ public static class Archinstall
                 $"[Service]\nExecStart=\nExecStart=-/usr/bin/agetty --noreset --noclear --autologin {a.User} - ${{TERM}}\n"));
             s.Append("grub-install --target=x86_64-efi --efi-directory=/boot --boot-directory=/boot --removable\n");
         }
+        // Arch's own pacman.conf (archinstall copies the ISO's, which only
+        // knows the offline repository), from the pacman package the install
+        // left in the cache; multilib on (Steam and other 32-bit software).
+        s.Append("if p=$(ls /var/cache/pacman/pkg/pacman-[0-9]*.pkg.tar.zst 2>/dev/null | head -n 1) && [ -n \"$p\" ] && bsdtar -xOf \"$p\" etc/pacman.conf > /etc/pacman.conf.myarch && grep -q '^\\[core\\]' /etc/pacman.conf.myarch; " +
+            "then mv /etc/pacman.conf.myarch /etc/pacman.conf; else rm -f /etc/pacman.conf.myarch; " +
+            Write("/etc/pacman.conf", PacmanConf).TrimEnd('\n') + "; fi\n");
+        s.Append("sed -i -e '/^#\\[multilib\\]/,/^#Include/ s/^#//' -e 's/^#Color/Color/' /etc/pacman.conf\n");
+        s.Append("rm -f /var/lib/pacman/sync/offline.*\n");
         // The mirrors nearest to where you are, when there's a connection
         // now (else the worldwide ones stay).
         if (a.Country != "")
@@ -182,6 +190,9 @@ public static class Archinstall
             s.Append(Write($"{home}/.ssh/authorized_keys", string.Join('\n', a.SshKeys) + "\n"));
             s.Append($"chmod 600 {home}/.ssh/authorized_keys\n");
         }
+        // Online: the repositories, and what's newer than the ISO, now (the
+        // first start is then up to date). Offline, the first app install does it.
+        s.Append("if curl -fsS --max-time 5 -o /dev/null https://geo.mirror.pkgbuild.com/; then pacman -Syu --noconfirm > /var/log/myarch-first-update.log 2>&1 || echo \"pacman -Syu failed: /var/log/myarch-first-update.log\"; fi\n");
         // Its desktop, now (reloads fail here, nothing runs yet: warnings only).
         s.Append($"HOME={home} USER={a.User} myarch apply --system -y > /var/log/myarch-first-apply.log 2>&1 || echo \"myarch apply failed: /var/log/myarch-first-apply.log\"\n");
         s.Append($"chown -R {a.User}:{a.User} {home}\n");
@@ -199,6 +210,26 @@ public static class Archinstall
         c.Plugins["hypr-base"] = new(StringComparer.Ordinal) { ["kb_layout"] = a.KbLayout, ["kb_variant"] = a.KbVariant };
         return c.Text();
     }
+
+    /// <summary>Arch's pacman.conf, for when the pacman package isn't in the cache to take it from.</summary>
+    const string PacmanConf = """
+        [options]
+        HoldPkg     = pacman glibc
+        Architecture = auto
+        ParallelDownloads = 5
+        SigLevel    = Required DatabaseOptional
+        LocalFileSigLevel = Optional
+
+        [core]
+        Include = /etc/pacman.d/mirrorlist
+
+        [extra]
+        Include = /etc/pacman.d/mirrorlist
+
+        #[multilib]
+        #Include = /etc/pacman.d/mirrorlist
+
+        """;
 
     const string BashProfile = """
 
