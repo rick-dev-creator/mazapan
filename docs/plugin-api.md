@@ -205,7 +205,8 @@ written as root, with sudo, only in a drop-in folder (`/etc/modprobe.d`,
 `/etc/systemd/logind.conf.d`, `/etc/systemd/sleep.conf.d`,
 `/etc/X11/xorg.conf.d`, browsers' `policies/managed`,
 `/etc/systemd/system/grub-btrfsd.service.d`, and for the login screen
-`/etc/greetd` and `/etc/systemd/system/greetd.service.d`) and named `myarch*`:
+`/etc/greetd`, `/etc/systemd/system/greetd.service.d` and `/etc/pam.d`,
+a service of its own) and named `myarch*`:
 never a file the system or another package owns. Its `reload` runs as
 root; `reboot = true` says it takes effect after a reboot. `[packages]
 pacman` are installed too.

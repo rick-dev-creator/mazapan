@@ -30,6 +30,12 @@ public sealed partial class Answers
     /// there to install remotely (cloud-init's cidata).
     /// </summary>
     public List<string> SshKeys = [];
+    /// <summary>
+    /// Hardware plugins for this machine (its GPU's drivers…), and the
+    /// packages they need: turned on and installed with the system, from the
+    /// ISO's repository. Not asked: the installer works them out.
+    /// </summary>
+    public List<string> Hardware = [], HardwarePackages = [];
 
     [GeneratedRegex(@"^(ssh-(ed25519|rsa)|ecdsa-sha2-nistp(256|384|521)|sk-(ssh-ed25519|ecdsa-sha2-nistp256)@openssh\.com) [A-Za-z0-9+/]+={0,3}( [^\n\r]{0,200})?\z")]
     private static partial Regex SshKeyRe();
@@ -125,6 +131,8 @@ public sealed partial class Answers
         Need(Theme == "" || ThemeRe().IsMatch(Theme), $"theme {Quote(Theme)}");
         Need(Apps.All(x => Store.AppCatalog.IsId(x)), "apps: an id that can't be one");
         Need(SshKeys.All(k => SshKeyRe().IsMatch(k)), "an SSH key that isn't one");
+        Need(Hardware.All(h => Plugins.Plugin.IdPattern().IsMatch(h)), "a hardware plugin that can't be one");
+        Need(HardwarePackages.All(Store.AppCatalog.IsPackage), "a package that can't be one");
     }
 
     static string Quote(string s) => "\"" + (s.Length > 40 ? s[..40] + "…" : s) + "\"";

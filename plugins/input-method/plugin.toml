@@ -1,0 +1,22 @@
+[plugin]
+id = "input-method"
+name = "Input method"
+version = "0.1.0"
+api = 1
+description = "Typing Chinese, Japanese and Korean (fcitx5, with Pinyin, Mozc and Hangul), in every app; CTRL + SPACE switches. The installer turns it on for those languages"
+categories = ["tools"]
+
+# For whoever writes in these languages: off until asked (the installer
+# asks for it where the language is Chinese, Japanese, Korean).
+[hardware]
+any = true
+
+[packages]
+pacman = ["fcitx5", "fcitx5-gtk", "fcitx5-qt", "fcitx5-configtool", "fcitx5-mozc", "fcitx5-chinese-addons", "fcitx5-hangul"]
+
+# Started with Hyprland, and every app told where to find it: X11 apps
+# through XMODIFIERS, Wayland ones through the compositor (text-input).
+[[targets]]
+template = "input-method.lua.tmpl"
+output = "~/.config/hypr/myarch/input-method.lua"
+reload = "hyprctl reload >/dev/null; pgrep -x fcitx5 >/dev/null || hyprctl dispatch 'hl.dsp.exec_cmd(\"fcitx5 -d --replace\")' >/dev/null"

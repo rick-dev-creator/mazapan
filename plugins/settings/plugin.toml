@@ -1,0 +1,31 @@
+[plugin]
+id = "settings"
+name = "Settings"
+version = "0.1.0"
+api = 1
+description = "The settings everyone needs, a page each: keyboard, touchpad and mouse, default apps, language and time zone, the screens and the look; every other one in the Plugins panel"
+categories = ["panel", "tools"]
+requires = ["shell-bar", "hypr-base", "default-apps"]
+
+[packages]
+pacman = ["quickshell", "xdg-utils"]
+
+[settings]
+# Opens Settings.
+key = "SUPER + comma"
+
+[[targets]]
+template = "Settings.qml.tmpl"
+output = "~/.config/quickshell/myarch/panels/settings.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "settings.lua.tmpl"
+output = "~/.config/hypr/myarch/settings.lua"
+reload = "hyprctl reload >/dev/null"
+
+[[actions]]
+name = "{{ t \"act.open\" }}"
+run = "qs ipc -c myarch call myarch panel settings"
+key = "{{ settings.key }}"
+keywords = "{{ t \"act.open.kw\" }}"

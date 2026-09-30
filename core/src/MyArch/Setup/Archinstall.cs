@@ -18,7 +18,7 @@ public static class Archinstall
     const long MiB = 1024 * 1024;
 
     /// <summary>What goes in besides archinstall's own: the desktop and what building from the AUR needs.</summary>
-    public static readonly string[] Packages = ["myarch", "base-devel", "git", "sof-firmware", "reflector"];
+    public static readonly string[] Packages = ["myarch", "base-devel", "git", "sof-firmware", "reflector", "avahi"];
 
     /// <summary>Mirrors the new system uses once installed (the install itself uses the ISO's).</summary>
     public static readonly string[] Mirrors =
@@ -86,6 +86,8 @@ public static class Archinstall
             { "app_config", new Fields {
                 { "audio_config", new Fields { { "audio", "pipewire" } } },
                 { "bluetooth_config", new Fields { { "enabled", true } } },
+                // Printing: CUPS, its settings app, managing printers without a terminal.
+                { "print_service_config", new Fields { { "enabled", true } } },
             } },
             { "bootloader_config", new Fields { { "bootloader", "Grub" }, { "uki", false }, { "removable", false } } },
             { "custom_commands", new List<object> { Post(a) } },
@@ -100,10 +102,13 @@ public static class Archinstall
             } },
             { "network_config", new Fields { { "type", "nm" } } },
             { "ntp", true },
-            { "packages", Packages.Concat(Snapshots(a)).Concat(a.Encrypt ? [] : ["greetd"]).Concat(a.SshKeys.Count > 0 ? ["openssh"] : [])
-                .Concat(NeedsCjk(a) ? ["noto-fonts-cjk"] : []).Cast<object>().ToList() },
+            { "packages", Packages.Concat(Snapshots(a)).Concat(a.HardwarePackages).Concat(a.Encrypt ? [] : ["greetd"]).Concat(a.SshKeys.Count > 0 ? ["openssh"] : [])
+                .Concat(NeedsCjk(a) ? ["noto-fonts-cjk"] : [])
+                .Concat(TypesCjk(a) ? ["fcitx5", "fcitx5-gtk", "fcitx5-qt", "fcitx5-configtool", "fcitx5-mozc", "fcitx5-chinese-addons", "fcitx5-hangul"] : [])
+                .Cast<object>().ToList() },
             { "parallel_downloads", 8 },
-            { "services", new List<object> { "power-profiles-daemon" }.Concat(a.SshKeys.Count > 0 ? ["sshd"] : []).ToList() },
+            // avahi: printers (and other devices) on the network found by themselves.
+            { "services", new List<object> { "power-profiles-daemon", "avahi-daemon" }.Concat(a.SshKeys.Count > 0 ? ["sshd"] : []).ToList() },
             { "swap", true },
             { "timezone", a.Timezone },
         };
@@ -119,6 +124,12 @@ public static class Archinstall
         a.FullName.Any(c => c is >= '\u2E80' and <= '\u9FFF' or >= '\uAC00' and <= '\uD7AF' or >= '\uF900' and <= '\uFAFF' or >= '\uFF00' and <= '\uFFEF')
         || a.Language.Split('_')[0] is "zh" or "ja" or "ko"
         || a.Country is "CN" or "JP" or "KR" or "TW" or "HK" or "MO";
+
+    /// <summary>
+    /// Chinese, Japanese or Korean to type: the language (fcitx5 sets its
+    /// method up from it; someone in Tokyo writing English wouldn't get one).
+    /// </summary>
+    public static bool TypesCjk(Answers a) => a.Language.Split('_')[0] is "zh" or "ja" or "ko";
 
     /// <summary>The secrets, in their own file (archinstall's --creds).</summary>
     public static string Creds(Answers a)
@@ -185,6 +196,18 @@ public static class Archinstall
         var home = "/home/" + a.User;
         s.Append($"install -d -o {a.User} -g {a.User} {home}/.config {home}/.config/myarch {home}/.local {home}/.local/state {home}/.local/state/myarch {home}/.cache\n");
         s.Append(Write($"{home}/.config/myarch/config.toml", UserConfig(a)));
+        if (a.Encrypt)
+        {
+            // Nobody types a password to log in (the disk's was it), so the
+            // keyring can't be opened with one: it has none (the disk is
+            // encrypted). With the login screen, PAM opens it with the password.
+            s.Append($"install -d -o {a.User} -g {a.User} {home}/.local/share\n");
+            s.Append($"install -d -m 700 -o {a.User} -g {a.User} {home}/.local/share/keyrings\n");
+            s.Append(Write($"{home}/.local/share/keyrings/Default_keyring.keyring",
+                "[keyring]\ndisplay-name=Default keyring\nctime=0\nmtime=0\nlock-on-idle=false\nlock-after=false\n"));
+            s.Append(Write($"{home}/.local/share/keyrings/default", "Default_keyring\n"));
+            s.Append($"chmod 600 {home}/.local/share/keyrings/Default_keyring.keyring {home}/.local/share/keyrings/default\n");
+        }
         // The first login opens the welcome where the installer left off.
         s.Append(Write($"{home}/.local/state/myarch/welcome.json", "{\"step\":\"look\",\"done\":false}\n"));
         if (a.Apps.Count > 0) s.Append(Write($"{home}/.local/state/myarch/first-apps", string.Join('\n', a.Apps) + "\n"));
@@ -223,6 +246,11 @@ public static class Archinstall
         if (!a.Encrypt) c.Enabled.Add("hw-snapshots-grub");
         // The login screen, unless the disk's password is the login.
         if (!a.Encrypt) c.Enabled.Add("login");
+        // Typing Chinese, Japanese, Korean, where it's the language or the place.
+        if (TypesCjk(a)) c.Enabled.Add("input-method");
+        // This machine's hardware plugins (its GPU's drivers…), their packages
+        // installed with the system.
+        foreach (var h in a.Hardware) if (!c.Enabled.Contains(h)) c.Enabled.Add(h);
         c.Plugins["hypr-base"] = new(StringComparer.Ordinal) { ["kb_layout"] = a.KbLayout, ["kb_variant"] = a.KbVariant };
         return c.Text();
     }

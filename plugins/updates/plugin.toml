@@ -1,0 +1,40 @@
+[plugin]
+id = "updates"
+name = "Updates"
+version = "0.1.0"
+api = 1
+description = "Updates you see: the bar says when there are (the whole system's and the Flatpak apps'), a panel shows what changes, the news to read first and what needs a restart; updated with a click, a snapshot before, rolled back if the desktop breaks"
+categories = ["bar", "panel"]
+requires = ["shell-bar"]
+
+[packages]
+pacman = ["quickshell", "pacman-contrib", "libnotify"]
+
+[settings]
+# How often to look for updates (hours). Looking downloads the package lists only.
+every = { default = 3, min = 1, max = 48, label = "Check every (hours)" }
+
+[[targets]]
+template = "qmldir.tmpl"
+output = "~/.config/quickshell/myarch/components/updates/qmldir"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "UpdatesService.qml.tmpl"
+output = "~/.config/quickshell/myarch/components/updates/UpdatesService.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "Indicator.qml.tmpl"
+output = "~/.config/quickshell/myarch/widgets/right/25-updates.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[targets]]
+template = "Updates.qml.tmpl"
+output = "~/.config/quickshell/myarch/panels/updates.qml"
+reload = "sh ~/.local/share/myarch/bin/shell-reload"
+
+[[actions]]
+name = "{{ t \"act.open\" }}"
+run = "qs ipc -c myarch call myarch panel updates"
+keywords = "{{ t \"act.open.kw\" }}"

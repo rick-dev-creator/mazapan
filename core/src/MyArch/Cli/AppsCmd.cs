@@ -19,8 +19,7 @@ namespace MyArch.Cli;
 ///
 /// For the panel, besides what it says: "step NAME" as it goes, "fail
 /// KIND DETAIL" when something didn't go through (cancelled, pacman,
-/// flatpak, plugins, webapp, busy), "note relogin" when Flatpak apps only
-/// show after logging in again.
+/// flatpak, plugins, webapp, busy).
 /// </summary>
 public static partial class Program
 {
@@ -221,7 +220,6 @@ public static partial class Program
         public List<(string Name, string Url)> Webapps = [];
         public List<string> Enable = [];  // myarch plugins turned on
         public long Download, Installed;
-        public bool Relogin;              // Flatpak itself new: its apps show from the next login
     }
 
     static AppsPlanned PlanInstall(List<App> apps, AppsNow now, string lang)
@@ -246,7 +244,6 @@ public static partial class Program
         if (p.Flatpaks.Count > 0 && !now.Packages.Contains("flatpak"))
         {
             p.Targets.Add("flatpak");
-            p.Relogin = true;
         }
         if (p.Webapps.Count > 0)
         {
@@ -392,7 +389,7 @@ public static partial class Program
                 { "download", plan.Download }, { "installed", plan.Installed },
                 { "flatpaks", plan.Flatpaks },
                 { "webapps", plan.Webapps.Select(w => new Fields { { "name", w.Name }, { "url", w.Url } }).ToList() },
-                { "enable", plan.Enable }, { "review", plan.Review }, { "relogin", plan.Relogin },
+                { "enable", plan.Enable }, { "review", plan.Review },
             }));
             return 0;
         }
@@ -410,7 +407,6 @@ public static partial class Program
         foreach (var w in plan.Webapps) Console.WriteLine($"  web app  {w.Name} ({w.Url})");
         foreach (var e in plan.Enable) Console.WriteLine($"  plugin   {e} turned on");
         foreach (var r in plan.Review) Console.WriteLine($"  {Style.Amber}plugin   {r}: add it from the Plugins panel (it shows what it can do){Style.Reset}");
-        if (plan.Relogin) Console.WriteLine($"  {Style.Dim}Flatpak apps show in the launcher from the next login{Style.Reset}");
     }
 
     static void PrintRemovePlan(AppsRemoval r, string lang)
@@ -435,6 +431,17 @@ public static partial class Program
         using var p = Process.Start(psi)!;
         p.WaitForExit();
         return p.ExitCode;
+    }
+
+    /// <summary>
+    /// The default apps again (plugin default-apps' script, when it's on):
+    /// an app just installed may be the first of its kind, one removed may
+    /// have been the default.
+    /// </summary>
+    static void DefaultApps()
+    {
+        var script = Paths.ExpandHome("~/.local/share/myarch/bin/default-apps");
+        if (File.Exists(script)) AppsCapture("sh", script);
     }
 
     /// <summary>No repository database yet: a system installed offline, from the ISO.</summary>
@@ -556,7 +563,7 @@ public static partial class Program
         tx.Apps = done.Select(a => a.Id).ToList();
         tx.Names = done.Select(a => a.In(lang).Name).ToList();
         if (!tx.Empty) AppsLedger.Save(AppsState(), tx);
-        if (plan.Relogin && tx.Packages.Contains("flatpak")) Console.WriteLine("note relogin");
+        DefaultApps();
         foreach (var f in failed) Console.WriteLine("fail " + f);
         if (failed.Count > 0) throw new MyArchException("not everything: " + string.Join("; ", failed));
         Console.WriteLine("installed " + string.Join(", ", tx.Names));
@@ -655,6 +662,7 @@ public static partial class Program
         tx.Apps = done.Select(a => a.Id).ToList();
         tx.Names = done.Select(a => a.In(lang).Name).ToList();
         if (!tx.Empty) AppsLedger.Save(AppsState(), tx);
+        DefaultApps();
         foreach (var f in failed) Console.WriteLine("fail " + f);
         if (failed.Count > 0) throw new MyArchException("not everything: " + string.Join("; ", failed));
         Console.WriteLine("removed " + string.Join(", ", tx.Names));

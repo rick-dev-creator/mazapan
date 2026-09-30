@@ -23,6 +23,8 @@ public static partial class AsRoot
     {
         if (path != Paths.Clean(path) || !path.StartsWith('/')) return false;
         var dir = Paths.Dir(path);
+        // PAM: only the login screen's own service, never another name.
+        if (dir == "/etc/pam.d" && Paths.Base(path) != "myarch-greetd") return false;
         return Plugins.Plugin.SystemDirs.Contains(dir) && Paths.Base(path).StartsWith("myarch") &&
             (Paths.Real(dir) is not { } real || real == dir);
     }

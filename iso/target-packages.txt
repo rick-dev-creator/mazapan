@@ -36,6 +36,13 @@ bluez
 bluez-utils
 power-profiles-daemon
 
+# Printing (archinstall's print service), and finding printers on the network
+cups
+system-config-printer
+cups-pk-helper
+ghostscript
+avahi
+
 # Setup.Archinstall.Packages: the desktop, and building from the AUR
 myarch
 base-devel
@@ -50,8 +57,27 @@ greetd
 # Chinese, Japanese and Korean text, when the account or the place needs it
 noto-fonts-cjk
 
+# Typing Chinese, Japanese, Korean (plugin input-method)
+fcitx5
+fcitx5-gtk
+fcitx5-qt
+fcitx5-configtool
+fcitx5-mozc
+fcitx5-chinese-addons
+fcitx5-hangul
+
 # Snapshots that boot (the hw-snapshots plugins)
 snapper
 snap-pac
 grub-btrfs
 inotify-tools
+
+# What hardware plugins install (myarch hardware --enable, while
+# installing): offline too, a GPU's drivers can't wait for a connection.
+intel-media-driver
+libva-intel-driver
+nvidia-open-dkms
+nvidia-utils
+libva-nvidia-driver
+linux-headers
+dkms

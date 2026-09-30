@@ -28,13 +28,75 @@ public static partial class Program
         return m;
     }
 
+    /// <summary>
+    /// What an update would bring, as data, for the updates panel: packages
+    /// (the desktop's own marked, the kernel's saying a restart), Arch's news
+    /// since the last update (those asking for something marked), and the
+    /// Flatpak apps with a newer version. Changes nothing.
+    /// </summary>
+    /// <summary>The account's Flatpak apps with a newer version: id and name.</summary>
+    static List<(string Id, string Name)> PendingFlatpaks()
+    {
+        var out_ = new List<(string, string)>();
+        if (Exec.LookPath("flatpak") == null) return out_;
+        var (code, text, _) = AppsCapture("flatpak", "remote-ls", "--updates", "--user", "--app", "--columns=application,name");
+        if (code != 0) return out_;
+        foreach (var line in text.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+            if (line.Split('\t') is [var id, .. var rest] && id != "Application ID")
+                out_.Add((id, rest.Length > 0 ? rest[0] : id));
+        return out_;
+    }
+
+    static bool UpdateFlatpaks()
+    {
+        Header("Flatpak apps");
+        var ok = AppsRun("flatpak", "update", "--user", "-y", "--noninteractive") == 0;
+        Console.WriteLine(ok ? "Flatpak apps updated." : "The Flatpak apps didn't update.");
+        return ok;
+    }
+
+    static int UpdateCheckJson()
+    {
+        var since = History.LastSuccess();
+        if (since == default) since = DateTimeOffset.Now.AddMonths(-1);
+        var newsTask = Task.Run(() => Feed.Since(since));
+        var s = Load();
+        var crit = Critical(s);
+        string error = "";
+        List<MyArch.Pacman.Change> pending = [];
+        try { pending = Packages.Pending(); }
+        catch (MyArchException e) { error = e.Message; }
+        List<Item> news = [];
+        var newsError = "";
+        try { news = newsTask.GetAwaiter().GetResult(); }
+        catch (Exception e) { newsError = e.Message; }
+        var flatpaks = PendingFlatpaks().Select(f => (object)new Fields { { "id", f.Id }, { "name", f.Name } }).ToList();
+        Console.WriteLine(GoJson.Marshal(new Fields
+        {
+            { "version", 1 },
+            { "packages", pending.Select(p => (object)new Fields
+                { { "name", p.Name }, { "from", p.From }, { "to", p.To }, { "desktop", crit.Contains(p.Name) }, { "kernel", IsKernel(p.Name) } }).ToList() },
+            { "restart", pending.Any(p => IsKernel(p.Name)) },
+            { "news", news.Select(n => (object)new Fields
+                { { "title", n.Title }, { "link", n.Link }, { "date", n.Date.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) }, { "action", n.NeedsAction() } }).ToList() },
+            { "flatpaks", flatpaks },
+            { "error", error },
+            { "news_error", newsError },
+        }));
+        return 0;
+    }
+
     static int CmdUpdate(string[] args)
     {
         var fs = new Flags("update")
             .Bool("y", "don't ask: update right away")
             .Bool("check", "show what an update would do, change nothing")
             .Bool("no-rollback", "if a check fails, leave things as they are")
+            .Bool("json", "with --check: what there is, as data (the updates panel)")
+            .Bool("gui", "from the updates panel: the password through polkit (pkexec), no terminal")
             .Parse(args);
+        if (fs.IsSet("json")) return UpdateCheckJson();
+        Packages.Gui = fs.IsSet("gui");
         var s = Load();
 
         // --- preview -------------------------------------------------------
@@ -100,9 +162,18 @@ public static partial class Program
             PrintPlan(changes, orphans, true);
         }
 
+        var flatpaks = PendingFlatpaks();
+        if (flatpaks.Count > 0)
+        {
+            Header($"Flatpak apps ({flatpaks.Count})");
+            foreach (var (_, name) in flatpaks) Console.WriteLine($"    {name}");
+        }
         if (pending.Count == 0 && fileChanges + orphans.Count == 0)
         {
-            Console.WriteLine("\nEverything is up to date.");
+            // Only the Flatpak apps: nothing of the system's changes, no record.
+            if (flatpaks.Count > 0 && !fs.IsSet("check") && (fs.IsSet("y") || Confirm("Update now?")))
+                return UpdateFlatpaks() ? 0 : 1;
+            if (flatpaks.Count == 0) Console.WriteLine("\nEverything is up to date.");
             return 0;
         }
         if (fs.IsSet("check")) return 0;
@@ -148,6 +219,10 @@ public static partial class Program
                 upErr = e.Message;
             }
         }
+        // The Flatpak apps too (the account's, as the Apps menu installs them):
+        // their own runtime, no root, not part of what a rollback undoes. Not
+        // when the system's part didn't go through (a password refused).
+        if (upErr == null && flatpaks.Count > 0 && !UpdateFlatpaks()) rec.Note = "the Flatpak apps didn't update (flatpak update --user)";
         Dictionary<string, string> after;
         try
         {

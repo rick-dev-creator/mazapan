@@ -28,12 +28,12 @@ Suggested start: 1, 2 and 3.
 | 13 | The same desktop anywhere | Planned |
 | 14 | Workspace sessions | Planned |
 | 15 | The CLI in your language | Planned |
-| 16 | Installation and first boot | In progress: catalog (17), welcome, the ISO with its graphical installer, and the login screen done (audited, 2026-09-30); next, snapshots from day one, unattended installs |
-| 17 | Apps: install and remove | **Done** (2026-09-29): catalog, `myarch apps`, the Apps menu with profiles (several at once); audited. Pending: catalogs from others, Flatpak apps without a new login |
-| 18 | Settings with a face | Planned |
+| 16 | Installation and first boot | **Done** (2026-09-30): catalog (17), welcome, the ISO with its graphical installer (any language, time zone, keyboard), snapshots from the install on; audited. Pending: unattended installs (`cidata`), real hardware |
+| 17 | Apps: install and remove | **Done** (2026-09-29): catalog, `myarch apps`, the Apps menu with profiles (several at once); Flatpak apps show without a new login (2026-09-30); audited. Pending: catalogs from others |
+| 18 | Settings with a face | In progress: the Settings panel (keyboard, touchpad and mouse, default apps, language and time zone) done (2026-09-30); fonts, keybindings, preview to do |
 | 19 | Security | Planned |
-| 20 | Updates, visible | Planned |
-| 21 | Boot and login in the theme | Planned |
+| 20 | Updates, visible | **Done** (2026-09-30): the bar says when there are, a panel shows them (news, restart), updated with a click (pkexec), Flatpak apps too. Pending: firmware, downloading ahead |
+| 21 | Boot and login in the theme | In progress: the login screen (plugin `login`, greetd) done; the boot splash and menu to do |
 | 22 | Sharing | Planned |
 | 23 | More capture | Planned |
 | 24 | Extras | Planned |

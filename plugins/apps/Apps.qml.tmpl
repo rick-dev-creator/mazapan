@@ -240,7 +240,7 @@ Item {
           root.failed = done !== "DONE 0" && !cancelled
           root.result = cancelled ? {{ tq "cancelled" }}
             : root.failed ? {{ tq "failed" }}.arg(fails.map(root.why).join("; ") || root.line)
-            : lines.some(l => l === "note relogin") ? {{ tq "done_relogin" }} : {{ tq "done" }}
+            : {{ tq "done" }}
           root.refresh()
           if (done === "DONE 0") {
             root.chosen = {}

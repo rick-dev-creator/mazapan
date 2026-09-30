@@ -1,0 +1,34 @@
+[plugin]
+id = "default-apps"
+name = "Default apps"
+version = "0.1.0"
+api = 1
+description = "What opens links, PDFs, pictures, videos, music, text, folders, mail, documents and archives: the first installed of the usual ones, unless you picked one; what you set in an app stays"
+categories = ["tools"]
+
+[packages]
+pacman = ["xdg-utils"]
+
+[settings]
+# Links and web pages: a desktop file's name ("firefox.desktop"); empty: the first installed.
+browser = { default = "", kind = "text", label = "Web browser" }
+# Folders: empty, the first installed file manager.
+files = { default = "", kind = "text", label = "Files" }
+# PDF documents.
+pdf = { default = "", kind = "text", label = "PDF" }
+# Pictures.
+images = { default = "", kind = "text", label = "Pictures" }
+# Videos.
+video = { default = "", kind = "text", label = "Videos" }
+# Music and other audio.
+audio = { default = "", kind = "text", label = "Music" }
+# Plain text.
+text = { default = "", kind = "text", label = "Text" }
+# Email links (mailto:).
+email = { default = "", kind = "text", label = "Email" }
+
+# Set on every apply, and after the Apps menu installs or removes one.
+[[targets]]
+template = "default-apps.sh.tmpl"
+output = "~/.local/share/myarch/bin/default-apps"
+reload = "sh ~/.local/share/myarch/bin/default-apps"

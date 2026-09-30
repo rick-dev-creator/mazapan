@@ -159,6 +159,17 @@ public static partial class Program
         // Whoever set the live system up to be reached over SSH (cidata) can
         // reach the new one the same way.
         if (File.Exists(RootKeys)) a.SshKeys = Answers.Keys(File.ReadAllText(RootKeys));
+        // This machine's hardware plugins: its hardware is seen from here (the
+        // same machine), how the system goes on it is the install's. Their
+        // packages come from the ISO's repository with the rest.
+        var target = Hardware.ThisMachine.Get().Installed("btrfs", "grub", bootOnRoot: !a.Encrypt);
+        foreach (var p in Plugins.Plugin.Discover(PluginDirs()).Plugins)
+            if (p.Hardware is { } h && !h.OnlyAny && !h.Live && h.Matches(target).Ok)
+            {
+                a.Hardware.Add(p.Id);
+                a.HardwarePackages.AddRange(p.Pacman.Where(x => !a.HardwarePackages.Contains(x)));
+            }
+        a.Check();
         if (!Directory.Exists("/sys/firmware/efi"))
         {
             Console.WriteLine("fail uefi");

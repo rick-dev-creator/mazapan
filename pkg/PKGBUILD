@@ -20,7 +20,7 @@ depends=(
   hyprland quickshell qt6-wayland qt6-svg qt6-imageformats xdg-desktop-portal-hyprland
   pipewire pipewire-pulse wireplumber networkmanager polkit
   noto-fonts noto-fonts-emoji ttf-jetbrains-mono-nerd
-  git jq curl flatpak power-profiles-daemon
+  git jq curl flatpak power-profiles-daemon gnome-keyring
   $(for f in "$_repo"/plugins/*/plugin.toml; do
       grep -q '^\[hardware' "$f" && continue
       sed -n '/^\[packages\]/,/^\[/{s/^pacman *= *\[\(.*\)\]/\1/p}' "$f"

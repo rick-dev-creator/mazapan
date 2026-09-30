@@ -107,8 +107,9 @@ public sealed partial class Plugin
         "/etc/opt/edge/policies/managed",
         // grub-btrfs's daemon (snapshots in the boot menu): what it passes a snapshot's kernel.
         "/etc/systemd/system/grub-btrfsd.service.d",
-        // The login screen: greetd's configuration (its own is left alone), and how it's started.
-        "/etc/greetd", "/etc/systemd/system/greetd.service.d",
+        // The login screen: greetd's configuration (its own is left alone), how it's
+        // started, and its own PAM service (a new one: the system's aren't touched).
+        "/etc/greetd", "/etc/systemd/system/greetd.service.d", "/etc/pam.d",
     ];
 
     static readonly HashSet<string> KnownToolkits =
@@ -404,7 +405,8 @@ public sealed partial class Plugin
             {
                 // A system file is myarch's by its name, in a folder made for
                 // drop-ins: never a file the system or another package owns.
-                if (!SystemDirs.Contains(Paths.Dir(t.Output)) || !Paths.Base(t.Output).StartsWith("myarch") || t.Each.Count > 0 || t.Merge != "")
+                if (!SystemDirs.Contains(Paths.Dir(t.Output)) || !Paths.Base(t.Output).StartsWith("myarch") || t.Each.Count > 0 || t.Merge != ""
+                    || (Paths.Dir(t.Output) == "/etc/pam.d" && Paths.Base(t.Output) != "myarch-greetd"))
                     throw new MyArchException($"{path}: targets[{i}]: a system file is /etc/…/myarch*, in one of: {string.Join(", ", SystemDirs)}");
             }
             else if (t.Output.StartsWith('/') && !t.Output.StartsWith(Paths.Home + "/"))

@@ -3,6 +3,19 @@
 
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
 
+-- Flatpak's apps where launchers look, from the start: one installed
+-- later shows right away, not after logging in again.
+do
+  local ok, data, home = pcall(function() return os.getenv("XDG_DATA_DIRS"), os.getenv("HOME") end)
+  if ok then
+    data = (data and data ~= "") and data or "/usr/local/share:/usr/share"
+    for _, d in ipairs({ (home or "") .. "/.local/share/flatpak/exports/share", "/var/lib/flatpak/exports/share" }) do
+      if not data:find(d, 1, true) then data = data .. ":" .. d end
+    end
+    hl.env("XDG_DATA_DIRS", data)
+  end
+end
+
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 
@@ -13,6 +26,12 @@ hl.config({
     kb_variant = {{ lq settings.kb_variant }},
     kb_options = {{ lq settings.kb_options }},
     follow_mouse = 1,
+    sensitivity = {{ num settings.pointer_speed }},
+    touchpad = {
+      tap_to_click = {{ settings.tap_to_click }},
+      natural_scroll = {{ settings.natural_scroll }},
+      disable_while_typing = {{ settings.disable_while_typing }},
+    },
   },
   -- Hyprland's own "updated" and donation windows: the desktop says what's new itself.
   ecosystem = {

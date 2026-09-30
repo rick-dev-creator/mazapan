@@ -39,6 +39,21 @@ public sealed class Machine
 
     public IEnumerable<PciDevice> Gpus => Pci.Where(p => p.IsGpu);
 
+    /// <summary>
+    /// As installed: this machine's hardware (seen from the ISO), the way
+    /// the installer puts the system on it. What hardware plugins to turn on
+    /// while installing is worked out against it.
+    /// </summary>
+    public Machine Installed(string filesystem, string bootloader, bool bootOnRoot)
+    {
+        var m = (Machine)MemberwiseClone();
+        m.Filesystem = filesystem;
+        m.Bootloader = bootloader;
+        m.BootOnRoot = bootOnRoot;
+        m.Live = false;
+        return m;
+    }
+
     public static Machine Read(string root = "/")
     {
         string R(string p) => Paths.Join(root, p);
@@ -89,7 +104,7 @@ public sealed class Machine
         // A snapshot started from the menu runs on an overlay: what's under it is btrfs.
         if (m.Filesystem == "overlay" && Text(R("proc/cmdline")).Contains("rootflags=subvol=")) m.Filesystem = "btrfs";
         m.BootOnRoot = !mounts.Any(f => f[1] == "/boot");
-        m.Live = Directory.Exists(R("run/archiso"));
+        m.Live = Directory.Exists(R("run/archiso")) && (root != "/" || !InChroot());
         m.Bootloader = BootloaderOf(R, efi: root != "/" || !InChroot());
         return m;
     }
@@ -98,7 +113,9 @@ public sealed class Machine
     /// In a chroot (an install, from the ISO): the firmware's variables then
     /// say how the ISO started, not the system being installed.
     /// </summary>
-    static bool InChroot()
+    static bool? inChroot;
+    static bool InChroot() => inChroot ??= DetectChroot();
+    static bool DetectChroot()
     {
         try
         {

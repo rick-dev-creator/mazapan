@@ -11,7 +11,7 @@ categories = ["hardware"]
 any = true
 
 [packages]
-pacman = ["greetd", "hyprland", "quickshell"]
+pacman = ["greetd", "hyprland", "quickshell", "gnome-keyring"]
 
 # greetd started with myarch's configuration (its own file stays as the
 # package has it), and as the login manager from the next start. Taken off,
@@ -21,6 +21,13 @@ template = "greetd.service.conf.tmpl"
 output = "/etc/systemd/system/greetd.service.d/myarch.conf"
 system = true
 reload = "systemctl daemon-reload; if [ -e /etc/systemd/system/greetd.service.d/myarch.conf ]; then systemctl enable -f greetd.service; else systemctl disable greetd.service; fi"
+
+# Its own PAM service (the system's stay as they are): the password also
+# unlocks the keyring.
+[[targets]]
+template = "pam.tmpl"
+output = "/etc/pam.d/myarch-greetd"
+system = true
 
 [[targets]]
 template = "greetd.toml.tmpl"

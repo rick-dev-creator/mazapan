@@ -119,6 +119,8 @@ public class SetupTests
         Assert.Equal("la-latin1", r.GetProperty("locale_config").GetProperty("kb_layout").GetString());
         Assert.Equal("es_MX.UTF-8", r.GetProperty("locale_config").GetProperty("sys_lang").GetString());
         Assert.Contains("myarch", r.GetProperty("packages").EnumerateArray().Select(x => x.GetString()));
+        Assert.True(r.GetProperty("app_config").GetProperty("print_service_config").GetProperty("enabled").GetBoolean());
+        Assert.Contains("avahi-daemon", r.GetProperty("services").EnumerateArray().Select(x => x.GetString()));
         // The password is only in the credentials.
         Assert.DoesNotContain("p4ss", r.GetRawText());
     }
@@ -136,6 +138,7 @@ public class SetupTests
         Assert.Equal(a.Password, creds.RootElement.GetProperty("encryption_password").GetString());
         Assert.Equal(a.Password, creds.RootElement.GetProperty("users")[0].GetProperty("!password").GetString());
         Assert.Contains("--autologin rick", Decoded(Archinstall.Post(a)));
+        Assert.Contains("lock-on-idle=false", Decoded(Archinstall.Post(a)));
         Assert.DoesNotContain("login", Archinstall.UserConfig(a));
         // Snapshots still (not in the boot menu: /boot isn't on btrfs).
         Assert.Contains("enabled_plugins = [\"hw-snapshots\"]", Archinstall.UserConfig(a));
@@ -160,6 +163,21 @@ public class SetupTests
         Assert.Equal(cjk, Archinstall.NeedsCjk(a));
     }
 
+    [Theory]
+    [InlineData("ja", "", true)]
+    [InlineData("en", "KR", false)]
+    [InlineData("zh_TW", "TW", true)]
+    [InlineData("en", "US", false)]
+    [InlineData("es", "MX", false)]
+    public void AnInputMethodWhereCjkIsTyped(string lang, string country, bool on)
+    {
+        var a = Answers.Parse(Good);
+        a.Language = lang;
+        a.Country = country;
+        Assert.Equal(on, Archinstall.TypesCjk(a));
+        Assert.Equal(on, Archinstall.UserConfig(a).Contains("input-method"));
+    }
+
     [Fact]
     public void TooSmallADiskIsRefused() =>
         Assert.Throws<MyArchException>(() => Archinstall.Config(Answers.Parse(Good), 4L * 1024 * 1024 * 1024, "us"));
@@ -178,11 +196,13 @@ public class SetupTests
         Assert.Contains("vscode\nsteam\n", files);
         Assert.Contains("start-hyprland", files);
         Assert.DoesNotContain("--autologin", files);
+        Assert.DoesNotContain("Default_keyring", files); // PAM opens the login keyring
         Assert.Contains("enabled_plugins = [\"hw-snapshots\", \"hw-snapshots-grub\", \"login\"]", files);
         Assert.Contains("snapper --no-dbus -c root create", post);
         Assert.True(post.IndexOf("myarch apply") < post.IndexOf("snapper --no-dbus -c root create"));
         Assert.Contains("Option \"XkbLayout\" \"latam\"", files);
         Assert.Contains("myarch apply --system -y", post);
+        Assert.DoesNotContain("hardware --enable", post); // worked out before, from the ISO
         Assert.Contains("--removable", post);
         // Arch's pacman.conf, not the ISO's offline-only one; multilib on; synced when online.
         Assert.Contains("bsdtar -xOf \"$p\" etc/pacman.conf", post);

@@ -10,14 +10,29 @@ public static partial class Program
     /// <summary>
     /// `myarch hardware`: this machine as plugins see it (model, GPUs, USB
     /// devices), and the hardware plugins for it: which are on, and how to
-    /// turn on the others. Nothing is turned on by itself.
+    /// turn on the others. Nothing is turned on by itself, but with --enable
+    /// (the installer's, before its apply --system): every one for this
+    /// machine (not those for any machine: they're asked for).
     /// </summary>
     static int CmdHardware(string[] args)
     {
         var fs = new Flags("hardware")
             .Bool("json", "as data")
             .Bool("all", "list the hardware plugins for other machines too")
+            .Bool("enable", "turn on every hardware plugin for this machine (then: myarch apply --system)")
             .Parse(args);
+        if (fs.IsSet("enable"))
+        {
+            var cfgOn = Settings.Load();
+            var on = HardwareToOffer(cfgOn);
+            foreach (var p in on)
+            {
+                cfgOn.TurnOn(p);
+                Console.WriteLine($"on: {p.Id}");
+            }
+            if (on.Count > 0) cfgOn.Save();
+            return 0;
+        }
         var m = ThisMachine.Get();
         var cfg = Settings.Load();
         var hw = Plugin.Discover(PluginDirs()).Plugins.Where(p => p.Hardware != null).ToList();

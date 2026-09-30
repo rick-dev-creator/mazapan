@@ -17,6 +17,14 @@ kb_variant = { default = "", kind = "text", label = "Keyboard variant" }
 # xkb options: a key to switch layouts ("grp:alt_shift_toggle"; with
 # several layouts and none, there's no way to switch), caps as control…
 kb_options = { default = "", kind = "text", label = "Keyboard options" }
+# Touchpad: a tap is a click (two fingers, the right one).
+tap_to_click = { default = true, label = "Tap to click" }
+# Touchpad: the content moves with the fingers, as on a phone.
+natural_scroll = { default = false, label = "Natural scrolling" }
+# Touchpad: off while typing, so the palm doesn't move the pointer.
+disable_while_typing = { default = true, label = "Off while typing" }
+# How fast the pointer moves, mouse and touchpad (-1 slowest, 0 as it comes, 1 fastest).
+pointer_speed = { default = 0.0, min = -1.0, max = 1.0, label = "Pointer speed" }
 
 [[targets]]
 template = "hyprland.lua.tmpl"

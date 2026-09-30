@@ -139,15 +139,19 @@ public static class Packages
         return null;
     }
 
+    /// <summary>From a panel (no terminal): pacman through pkexec, the password in polkit's dialog.</summary>
+    public static bool Gui;
+
     /// <summary>
     /// run executes a pacman command as root, attached to the terminal so sudo
-    /// can ask for a password and pacman can show its progress. Null when it
-    /// worked, else the error as Go wrote it ("exit status 1").
+    /// (or pkexec, Gui) can ask for a password and pacman can show its
+    /// progress. Null when it worked, else the error as Go wrote it ("exit status 1").
     /// </summary>
     static string? RunAsRoot(params string[] args)
     {
-        if (Exec.LookPath("sudo") is not { } sudo)
-            return "exec: \"sudo\": executable file not found in $PATH";
+        var how = Gui ? "pkexec" : "sudo";
+        if (Exec.LookPath(how) is not { } sudo)
+            return $"exec: \"{how}\": executable file not found in $PATH";
         var psi = new ProcessStartInfo(sudo) { UseShellExecute = false };
         psi.ArgumentList.Add("pacman");
         foreach (var a in args) psi.ArgumentList.Add(a);
