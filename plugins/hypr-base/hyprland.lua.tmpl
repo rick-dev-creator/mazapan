@@ -8,7 +8,10 @@ hl.env("HYPRCURSOR_SIZE", "24")
 
 hl.config({
   input = {
-    kb_layout = "us",
+    -- The keyboard (xkb): layouts, their variants, options (a key to switch between layouts).
+    kb_layout = {{ lq settings.kb_layout }},
+    kb_variant = {{ lq settings.kb_variant }},
+    kb_options = {{ lq settings.kb_options }},
     follow_mouse = 1,
   },
   misc = {

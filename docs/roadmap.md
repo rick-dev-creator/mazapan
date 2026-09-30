@@ -28,7 +28,7 @@ Suggested start: 1, 2 and 3.
 | 13 | The same desktop anywhere | Planned |
 | 14 | Workspace sessions | Planned |
 | 15 | The CLI in your language | Planned |
-| 16 | Installation and first boot | In progress: its profiles and catalog first (17), then a first-boot welcome, then the ISO |
+| 16 | Installation and first boot | In progress: profiles and catalog (17) and the first-boot welcome done; next, the ISO |
 | 17 | Apps: install and remove | **Done** (2026-09-29): catalog, `myarch apps`, the Apps menu with profiles (several at once); audited. Pending: catalogs from others, Flatpak apps without a new login |
 | 18 | Settings with a face | Planned |
 | 19 | Security | Planned |
@@ -730,6 +730,16 @@ selection is installed, and you remove what you don't want.
   (17) first, on any Arch; then a first-boot welcome (language, keyboard,
   theme, profiles, Wi-Fi) for those who installed Arch themselves; then
   the ISO, reusing both. Tested by booting the ISO in the VM.
+
+*Done so far* (2026-09-30): the catalog and the Apps menu (17), and the
+welcome (plugin `welcome`): on the first login after the machine's first
+`myarch apply`, a screen each for the language (the whole desktop
+switches at once), the keyboard (the common ones in your language, any
+other by search, a field to try it), the time zone (by city, or from the
+connection when asked), Wi-Fi when there's none, the look, and the
+profiles (several at once, installed in the background); the last screen
+shows the keys as they are on that machine. Where it was is kept across
+the reloads it causes; Esc closes it until the next login. Next: the ISO.
 
 ## 17. Apps: install and remove
 

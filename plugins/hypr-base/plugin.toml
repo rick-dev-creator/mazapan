@@ -9,6 +9,15 @@ categories = ["window"]
 [packages]
 pacman = ["hyprland", "foot"]
 
+[settings]
+# Keyboard layouts, comma separated ("us", "es", "us,es"): xkb's names.
+kb_layout = { default = "us", kind = "text", label = "Keyboard layout" }
+# Each layout's variant, in the same order ("intl", "" for none).
+kb_variant = { default = "", kind = "text", label = "Keyboard variant" }
+# xkb options: a key to switch layouts ("grp:alt_shift_toggle"; with
+# several layouts and none, there's no way to switch), caps as control…
+kb_options = { default = "", kind = "text", label = "Keyboard options" }
+
 [[targets]]
 template = "hyprland.lua.tmpl"
 output = "~/.config/hypr/hyprland.lua"

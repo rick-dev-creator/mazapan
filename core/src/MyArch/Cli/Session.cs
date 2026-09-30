@@ -254,6 +254,7 @@ public static partial class Program
         var fs = new Flags("apply")
             .String("theme", "switch to this theme (saved in config)")
             .String("accent", "use this accent color, #rrggbb; \"theme\" for the theme's own (saved in config)")
+            .String("language", "the desktop's language (es, pt_BR); \"system\" for the system's (saved in config)")
             .Bool("dry-run", "show what would change, write nothing")
             .Bool("adopt", "back up and take over files myarch didn't write")
             .Bool("diff", "show exactly what would be written, as a unified diff")
@@ -268,6 +269,9 @@ public static partial class Program
             .Parse(args);
         var themeId = fs.Get("theme");
         var accent = fs.Get("accent");
+        var language = fs.Get("language");
+        if (language != "" && language != "system" && !System.Text.RegularExpressions.Regex.IsMatch(language, @"^[a-z]{2,3}(_[A-Z]{2})?\z"))
+            throw new MyArchException($"--language {GoFormat.Quote(language)}: a language code (es, pt_BR), or \"system\"");
         if (accent != "" && accent != "theme" && !AccentPattern().IsMatch(accent))
             throw new MyArchException($"--accent {GoFormat.Quote(accent)}: use #rrggbb, or \"theme\" for the theme's own");
         var edits = new List<string>(); // what changes config.toml, for undo --list
@@ -293,6 +297,9 @@ public static partial class Program
         var s = LoadWith(c =>
         {
             if (themeId != "") c.Theme = themeId;
+            if (language == "system") c.Language = "";
+            else if (language != "") c.Language = language;
+            if (language != "") edits.Add("language " + (language == "system" ? "the system's" : language));
             if (accent == "theme") c.Accent = "";
             else if (accent != "") c.Accent = accent.ToLowerInvariant();
             foreach (var (plugin, key, value) in sets)
@@ -351,6 +358,18 @@ public static partial class Program
         // Packages alone are a change too: undo takes them out.
         var snap = noSnapshots ? null : Snapshots.Begin(changes, orphans, fs.IsSet("adopt"), Settings.Path, what,
             configOnly: configChanged || (fs.IsSet("system") && rootWork > 0));
+        // The machine's very first apply (an install, a first setup): the
+        // welcome opens at the next login (the welcome plugin reads this).
+        // Written first: the shell reloads as the files are written.
+        if (!File.Exists(Apply.StatePath()))
+        {
+            var welcome = Paths.ExpandHome("~/.local/state/myarch/welcome.json");
+            if (!File.Exists(welcome))
+            {
+                Directory.CreateDirectory(Paths.Dir(welcome));
+                Files.WriteAtomic(welcome, "{\"step\":\"language\",\"done\":false}\n");
+            }
+        }
         try
         {
             s.Write(changes, orphans, owned, fs.IsSet("adopt"));
