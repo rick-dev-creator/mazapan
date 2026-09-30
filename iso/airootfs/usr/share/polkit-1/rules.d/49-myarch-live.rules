@@ -1,0 +1,4 @@
+// The live session asks for no password (it has none).
+polkit.addRule(function (action, subject) {
+    if (subject.user == "live") return polkit.Result.YES;
+});

@@ -110,15 +110,17 @@ Item {
     problem = ""
     save()
   }
-  // Wi-Fi only when there's no connection.
+  // Wi-Fi only when there's no connection; the apps not when the installer
+  // asked already.
+  function shown(s) { return (s !== "network" || !online) && (s !== "apps" || !fromInstaller) }
   function next() {
     let i = steps.indexOf(step) + 1
-    if (steps[i] === "network" && online) i++
+    while (i < steps.length - 1 && !shown(steps[i])) i++
     go(steps[Math.min(i, steps.length - 1)])
   }
   function back() {
     let i = steps.indexOf(step) - 1
-    if (steps[i] === "network" && online) i--
+    while (i > 0 && !shown(steps[i])) i--
     go(steps[Math.max(i, 0)])
   }
   function finish() {
@@ -341,11 +343,40 @@ Item {
     }
   }
 
+  // The apps chosen in the installer (myarch install leaves them in
+  // first-apps): installed as soon as there's a connection, once (the file
+  // is then marked "#started", and still says the installer asked).
+  readonly property string firstAppsFile: Quickshell.env("HOME") + "/.local/state/myarch/first-apps"
+  property var firstApps: []
+  property bool fromInstaller: false
+  FileView {
+    path: root.firstAppsFile
+    printErrors: false
+    onLoaded: {
+      const lines = text().split("\n")
+      const ids = lines.filter(x => /^[a-z0-9][a-z0-9-]*$/.test(x))
+      root.fromInstaller = ids.length > 0
+      root.firstApps = lines[0] === "#started" ? [] : ids
+      root.installFirst()
+    }
+  }
+  onOnlineChanged: installFirst()
+  function installFirst() {
+    if (firstApps.length === 0 || !online || installing) return
+    const ids = firstApps
+    firstApps = []
+    Quickshell.execDetached(["sh", "-c", '{ echo "#started"; cat "$0"; } > "$0.new" && mv "$0.new" "$0"', firstAppsFile])
+    installIds(ids)
+  }
+
   function installChosen() {
     const ids = Object.keys(chosen).filter(k => chosen[k])
+    chosen = {}
+    installIds(ids)
+  }
+  function installIds(ids) {
     if (ids.length === 0 || installing) return
     installing = true
-    chosen = {}
     // As the Apps menu does it (it shows the progress, and picks it up).
     Quickshell.execDetached(["sh", "-c", 'dir=$0; ok=$1; bad=$2; title=$3; shift 3; mkdir -p "$dir"; '
       + 'echo "START welcome" > "$dir/run.log"; myarch apps install --gui "$@" >> "$dir/run.log" 2>&1; code=$?; '
@@ -439,7 +470,7 @@ Item {
           Layout.alignment: Qt.AlignHCenter
           spacing: 8
           Repeater {
-            model: root.steps.filter(s => s !== "network" || !root.online)
+            model: root.steps.filter(s => root.shown(s))
             Rectangle {
               required property string modelData
               width: root.step === modelData ? 22 : 8

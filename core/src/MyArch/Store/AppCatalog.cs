@@ -62,6 +62,7 @@ public static partial class AppCatalog
     [GeneratedRegex(@"^[a-z]{2,3}(_[A-Z]{2})?\z")] private static partial Regex LangPattern();
     [GeneratedRegex(@"^[A-Za-z0-9._@+-]+\.desktop\z")] private static partial Regex DesktopPattern();
 
+    public static bool IsId(string s) => IdPattern().IsMatch(s);
     public static bool IsPackage(string s) => PackagePattern().IsMatch(s);
     public static bool IsFlatpak(string s) => FlatpakPattern().IsMatch(s);
     public static bool IsWebapp(string s) => s.StartsWith("https://") && s.Length > 8 && !s.Any(c => char.IsWhiteSpace(c) || char.IsControl(c) || c == '\\');

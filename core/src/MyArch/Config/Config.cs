@@ -55,7 +55,12 @@ public sealed class Settings
         return c;
     }
 
-    public void Save()
+    public void Save() =>
+        // Atomically, and through a symlink (dotfiles kept with stow or chezmoi).
+        Files.WriteAtomic(Paths.Real(Path) ?? Path, Text());
+
+    /// <summary>The file's text, as Save writes it.</summary>
+    public string Text()
     {
         var b = new StringBuilder("# myarch configuration. Apply changes with: myarch apply\n\n");
         TomlWriter.Key(b, "theme", Theme);
@@ -73,8 +78,7 @@ public sealed class Settings
                 foreach (var (k, v) in settings) TomlWriter.Key(b, k, v, "    ");
             }
         }
-        // Atomically, and through a symlink (dotfiles kept with stow or chezmoi).
-        Files.WriteAtomic(Paths.Real(Path) ?? Path, b.ToString());
+        return b.ToString();
     }
 
     public bool IsDisabled(string id) => Disabled.Contains(id);

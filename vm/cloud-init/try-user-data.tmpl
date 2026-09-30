@@ -1,0 +1,6 @@
+#cloud-config
+# The try VM (vm/vm try): the ISO's live system reads this from the seed
+# CD, only to let SSH in as root with the dev key.
+disable_root: false
+runcmd:
+  - [sh, -c, "install -d -m 700 /root/.ssh && echo '@SSH_PUBKEY@' >> /root/.ssh/authorized_keys"]

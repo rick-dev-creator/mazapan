@@ -177,6 +177,8 @@ gpus = 2                             # at least this many GPUs
 filesystem = ["btrfs"]               # the root filesystem
 bootloader = ["grub"]                # grub, limine, systemd-boot
 boot_on_root = true                  # /boot isn't a partition of its own
+live = true                          # the ISO's live system (the installer's)
+any = true                           # any machine: for all, but it changes the system, so off until asked
 ```
 
 Patterns are shell patterns, case-insensitive (a literal `[`, common in PCI
@@ -202,7 +204,8 @@ written as root, with sudo, only in a drop-in folder (`/etc/modprobe.d`,
 `/etc/udev/hwdb.d`, `/etc/sysctl.d`, `/etc/tmpfiles.d`,
 `/etc/systemd/logind.conf.d`, `/etc/systemd/sleep.conf.d`,
 `/etc/X11/xorg.conf.d`, browsers' `policies/managed`,
-`/etc/systemd/system/grub-btrfsd.service.d`) and named `myarch*`:
+`/etc/systemd/system/grub-btrfsd.service.d`, and for the login screen
+`/etc/greetd` and `/etc/systemd/system/greetd.service.d`) and named `myarch*`:
 never a file the system or another package owns. Its `reload` runs as
 root; `reboot = true` says it takes effect after a reboot. `[packages]
 pacman` are installed too.

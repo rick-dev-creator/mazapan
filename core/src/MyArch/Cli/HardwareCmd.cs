@@ -58,7 +58,7 @@ public static partial class Program
         if (m.Filesystem != "" || m.Bootloader != "")
             Console.WriteLine($"  root {(m.Filesystem == "" ? "?" : m.Filesystem)}, boot loader {(m.Bootloader == "" ? "?" : m.Bootloader)}");
         Console.WriteLine();
-        var mine = rows.Where(r => r.Match.Ok).ToList();
+        var mine = rows.Where(r => r.Match.Ok && !r.Plugin.Hardware!.OnlyAny).ToList();
         if (mine.Count == 0) Console.WriteLine("No hardware plugin is for this machine.");
         foreach (var (p, _, on) in mine)
         {
@@ -70,6 +70,11 @@ public static partial class Program
             Console.WriteLine("\nFor other machines:");
             foreach (var (p, match, _) in rows.Where(r => !r.Match.Ok))
                 Console.WriteLine($"  {Style.Dim}{p.Id,-26} {p.Hardware!.Describe()} (here: {match.Why}){Style.Reset}");
+            // For every machine, but they change how it starts: only when asked.
+            var any = rows.Where(r => r.Plugin.Hardware!.OnlyAny).ToList();
+            if (any.Count > 0) Console.WriteLine("\nFor any machine, when you want them:");
+            foreach (var (p, _, on) in any)
+                Console.WriteLine($"  {(on ? Style.Green + "✓" : Style.Dim + "○")}{Style.Reset} {p.Id,-24} {p.Meta.Description}");
         }
         return 0;
     }
@@ -77,5 +82,5 @@ public static partial class Program
     /// <summary>The hardware plugins for this machine that are off: doctor and status mention them.</summary>
     static List<Plugin> HardwareToOffer(Settings cfg) =>
         Plugin.Discover(PluginDirs()).Plugins
-            .Where(p => p.Hardware != null && !cfg.IsOn(p) && p.Hardware.Matches(ThisMachine.Get()).Ok).ToList();
+            .Where(p => p.Hardware != null && !cfg.IsOn(p) && p.Hardware.Offered(ThisMachine.Get())).ToList();
 }

@@ -107,6 +107,8 @@ public sealed partial class Plugin
         "/etc/opt/edge/policies/managed",
         // grub-btrfs's daemon (snapshots in the boot menu): what it passes a snapshot's kernel.
         "/etc/systemd/system/grub-btrfsd.service.d",
+        // The login screen: greetd's configuration (its own is left alone), and how it's started.
+        "/etc/greetd", "/etc/systemd/system/greetd.service.d",
     ];
 
     static readonly HashSet<string> KnownToolkits =
@@ -318,6 +320,8 @@ public sealed partial class Plugin
                 Filesystem = hw.Strings("filesystem"),
                 Bootloader = hw.Strings("bootloader"),
                 BootOnRoot = hw.Bool("boot_on_root"),
+                Live = hw.Bool("live"),
+                Any_ = hw.Bool("any"),
             };
             if (p.Hardware.Empty) throw new MyArchException($"{path}: [hardware] needs at least one rule");
             if (p.Hardware.BadPatterns().FirstOrDefault() is { } bad)

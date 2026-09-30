@@ -7,3 +7,6 @@ vm/.state/
 core/**/bin/
 core/**/obj/
 core/obj/
+
+# The ISO (iso/build without an output folder)
+/out/

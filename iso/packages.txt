@@ -1,0 +1,6 @@
+# Added to releng's packages for the live system. myarch brings the
+# desktop with it (pkg/PKGBUILD's depends).
+myarch
+# Names and text in Chinese, Japanese, Korean (the rest of the world's
+# scripts are in noto-fonts, which myarch brings).
+noto-fonts-cjk

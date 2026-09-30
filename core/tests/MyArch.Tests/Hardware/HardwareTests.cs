@@ -143,7 +143,7 @@ public class HardwareTests
     public void BuiltInHardwarePluginsLoad()
     {
         var (all, broken) = Plugin.Discover([Path.Join(Repo.Root, "plugins")]);
-        Assert.Empty(broken);
+        Assert.True(broken.Count == 0, string.Join("\n", broken.Select(b => b.Key + ": " + b.Value)));
         var hw = all.Where(p => p.Hardware != null).Select(p => p.Id).ToList();
         foreach (var id in new[] { "hw-multi-gpu-cursor", "hw-apple-fnkeys", "hw-nvidia", "hw-intel-video", "hw-synaptics-intertouch", "hw-yoga-pro7-bass" })
             Assert.Contains(id, hw);

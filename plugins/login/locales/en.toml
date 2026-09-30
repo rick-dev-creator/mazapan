@@ -1,0 +1,5 @@
+password = "Password"
+starting = "Starting…"
+wrong = "That's not the password"
+restart = "Restart"
+power_off = "Power off"

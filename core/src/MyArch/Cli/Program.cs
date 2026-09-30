@@ -20,6 +20,8 @@ public static partial class Program
           timeline [--json]
                          what changed on the desktop, in words: every apply and
                          update, newest first
+          install disks [--json] | plan ANSWERS.json | run ANSWERS.json
+                         this system onto a disk, from the ISO (its installer runs it)
           apps [list|plan|plan-remove|install|remove|undo] [ID...] [--json] [--gui] [-y]
                          the apps the catalog knows how to install, by profile
                          (Gaming, Development…), and installing or removing them
@@ -93,6 +95,7 @@ public static partial class Program
                 "history" => CmdHistory(),
                 "timeline" => CmdTimeline(rest),
                 "apps" => CmdApps(rest),
+                "install" => CmdInstall(rest),
                 "rollback" => CmdRollback(rest),
                 "coverage" => CmdCoverage(rest),
                 "-h" or "--help" or "help" => Help(),

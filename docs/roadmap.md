@@ -28,7 +28,7 @@ Suggested start: 1, 2 and 3.
 | 13 | The same desktop anywhere | Planned |
 | 14 | Workspace sessions | Planned |
 | 15 | The CLI in your language | Planned |
-| 16 | Installation and first boot | In progress: profiles and catalog (17) and the first-boot welcome done; next, the ISO |
+| 16 | Installation and first boot | In progress: catalog (17), welcome, the ISO with its graphical installer, and the login screen done (audited, 2026-09-30); next, snapshots from day one, unattended installs |
 | 17 | Apps: install and remove | **Done** (2026-09-29): catalog, `myarch apps`, the Apps menu with profiles (several at once); audited. Pending: catalogs from others, Flatpak apps without a new login |
 | 18 | Settings with a face | Planned |
 | 19 | Security | Planned |
@@ -739,7 +739,44 @@ other by search, a field to try it), the time zone (by city, or from the
 connection when asked), Wi-Fi when there's none, the look, and the
 profiles (several at once, installed in the background); the last screen
 shows the keys as they are on that machine. Where it was is kept across
-the reloads it causes; Esc closes it until the next login. Next: the ISO.
+the reloads it causes; Esc closes it until the next login.
+
+*The ISO* (2026-09-30): `iso/build` (in the dev VM: `vm/vm iso`) makes it
+from archiso's own profile, with myarch as a package (`pkg/PKGBUILD`) and
+an offline repository inside (everything an install puts on the disk,
+~550 packages): an install downloads nothing and takes a minute or two.
+It starts into the live desktop, in the theme, and the installer (plugin
+`installer`, only on the live system: `[hardware] live = true`) opens by
+itself: language (the live desktop switches at once), keyboard (tried
+there), where you are, Wi-Fi only without a connection, the disk (all of
+it, only which one, with what's on it now said), the account (user and
+computer names from yours), profiles (several at once, each app to see
+for whoever wants to), a review, and a progress bar. `myarch install run`
+turns it into archinstall's configuration: GPT, btrfs (/, /home, logs,
+pacman's cache), `/boot` on btrfs (the snapshots boot with their kernel;
+encrypted, `/boot` is the EFI partition), GRUB, NetworkManager, PipeWire,
+zram, the locale from the language and the time zone (es + Mexico City:
+es_MX), the console keymap from the layout; the account's desktop is
+written right there, so the first start goes straight in. The login
+screen (plugin `login`: greetd, a Hyprland of its own, a Quickshell
+greeter in the theme; opt-in, `[hardware] any = true`) instead of the
+text login; encrypted, the disk's password is the login. On the first
+login the welcome picks up at the look, and the apps chosen install as
+soon as there's a connection. For anyone, anywhere: the languages
+offered are the translations there are (a new one shows up by itself, in
+its own name), the time zone comes from the connection, the keyboards
+suggested first are the country's and the language's (Japan's in Tokyo,
+Latin America's for Spanish in Mexico), names in any script (a user name
+to start from when it isn't Latin, Chinese/Japanese/Korean fonts when
+they're needed), the clock as the language writes it, the mirrors the
+country's (reflector). Tested in `vm/vm try` (UEFI, blank disk): Spanish
+in Mexico, English in Tokyo with a Japanese name, encrypted (the disk's
+password typed at boot, straight in) and not. Audited: the live system
+never locks or sleeps, installs are started by a click (never Enter), the
+stick it runs from is never offered, a failed install's leftovers are
+taken down, SSH keys (only when the live system was reached with them)
+are shown and keys-only. Next: snapshots on from the install,
+unattended installs with `cidata`.
 
 ## 17. Apps: install and remove
 

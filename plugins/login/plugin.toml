@@ -1,0 +1,45 @@
+[plugin]
+id = "login"
+name = "Login screen"
+version = "0.1.0"
+api = 1
+description = "The login screen in the theme: the clock, your name, your password (greetd, with a Hyprland of its own and a Quickshell greeter). The installer turns it on; on a system with another login manager, it takes its place"
+categories = ["hardware"]
+
+# For every machine, but it changes how the system starts: on only when asked.
+[hardware]
+any = true
+
+[packages]
+pacman = ["greetd", "hyprland", "quickshell"]
+
+# greetd started with myarch's configuration (its own file stays as the
+# package has it), and as the login manager from the next start. Taken off,
+# greetd isn't started any more (the text login is back).
+[[targets]]
+template = "greetd.service.conf.tmpl"
+output = "/etc/systemd/system/greetd.service.d/myarch.conf"
+system = true
+reload = "systemctl daemon-reload; if [ -e /etc/systemd/system/greetd.service.d/myarch.conf ]; then systemctl enable -f greetd.service; else systemctl disable greetd.service; fi"
+
+[[targets]]
+template = "greetd.toml.tmpl"
+output = "/etc/greetd/myarch.toml"
+system = true
+
+[[targets]]
+template = "hyprland.lua.tmpl"
+output = "/etc/greetd/myarch-hyprland.lua"
+system = true
+
+# What a session is (greetd joins a command's words with spaces: a script
+# keeps it whole).
+[[targets]]
+template = "session.sh.tmpl"
+output = "/etc/greetd/myarch-session.sh"
+system = true
+
+[[targets]]
+template = "Greeter.qml.tmpl"
+output = "/etc/greetd/myarch-greeter.qml"
+system = true

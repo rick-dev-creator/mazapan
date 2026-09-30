@@ -445,7 +445,7 @@ public static partial class Program
                 { "state", origin.StartsWith("git ") ? "installed" : origin == "local" ? "local" : "built-in" },
                 { "enabled", c.Cfg.IsOn(p) },
                 { "applies", Applies(p) },
-                { "for_this_machine", p.Hardware != null && p.Hardware.Matches(Hardware.ThisMachine.Get()).Ok },
+                { "for_this_machine", p.Hardware != null && p.Hardware.Offered(Hardware.ThisMachine.Get()) },
                 { "source", e?.Source ?? "" },
                 { "homepage", listed?.Homepage ?? "" },
             });

@@ -1,0 +1,7 @@
+"plugin.name" = "Pantalla de inicio de sesión"
+"plugin.description" = "La pantalla de inicio de sesión con el tema: el reloj, tu nombre, tu contraseña (greetd, con un Hyprland propio y un greeter de Quickshell). El instalador la activa; en un sistema con otro gestor de inicio de sesión, toma su lugar"
+password = "Contraseña"
+starting = "Iniciando…"
+wrong = "Esa no es la contraseña"
+restart = "Reiniciar"
+power_off = "Apagar"

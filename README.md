@@ -14,7 +14,9 @@ plugins/   built-in plugins, same API as third-party ones: theme targets,
            window layouts, the Quickshell bar and its widgets…
 themes/    token palettes
 docs/      plugin API and design notes
-vm/        dev VM
+iso/       the ISO: archiso's live profile + the installer (built in the dev VM: vm/vm iso)
+pkg/       myarch as a pacman package (the ISO installs it)
+vm/        dev VM, and a second one to try the ISO (vm/vm try)
 ```
 
 ## Core

@@ -34,6 +34,8 @@ public sealed class Machine
     /// its own): a snapshot of / has the kernel that goes with its modules.
     /// </summary>
     public bool BootOnRoot;
+    /// <summary>The ISO's live system (archiso's): nothing installed yet.</summary>
+    public bool Live;
 
     public IEnumerable<PciDevice> Gpus => Pci.Where(p => p.IsGpu);
 
@@ -87,6 +89,7 @@ public sealed class Machine
         // A snapshot started from the menu runs on an overlay: what's under it is btrfs.
         if (m.Filesystem == "overlay" && Text(R("proc/cmdline")).Contains("rootflags=subvol=")) m.Filesystem = "btrfs";
         m.BootOnRoot = !mounts.Any(f => f[1] == "/boot");
+        m.Live = Directory.Exists(R("run/archiso"));
         m.Bootloader = BootloaderOf(R);
         return m;
     }
@@ -205,9 +208,20 @@ public sealed class Rules
     public List<string> Filesystem = [], Bootloader = [];
     /// <summary>The kernels on the root filesystem (no /boot partition of its own).</summary>
     public bool BootOnRoot;
+    /// <summary>The ISO's live system (the installer is for it).</summary>
+    public bool Live;
+    /// <summary>Any machine: a plugin that's for every one, but changes the system, so only on when asked.</summary>
+    public bool Any_;
+
+    /// <summary>Only "any": for every machine, so never offered as this one's (it's asked for).</summary>
+    public bool OnlyAny => Any_ && new Rules { Vendor = Vendor, Product = Product, Board = Board, Pci = Pci, Usb = Usb, Gpu = Gpu,
+        Input = Input, Modules = Modules, Gpus = Gpus, Filesystem = Filesystem, Bootloader = Bootloader, BootOnRoot = BootOnRoot, Live = Live }.Empty;
+
+    /// <summary>Offered: this machine's, to suggest turning on (doctor, status, the Plugins panel).</summary>
+    public bool Offered(Machine m) => !OnlyAny && Matches(m).Ok;
 
     public bool Empty => Vendor.Count + Product.Count + Board.Count + Pci.Count + Usb.Count + Gpu.Count +
-        Input.Count + Modules.Count + Filesystem.Count + Bootloader.Count == 0 && Gpus == 0 && !BootOnRoot;
+        Input.Count + Modules.Count + Filesystem.Count + Bootloader.Count == 0 && Gpus == 0 && !BootOnRoot && !Live && !Any_;
 
     // Names aren't paths: a "/" in "RX 7900 XT/7900 XTX" is text, which * crosses.
     static string Flat(string s) => s.ToLowerInvariant().Replace('/', '\u2215');
@@ -230,6 +244,7 @@ public sealed class Rules
         if (Filesystem.Count > 0 && !Any(Filesystem, [m.Filesystem])) return No($"the root filesystem is {(m.Filesystem == "" ? "unknown" : m.Filesystem)}");
         if (Bootloader.Count > 0 && !Any(Bootloader, [m.Bootloader])) return No($"the boot loader is {(m.Bootloader == "" ? "unknown" : m.Bootloader)}");
         if (BootOnRoot && !m.BootOnRoot) return No("/boot is a partition of its own (snapshots of / don't have the kernel)");
+        if (Live && !m.Live) return No("this isn't the ISO's live system");
         if (Gpus > 0 && m.Gpus.Count() < Gpus)
             return No($"{m.Gpus.Count()} GPU{(m.Gpus.Count() == 1 ? "" : "s")}, not {Gpus}");
         return (true, "");
@@ -246,7 +261,7 @@ public sealed class Rules
         Vendor = Vendor, Product = Product, Board = Board, Pci = Pci, Gpu = Gpu,
         // How the system is installed says which machine too: a config.toml
         // shared with a laptop on ext4, or on another boot loader, does nothing there.
-        Filesystem = Filesystem, Bootloader = Bootloader, BootOnRoot = BootOnRoot,
+        Filesystem = Filesystem, Bootloader = Bootloader, BootOnRoot = BootOnRoot, Live = Live,
     }.Matches(m).Ok;
 
     /// <summary>The patterns that don't parse (a bare "[" is a class: write "\\[").</summary>
@@ -273,6 +288,8 @@ public sealed class Rules
         Add("root filesystem", Filesystem);
         Add("boot loader", Bootloader);
         if (BootOnRoot) parts.Add("/boot on the root filesystem");
+        if (Live) parts.Add("the ISO's live system");
+        if (Any_ && parts.Count == 0) parts.Add("any hardware");
         if (Gpus > 0) parts.Add($"{Gpus} or more GPUs");
         return string.Join("; ", parts);
     }

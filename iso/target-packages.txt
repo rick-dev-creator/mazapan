@@ -1,0 +1,56 @@
+# What an install puts on the disk, for the ISO's offline repository: what
+# archinstall installs by itself for the configuration myarch gives it
+# (core/src/MyArch/Setup/Archinstall.cs), and myarch's own. Their
+# dependencies come along. Missing one here, the install stops asking for it.
+
+# archinstall's base, and for btrfs, LUKS, GRUB on UEFI, zram
+base
+sudo
+linux
+linux-firmware
+mkinitcpio
+btrfs-progs
+dosfstools
+cryptsetup
+grub
+efibootmgr
+intel-ucode
+amd-ucode
+zram-generator
+reflector
+terminus-font
+
+# Its NetworkManager, PipeWire, Bluetooth, power profiles
+networkmanager
+wpa_supplicant
+pipewire
+pipewire-alsa
+pipewire-jack
+pipewire-pulse
+gst-plugin-pipewire
+libpulse
+wireplumber
+alsa-firmware
+sof-firmware
+bluez
+bluez-utils
+power-profiles-daemon
+
+# Setup.Archinstall.Packages: the desktop, and building from the AUR
+myarch
+base-devel
+git
+
+# SSH, when the live system was reached over it (its keys go to the account)
+openssh
+
+# The login screen (plugin login)
+greetd
+
+# Chinese, Japanese and Korean text, when the account or the place needs it
+noto-fonts-cjk
+
+# Snapshots that boot (the hw-snapshots plugins)
+snapper
+grub-btrfs
+inotify-tools
