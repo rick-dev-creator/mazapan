@@ -1,0 +1,7 @@
+"plugin.name" = "Hibernación"
+"plugin.description" = "Nada se pierde si se acaba la batería: al cerrar la tapa, la suspensión pasa a hibernación después de un rato, y una batería a punto de morir hiberna en vez de apagarse de golpe. El instalador lo enciende donde hay batería, con un archivo de intercambio para ello"
+"setting.after" = "Horas dormida antes de hibernar"
+"act.hibernate" = "Hibernar"
+"act.hibernate.kw" = "hibernar dormir disco energía"
+"check.swap" = "El archivo de intercambio para hibernar está activo"
+"setting.after.help" = "Cuántas horas duerme la computadora, con la tapa cerrada y en batería, antes de hibernar."

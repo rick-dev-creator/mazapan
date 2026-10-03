@@ -64,7 +64,10 @@ public static class Archinstall
                         { "obj_id", espId }, { "size", Size(esp) }, { "start", Size(MiB) }, { "status", "create" }, { "type", "primary" },
                     },
                     new Fields {
-                        { "btrfs", new List<object> { Subvol("@", "/"), Subvol("@home", "/home"), Subvol("@log", "/var/log"), Subvol("@pkg", "/var/cache/pacman/pkg") } },
+                        { "btrfs", new List<object> { Subvol("@", "/"), Subvol("@home", "/home"), Subvol("@log", "/var/log"), Subvol("@pkg", "/var/cache/pacman/pkg") }
+                            // Hibernation's swap file in a top-level subvolume of its own: inside
+                            // the root's, a snapshot's rollback would take it along (Omarchy's).
+                            .Concat(a.Hibernate == true ? [Subvol("@swap", "/swap")] : []).ToList() },
                         { "dev_path", null }, { "flags", new List<object>() }, { "fs_type", "btrfs" },
                         { "mount_options", new List<object> { "compress=zstd" } }, { "mountpoint", null },
                         { "obj_id", mainId }, { "size", Size(mainSize) }, { "start", Size(mainStart) }, { "status", "create" }, { "type", "primary" },
@@ -155,6 +158,15 @@ public static class Archinstall
     public static string Post(Answers a, string server = "")
     {
         var s = new StringBuilder("set -eu\n");
+        if (a.Hibernate == true && a.MemoryMiB > 0)
+        {
+            // Hibernation: a swap file as big as the memory, below zram (which
+            // is tried first), and where to resume from on the kernel's line
+            // as well (systemd also finds it on its own, through EFI).
+            s.Append($"btrfs filesystem mkswapfile --size {a.MemoryMiB}m --uuid clear /swap/swapfile\n");
+            s.Append("echo '/swap/swapfile none swap defaults,pri=0 0 0' >> /etc/fstab\n");
+            s.Append("sed -i -E \"s|^(GRUB_CMDLINE_LINUX_DEFAULT=\\\"[^\\\"]*)|\\1 resume=UUID=$(findmnt -no UUID /) resume_offset=$(btrfs inspect-internal map-swapfile -r /swap/swapfile)|\" /etc/default/grub\n");
+        }
         if (!a.Encrypt)
         {
             // GRUB's own files on btrfs, next to the kernels: the EFI
@@ -253,6 +265,9 @@ public static class Archinstall
         // in the boot menu when /boot is on btrfs (each has its kernel).
         c.Enabled.Add("hw-snapshots");
         if (!a.Encrypt) c.Enabled.Add("hw-snapshots-grub");
+        // Hibernation: the lid's sleep turns into it after a while, and a
+        // battery about to die hibernates (the swap file is the install's).
+        if (a.Hibernate == true) c.Enabled.Add("hibernate");
         // The firewall: nothing in that wasn't asked for; SSH too when the
         // install was given keys to be reached with.
         c.Enabled.Add("firewall");

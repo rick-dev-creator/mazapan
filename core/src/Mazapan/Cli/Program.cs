@@ -21,6 +21,8 @@ public static partial class Program
                          where Mazapán's own updates come from: stable, or every
                          release first (edge); without one, which it is
           version        this Mazapán's version
+          password       change your password everywhere it is: the disk's (when
+                         it's encrypted), the account's, the keyring's
           timeline [--json]
                          what changed on the desktop, in words: every apply and
                          update, newest first
@@ -103,6 +105,7 @@ public static partial class Program
                 "rollback" => CmdRollback(rest),
                 "coverage" => CmdCoverage(rest),
                 "channel" => CmdChannel(rest),
+                "password" => CmdPassword(rest),
                 "version" or "--version" => PrintVersion(),
                 "-h" or "--help" or "help" => Help(),
                 _ => Unknown(),

@@ -1,0 +1,7 @@
+"plugin.name" = "Ruhezustand"
+"plugin.description" = "Nichts geht verloren, wenn der Akku leer wird: Bei geschlossenem Deckel wird aus dem Standby nach einer Weile der Ruhezustand, und ein fast leerer Akku versetzt den Computer in den Ruhezustand, statt ihn abzuschalten. Das Installationsprogramm schaltet ihn ein, wo es einen Akku gibt, mit einer Auslagerungsdatei dafür"
+"setting.after" = "Stunden im Standby vor dem Ruhezustand"
+"act.hibernate" = "Ruhezustand"
+"act.hibernate.kw" = "ruhezustand schlafen festplatte energie"
+"check.swap" = "Die Auslagerungsdatei für den Ruhezustand ist aktiv"
+"setting.after.help" = "Wie viele Stunden der Computer bei geschlossenem Deckel im Akkubetrieb schläft, bevor er in den Ruhezustand geht."

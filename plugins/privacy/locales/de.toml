@@ -1,0 +1,8 @@
+"plugin.name" = "Datenschutz-Punkte"
+"plugin.description" = "Punkte in der Leiste, solange Mikrofon, Kamera oder Bildschirm benutzt werden, wie macOS sie zeigt; per Klick, welche App"
+"mic" = "Mikrofon"
+"cam" = "Kamera"
+"screen" = "Bildschirm geteilt"
+"unknown" = "eine App"
+"setting.every" = "Wie oft nachsehen (Sekunden)"
+"setting.every.help" = "Wie oft nachgesehen wird, was Mikrofon, Kamera und Bildschirm benutzt."

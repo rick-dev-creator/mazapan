@@ -1,0 +1,6 @@
+"mic" = "Microphone"
+"cam" = "Camera"
+"screen" = "Screen shared"
+"unknown" = "an app"
+"setting.every" = "How often to look (seconds)"
+"setting.every.help" = "How often it looks at what uses the microphone, the camera and the screen."

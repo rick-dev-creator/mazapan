@@ -87,6 +87,10 @@ public static partial class Program
         if (cfg.Theme == "")
             throw new MazapanException($"no theme selected; available: {string.Join(", ", Theme.List(ThemeDirs()))}\n  mazapan apply --theme <id>");
         var t = Theme.Load(ThemeDirs(), cfg.Theme);
+        // The person's fonts over the theme's (each checked: it goes into code).
+        if (cfg.FontUI != "") t.Font.UI = FontName(cfg.FontUI, "font_ui");
+        if (cfg.FontMono != "") t.Font.Mono = FontName(cfg.FontMono, "font_mono");
+        if (cfg.FontSize > 0) t.Font.Size = cfg.FontSize is >= 6 and <= 32 ? cfg.FontSize : throw new MazapanException("font_size: from 6 to 32");
         if (cfg.Accent != "")
         {
             try
@@ -271,12 +275,23 @@ public static partial class Program
     static bool UpToDate() => File.Exists(VersionStamp) && File.ReadAllText(VersionStamp).Trim() == Version
         && File.Exists(Apply.StatePath());
 
+    // A font family's name, as fc-list writes them: letters, digits, spaces
+    // and a few signs; never a quote (it's put into QML, Lua, ini, CSS).
+    [GeneratedRegex(@"^[\p{L}\p{N} ._+&-]{1,64}\z")]
+    private static partial Regex FontPattern();
+
+    static string FontName(string name, string what) =>
+        FontPattern().IsMatch(name) ? name : throw new MazapanException($"{what} {GoFormat.Quote(name)}: a font family's name (letters, digits, spaces)");
+
     static int CmdApply(string[] args)
     {
         var fs = new Flags("apply")
             .String("theme", "switch to this theme (saved in config)")
             .String("accent", "use this accent color, #rrggbb; \"theme\" for the theme's own (saved in config)")
             .String("language", "the desktop's language (es, pt_BR); \"system\" for the system's (saved in config)")
+            .String("font-ui", "the font for the desktop's text (a family, as fc-list says); \"theme\" for the theme's (saved in config)")
+            .String("font-mono", "the monospace font (terminals, code); \"theme\" for the theme's (saved in config)")
+            .String("font-size", "the text's size in points (6 to 32); \"theme\" for the theme's (saved in config)")
             .Bool("dry-run", "show what would change, write nothing")
             .Bool("adopt", "back up and take over files mazapan didn't write")
             .Bool("diff", "show exactly what would be written, as a unified diff")
@@ -294,6 +309,14 @@ public static partial class Program
         var themeId = fs.Get("theme");
         var accent = fs.Get("accent");
         var language = fs.Get("language");
+        var fontUI = fs.Get("font-ui");
+        var fontMono = fs.Get("font-mono");
+        var fontSize = fs.Get("font-size");
+        if (fontUI is not ("" or "theme")) FontName(fontUI, "--font-ui");
+        if (fontMono is not ("" or "theme")) FontName(fontMono, "--font-mono");
+        double size = 0;
+        if (fontSize is not ("" or "theme") && !(double.TryParse(fontSize, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out size) && size is >= 6 and <= 32))
+            throw new MazapanException($"--font-size {GoFormat.Quote(fontSize)}: points from 6 to 32, or \"theme\"");
         if (language != "" && language != "system" && !System.Text.RegularExpressions.Regex.IsMatch(language, @"^[a-z]{2,3}(_[A-Z]{2})?\z"))
             throw new MazapanException($"--language {GoFormat.Quote(language)}: a language code (es, pt_BR), or \"system\"");
         if (accent != "" && accent != "theme" && !AccentPattern().IsMatch(accent))
@@ -326,6 +349,9 @@ public static partial class Program
             if (language != "") edits.Add("language " + (language == "system" ? "the system's" : language));
             if (accent == "theme") c.Accent = "";
             else if (accent != "") c.Accent = accent.ToLowerInvariant();
+            if (fontUI != "") { c.FontUI = fontUI == "theme" ? "" : fontUI; edits.Add("font " + (fontUI == "theme" ? "the theme's" : fontUI)); }
+            if (fontMono != "") { c.FontMono = fontMono == "theme" ? "" : fontMono; edits.Add("monospace font " + (fontMono == "theme" ? "the theme's" : fontMono)); }
+            if (fontSize != "") { c.FontSize = fontSize == "theme" ? 0 : size; edits.Add("text size " + (fontSize == "theme" ? "the theme's" : fontSize)); }
             foreach (var (plugin, key, value) in sets)
             {
                 if (!c.Plugins.TryGetValue(plugin, out var m)) c.Plugins[plugin] = m = new(StringComparer.Ordinal);

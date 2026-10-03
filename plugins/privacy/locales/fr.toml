@@ -1,0 +1,8 @@
+"plugin.name" = "Indicateurs de confidentialité"
+"plugin.description" = "Des points dans la barre quand le micro, la caméra ou l'écran sont utilisés, comme sur macOS ; d'un clic, quelle app"
+"mic" = "Micro"
+"cam" = "Caméra"
+"screen" = "Écran partagé"
+"unknown" = "une app"
+"setting.every" = "Fréquence de vérification (secondes)"
+"setting.every.help" = "À quelle fréquence il regarde ce qui utilise le micro, la caméra et l'écran."

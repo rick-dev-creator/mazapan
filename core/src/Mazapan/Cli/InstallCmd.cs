@@ -178,6 +178,10 @@ public static partial class Program
                 a.Hardware.Add(p.Id);
                 a.HardwarePackages.AddRange(p.Pacman.Where(x => !a.HardwarePackages.Contains(x)));
             }
+        // Hibernation where there's a battery, unless the answers say; the swap
+        // file as big as the memory (what a hibernation writes, at most).
+        a.Hibernate ??= HasBattery();
+        a.MemoryMiB = MemoryMiB();
         a.Check();
         if (!Directory.Exists("/sys/firmware/efi"))
         {
@@ -225,6 +229,26 @@ public static partial class Program
             else Console.WriteLine("norecovery");
         }
         Console.WriteLine("done");
+        return 0;
+    }
+
+    static bool HasBattery()
+    {
+        const string sys = "/sys/class/power_supply";
+        if (!Directory.Exists(sys)) return false;
+        foreach (var d in Directory.GetDirectories(sys))
+        {
+            string Read(string f) { try { return File.ReadAllText(Path.Join(d, f)).Trim(); } catch (IOException) { return ""; } }
+            if (Read("type") == "Battery" && Read("scope") != "Device") return true;
+        }
+        return false;
+    }
+
+    static long MemoryMiB()
+    {
+        foreach (var line in File.ReadLines("/proc/meminfo"))
+            if (line.StartsWith("MemTotal:", StringComparison.Ordinal) && long.TryParse(line.Split(' ', StringSplitOptions.RemoveEmptyEntries)[1], out var kb))
+                return (kb + 1023) / 1024;
         return 0;
     }
 

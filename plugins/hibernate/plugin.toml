@@ -1,0 +1,49 @@
+[plugin]
+id = "hibernate"
+name = "Hibernation"
+version = "0.1.0"
+api = 1
+description = "Nothing lost when the battery dies: the lid's sleep turns into hibernation after a while, and a battery about to die hibernates instead of cutting out. The installer turns it on where there's a battery, with a swap file for it"
+categories = ["hardware"]
+
+# For every machine with the swap file the installer makes; it changes how
+# the computer sleeps, so on only when asked.
+[hardware]
+any = true
+
+[packages]
+pacman = ["upower"]
+
+[settings]
+# Hours asleep before hibernating (the lid closed, on battery).
+after = { default = 2, min = 1, max = 24 }
+
+# The lid closed on battery: suspend, then hibernate after a while
+# (suspend-then-hibernate); plugged in, suspend as before.
+[[targets]]
+template = "logind.conf.tmpl"
+output = "/etc/systemd/logind.conf.d/mazapan-hibernate.conf"
+system = true
+reload = "systemctl kill -s HUP systemd-logind"
+
+[[targets]]
+template = "sleep.conf.tmpl"
+output = "/etc/systemd/sleep.conf.d/mazapan-hibernate.conf"
+system = true
+
+# A battery about to die hibernates (UPower), rather than cutting out.
+[[targets]]
+template = "upower.conf.tmpl"
+output = "/etc/UPower/UPower.conf.d/mazapan-hibernate.conf"
+system = true
+reload = "systemctl try-restart upower.service"
+
+[[actions]]
+name = "{{ t \"act.hibernate\" }}"
+run = "systemctl hibernate"
+keywords = "{{ t \"act.hibernate.kw\" }}"
+glyph = "󰤁"
+
+[[checks]]
+name = "{{ t \"check.swap\" }}"
+run = "swapon --show=NAME --noheadings | grep -qx /swap/swapfile"

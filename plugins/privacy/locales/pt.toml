@@ -1,0 +1,8 @@
+"plugin.name" = "Indicadores de privacidade"
+"plugin.description" = "Pontos na barra enquanto o microfone, a câmera ou a tela estão em uso, como o macOS mostra; com um clique, qual app"
+"mic" = "Microfone"
+"cam" = "Câmera"
+"screen" = "Tela compartilhada"
+"unknown" = "um app"
+"setting.every" = "Com que frequência olhar (segundos)"
+"setting.every.help" = "Com que frequência olha o que usa o microfone, a câmera e a tela."

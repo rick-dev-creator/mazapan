@@ -23,3 +23,10 @@ release (a tag `vX.Y.Z`) names them.
 - The menu: SUPER + Space with nothing typed shows a tile for each place
   (Apps, Updates, Settings, Theme…), the power row and the open windows;
   typing finds apps that aren't installed too, to install them.
+- The password changed in one place (Settings › Security, or `mazapan
+  password`): the disk's, the account's and the keyring's together.
+- Privacy dots in the bar while the microphone, the camera or the screen
+  is in use.
+- Hibernation on laptops: nothing lost when the battery dies.
+- Settings › Text: the fonts (each shown in itself) and the text's size,
+  over the theme's.

@@ -190,6 +190,24 @@ public class SetupTests
         Assert.Throws<MazapanException>(() => Archinstall.Config(Answers.Parse(Good), 4L * 1024 * 1024 * 1024, "us"));
 
     [Fact]
+    public void HibernationGetsASwapFileOfItsOwn()
+    {
+        var a = Answers.Parse(With("hibernate", "true"));
+        a.MemoryMiB = 8192;
+        using var doc = JsonDocument.Parse(Archinstall.Config(a, 512110190592, "us"));
+        Assert.Contains("\"@swap\"", doc.RootElement.GetProperty("disk_config").GetRawText());
+        var post = Archinstall.Post(a);
+        Assert.Contains("mkswapfile --size 8192m", post);
+        Assert.Contains("resume_offset=", post);
+        // Before GRUB's configuration is written, which takes resume= in.
+        Assert.True(post.IndexOf("mkswapfile", StringComparison.Ordinal) < post.IndexOf("grub-mkconfig", StringComparison.Ordinal));
+        Assert.Contains("\"hibernate\"", Archinstall.UserConfig(a));
+        var none = Answers.Parse(With("hibernate", "false"));
+        Assert.DoesNotContain("mkswapfile", Archinstall.Post(none));
+        Assert.DoesNotContain("@swap", Archinstall.Config(none, 512110190592, "us"));
+    }
+
+    [Fact]
     public void MazapanUpdatesFromItsRepositoryOnceItsPublished()
     {
         var a = Answers.Parse(Good);

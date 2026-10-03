@@ -112,6 +112,8 @@ public sealed partial class Plugin
         "/etc/greetd", "/etc/systemd/system/greetd.service.d", "/etc/pam.d",
         // The firewall: ufw started at every start, while mazapan's drop-in is there.
         "/etc/systemd/system/ufw.service.d",
+        // Hibernation: what a battery about to die does.
+        "/etc/UPower/UPower.conf.d",
     ];
 
     static readonly HashSet<string> KnownToolkits =

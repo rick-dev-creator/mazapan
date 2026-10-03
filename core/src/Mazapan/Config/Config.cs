@@ -18,6 +18,9 @@ public sealed class Settings
     public string Accent = "";
     /// <summary>Language to render text in ("es", "es_MX"); empty = the OS's.</summary>
     public string Language = "";
+    /// <summary>Fonts instead of the theme's (Settings › Text): empty, and 0, the theme's own.</summary>
+    public string FontUI = "", FontMono = "";
+    public double FontSize;
     public List<string> Disabled = [];
     /// <summary>Catalogs of plugins to add besides mazapan's own: URLs or paths of index.toml files.</summary>
     public List<string> Catalogs = [];
@@ -40,6 +43,9 @@ public sealed class Settings
         c.Theme = r.String("theme");
         c.Accent = r.String("accent");
         c.Language = r.String("language");
+        c.FontUI = r.String("font_ui");
+        c.FontMono = r.String("font_mono");
+        c.FontSize = r.Float("font_size");
         c.Disabled = r.Strings("disabled_plugins");
         c.Enabled = r.Strings("enabled_plugins");
         c.Catalogs = r.Strings("catalogs");
@@ -66,6 +72,9 @@ public sealed class Settings
         TomlWriter.Key(b, "theme", Theme);
         if (Accent != "") TomlWriter.Key(b, "accent", Accent);
         if (Language != "") TomlWriter.Key(b, "language", Language);
+        if (FontUI != "") TomlWriter.Key(b, "font_ui", FontUI);
+        if (FontMono != "") TomlWriter.Key(b, "font_mono", FontMono);
+        if (FontSize > 0) TomlWriter.Key(b, "font_size", FontSize);
         if (Disabled.Count > 0) TomlWriter.Key(b, "disabled_plugins", Disabled);
         if (Enabled.Count > 0) TomlWriter.Key(b, "enabled_plugins", Enabled);
         if (Catalogs.Count > 0) TomlWriter.Key(b, "catalogs", Catalogs);

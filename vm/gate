@@ -8,6 +8,7 @@
 #
 #   vm/gate [encrypted|plain]     encrypted by default, as the installer
 #
+# MAZAPAN_GATE_HIBERNATE=1 installs with hibernation (a VM has no battery).
 # MAZAPAN_GATE_REPO=DIR also updates the installed system from that
 # repository (pkg/release's out/repo), copied to /srv/mazapan-repo: the ISO
 # has to be built with MAZAPAN_REPO_SERVER='file:///srv/mazapan-repo/$channel/$arch'
@@ -44,7 +45,7 @@ answers="$state/gate-answers.json"
 cat > "$answers" <<EOF
 {"disk":"auto","encrypt":$([[ $mode == encrypted ]] && echo true || echo false),"user":"$user","fullname":"Gate",
  "password":"$pass","timezone":"UTC","language":"en","locale":"en_US.UTF-8","kb_layout":"us","kb_variant":"",
- "theme":"phosphor","apps":[],"after":"none"}
+ "theme":"phosphor","apps":[],"after":"none"$([[ ${MAZAPAN_GATE_HIBERNATE:-} == 1 ]] && echo ',"hibernate":true')}
 EOF
 
 step "a fresh try VM, the answers on its cidata seed ($mode)"
@@ -70,6 +71,10 @@ if ! grep -q '^EXIT 0$' "$state/gate-install.log"; then
   fail "the install failed: $(timeout 20 "$vm" try ssh 'tail -5 /var/log/mazapan-install.log' 2>/dev/null) (vm/.state/gate-install.log)"
 fi
 "$vm" try stop >/dev/null 2>&1 || true
+# The seed without the answers: the ISO started again (to look at the disk)
+# must not install over it.
+rm -f "$state/try-seed.iso"
+"$vm" try create >/dev/null
 pass_ "installed in $(( (SECONDS - start) / 60 )) min"
 
 step "the installed system starts"

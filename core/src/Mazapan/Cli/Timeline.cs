@@ -258,7 +258,7 @@ public static partial class Program
     static bool Invertible(Fields f) => (string)f["kind"]! switch
     {
         "theme" => f["from"] is string t && t != "",
-        "accent" or "on" or "off" or "setting" => true,
+        "accent" or "font" or "on" or "off" or "setting" => true,
         _ => false,
     };
 
@@ -271,6 +271,12 @@ public static partial class Program
             "theme" => now.Theme == (string?)c.To,
             "accent" => now.Accent == ((string?)c.To ?? ""),
             "language" => now.Language == ((string?)c.To ?? ""),
+            "font" => c.Key switch
+            {
+                "ui" => now.FontUI == ((string?)c.To ?? ""),
+                "mono" => now.FontMono == ((string?)c.To ?? ""),
+                _ => now.FontSize == (c.To is double d ? d : c.To is long l ? l : 0),
+            },
             // Hardware plugins are the person's, through mazapan hardware.
             "on" => p != null && p.Hardware == null && now.IsOn(p),
             "off" => p != null && p.Hardware == null && !now.IsOn(p),
@@ -295,6 +301,8 @@ public static partial class Program
                 return Theme.List(ThemeDirs()).Contains(t) ? null : $"theme {t} isn't there any more";
             case "accent":
                 return c.From is null or string { Length: 7 } && (c.From is null || ((string)c.From).StartsWith('#')) ? null : "the accent before it isn't a color";
+            case "font":
+                return null;
             case "on" or "off":
                 if (p == null) return $"{c.Plugin} isn't there any more";
                 return p.Hardware != null || p.Targets.Any(x => x.System) ? $"{c.Plugin} is a hardware plugin: mazapan hardware" : null;
@@ -325,6 +333,7 @@ public static partial class Program
             "theme" => $"theme {f["from_name"]} → {f["to_name"]}".Replace("theme  →", "theme →"),
             "accent" => $"accent {(c.From == null ? "the theme's" : c.From)} → {(c.To == null ? "the theme's" : c.To)}",
             "language" => $"language {c.From ?? "the system's"} → {c.To ?? "the system's"}",
+            "font" => $"{(c.Key == "ui" ? "font" : c.Key == "mono" ? "monospace font" : "text size")} {c.From ?? "the theme's"} → {c.To ?? "the theme's"}",
             "on" => $"{f["plugin_name"]} turned on",
             "off" => $"{f["plugin_name"]} turned off",
             "setting" => $"{f["plugin_name"]}: {f["label"]} {V(c.From)} → {V(c.To)}",
@@ -381,6 +390,9 @@ public static partial class Program
                     break;
                 case "accent":
                     apply.Add("--accent=" + ((string?)c.From ?? "theme"));
+                    break;
+                case "font":
+                    apply.Add($"--font-{(c.Key == "ui" ? "ui" : c.Key == "mono" ? "mono" : "size")}=" + (c.From == null ? "theme" : Convert.ToString(c.From, System.Globalization.CultureInfo.InvariantCulture)));
                     break;
                 case "on":
                     apply.Add("--disable=" + c.Plugin);

@@ -1,0 +1,7 @@
+"plugin.name" = "Hibernation"
+"plugin.description" = "Rien de perdu si la batterie s'épuise : le capot fermé, la veille passe en hibernation au bout d'un moment, et une batterie presque vide hiberne au lieu de couper net. L'installateur l'active là où il y a une batterie, avec un fichier d'échange pour cela"
+"setting.after" = "Heures en veille avant d'hiberner"
+"act.hibernate" = "Hiberner"
+"act.hibernate.kw" = "hiberner veille disque énergie"
+"check.swap" = "Le fichier d'échange pour l'hibernation est actif"
+"setting.after.help" = "Combien d'heures l'ordinateur reste en veille, capot fermé sur batterie, avant d'hiberner."

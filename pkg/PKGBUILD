@@ -51,6 +51,7 @@ package() {
   install -Dm644 "$_repo/assets/mazapan-app.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/mazapan.svg"
   # The password dialog's words for pacman through pkexec.
   install -Dm644 "$_repo/pkg/org.mazapan.pacman.policy" "$pkgdir/usr/share/polkit-1/actions/org.mazapan.pacman.policy"
+  install -Dm644 "$_repo/pkg/org.mazapan.password.policy" "$pkgdir/usr/share/polkit-1/actions/org.mazapan.password.policy"
   # Where its own updates come from (Pacman.Repository); a test build can
   # point it elsewhere (a file:// repository in a VM).
   install -Dm644 "$_repo/pkg/repository.toml" "$pkgdir/usr/lib/mazapan/pkg/repository.toml"

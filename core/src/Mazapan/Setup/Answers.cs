@@ -14,6 +14,14 @@ public sealed partial class Answers
     public string Disk = "";
     /// <summary>The whole disk encrypted, unlocked with the account's password.</summary>
     public bool Encrypt;
+    /// <summary>
+    /// Hibernation: a swap file the size of the memory, and the lid's sleep
+    /// turning into hibernation after a while (plugin hibernate). By default
+    /// where there's a battery ("hibernate" in the answers says otherwise).
+    /// </summary>
+    public bool? Hibernate;
+    /// <summary>The memory, in MiB: the swap file's size (the machine's, read while installing).</summary>
+    public long MemoryMiB;
     public string User = "", FullName = "", Password = "", Hostname = "";
     public string Timezone = "UTC";
     /// <summary>The desktop's language (mazapan's), and the system's locale.</summary>
@@ -86,6 +94,7 @@ public sealed partial class Answers
         {
             Disk = S("disk"),
             Encrypt = r.TryGetProperty("encrypt", out var e) && e.ValueKind == JsonValueKind.True,
+            Hibernate = r.TryGetProperty("hibernate", out var h) && h.ValueKind is JsonValueKind.True or JsonValueKind.False ? h.ValueKind == JsonValueKind.True : null,
             User = S("user"),
             FullName = S("fullname"),
             Password = S("password"),

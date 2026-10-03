@@ -13,7 +13,7 @@ namespace Mazapan.Applying;
 public static class Timeline
 {
     /// <summary>
-    /// One change. Kind: theme, accent, language, on, off, setting, catalog
+    /// One change. Kind: theme, accent, language, font (Key: ui, mono, size), on, off, setting, catalog
     /// (added), catalog-removed. From/To: TOML values as read (null: not set,
     /// the default).
     /// </summary>
@@ -25,6 +25,9 @@ public static class Timeline
         if (a.Theme != b.Theme) out_.Add(new Change("theme", From: a.Theme, To: b.Theme));
         if (a.Accent != b.Accent) out_.Add(new Change("accent", From: Blank(a.Accent), To: Blank(b.Accent)));
         if (a.Language != b.Language) out_.Add(new Change("language", From: Blank(a.Language), To: Blank(b.Language)));
+        if (a.FontUI != b.FontUI) out_.Add(new Change("font", Key: "ui", From: Blank(a.FontUI), To: Blank(b.FontUI)));
+        if (a.FontMono != b.FontMono) out_.Add(new Change("font", Key: "mono", From: Blank(a.FontMono), To: Blank(b.FontMono)));
+        if (a.FontSize != b.FontSize) out_.Add(new Change("font", Key: "size", From: a.FontSize > 0 ? a.FontSize : null, To: b.FontSize > 0 ? b.FontSize : null));
         // Off: disabled (or no longer enabled, a hardware plugin); on: the other way.
         foreach (var id in b.Disabled.Except(a.Disabled).Concat(a.Enabled.Except(b.Enabled)).Distinct())
             out_.Add(new Change("off", id));

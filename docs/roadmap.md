@@ -191,8 +191,8 @@ Hyprland, the shell restarted on its own). Better than it:
 | 15 | The CLI in your language | Dropped (2026-09-30): the CLI stays in English; everything graphical is localized |
 | 16 | Installation and first boot | **Done** (2026-09-30): catalog (17), welcome, the ISO with its graphical installer (any language, time zone, keyboard), snapshots from the install on; what any machine needs (its hardware's drivers chosen live and installed offline, touchpad, keyring, default apps, printing, input methods); audited. Its own signed repository and unattended installs since (1.0's A and C7). Pending: publishing the ISO (hosting), real hardware, right-to-left languages in the list |
 | 17 | Apps: install and remove | **Done** (2026-09-29): catalog, `mazapan apps`, the Apps menu with profiles (several at once); Flatpak apps show without a new login (2026-09-30); audited. Pending: catalogs from others |
-| 18 | Settings with a face | In progress: the Settings panel (keyboard, touchpad and mouse, default apps, language and time zone) done (2026-09-30); fonts, keybindings, preview to do |
-| 19 | Security | In progress: researched (2026-09-30); the disk encrypted with a recovery key and one password, locked before sleep, the firewall done (2026-10-03, 1.0's B). To do: changing the password in one place, the privacy dots and per-app permissions, fingerprint and FIDO2, hibernation, TPM later |
+| 18 | Settings with a face | In progress: the Settings panel (keyboard, touchpad and mouse, default apps, language and time zone) done (2026-09-30); Text (the fonts, each shown in itself, and the size; `font_ui`, `font_mono`, `font_size` over the theme's, on the timeline) and Security (the password) done (2026-10-03); keybindings to do |
+| 19 | Security | In progress: researched (2026-09-30); the disk encrypted with a recovery key and one password, locked before sleep, the firewall (1.0's B), the password changed in one place, the privacy dots, hibernation (2026-10-03). To do: per-app permissions; fingerprint and FIDO2 need the hardware; TPM later |
 | 20 | Updates, visible | **Done** (2026-09-30): the bar says when there are, a panel shows them (news, restart), updated with a click (pkexec), Flatpak apps too; the updater redone after Omarchy's (2026-10-03). Pending: firmware, downloading ahead, plugin updates alongside |
 | 21 | Boot and login in the theme | In progress: the login screen (plugin `login`, greetd) done; the boot splash and menu to do |
 | 22 | Sharing | Planned |
@@ -1094,6 +1094,25 @@ Order: 1, then 2, 3, 4, 5.
    after a while or at 5 % (suspend-then-hibernate), and at critical
    battery (UPower); resume found by systemd, with resume= on GRUB's
    line as well.
+
+*Done since 1.0's B* (2026-10-03):
+- Changing the password in one place: `mazapan password`, and Settings ›
+  Security. The disk's first (luksChangeKey from the current one, kept only
+  once the new one opens it), then the account's (chpasswd), as root
+  through polkit (its own words, asked every time) and only for one's own
+  account; then the keyring's, through gnome-keyring's control socket, the
+  way its PAM module changes it (that module only acts on a password
+  pam_unix asked for). Run again after stopping half way, it finishes.
+  Tested in the VM: the new password at the next start opens the disk, the
+  desktop and the keyring.
+- The privacy dots (plugin `privacy`): orange, green, blue while the
+  microphone, the camera, the screen are in use, which app on a click
+  (PipeWire's running nodes, as Waybar's module, and /dev/video opened
+  past it).
+- Hibernation (plugin `hibernate`): the installer makes a top-level @swap
+  subvolume with a swap file the size of the memory (below zram) where
+  there's a battery, resume= on GRUB's line too; the lid suspends then
+  hibernates on battery, a dying battery hibernates (UPower).
 
 Not now: AppArmor (no Arch-based distro turns it on; CachyOS warns it
 breaks things); time-boxed passwordless sudo for agents (sudo stays per

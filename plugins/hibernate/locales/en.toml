@@ -1,0 +1,5 @@
+"act.hibernate" = "Hibernate"
+"act.hibernate.kw" = "hibernate sleep disk power"
+"check.swap" = "The swap file for hibernation is on"
+"setting.after" = "Hours asleep before hibernating"
+"setting.after.help" = "How many hours the computer sleeps, the lid closed on battery, before hibernating."

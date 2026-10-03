@@ -20,7 +20,50 @@ Item {
   property bool open: false
   property var screenAtOpen: null
   readonly property string logFile: Quickshell.env("HOME") + "/.local/state/mazapan/settings.log"
-  readonly property var pages: ["keyboard", "pointer", "apps", "region", "display"]
+  readonly property var pages: ["keyboard", "pointer", "text", "apps", "region", "display", "security"]
+
+  // Text: the fonts installed (fc-list), the monospace ones apart.
+  property var uiFonts: []
+  property var monoFonts: []
+  Process {
+    id: fontsProbe
+    command: ["sh", "-c", "fc-list -f '%{family[0]}\\n' :scalable=true | sort -u; echo --; fc-list -f '%{family[0]}\\n' :spacing=mono:scalable=true | sort -u"]
+    stdout: StdioCollector {
+      onStreamFinished: {
+        const [ui, mono] = text.split("--\n")
+        // Names apply takes (it checks them again): no quotes, backslashes or controls.
+        const ok = f => f !== "" && f.length <= 64 && !/["'`\\\x00-\x1f]/.test(f) && !/Emoji|SignWriting|Symbol/i.test(f)
+        root.uiFonts = (ui || "").split("\n").filter(ok)
+        root.monoFonts = (mono || "").split("\n").filter(ok)
+      }
+    }
+  }
+
+  // The password, changed by `mazapan password --gui` (both on stdin, never
+  // on a command line; polkit asks for the password for root): "", running,
+  // done, or what went wrong.
+  property string pwState: ""
+  function changePassword(old, new_) {
+    pwState = "running"
+    pwProc.payload = JSON.stringify({ old: old, new: new_ })
+    pwProc.running = true
+  }
+  Process {
+    id: pwProc
+    property string payload: ""
+    command: ["mazapan", "password", "--gui"]
+    stdinEnabled: true
+    onStarted: { write(payload); payload = ""; stdinEnabled = false }
+    stdout: StdioCollector { id: pwOut }
+    stderr: StdioCollector { id: pwErr }
+    onExited: code => {
+      stdinEnabled = true
+      const keyringFailed = pwOut.text.split("\n").some(l => l.startsWith("step keyring fail"))
+      root.pwState = code !== 0 ? (pwErr.text.trim().replace(/^mazapan: /, "") || {{ tq "pw.failed" }})
+        : keyringFailed ? {{ tq "pw.keyring" }} : "done"
+      if (code === 0) { pwOld.text = ""; pwNew.text = ""; pwAgain.text = "" }
+    }
+  }
   property string problem: ""
 
   PersistentProperties {
@@ -198,6 +241,8 @@ Item {
     property string text: ""
     property string detail: ""
     property bool selected: false
+    // Shown in this font (a font's own row); "": the theme's.
+    property string fontFamily: ""
     signal picked()
     Layout.fillWidth: true
     implicitHeight: detail !== "" ? 50 : 36
@@ -218,7 +263,7 @@ Item {
       anchors.rightMargin: 12
       spacing: 0
       Item { Layout.fillHeight: true }
-      Label { text: choice.text; font.bold: choice.selected; elide: Text.ElideRight; Layout.fillWidth: true }
+      Label { text: choice.text; font.bold: choice.selected; font.family: choice.fontFamily !== "" ? choice.fontFamily : font.family; elide: Text.ElideRight; Layout.fillWidth: true }
       Caption { visible: choice.detail !== ""; text: choice.detail; elide: Text.ElideRight; Layout.fillWidth: true }
       Item { Layout.fillHeight: true }
     }
@@ -302,10 +347,10 @@ Item {
             model: root.pages
             Choice {
               required property string modelData
-              text: ({ keyboard: {{ tq "p.keyboard" }}, pointer: {{ tq "p.pointer" }}, apps: {{ tq "p.apps" }},
-                       region: {{ tq "p.region" }}, display: {{ tq "p.display" }} })[modelData]
+              text: ({ keyboard: {{ tq "p.keyboard" }}, pointer: {{ tq "p.pointer" }}, text: {{ tq "p.text" }}, apps: {{ tq "p.apps" }},
+                       region: {{ tq "p.region" }}, display: {{ tq "p.display" }}, security: {{ tq "p.security" }} })[modelData]
               selected: session.page === modelData
-              onPicked: { session.page = modelData; root.problem = "" }
+              onPicked: { session.page = modelData; root.problem = ""; if (modelData === "text" && root.uiFonts.length === 0) fontsProbe.running = true }
             }
           }
           Item { Layout.fillHeight: true }
@@ -469,7 +514,100 @@ Item {
             }
           }
 
-          Item { Layout.fillHeight: session.page === "pointer" || session.page === "display" }
+          // Text: the fonts and their size, each font shown in itself.
+          ColumnLayout {
+            visible: session.page === "text"
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            spacing: 8
+            RowLayout {
+              Layout.fillWidth: true
+              Label { text: {{ tq "p.text" }}; font.pointSize: 13; font.bold: true; Layout.fillWidth: true }
+              Button { text: {{ tq "font.theme" }}; onClicked: root.apply(["--font-ui=theme", "--font-mono=theme", "--font-size=theme"]) }
+            }
+            RowLayout {
+              Layout.fillWidth: true
+              // 8 to 16 points, by halves; applied once the slider rests.
+              property real pending: 0
+              Caption { text: {{ tq "font.size" }}.arg(parent.pending > 0 ? parent.pending : Math.round(Theme.fontSize * 10) / 10) }
+              Slider {
+                Layout.fillWidth: true
+                to: 1
+                step: 1 / 16
+                value: (Theme.fontSize - 8) / 8
+                onMoved: v => { parent.pending = 8 + Math.round(v * 16) / 2; sizeApply.restart() }
+              }
+              Timer { id: sizeApply; interval: 600; onTriggered: root.apply(["--font-size=" + parent.pending]) }
+            }
+            TextField { id: fontSearch; Layout.fillWidth: true; placeholder: {{ tq "font.search" }} }
+            RowLayout {
+              Layout.fillWidth: true
+              Layout.fillHeight: true
+              spacing: 12
+              Repeater {
+                // The desktop's text, and the monospace one (terminals, code).
+                model: [[{{ tq "font.ui" }}, root.uiFonts, Theme.fontUi, "--font-ui="], [{{ tq "font.mono" }}, root.monoFonts, Theme.fontMono, "--font-mono="]]
+                ColumnLayout {
+                  id: fontCol
+                  required property var modelData
+                  Layout.fillWidth: true
+                  Layout.fillHeight: true
+                  Layout.preferredWidth: 1
+                  spacing: 4
+                  Caption { text: fontCol.modelData[0] }
+                  ListView {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    clip: true
+                    spacing: 2
+                    model: fontCol.modelData[1].filter(f => f.toLowerCase().includes(fontSearch.text.toLowerCase()))
+                    delegate: Choice {
+                      required property string modelData
+                      width: ListView.view.width
+                      text: modelData
+                      fontFamily: modelData
+                      selected: fontCol.modelData[2] === modelData
+                      onPicked: if (!selected) root.apply([fontCol.modelData[3] + modelData])
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          // Security: the password, one for the disk, the account and the keyring.
+          ColumnLayout {
+            visible: session.page === "security"
+            Layout.fillWidth: true
+            spacing: 8
+            Label { text: {{ tq "p.security" }}; font.pointSize: 13; font.bold: true }
+            Label { text: {{ tq "pw.title" }}; font.bold: true; Layout.topMargin: 6 }
+            Caption { text: {{ tq "pw.d" }}; wrapMode: Text.Wrap; Layout.fillWidth: true }
+            TextField { id: pwOld; Layout.fillWidth: true; echoMode: TextInput.Password; placeholder: {{ tq "pw.old" }} }
+            TextField { id: pwNew; Layout.fillWidth: true; echoMode: TextInput.Password; placeholder: {{ tq "pw.new" }} }
+            TextField { id: pwAgain; Layout.fillWidth: true; echoMode: TextInput.Password; placeholder: {{ tq "pw.again" }} }
+            RowLayout {
+              Layout.fillWidth: true
+              Caption {
+                Layout.fillWidth: true
+                wrapMode: Text.Wrap
+                text: root.pwState === "running" ? {{ tq "pw.running" }}
+                  : root.pwState === "done" ? {{ tq "pw.done" }}
+                  : pwNew.text !== "" && pwAgain.text !== "" && pwNew.text !== pwAgain.text ? {{ tq "pw.mismatch" }}
+                  : root.pwState
+                color: root.pwState === "done" ? Theme.success : root.pwState === "running" || root.pwState === "" ? Theme.fgMuted : Theme.danger
+              }
+              Button {
+                primary: true
+                text: {{ tq "pw.change" }}
+                enabled: root.pwState !== "running" && pwOld.text !== "" && pwNew.text !== "" && pwNew.text === pwAgain.text
+                opacity: enabled ? 1 : 0.5
+                onClicked: root.changePassword(pwOld.text, pwNew.text)
+              }
+            }
+          }
+
+          Item { Layout.fillHeight: session.page === "pointer" || session.page === "display" || session.page === "security" }
           Caption {
             visible: root.problem !== ""
             text: root.problem

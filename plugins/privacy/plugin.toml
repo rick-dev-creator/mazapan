@@ -1,0 +1,26 @@
+[plugin]
+id = "privacy"
+name = "Privacy dots"
+version = "0.1.0"
+api = 1
+description = "Dots in the bar while the microphone, the camera or the screen is in use, as macOS shows them; which app, on a click"
+categories = ["bar"]
+requires = ["shell-bar"]
+
+[packages]
+pacman = ["quickshell", "pipewire", "jq"]
+
+[settings]
+# How often to look (seconds).
+every = { default = 2, min = 1, max = 10 }
+
+# What's in use: PipeWire's running nodes by what they are (as Waybar's
+# privacy module), and the cameras opened past PipeWire (some browsers).
+[[targets]]
+template = "privacy.sh.tmpl"
+output = "~/.local/share/mazapan/bin/privacy"
+
+[[targets]]
+template = "Privacy.qml.tmpl"
+output = "~/.config/quickshell/mazapan/widgets/right/02-privacy.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"

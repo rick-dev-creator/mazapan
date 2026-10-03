@@ -47,6 +47,7 @@ avahi
 mazapan
 mazapan-keyring
 ufw
+upower
 pam-fde-boot-pw
 base-devel
 git
