@@ -1,0 +1,3 @@
+"plugin.name" = "MacBook-NVMe wacht aus dem Ruhezustand auf"
+"plugin.description" = "Hält die NVMe-SSD von MacBook und MacBook Pro aus 2015-2017 aus ihrem tiefsten Energiezustand (D3cold) heraus, aus dem sie nach dem Ruhezustand nicht mehr aufwacht"
+"check.d3cold" = "Die NVMe-SSD bleibt aus D3cold heraus"

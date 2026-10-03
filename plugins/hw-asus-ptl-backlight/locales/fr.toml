@@ -1,0 +1,3 @@
+"plugin.name" = "Luminosité de l'écran des ASUS Panther Lake"
+"plugin.description" = "Une luminosité d'écran qui change vraiment sur les ASUS ExpertBook B9406 et Zenbook UX5406AA (Intel Panther Lake), pas seulement au maximum ou éteinte : le rétroéclairage de la dalle via DisplayPort AUX (DPCD)"
+"check.option" = "Le pilote xe règle le rétroéclairage via DPCD"

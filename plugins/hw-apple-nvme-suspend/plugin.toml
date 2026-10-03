@@ -1,0 +1,22 @@
+[plugin]
+id = "hw-apple-nvme-suspend"
+name = "MacBook NVMe waking from sleep"
+version = "0.1.0"
+api = 1
+description = "Keeps the NVMe drive of the 2015-2017 MacBook and MacBook Pro out of its deepest power state (D3cold), which it fails to wake from after sleep"
+categories = ["hardware"]
+
+[hardware]
+product = ["MacBook8,1", "MacBook9,1", "MacBook10,1", "MacBookPro13,[123]", "MacBookPro14,[123]"]
+
+# The drive at 0000:01:00.0 on these models never allowed into D3cold, at
+# every start (systemd-tmpfiles). Now too; and taken off, allowed again.
+[[targets]]
+template = "nvme.conf.tmpl"
+output = "/etc/tmpfiles.d/mazapan-apple-nvme-suspend.conf"
+system = true
+reload = "f=/sys/bus/pci/devices/0000:01:00.0/d3cold_allowed; if [ -e /etc/tmpfiles.d/mazapan-apple-nvme-suspend.conf ]; then systemd-tmpfiles --create /etc/tmpfiles.d/mazapan-apple-nvme-suspend.conf; elif [ -w $f ]; then echo 1 > $f; fi; true"
+
+[[checks]]
+name = "{{ t \"check.d3cold\" }}"
+run = "f=/sys/bus/pci/devices/0000:01:00.0/d3cold_allowed; [ ! -e $f ] || [ \"$(cat $f)\" = 0 ]"

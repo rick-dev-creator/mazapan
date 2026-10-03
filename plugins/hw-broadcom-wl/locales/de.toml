@@ -1,0 +1,4 @@
+"plugin.name" = "Broadcom-WLAN BCM4360 und BCM4331"
+"plugin.description" = "Der wl-Treiber von Broadcom für die WLAN-Chips BCM4360 und BCM4331 (MacBooks von 2012-2015 und andere Laptops), die die kernel-eigenen Treiber schlecht oder gar nicht betreiben"
+"check.headers" = "Kernel-Header für das wl-Modul sind installiert (linux-headers für deinen Kernel)"
+"check.module" = "Der wl-Treiber ist für den laufenden Kernel gebaut"

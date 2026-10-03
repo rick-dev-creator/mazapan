@@ -1,0 +1,19 @@
+[plugin]
+id = "hw-vulkan-radeon"
+name = "Vulkan on AMD graphics"
+version = "0.1.0"
+api = 1
+description = "Vulkan on AMD Radeon graphics (Mesa's RADV driver): games, Steam and Proton, and apps that draw with Vulkan, on the GPU instead of failing or falling back to the CPU"
+categories = ["hardware"]
+
+[hardware]
+# AMD's GPUs, as the PCI database names their maker (1002).
+gpu = ["Advanced Micro Devices*"]
+
+[packages]
+pacman = ["vulkan-radeon"]
+
+# Mesa's RADV is listed for the Vulkan loader.
+[[checks]]
+name = "{{ t \"check.icd\" }}"
+run = "ls /usr/share/vulkan/icd.d/radeon_icd*.json >/dev/null 2>&1"

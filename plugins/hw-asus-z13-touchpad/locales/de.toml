@@ -1,0 +1,3 @@
+"plugin.name" = "Touchpad des ASUS ROG Flow Z13 beim Tippen"
+"plugin.description" = "Das Touchpad der abnehmbaren Tastatur des ASUS ROG Flow Z13 (GZ302) wird beim Tippen ignoriert, wie ein eingebautes: keine verirrten Taps mehr, die den Cursor springen lassen"
+"check.internal" = "Das Touchpad der Z13-Tastatur gilt als eingebaut"

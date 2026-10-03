@@ -1,0 +1,3 @@
+"plugin.name" = "Wi-Fi 6 sur les cartes Intel BE200 et BE211"
+"plugin.description" = "Désactive le Wi-Fi 7 sur les cartes Intel BE200 et BE211 (Dell XPS 14 et 16 sous Panther Lake, et d'autres) : avec lui, la réception défaillante du pilote fait tomber le point d'accès à son débit le plus bas et le Wi-Fi est inutilisable ; en Wi-Fi 6, il va à pleine vitesse"
+"check.option" = "Le Wi-Fi 7 est désactivé pour le pilote iwlwifi"

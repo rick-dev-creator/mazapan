@@ -1,0 +1,3 @@
+"plugin.name" = "Pavé tactile de l'ASUS ROG Flow Z13 pendant la frappe"
+"plugin.description" = "Le pavé tactile du clavier détachable de l'ASUS ROG Flow Z13 (GZ302) ignoré pendant la frappe, comme un pavé intégré : plus de tapes parasites qui font sauter le curseur"
+"check.internal" = "Le pavé tactile du clavier du Z13 compte comme intégré"

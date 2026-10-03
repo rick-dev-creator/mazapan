@@ -1,0 +1,27 @@
+[plugin]
+id = "hw-surface-keyboard"
+name = "Surface keyboard at boot"
+version = "0.1.0"
+api = 1
+description = "The built-in keyboard of Microsoft Surface laptops working from the start of boot, so the disk password can be typed: the Surface Aggregator's modules in the initramfs"
+categories = ["hardware"]
+
+[hardware]
+vendor = ["Microsoft Corporation"]
+product = ["*Surface*"]
+
+# The keyboard reaches the system through the Surface Aggregator (on a
+# UART behind Intel's LPSS): its modules in the initramfs, or the keyboard
+# only comes up after the disk password was asked for.
+[[targets]]
+template = "modules.conf.tmpl"
+output = "/etc/mkinitcpio.conf.d/mazapan-surface-keyboard.conf"
+system = true
+reboot = true
+reload = "mkinitcpio -P"
+
+# mkinitcpio fails on a module the kernel doesn't have: looked for first.
+[[checks]]
+name = "{{ t \"check.modules\" }}"
+run = "for m in surface_aggregator surface_aggregator_registry surface_aggregator_hub surface_hid_core surface_hid surface_kbd intel_lpss_pci 8250_dw; do modinfo -n $m >/dev/null 2>&1 || { echo \"no $m in this kernel\"; exit 1; }; done"
+before_system = true

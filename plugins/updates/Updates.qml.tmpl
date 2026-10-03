@@ -35,6 +35,8 @@ Item {
   readonly property var d: UpdatesService.data
   readonly property var packages: d ? d.packages || [] : []
   readonly property var flatpaks: d ? d.flatpaks || [] : []
+  // Apps from their makers (Rider, VS Code): updated with the rest.
+  readonly property var vendor: d ? d.vendor || [] : []
   readonly property var news: d ? d.news || [] : []
   readonly property var whatsNew: d ? d.whats_new || [] : []
   readonly property var firmware: d ? d.firmware || [] : []
@@ -240,6 +242,7 @@ Item {
           spacing: 2
           model: root.packages.map(p => ({ name: p.name, detail: p.from + " → " + p.to, mark: p.desktop || p.kernel }))
             .concat(root.flatpaks.map(f => ({ name: f.name, detail: "Flatpak · " + f.id, mark: false })))
+            .concat(root.vendor.map(v => ({ name: v.name, detail: v.from + " → " + v.to + " · " + {{ tq "from_maker" }}, mark: false })))
           delegate: RowLayout {
             required property var modelData
             width: ListView.view.width

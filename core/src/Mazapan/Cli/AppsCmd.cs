@@ -109,6 +109,7 @@ public static partial class Program
         public List<Plugin> Found = [];
         public (HashSet<string> Packages, HashSet<string> Flatpaks, HashSet<string> Webapps) Owned;
         public HashSet<string> Protected = [];
+        public HashSet<string> OwnedVendor = [];
         public bool ChromiumBrowser;
 
         public static AppsNow Read()
@@ -131,7 +132,9 @@ public static partial class Program
             }
             try { n.Cfg = Settings.Load(); } catch (MazapanException) { }
             n.Found = Plugin.Discover(PluginDirs()).Plugins;
-            n.Owned = AppsLedger.Owned(AppsLedger.List(AppsState()));
+            var ledger = AppsLedger.List(AppsState());
+            n.Owned = AppsLedger.Owned(ledger);
+            n.OwnedVendor = AppsLedger.OwnedVendor(ledger);
             // Never removed: the system's, and what an enabled plugin needs.
             n.Protected = [.. AppsLedger.Protected];
             foreach (var p in n.Found.Where(p => n.Cfg != null && n.Cfg.IsOn(p))) n.Protected.UnionWith(p.Pacman);
@@ -144,6 +147,7 @@ public static partial class Program
             "pacman" => a.Pacman.All(Packages.Contains),
             "flatpak" => UserFlatpaks.Contains(a.Flatpak) || SystemFlatpaks.Contains(a.Flatpak),
             "webapp" => Webapps.ContainsKey(a.Webapp.TrimEnd('/')),
+            "vendor" => Vendor.Installed(a.Id) != "",
             _ => Found.FirstOrDefault(p => p.Id == a.Plugin) is { } p && Cfg != null && Cfg.IsOn(p),
         };
 
@@ -153,6 +157,7 @@ public static partial class Program
             "pacman" => a.Pacman.Any(p => Packages.Contains(p) && Owned.Packages.Contains(p) && !Protected.Contains(p)),
             "flatpak" => UserFlatpaks.Contains(a.Flatpak) && Owned.Flatpaks.Contains(a.Flatpak),
             "webapp" => Webapps.ContainsKey(a.Webapp.TrimEnd('/')) && Owned.Webapps.Contains(a.Webapp.TrimEnd('/')),
+            "vendor" => Vendor.Installed(a.Id) != "" && OwnedVendor.Contains(a.Id),
             _ => false, // a plugin: the Plugins panel's
         };
     }
@@ -213,7 +218,8 @@ public static partial class Program
                     { "id", a.Id }, { "name", a.In(lang).Name }, { "description", a.In(lang).Description },
                     { "category", a.Category }, { "kind", a.Kind }, { "from", a.From }, { "flatpak", a.Flatpak },
                     // A web app's launcher is the one webapps made for it.
-                    { "desktop", a.Webapp != "" && now.Webapps.TryGetValue(a.Webapp.TrimEnd('/'), out var wid) ? $"mazapan-webapp-{wid}.desktop" : a.Desktop },
+                    { "desktop", a.Webapp != "" && now.Webapps.TryGetValue(a.Webapp.TrimEnd('/'), out var wid) ? $"mazapan-webapp-{wid}.desktop"
+                        : a.Vendor != "" && now.Has(a) ? Vendor.DesktopName(a.Id) : a.Desktop },
                     { "installed", now.Has(a) },
                     { "removable", now.Removable(a) },
                     { "plugin", a.Plugin },
@@ -233,6 +239,7 @@ public static partial class Program
         public List<string> Targets = []; // the packages asked for (not their dependencies)
         public List<string> Flatpaks = [];
         public List<(string Name, string Url)> Webapps = [];
+        public List<(App App, VendorRelease Release)> Vendor = []; // from their makers
         public List<string> Enable = [];  // mazapan plugins turned on
         public long Download, Installed;
     }
@@ -253,6 +260,14 @@ public static partial class Program
             p.Targets.AddRange(a.Pacman.Where(x => !now.Packages.Contains(x)));
             if (a.Flatpak != "") p.Flatpaks.Add(a.Flatpak);
             if (a.Webapp != "") p.Webapps.Add((a.In(lang).Name, a.Webapp));
+            if (a.Vendor != "")
+            {
+                try { p.Vendor.Add((a, Mazapan.Store.Vendor.Latest(a.Vendor))); }
+                catch (Exception e) when (e is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException or KeyNotFoundException or InvalidOperationException or IndexOutOfRangeException)
+                {
+                    throw new MazapanException($"{a.In(lang).Name}: its maker can't be reached ({e.Message})");
+                }
+            }
         }
         // Flatpaks need flatpak; sites as apps, the webapps plugin and a
         // Chromium-based browser (only those open a site as an app).
@@ -291,6 +306,7 @@ public static partial class Program
             p.Download = p.Packages.Sum(x => x.Download);
             p.Installed = p.Packages.Sum(x => x.Installed);
         }
+        p.Download += p.Vendor.Sum(v => v.Release.Size);
         return p;
     }
 
@@ -331,6 +347,7 @@ public static partial class Program
         public List<(string Name, string Why)> Kept = [];
         public List<string> Flatpaks = [];
         public List<string> Webapps = [];       // their ids
+        public List<App> Vendor = [];           // from their makers
     }
 
     /// <summary>
@@ -352,6 +369,7 @@ public static partial class Program
             }
             if (a.Flatpak != "") r.Flatpaks.Add(a.Flatpak);
             if (a.Webapp != "") r.Webapps.Add(now.Webapps[a.Webapp.TrimEnd('/')]);
+            if (a.Vendor != "") r.Vendor.Add(a);
         }
         r.Packages = r.Packages.Distinct().ToList();
         // What pacman would take out, dependencies included; one that another
@@ -387,7 +405,7 @@ public static partial class Program
                 {
                     { "apps", r.Apps.Select(a => a.Id).ToList() }, { "packages", r.Removed.Count > 0 ? r.Removed : r.Packages },
                     { "kept", r.Kept.Select(k => new Fields { { "name", k.Name }, { "why", k.Why } }).ToList() },
-                    { "flatpaks", r.Flatpaks }, { "webapps", r.Webapps },
+                    { "flatpaks", r.Flatpaks }, { "webapps", r.Webapps }, { "vendor", r.Vendor.Select(a => a.Id).ToList() },
                 }));
                 return 0;
             }
@@ -404,6 +422,7 @@ public static partial class Program
                 { "download", plan.Download }, { "installed", plan.Installed },
                 { "flatpaks", plan.Flatpaks },
                 { "webapps", plan.Webapps.Select(w => new Fields { { "name", w.Name }, { "url", w.Url } }).ToList() },
+                { "vendor", plan.Vendor.Select(v => new Fields { { "id", v.App.Id }, { "name", v.App.In(lang).Name }, { "version", v.Release.Version }, { "download", v.Release.Size } }).ToList() },
                 { "enable", plan.Enable }, { "review", plan.Review },
             }));
             return 0;
@@ -420,6 +439,7 @@ public static partial class Program
         foreach (var x in plan.Packages) Console.WriteLine($"    {x.Name} {Style.Dim}{x.Version}{Style.Reset}");
         foreach (var f in plan.Flatpaks) Console.WriteLine($"  flatpak  {f} (Flathub)");
         foreach (var w in plan.Webapps) Console.WriteLine($"  web app  {w.Name} ({w.Url})");
+        foreach (var (a, rel) in plan.Vendor) Console.WriteLine($"  from its maker  {a.In(lang).Name} {rel.Version}" + (rel.Size > 0 ? $" ({Mazapan.Store.Vendor.Size(rel.Size)})" : ""));
         foreach (var e in plan.Enable) Console.WriteLine($"  plugin   {e} turned on");
         foreach (var r in plan.Review) Console.WriteLine($"  {Style.Amber}plugin   {r}: add it from the Plugins panel (it shows what it can do){Style.Reset}");
     }
@@ -431,6 +451,7 @@ public static partial class Program
         foreach (var (name, why) in r.Kept) Console.WriteLine($"  {Style.Dim}kept     {name} ({why}){Style.Reset}");
         foreach (var f in r.Flatpaks) Console.WriteLine($"  flatpak  {f}");
         foreach (var w in r.Webapps) Console.WriteLine($"  web app  {w}");
+        foreach (var v in r.Vendor) Console.WriteLine($"  from its maker  {v.In(lang).Name}");
     }
 
     static string Mb(long b) => b >= 1073741824 ? $"{b / 1073741824.0:0.0} GB" : $"{b / 1048576.0:0} MB";
@@ -573,6 +594,24 @@ public static partial class Program
                 else failed.Add("webapp " + name);
             }
         }
+        if (plan.Vendor.Count > 0)
+        {
+            Step("vendor");
+            foreach (var (a, rel) in plan.Vendor)
+            {
+                try
+                {
+                    Mazapan.Store.Vendor.Install(a.Id, Mazapan.Store.Vendor.MakerOf(a.Vendor), rel, a.In(lang).Name);
+                    tx.Vendor.Add(a.Id);
+                    okApps.Add(a.Id);
+                }
+                catch (Exception e) when (e is MazapanException or HttpRequestException or TaskCanceledException or IOException or UnauthorizedAccessException)
+                {
+                    Console.Error.WriteLine(e.Message);
+                    failed.Add("vendor " + a.In(lang).Name);
+                }
+            }
+        }
         var rest = plan.Enable.Where(e => !tx.Plugins.Contains(e)).ToList();
         if (rest.Count > 0)
         {
@@ -659,6 +698,20 @@ public static partial class Program
                 okApps.Add(a.Id);
             }
             else failed.Add("webapp " + a.In(lang).Name);
+        }
+        foreach (var a in r.Vendor)
+        {
+            try
+            {
+                Mazapan.Store.Vendor.Remove(a.Id, Mazapan.Store.Vendor.MakerOf(a.Vendor));
+                tx.Vendor.Add(a.Id);
+                okApps.Add(a.Id);
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException or MazapanException)
+            {
+                Console.Error.WriteLine(e.Message);
+                failed.Add("vendor " + a.In(lang).Name);
+            }
         }
         // The plugins that came with them (an undo says which), if nothing
         // else installed still needs them.

@@ -86,3 +86,13 @@ nvidia-utils
 libva-nvidia-driver
 linux-headers
 dkms
+
+# Hardware plugins ported from Omarchy: offered on the machines that need
+# them, turned on by the installer there, from this offline repository.
+vulkan-intel
+vulkan-radeon
+intel-lpmd
+asusctl
+alsa-utils
+linux-firmware-marvell
+broadcom-wl-dkms

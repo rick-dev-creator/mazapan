@@ -1,0 +1,26 @@
+[plugin]
+id = "hw-broadcom-wl"
+name = "Broadcom BCM4360 and BCM4331 Wi-Fi"
+version = "0.1.0"
+api = 1
+description = "Broadcom's wl driver for the BCM4360 and BCM4331 Wi-Fi chips (2012-2015 MacBooks, and other laptops), which the kernel's own drivers run poorly or not at all"
+categories = ["hardware"]
+
+[hardware]
+# BCM4360 (2013-2015 MacBooks) and BCM4331 (2012, early 2013 MacBooks).
+pci = ["14e4:43a0", "14e4:4331"]
+
+# The package keeps the kernel's own Broadcom drivers off (its modprobe.d).
+[packages]
+pacman = ["broadcom-wl-dkms", "linux-headers"]
+
+# wl is built for the running kernel on install (DKMS): its headers must be
+# there first, or the driver never loads.
+[[checks]]
+name = "{{ t \"check.headers\" }}"
+run = "for k in /usr/lib/modules/*/pkgbase; do [ -e \"${k%/pkgbase}/build\" ] || exit 1; done"
+before_system = true
+
+[[checks]]
+name = "{{ t \"check.module\" }}"
+run = "modinfo -n wl >/dev/null 2>&1"

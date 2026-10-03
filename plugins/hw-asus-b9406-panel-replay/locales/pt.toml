@@ -1,0 +1,3 @@
+"plugin.name" = "A tela do ASUS ExpertBook B9406 continua atualizando"
+"plugin.description" = "A tela do ASUS ExpertBook B9406 (Intel Panther Lake) não congela mais no último quadro: o Panel Replay, do qual este painel nunca acorda, desativado"
+"check.option" = "O Panel Replay está desativado no driver xe"

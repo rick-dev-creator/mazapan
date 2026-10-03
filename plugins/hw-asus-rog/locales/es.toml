@@ -1,0 +1,3 @@
+"plugin.name" = "Controles de los portátiles ASUS ROG"
+"plugin.description" = "asusctl en los portátiles ASUS ROG: perfiles de rendimiento, curvas de ventilador, un límite de carga de la batería y la iluminación del teclado"
+"check.daemon" = "asusd, el servicio con el que habla asusctl, está en marcha"

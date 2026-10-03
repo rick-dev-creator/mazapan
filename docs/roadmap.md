@@ -85,7 +85,20 @@ person's approval for root) is the foundation that can be.
    emulator, with nothing done by hand.
 5. **Omarchy's hardware fixes as hardware plugins** (item 5): its ~40, each
    offered only on the machine that needs it, said and undoable (Omarchy
-   runs them once at install).
+   runs them once at install). *Done (2026-10-04):* 18 ported (Apple Wi-Fi, SPI keyboard and NVMe
+   suspend; ASUS panel replay, Panther Lake backlight, Z13 touchpad, ROG
+   (asusctl) and its audio; Surface keyboard and Wi-Fi; Framework 16
+   keyboard access and 13 AMD microphone; Broadcom wl; Intel Wi-Fi 7 EHT and
+   lpmd; Vulkan for Intel and AMD; nouveau's cursor), every one tied to
+   the machines its Omarchy script names, its packages on the ISO (a test
+   holds it). Left out, said why: the T2 kernel, Omarchy's or the AUR's
+   own packages (Dell haptics, Tuxedo, YT6801, qmk-hid, IPU7 camera), the
+   B9406 touchpad (libinput reads one fixed file), the ASUS mic levels
+   (alsactl's one state file), FRED on GRUB (no drop-in for the kernel's
+   line), thermald (no CPU or battery rule yet), speaker tuning and the
+   wireless region (each its own feature). To tell next: a `cpu`, a
+   `battery` and a DMI `family` rule would let thermald, lpmd and older ROG
+   models match exactly; all of them need trying on their hardware.
 
 Order: 2 and 3 first (the person's problem today, and what sets Mazapán
 apart), then 4, with 5 alongside; 1 whenever the person can.
@@ -269,7 +282,7 @@ Hyprland, the shell restarted on its own). Better than it:
 | — | Toward 1.0, C7: unattended installs, the release gate | **Done** (2026-10-03): `cidata` + mazapan.json installs by itself; `vm/gate` passes encrypted and plain. C8 (the live USB on real hardware) needs the person |
 | — | Toward 1.0, B: safe to install | **Done** (2026-10-03): encrypted by default with a recovery key, one password (keyring included), locked before sleep, firewall on |
 | — | Toward 1.0, A: it updates itself | **Done** (2026-10-03): its own signed repository with channels, versions and releases, the updater after Omarchy's. Pending, the person's: the release key, hosting, uploading |
-| — | Next: the must-haves (agents and accounts with observability, live sessions, .NET and Expo profiles, hardware fixes from Omarchy) | In progress: agents and accounts, their use, limits and the next account taken, live sessions in the bar, the dashboard (2026-10-04); the profiles and the hardware fixes to do |
+| — | Next: the must-haves (agents and accounts with observability, live sessions, .NET and Expo profiles, hardware fixes from Omarchy) | In progress: agents and accounts, their use, limits and the next account taken, live sessions in the bar, the dashboard; the .NET and Mobile (Expo) profiles, with apps from their makers (Rider, VS Code) checked and kept current; 18 of Omarchy's hardware fixes as hardware plugins, 13 left out with their reasons (2026-10-04). What's left is the person's: trying it on their PC |
 | 1 | Updates you can trust | **Done** (2026-09-28); follow-ups listed below |
 | 2 | Monitors | **Done** (2026-09-28); follow-ups listed below |
 | 3 | One command palette | **Done** (2026-09-28): first version; follow-ups listed below |
@@ -1126,6 +1139,19 @@ packages:
   without it). A check: a new Expo app starts in the emulator.
 - What isn't in Arch's repositories comes from Flathub, never the AUR;
   each profile's README says what it set up and how to undo it.
+
+*Done (2026-10-04).* Both profiles, each app's setup in a plugin of its own
+(`dev-dotnet`, `dev-expo`, optional: the profile turns them on). Rider's
+Flatpak turned out not to see the .NET SDK (its sandbox), so the catalog
+gained apps from their makers: `vendor = "jetbrains:RD"` (Rider),
+`"vscode:stable"` (Microsoft's VS Code, where the C# Dev Kit runs): the
+maker's latest release over https from its own API, checked against the
+SHA-256 it publishes, unpacked in `~/.local/share/mazapan/vendor/ID` (the
+next version beside it, `current` switched once it's in place), its
+launcher and command written; `mazapan update` brings new releases, and
+removing takes it all out. Aspire's containers on Podman (no root, no
+service). Not tried yet: Android Studio's first start and the emulator
+(gigabytes of SDK), and the C# Dev Kit itself.
 
 ## 18. Settings with a face
 

@@ -1,0 +1,3 @@
+"plugin.name" = "Senhas de Wi-Fi em Macs com Wi-Fi Broadcom"
+"plugin.description" = "Os Macs cujo Wi-Fi Broadcom usa o driver brcmfmac (de 2015 em diante, os T2 também) entram em redes WPA2/WPA3 que, sem isso, recusam a senha certa: o handshake feito pelo wpa_supplicant, não pelo firmware da placa"
+"check.option" = "O brcmfmac deixa o handshake WPA para o wpa_supplicant"

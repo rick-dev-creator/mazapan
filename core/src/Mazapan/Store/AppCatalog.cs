@@ -14,13 +14,15 @@ public sealed class App
     public string Id = "", Name = "", Description = "", Category = "", Desktop = "";
     public List<string> Pacman = [];
     public string Flatpak = "", Webapp = "", Plugin = "";
+    /// <summary>From its maker (jetbrains:RD, vscode:stable): see Vendor.</summary>
+    public string Vendor = "";
     public List<string> Plugins = [];
     /// <summary>The catalog it's from when it isn't mazapan's (config.toml's app_catalogs).</summary>
     public string From = "";
     public Dictionary<string, (string Name, string Description)> Translations = [];
 
     /// <summary>How it's installed: pacman, flatpak, webapp or plugin.</summary>
-    public string Kind => Pacman.Count > 0 ? "pacman" : Flatpak != "" ? "flatpak" : Webapp != "" ? "webapp" : "plugin";
+    public string Kind => Pacman.Count > 0 ? "pacman" : Flatpak != "" ? "flatpak" : Webapp != "" ? "webapp" : Vendor != "" ? "vendor" : "plugin";
 
     public (string Name, string Description) In(string lang)
     {
@@ -128,6 +130,7 @@ public static partial class AppCatalog
                 Flatpak = t.String("flatpak"),
                 Webapp = t.String("webapp"),
                 Plugin = t.String("plugin"),
+                Vendor = t.String("vendor"),
                 Plugins = t.Strings("plugins"),
             };
             a.Translations = Translations(t, from, a.Id);
@@ -135,8 +138,10 @@ public static partial class AppCatalog
             if (!IdPattern().IsMatch(a.Id)) throw new MazapanException($"{from}: app id \"{a.Id}\": lowercase letters, digits and dashes");
             if (a.Name == "") throw new MazapanException($"{from}: {a.Id}: a name");
             if (!Categories.Contains(a.Category)) throw new MazapanException($"{from}: {a.Id}: category \"{a.Category}\": one of {string.Join(", ", Categories)}");
-            var sources = (a.Pacman.Count > 0 ? 1 : 0) + (a.Flatpak != "" ? 1 : 0) + (a.Webapp != "" ? 1 : 0) + (a.Plugin != "" ? 1 : 0);
-            if (sources != 1) throw new MazapanException($"{from}: {a.Id}: exactly one of pacman, flatpak, webapp, plugin");
+            var sources = (a.Pacman.Count > 0 ? 1 : 0) + (a.Flatpak != "" ? 1 : 0) + (a.Webapp != "" ? 1 : 0) + (a.Plugin != "" ? 1 : 0) + (a.Vendor != "" ? 1 : 0);
+            if (sources != 1) throw new MazapanException($"{from}: {a.Id}: exactly one of pacman, flatpak, webapp, plugin, vendor");
+            if (a.Vendor != "" && !Mazapan.Store.Vendor.IsSpec(a.Vendor))
+                throw new MazapanException($"{from}: {a.Id}: vendor \"{a.Vendor}\": one of {string.Join(", ", Mazapan.Store.Vendor.Makers.Select(m => m.Spec))}");
             if (a.Pacman.FirstOrDefault(p => !PackagePattern().IsMatch(p)) is { } bad) throw new MazapanException($"{from}: {a.Id}: package \"{bad}\"");
             if (a.Flatpak != "" && !FlatpakPattern().IsMatch(a.Flatpak)) throw new MazapanException($"{from}: {a.Id}: flatpak \"{a.Flatpak}\": an application id (org.example.App)");
             if (a.Webapp != "" && !IsWebapp(a.Webapp))

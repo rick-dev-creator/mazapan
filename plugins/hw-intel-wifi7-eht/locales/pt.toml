@@ -1,0 +1,3 @@
+"plugin.name" = "Wi-Fi 6 nas placas Intel BE200 e BE211"
+"plugin.description" = "Desliga o Wi-Fi 7 nas placas Intel BE200 e BE211 (Dell XPS 14 e 16 com Panther Lake, e outros): com ele, a recepção quebrada do driver faz o ponto de acesso cair para a velocidade mínima e o Wi-Fi fica inutilizável; com Wi-Fi 6 funciona a toda velocidade"
+"check.option" = "O Wi-Fi 7 está desligado no driver iwlwifi"

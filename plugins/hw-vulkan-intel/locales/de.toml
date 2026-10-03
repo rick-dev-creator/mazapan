@@ -1,0 +1,3 @@
+"plugin.name" = "Vulkan auf Intel-Grafik"
+"plugin.description" = "Vulkan auf Intel-Grafik (der Treiber von Mesa): Spiele, Steam und Proton und Apps, die mit Vulkan zeichnen, auf der GPU, statt zu scheitern oder auf die CPU auszuweichen"
+"check.icd" = "Der Vulkan-Treiber für Intel-Grafik ist installiert"

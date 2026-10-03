@@ -1,0 +1,3 @@
+"plugin.name" = "Steuerung für ASUS-ROG-Laptops"
+"plugin.description" = "asusctl auf ASUS-ROG-Laptops: Leistungsprofile, Lüfterkurven, ein Ladelimit für den Akku und die Tastaturbeleuchtung"
+"check.daemon" = "asusd, der Dienst, mit dem asusctl spricht, läuft"

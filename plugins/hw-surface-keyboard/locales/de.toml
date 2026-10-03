@@ -1,0 +1,3 @@
+"plugin.name" = "Surface-Tastatur beim Start"
+"plugin.description" = "Die eingebaute Tastatur von Microsoft-Surface-Laptops funktioniert ab Beginn des Starts, damit sich das Festplattenpasswort eingeben lässt: die Module des Surface Aggregator im Initramfs"
+"check.modules" = "Der Kernel hat die Module der Surface-Tastatur"

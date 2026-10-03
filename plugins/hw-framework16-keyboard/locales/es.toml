@@ -1,0 +1,3 @@
+"plugin.name" = "Iluminación del teclado del Framework Laptop 16"
+"plugin.description" = "Te deja a ti, no solo a root, hablar con el teclado del Framework Laptop 16, para cambiar su iluminación RGB y sus teclas (qmk_hid, o el configurador VIA en un navegador)"
+"check.access" = "Puedes acceder al HID en bruto del teclado del Framework 16"

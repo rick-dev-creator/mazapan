@@ -1,0 +1,3 @@
+"plugin.name" = "O NVMe do MacBook acordando da suspensão"
+"plugin.description" = "Mantém o SSD NVMe do MacBook e do MacBook Pro de 2015-2017 fora do seu estado de energia mais profundo (D3cold), do qual ele não consegue acordar depois da suspensão"
+"check.d3cold" = "O SSD NVMe fica fora do D3cold"

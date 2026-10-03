@@ -13,8 +13,10 @@ public sealed class AppsTx
     public List<string> Apps = [], Names = [];
     /// <summary>What it put there, or took out: packages, Flatpaks (yours), web apps (their addresses), plugins turned on.</summary>
     public List<string> Packages = [], Flatpaks = [], Webapps = [], Plugins = [];
+    /// <summary>Apps from their makers (Vendor), by their catalog id.</summary>
+    public List<string> Vendor = [];
 
-    public bool Empty => Apps.Count == 0 && Packages.Count == 0 && Flatpaks.Count == 0 && Webapps.Count == 0 && Plugins.Count == 0;
+    public bool Empty => Apps.Count == 0 && Packages.Count == 0 && Flatpaks.Count == 0 && Webapps.Count == 0 && Plugins.Count == 0 && Vendor.Count == 0;
 }
 
 /// <summary>
@@ -32,7 +34,7 @@ public static class AppsLedger
         {
             { "id", tx.Id }, { "action", tx.Action }, { "time", tx.Time.ToString("o", CultureInfo.InvariantCulture) },
             { "apps", tx.Apps }, { "names", tx.Names }, { "packages", tx.Packages }, { "flatpaks", tx.Flatpaks },
-            { "webapps", tx.Webapps }, { "plugins", tx.Plugins },
+            { "webapps", tx.Webapps }, { "plugins", tx.Plugins }, { "vendor", tx.Vendor },
         }) + "\n");
     }
 
@@ -55,13 +57,14 @@ public static class AppsLedger
                     Action = r.GetProperty("action").GetString() ?? "",
                     Time = DateTimeOffset.Parse(r.GetProperty("time").GetString() ?? "", CultureInfo.InvariantCulture),
                     Apps = L("apps"), Names = L("names"), Packages = L("packages"), Flatpaks = L("flatpaks"),
-                    Webapps = L("webapps"), Plugins = L("plugins"),
+                    Webapps = L("webapps"), Plugins = L("plugins"), Vendor = L("vendor"),
                 };
                 // Yours to edit, so checked as if a stranger wrote it: what it
                 // names ends up in commands.
                 if (tx.Action is not ("install" or "remove")) continue;
                 if (!tx.Packages.All(AppCatalog.IsPackage) || !tx.Flatpaks.All(AppCatalog.IsFlatpak)
-                    || !tx.Webapps.All(AppCatalog.IsWebapp) || !tx.Plugins.All(p => Mazapan.Plugins.Plugin.IdPattern().IsMatch(p)))
+                    || !tx.Webapps.All(AppCatalog.IsWebapp) || !tx.Plugins.All(p => Mazapan.Plugins.Plugin.IdPattern().IsMatch(p))
+                    || !tx.Vendor.All(AppCatalog.IsId))
                     continue;
                 out_.Add(tx);
             }
@@ -85,6 +88,15 @@ public static class AppsLedger
             foreach (var w in t.Webapps) { if (add) wa.Add(w.TrimEnd('/')); else wa.Remove(w.TrimEnd('/')); }
         }
         return (pk, fp, wa);
+    }
+
+    /// <summary>The apps from their makers the Apps menu put there and hasn't taken out since.</summary>
+    public static HashSet<string> OwnedVendor(IEnumerable<AppsTx> txs)
+    {
+        var out_ = new HashSet<string>();
+        foreach (var t in txs.OrderBy(t => t.Id, StringComparer.Ordinal))
+            foreach (var v in t.Vendor) { if (t.Action == "install") out_.Add(v); else out_.Remove(v); }
+        return out_;
     }
 
     /// <summary>

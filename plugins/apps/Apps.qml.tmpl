@@ -292,10 +292,16 @@ Item {
         const lines = text.split("\n").filter(l => l.trim() !== "")
         // Only this run's (the file may still be the one before for a moment).
         if (lines[0] !== "START " + root.runId) return
-        const said = l => l.startsWith("step ") || l.startsWith("DONE ") || l.startsWith("fail ") || l.startsWith("note ") || l.startsWith("START ")
+        const said = l => l.startsWith("step ") || l.startsWith("DONE ") || l.startsWith("fail ") || l.startsWith("note ") || l.startsWith("START ") || l.startsWith("progress ")
         for (const l of lines) if (l.startsWith("step ")) root.step = l.slice(5)
         const last = lines.filter(l => !said(l)).pop() || ""
         root.line = last.replace(/\x1b\[[0-9;]*m/g, "").replace(/^mazapan: /, "").slice(0, 140)
+        // A maker's download: how far ("progress DONE TOTAL", in bytes).
+        const prog = lines.filter(l => l.startsWith("progress ")).pop()
+        if (prog && root.step === "vendor") {
+          const [d, t] = prog.slice(9).split(" ").map(Number)
+          if (t > 0) root.line = {{ tq "downloaded" }}.arg(Math.round(d / 1048576)).arg(Math.round(t / 1048576)).arg(Math.round(100 * d / t))
+        }
         const done = lines.find(l => l.startsWith("DONE "))
         if (done) {
           watch.stop()
@@ -335,7 +341,8 @@ Item {
 
   function stepText(s) {
     return s === "packages" ? {{ tq "step.packages" }} : s === "flatpaks" ? {{ tq "step.flatpaks" }}
-      : s === "plugins" ? {{ tq "step.plugins" }} : s === "webapps" ? {{ tq "step.webapps" }} : {{ tq "step.start" }}
+      : s === "plugins" ? {{ tq "step.plugins" }} : s === "webapps" ? {{ tq "step.webapps" }}
+      : s === "vendor" ? {{ tq "step.vendor" }} : {{ tq "step.start" }}
   }
 
   function launch(a) {

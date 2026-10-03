@@ -1,0 +1,3 @@
+"plugin.name" = "Tastaturbeleuchtung des Framework Laptop 16"
+"plugin.description" = "Lässt dich, nicht nur root, mit der Tastatur des Framework Laptop 16 sprechen, um ihre RGB-Beleuchtung und Tasten einzustellen (qmk_hid oder der VIA-Konfigurator im Browser)"
+"check.access" = "Du hast Zugriff auf das Raw-HID der Framework-16-Tastatur"

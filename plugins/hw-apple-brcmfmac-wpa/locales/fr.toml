@@ -1,0 +1,3 @@
+"plugin.name" = "Mots de passe Wi-Fi sur les Mac à Wi-Fi Broadcom"
+"plugin.description" = "Les Mac dont le Wi-Fi Broadcom tourne avec le pilote brcmfmac (à partir de 2015, les Mac T2 aussi) rejoignent les réseaux WPA2/WPA3 qui sinon refusent le bon mot de passe : la négociation faite par wpa_supplicant, pas par le firmware de la carte"
+"check.option" = "brcmfmac laisse la négociation WPA à wpa_supplicant"

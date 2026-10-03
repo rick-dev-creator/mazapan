@@ -47,6 +47,47 @@ public static partial class Program
         return out_;
     }
 
+    /// <summary>Apps from their makers (Rider, VS Code) with a newer release: the app, and that release.</summary>
+    static List<(Store.App App, Store.VendorRelease Release)> PendingVendorUpdates()
+    {
+        var out_ = new List<(Store.App, Store.VendorRelease)>();
+        List<Store.App> apps;
+        try { apps = AppsCatalog(false).Apps; }
+        catch (MazapanException) { return out_; }
+        foreach (var a in apps.Where(a => a.Vendor != "" && Store.Vendor.Installed(a.Id) != ""))
+        {
+            try
+            {
+                var latest = Store.Vendor.Latest(a.Vendor);
+                if (latest.Version != Store.Vendor.Installed(a.Id)) out_.Add((a, latest));
+            }
+            // Its maker unreachable now: next time.
+            catch (Exception e) when (e is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException or KeyNotFoundException or InvalidOperationException or IndexOutOfRangeException or MazapanException) { }
+        }
+        return out_;
+    }
+
+    static bool UpdateVendorApps(List<(Store.App App, Store.VendorRelease Release)> updates)
+    {
+        if (updates.Count == 0) return true;
+        Header("From their makers");
+        var ok = true;
+        foreach (var (a, rel) in updates)
+        {
+            try
+            {
+                Store.Vendor.Install(a.Id, Store.Vendor.MakerOf(a.Vendor), rel, a.Name);
+                Console.WriteLine($"{a.Name} {rel.Version}");
+            }
+            catch (Exception e) when (e is MazapanException or HttpRequestException or TaskCanceledException or IOException or UnauthorizedAccessException)
+            {
+                Console.WriteLine($"{a.Name}: {e.Message}");
+                ok = false;
+            }
+        }
+        return ok;
+    }
+
     static bool UpdateFlatpaks()
     {
         Header("Flatpak apps");
@@ -83,6 +124,9 @@ public static partial class Program
             { "news", news.Select(n => (object)new Fields
                 { { "title", n.Title }, { "link", n.Link }, { "date", n.Date.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) }, { "action", n.NeedsAction() } }).ToList() },
             { "flatpaks", flatpaks },
+            // Apps from their makers (Rider, VS Code): updated with the rest.
+            { "vendor", PendingVendorUpdates().Select(v => (object)new Fields
+                { { "id", v.App.Id }, { "name", v.App.Name }, { "from", Store.Vendor.Installed(v.App.Id) }, { "to", v.Release.Version } }).ToList() },
             // Plugins from git with a newer version: mazapan plugins update brings them.
             { "plugins", PendingPluginUpdates().Select(p => (object)new Fields
                 { { "id", p.Id }, { "from", p.From }, { "to", p.To } }).ToList() },
@@ -126,6 +170,7 @@ public static partial class Program
         var pending = Packages.Pending();
         var (changes, orphans, owned) = s.Plan();
         var flatpaks = PendingFlatpaks();
+        var vendor = PendingVendorUpdates();
         List<Item> items = [];
         Exception? newsErr = null;
         try
@@ -139,7 +184,7 @@ public static partial class Program
         // What an apply would write: busy and unreadable files wait, they're
         // not an update.
         var fileChanges = changes.Count(c => c.State is State.New or State.Changed or State.Conflict);
-        if (pending.Count == 0 && fileChanges + orphans.Count == 0 && flatpaks.Count == 0)
+        if (pending.Count == 0 && fileChanges + orphans.Count == 0 && flatpaks.Count == 0 && vendor.Count == 0)
         {
             Console.WriteLine("\nEverything is up to date.");
             return 0;
@@ -155,6 +200,7 @@ public static partial class Program
         if (self != null) summary.Add($"Mazapán {V(self.From)} → {V(self.To)}");
         if (pending.Count > 0) summary.Add(Plural(pending.Count, "package", "packages"));
         if (flatpaks.Count > 0) summary.Add(Plural(flatpaks.Count, "Flatpak app", "Flatpak apps"));
+        if (vendor.Count > 0) summary.Add(string.Join(", ", vendor.Select(v => $"{v.App.Name} {v.Release.Version}")));
         if (pending.Any(p => IsKernel(p.Name))) summary.Add("a restart (kernel)");
         if (summary.Count > 0) Console.WriteLine($"\n{Style.Bold}{string.Join(" · ", summary)}{Style.Reset}");
 
@@ -225,11 +271,18 @@ public static partial class Program
             Header($"Flatpak apps ({flatpaks.Count})");
             foreach (var (_, name) in flatpaks) Console.WriteLine($"    {name}");
         }
+        if (vendor.Count > 0)
+        {
+            Header($"From their makers ({vendor.Count})");
+            foreach (var v in vendor) Console.WriteLine($"    {v.App.Name,-28} {Style.Dim}{Store.Vendor.Installed(v.App.Id)}{Style.Reset} → {v.Release.Version}");
+        }
         if (fs.IsSet("check")) return 0;
         if (pending.Count == 0 && fileChanges + orphans.Count == 0)
         {
-            // Only the Flatpak apps: nothing of the system's changes, no record.
-            if (!ask || Confirm("Update now?")) return UpdateFlatpaks() ? 0 : 1;
+            // Only the Flatpak apps and the makers' apps: nothing of the
+            // system's changes, no record.
+            if (!ask || Confirm("Update now?"))
+                return (flatpaks.Count == 0 || UpdateFlatpaks()) & UpdateVendorApps(vendor) ? 0 : 1;
             return 0;
         }
         if (ask && !Confirm("Update now?")) return 0;
@@ -310,6 +363,7 @@ public static partial class Program
         // their own runtime, no root, not part of what a rollback undoes. Not
         // when the system's part didn't go through (a password refused).
         if (upErr == null && flatpaks.Count > 0 && !UpdateFlatpaks()) rec.Note = "the Flatpak apps didn't update (flatpak update --user)";
+        if (upErr == null && !UpdateVendorApps(vendor)) rec.Note = (rec.Note == "" ? "" : rec.Note + "; ") + "an app from its maker didn't update";
         Dictionary<string, string> after;
         try
         {

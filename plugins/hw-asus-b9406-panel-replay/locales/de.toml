@@ -1,0 +1,3 @@
+"plugin.name" = "ASUS ExpertBook B9406: Bildschirm aktualisiert sich weiter"
+"plugin.description" = "Der Bildschirm des ASUS ExpertBook B9406 (Intel Panther Lake) friert nicht mehr beim letzten Bild ein: Panel Replay, aus dem dieses Panel nie aufwacht, ist aus"
+"check.option" = "Panel Replay ist für den Treiber xe aus"

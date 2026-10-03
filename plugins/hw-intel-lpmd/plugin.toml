@@ -1,0 +1,30 @@
+[plugin]
+id = "hw-intel-lpmd"
+name = "Intel low power mode"
+version = "0.1.0"
+api = 1
+description = "Intel's Low Power Mode Daemon on laptops with a hybrid Intel processor (Alder Lake, Raptor Lake, Meteor Lake, Lunar Lake, Panther Lake): light work kept on the efficient cores, so the battery lasts longer"
+categories = ["hardware"]
+
+[hardware]
+# The hybrid generations intel_lpmd supports (Alder Lake, Raptor Lake, Meteor
+# Lake, Lunar Lake, Panther Lake), told by their built-in graphics, as the
+# CPU model isn't a rule: the laptop dies only (P, U, HX; Meteor, Lunar and
+# Panther Lake are laptop-only), as it's for a battery. Not Alder Lake-N,
+# which isn't hybrid.
+gpu = ["Intel*Alder Lake-P*", "Intel*Alder Lake-UP*", "Intel*Alder Lake-HX*", "Intel*Raptor Lake-P*", "Intel*Raptor Lake-U*", "Intel*Meteor Lake*", "Intel*Lunar Lake*", "Intel*Panther Lake*"]
+
+[packages]
+pacman = ["intel-lpmd"]
+
+# intel_lpmd started at every start, while this file is there; taken off,
+# it's stopped and not started any more.
+[[targets]]
+template = "lpmd.conf.tmpl"
+output = "/etc/tmpfiles.d/mazapan-intel-lpmd.conf"
+system = true
+reload = "if [ -e /etc/tmpfiles.d/mazapan-intel-lpmd.conf ]; then systemctl enable --now intel_lpmd.service; else systemctl disable --now intel_lpmd.service 2>/dev/null; true; fi"
+
+[[checks]]
+name = "{{ t \"check.on\" }}"
+run = "systemctl is-enabled -q intel_lpmd.service"

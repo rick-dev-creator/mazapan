@@ -1,0 +1,26 @@
+[plugin]
+id = "hw-asus-ptl-backlight"
+name = "ASUS Panther Lake screen brightness"
+version = "0.1.0"
+api = 1
+description = "Screen brightness that really changes on the ASUS ExpertBook B9406 and Zenbook UX5406AA (Intel Panther Lake), not only full or off: the panel's backlight through DisplayPort AUX (DPCD)"
+categories = ["hardware"]
+
+[hardware]
+# The models it's confirmed on; other ASUS Panther Lake laptops may need it
+# too, but that's not known yet.
+product = ["*B9406*", "*UX5406AA*"]
+gpu = ["*Panther Lake*"]
+
+# xe starts from the initramfs, which carries modprobe.d too (the modconf
+# hook): rebuilt, so it reads the option from the start.
+[[targets]]
+template = "xe.conf.tmpl"
+output = "/etc/modprobe.d/mazapan-asus-ptl-backlight.conf"
+system = true
+reboot = true
+reload = "mkinitcpio -P"
+
+[[checks]]
+name = "{{ t \"check.option\" }}"
+run = "modprobe -c | grep -q '^options xe .*enable_dpcd_backlight=1'"

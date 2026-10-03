@@ -60,6 +60,17 @@ release (a tag `vX.Y.Z`) names them.
   account's limits and when they reset, what they used today; a
   dashboard with cost and tokens by day, model and project; Claude
   launched with the account that has room.
+- Apps: the .NET profile (ASP.NET Core and Aspire set up: the HTTPS
+  certificate trusted, Aspire's templates, containers on Podman, Rider
+  and Visual Studio Code) and the Mobile (Expo) one (Node.js, Java 17,
+  Android Studio, phones over USB). Apps can come from their makers,
+  checked against their published checksums and kept up to date by
+  mazapan update.
+- 18 hardware fixes from Omarchy as hardware plugins, each offered only
+  on the machines that need it (Apple, ASUS, Surface, Framework, Broadcom,
+  Intel Wi-Fi 7 and lpmd, Vulkan, nouveau).
+- The agents' views quieter: each agent its own color, the data in
+  neutral tones, amber and red only where something needs you.
 - Fixed after an audit: the privacy dots no longer keep a processor busy,
   and no app name can hide them; changing the password checks the current
   one first; a plugin that can't be read keeps its files; hibernation only

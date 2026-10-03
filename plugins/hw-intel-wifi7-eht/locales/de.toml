@@ -1,0 +1,3 @@
+"plugin.name" = "Wi-Fi 6 auf Intel-BE200- und -BE211-Karten"
+"plugin.description" = "Schaltet Wi-Fi 7 auf Intel-BE200- und -BE211-Karten ab (Dell XPS 14 und 16 mit Panther Lake und andere): Damit lässt der fehlerhafte Empfangspfad des Treibers den Access Point auf seine langsamste Rate fallen und das WLAN ist unbrauchbar; mit Wi-Fi 6 läuft es mit voller Geschwindigkeit"
+"check.option" = "Wi-Fi 7 ist für den Treiber iwlwifi abgeschaltet"

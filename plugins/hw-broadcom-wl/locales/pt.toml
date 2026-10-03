@@ -1,0 +1,4 @@
+"plugin.name" = "Wi-Fi Broadcom BCM4360 e BCM4331"
+"plugin.description" = "O driver wl da Broadcom para os chips de Wi-Fi BCM4360 e BCM4331 (MacBooks de 2012-2015 e outros notebooks), que os drivers do próprio kernel suportam mal ou nem suportam"
+"check.headers" = "Os headers do kernel para o módulo wl estão instalados (linux-headers do seu kernel)"
+"check.module" = "O driver wl está compilado para o kernel em execução"

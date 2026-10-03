@@ -1,0 +1,3 @@
+"plugin.name" = "Bildschirmhelligkeit auf ASUS mit Panther Lake"
+"plugin.description" = "Eine Bildschirmhelligkeit, die sich wirklich ändert, auf dem ASUS ExpertBook B9406 und dem Zenbook UX5406AA (Intel Panther Lake), nicht nur voll oder aus: die Hintergrundbeleuchtung des Panels über DisplayPort AUX (DPCD)"
+"check.option" = "Der Treiber xe steuert die Hintergrundbeleuchtung über DPCD"

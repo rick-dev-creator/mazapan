@@ -1,0 +1,4 @@
+"plugin.name" = "Wi-Fi Broadcom BCM4360 et BCM4331"
+"plugin.description" = "Le pilote wl de Broadcom pour les puces Wi-Fi BCM4360 et BCM4331 (MacBook de 2012-2015, et d'autres portables), que les pilotes du noyau gèrent mal ou pas du tout"
+"check.headers" = "Les en-têtes du noyau pour le module wl sont installés (linux-headers de votre noyau)"
+"check.module" = "Le pilote wl est compilé pour le noyau en cours"

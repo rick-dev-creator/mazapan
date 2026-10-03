@@ -1,0 +1,25 @@
+[plugin]
+id = "hw-asus-b9406-panel-replay"
+name = "ASUS ExpertBook B9406 screen that keeps updating"
+version = "0.1.0"
+api = 1
+description = "The ASUS ExpertBook B9406 (Intel Panther Lake) screen no longer freezes on its last frame: Panel Replay, which this panel never wakes from, turned off"
+categories = ["hardware"]
+
+[hardware]
+# The ExpertBook B9406, on Panther Lake graphics (the xe driver).
+product = ["*B9406*"]
+gpu = ["*Panther Lake*"]
+
+# xe starts from the initramfs, which carries modprobe.d too (the modconf
+# hook): rebuilt, so it reads the option from the first frame.
+[[targets]]
+template = "xe.conf.tmpl"
+output = "/etc/modprobe.d/mazapan-asus-b9406-panel-replay.conf"
+system = true
+reboot = true
+reload = "mkinitcpio -P"
+
+[[checks]]
+name = "{{ t \"check.option\" }}"
+run = "modprobe -c | grep -q '^options xe .*enable_panel_replay=0'"

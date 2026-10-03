@@ -1,0 +1,2 @@
+"check.headers" = "Kernel headers for the wl module are installed (linux-headers for your kernel)"
+"check.module" = "The wl driver is built for the running kernel"

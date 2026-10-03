@@ -1,0 +1,3 @@
+"plugin.name" = "El NVMe del MacBook despierta tras suspender"
+"plugin.description" = "Mantiene el disco NVMe del MacBook y el MacBook Pro de 2015-2017 fuera de su estado de energía más profundo (D3cold), del que no consigue despertar tras suspender"
+"check.d3cold" = "El disco NVMe se mantiene fuera de D3cold"

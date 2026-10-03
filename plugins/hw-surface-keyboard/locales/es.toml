@@ -1,0 +1,3 @@
+"plugin.name" = "Teclado del Surface al arrancar"
+"plugin.description" = "El teclado integrado de los portátiles Microsoft Surface funcionando desde el principio del arranque, para poder escribir la contraseña del disco: los módulos del Surface Aggregator en el initramfs"
+"check.modules" = "El kernel tiene los módulos del teclado del Surface"

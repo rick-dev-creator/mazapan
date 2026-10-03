@@ -1,0 +1,19 @@
+[plugin]
+id = "hw-vulkan-intel"
+name = "Vulkan on Intel graphics"
+version = "0.1.0"
+api = 1
+description = "Vulkan on Intel graphics (Mesa's driver): games, Steam and Proton, and apps that draw with Vulkan, on the GPU instead of failing or falling back to the CPU"
+categories = ["hardware"]
+
+[hardware]
+gpu = ["Intel*"]
+
+[packages]
+pacman = ["vulkan-intel"]
+
+# Mesa's Intel Vulkan drivers (anv; hasvk for Ivy Bridge to Broadwell) are
+# listed for the Vulkan loader.
+[[checks]]
+name = "{{ t \"check.icd\" }}"
+run = "ls /usr/share/vulkan/icd.d/intel_*icd*.json >/dev/null 2>&1"

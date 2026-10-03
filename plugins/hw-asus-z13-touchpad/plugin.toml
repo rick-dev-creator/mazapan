@@ -1,0 +1,26 @@
+[plugin]
+id = "hw-asus-z13-touchpad"
+name = "ASUS ROG Flow Z13 touchpad while typing"
+version = "0.1.0"
+api = 1
+description = "The touchpad of the ASUS ROG Flow Z13's (GZ302) detachable keyboard ignored while typing, as a built-in one is: no more stray taps that jump the cursor"
+categories = ["hardware"]
+
+[hardware]
+vendor = ["ASUSTeK COMPUTER INC."]
+product = ["*GZ302*"]
+
+# The keyboard's touchpad is seen as external, so libinput doesn't pair it
+# with the keyboard for disable-while-typing: marked internal. Taken by
+# libinput when the keyboard is attached again, or at the next login.
+[[targets]]
+template = "touchpad.rules.tmpl"
+output = "/etc/udev/rules.d/mazapan-asus-z13-touchpad.rules"
+system = true
+reload = "udevadm control --reload; udevadm trigger --subsystem-match=input; true"
+
+# Every touchpad of that keyboard plugged in is marked internal (none
+# plugged in: nothing to check).
+[[checks]]
+name = "{{ t \"check.internal\" }}"
+run = '''for e in /sys/class/input/event*; do p=$(udevadm info -q property -p "$e" 2>/dev/null); echo "$p" | grep -qx 'ID_INPUT_TOUCHPAD=1' && echo "$p" | grep -qx 'ID_VENDOR_ID=0b05' && echo "$p" | grep -qx 'ID_MODEL_ID=1a30' || continue; echo "$p" | grep -qx 'ID_INPUT_TOUCHPAD_INTEGRATION=internal' || exit 1; done; exit 0'''

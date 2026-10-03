@@ -1,0 +1,56 @@
+[plugin]
+id = "dev-dotnet"
+name = ".NET, set up"
+version = "0.1.0"
+api = 1
+description = "ASP.NET Core and Aspire ready to use: the HTTPS development certificate trusted (by .NET, and by Chromium and Firefox), Aspire's templates installed, its containers on Podman, dotnet's tools on the PATH, its telemetry off. The .NET profile in Apps turns it on"
+categories = ["tools"]
+optional = true
+
+[packages]
+pacman = ["dotnet-sdk", "aspnet-runtime", "aspnet-targeting-pack", "nss"]
+
+[settings]
+# Aspire's containers: "podman" (no root, no service) or "docker".
+containers = { default = "podman", choices = ["podman", "docker"] }
+# .NET's telemetry off.
+telemetry_off = true
+
+[[targets]]
+template = "dotnet.lua.tmpl"
+output = "~/.config/hypr/mazapan/dotnet.lua"
+reload = "hyprctl reload >/dev/null"
+
+# Once, and again whenever it changes: the certificate, Aspire's templates.
+[[targets]]
+template = "dotnet-setup.sh.tmpl"
+output = "~/.local/share/mazapan/bin/dotnet-setup"
+reload = "setsid sh ~/.local/share/mazapan/bin/dotnet-setup >/dev/null 2>&1 &"
+
+[[targets]]
+template = "dotnet-new.sh.tmpl"
+output = "~/.local/share/mazapan/bin/dotnet-new"
+
+[[actions]]
+name = "{{ t \"act.setup\" }}"
+run = "sh ~/.local/share/mazapan/bin/dotnet-setup --verbose"
+terminal = true
+keywords = "{{ t \"act.setup.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.new\" }}"
+run = "sh ~/.local/share/mazapan/bin/dotnet-new"
+terminal = true
+keywords = "{{ t \"act.new.kw\" }}"
+
+[[checks]]
+name = "{{ t \"check.sdk\" }}"
+run = "dotnet --list-sdks | grep -q ."
+
+[[checks]]
+name = "{{ t \"check.aspire\" }}"
+run = "dotnet new list aspire 2>/dev/null | grep -qi aspire"
+
+[[checks]]
+name = "{{ t \"check.cert\" }}"
+run = "SSL_CERT_DIR=\"$HOME/.aspnet/dev-certs/trust:/etc/ssl/certs\" dotnet dev-certs https --check --trust >/dev/null 2>&1"

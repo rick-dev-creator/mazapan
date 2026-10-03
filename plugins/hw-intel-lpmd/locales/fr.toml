@@ -1,0 +1,3 @@
+"plugin.name" = "Mode basse consommation d'Intel"
+"plugin.description" = "Le Low Power Mode Daemon d'Intel sur les portables à processeur Intel hybride (Alder Lake, Raptor Lake, Meteor Lake, Lunar Lake, Panther Lake) : le travail léger reste sur les cœurs économes, et la batterie dure plus longtemps"
+"check.on" = "Le Low Power Mode Daemon d'Intel démarre avec le système"

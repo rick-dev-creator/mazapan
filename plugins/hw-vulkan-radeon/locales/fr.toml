@@ -1,0 +1,3 @@
+"plugin.name" = "Vulkan sur les cartes graphiques AMD"
+"plugin.description" = "Vulkan sur les cartes graphiques AMD Radeon (le pilote RADV de Mesa) : les jeux, Steam et Proton, et les applications qui dessinent avec Vulkan, sur le GPU au lieu d'échouer ou de se rabattre sur le CPU"
+"check.icd" = "Le pilote Vulkan pour les cartes graphiques AMD est installé"

@@ -1,0 +1,3 @@
+"plugin.name" = "Curseur avec le pilote nouveau"
+"plugin.description" = "Dessine le curseur de manière logicielle quand un GPU NVIDIA utilise le pilote libre nouveau : sur beaucoup d'anciens GPU NVIDIA, nouveau n'affiche pas le curseur matériel, et le pointeur de la souris est invisible"
+"check.cursor" = "Le curseur est dessiné de manière logicielle avec le pilote nouveau"

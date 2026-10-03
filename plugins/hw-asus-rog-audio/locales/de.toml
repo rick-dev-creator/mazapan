@@ -1,0 +1,3 @@
+"plugin.name" = "Lautsprecherlautstärke auf ASUS-ROG-Laptops"
+"plugin.description" = "Die Lautstärke auf ASUS-ROG-Laptops in Software (der Soft-Mixer von WirePlumber), weg von den Macken des Hardware-Mixers im Realtek-Codec, die die Lautsprecher dumpf klingen lassen; und der Master des ALC285 nicht mehr stumm"
+"check.soft" = "Die Lautstärke der Soundkarten wird in Software geregelt"

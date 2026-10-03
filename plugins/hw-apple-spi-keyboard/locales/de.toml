@@ -1,0 +1,3 @@
+"plugin.name" = "MacBook-SPI-Tastatur beim Start"
+"plugin.description" = "Die eingebaute Tastatur und das Touchpad von MacBook und MacBook Pro aus 2015-2017 (über SPI) funktionieren ab Beginn des Starts, damit sich das Festplattenpasswort eingeben lässt"
+"check.modules" = "Der Kernel hat die Module der SPI-Tastatur (applespi und sein SPI-Controller)"

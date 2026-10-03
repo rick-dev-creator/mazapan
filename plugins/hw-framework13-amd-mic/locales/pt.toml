@@ -1,0 +1,3 @@
+"plugin.name" = "Microfones do Framework Laptop 13 (AMD)"
+"plugin.description" = "Os microfones integrados do Framework Laptop 13 com AMD Ryzen funcionando: a placa de som no perfil que os tem (HiFi: Mic1, Mic2, Speaker)"
+"check.profile" = "A placa de som está no perfil com os microfones"

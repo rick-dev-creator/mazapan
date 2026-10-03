@@ -1,0 +1,3 @@
+"plugin.name" = "Firmware Wi-Fi del Surface"
+"plugin.description" = "El firmware del Wi-Fi y el Bluetooth Marvell de los dispositivos Microsoft Surface (linux-firmware-marvell), que el linux-firmware de Arch no trae"
+"check.firmware" = "El firmware de Wi-Fi y Bluetooth de Marvell está instalado"

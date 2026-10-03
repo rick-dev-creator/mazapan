@@ -1,0 +1,3 @@
+"plugin.name" = "L'écran de l'ASUS ExpertBook B9406 qui se met à jour"
+"plugin.description" = "L'écran de l'ASUS ExpertBook B9406 (Intel Panther Lake) ne se fige plus sur sa dernière image : Panel Replay, dont cette dalle ne se réveille jamais, désactivé"
+"check.option" = "Panel Replay est désactivé pour le pilote xe"

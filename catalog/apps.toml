@@ -10,7 +10,10 @@
 # pacman = ["gimp"]              # from Arch's official repositories, or…
 # flatpak = "org.gimp.GIMP"      # …from Flathub (what the repositories don't have), or…
 # webapp = "https://…"           # …a site as an app of its own (the webapps plugin), or…
-# plugin = "markets"             # …a mazapan plugin (from a catalog)
+# plugin = "markets"             # …a mazapan plugin (from a catalog), or…
+# vendor = "jetbrains:RD"        # …from its maker, when neither of those can give it as it should be
+#                                #   (jetbrains:RD Rider, vscode:stable VS Code): checked against the
+#                                #   maker's SHA-256, in ~/.local/share/mazapan/vendor, updated by mazapan update
 # desktop = "gimp.desktop"       # its launcher (to open it, and its icon)
 # plugins = ["theme-gimp"]       # mazapan plugins that go with it: turned on with it
 # translations.es.description = "Una línea sobre lo que es"
@@ -59,6 +62,32 @@ translations.es.description = "Editores de código, git, contenedores, lenguajes
 translations.de.description = "Code-Editoren, git, Container, Sprachen und die Kommandozeilen-Tools, zu denen Entwickler greifen"
 translations.fr.description = "Éditeurs de code, git, conteneurs, langages et les outils en ligne de commande qu'utilisent les développeurs"
 translations.pt.description = "Editores de código, git, contêineres, linguagens e as ferramentas de terminal que todo desenvolvedor usa"
+
+[[profile]]
+id = "dotnet"
+name = ".NET"
+description = "ASP.NET Core and Aspire, ready: the SDK set up (its HTTPS certificate trusted, Aspire's templates), containers for Aspire, Rider and Visual Studio Code from their makers"
+glyph = 0xF0AAE
+apps = ["dotnet-sdk", "podman", "rider", "vscode-microsoft", "git"]
+translations.es.description = "ASP.NET Core y Aspire, listos: el SDK configurado (su certificado HTTPS de confianza, las plantillas de Aspire), contenedores para Aspire, Rider y Visual Studio Code de sus fabricantes"
+translations.de.description = "ASP.NET Core und Aspire, bereit: das SDK eingerichtet (sein HTTPS-Zertifikat vertrauenswürdig, die Aspire-Vorlagen), Container für Aspire, Rider und Visual Studio Code von ihren Herstellern"
+translations.fr.description = "ASP.NET Core et Aspire, prêts : le SDK configuré (son certificat HTTPS approuvé, les modèles Aspire), des conteneurs pour Aspire, Rider et Visual Studio Code de leurs éditeurs"
+translations.pt.description = "ASP.NET Core e Aspire, prontos: o SDK configurado (seu certificado HTTPS confiável, os modelos do Aspire), contêineres para o Aspire, Rider e Visual Studio Code de seus fabricantes"
+
+[[profile]]
+id = "mobile"
+name = "Mobile (Expo)"
+description = "Expo apps on Android from the first try: Node.js, Java 17, Android Studio with its SDK and emulators, phones over USB, Visual Studio Code"
+glyph = 0xF011C
+apps = ["nodejs-lts", "jdk17", "android-studio", "expo", "vscode-microsoft", "git"]
+translations.es.name = "Móvil (Expo)"
+translations.de.name = "Mobil (Expo)"
+translations.fr.name = "Mobile (Expo)"
+translations.pt.name = "Celular (Expo)"
+translations.es.description = "Apps de Expo en Android a la primera: Node.js, Java 17, Android Studio con su SDK y emuladores, teléfonos por USB, Visual Studio Code"
+translations.de.description = "Expo-Apps auf Android beim ersten Versuch: Node.js, Java 17, Android Studio mit SDK und Emulatoren, Handys über USB, Visual Studio Code"
+translations.fr.description = "Des apps Expo sur Android du premier coup : Node.js, Java 17, Android Studio avec son SDK et ses émulateurs, les téléphones en USB, Visual Studio Code"
+translations.pt.description = "Apps Expo no Android de primeira: Node.js, Java 17, Android Studio com seu SDK e emuladores, celulares por USB, Visual Studio Code"
 
 [[profile]]
 id = "gaming"
@@ -701,3 +730,96 @@ translations.es.description = "El exchange, como una app propia"
 translations.de.description = "Die Börse, als eigene App"
 translations.fr.description = "La plateforme d'échange, comme une application à part entière"
 translations.pt.description = "A exchange, como um app próprio"
+
+# --- .NET and mobile ------------------------------------------------------
+
+[[app]]
+id = "dotnet-sdk"
+name = ".NET SDK"
+description = "The .NET SDK with ASP.NET Core, set up: its HTTPS development certificate trusted, Aspire's templates, dotnet's tools on the PATH"
+category = "development"
+pacman = ["dotnet-sdk", "aspnet-runtime", "aspnet-targeting-pack", "nss"]
+plugins = ["dev-dotnet"]
+translations.es.description = "El SDK de .NET con ASP.NET Core, configurado: su certificado HTTPS de desarrollo de confianza, las plantillas de Aspire, las herramientas de dotnet en el PATH"
+translations.de.description = "Das .NET-SDK mit ASP.NET Core, eingerichtet: sein HTTPS-Entwicklungszertifikat vertrauenswürdig, die Aspire-Vorlagen, die dotnet-Tools im PATH"
+translations.fr.description = "Le SDK .NET avec ASP.NET Core, configuré : son certificat HTTPS de développement approuvé, les modèles Aspire, les outils de dotnet dans le PATH"
+translations.pt.description = "O SDK do .NET com ASP.NET Core, configurado: seu certificado HTTPS de desenvolvimento confiável, os modelos do Aspire, as ferramentas do dotnet no PATH"
+
+[[app]]
+id = "podman"
+name = "Podman"
+description = "Containers without root or a service; what Aspire runs its own on"
+category = "development"
+pacman = ["podman"]
+translations.es.description = "Contenedores sin root ni servicio; donde Aspire ejecuta los suyos"
+translations.de.description = "Container ohne root und ohne Dienst; worauf Aspire seine eigenen ausführt"
+translations.fr.description = "Des conteneurs sans root ni service ; là où Aspire lance les siens"
+translations.pt.description = "Contêineres sem root nem serviço; onde o Aspire roda os seus"
+
+[[app]]
+id = "rider"
+name = "JetBrains Rider"
+description = "The .NET IDE, from JetBrains itself (its Flatpak can't see the .NET SDK): checked, kept up to date by mazapan update"
+category = "development"
+vendor = "jetbrains:RD"
+translations.es.description = "El IDE de .NET, de JetBrains directamente (su Flatpak no ve el SDK de .NET): verificado, actualizado con mazapan update"
+translations.de.description = "Die .NET-IDE, direkt von JetBrains (ihr Flatpak sieht das .NET-SDK nicht): geprüft, aktuell gehalten von mazapan update"
+translations.fr.description = "L'IDE .NET, directement de JetBrains (son Flatpak ne voit pas le SDK .NET) : vérifié, tenu à jour par mazapan update"
+translations.pt.description = "A IDE do .NET, direto da JetBrains (seu Flatpak não vê o SDK do .NET): verificada, atualizada pelo mazapan update"
+
+[[app]]
+id = "vscode-microsoft"
+name = "Visual Studio Code"
+description = "Microsoft's own build (the C# Dev Kit runs only there), from Microsoft: checked, kept up to date by mazapan update"
+category = "development"
+vendor = "vscode:stable"
+plugins = ["theme-vscode"]
+translations.es.description = "La versión de Microsoft (el C# Dev Kit solo funciona en ella), de Microsoft directamente: verificada, actualizada con mazapan update"
+translations.de.description = "Microsofts eigener Build (das C# Dev Kit läuft nur dort), direkt von Microsoft: geprüft, aktuell gehalten von mazapan update"
+translations.fr.description = "La version de Microsoft (le C# Dev Kit ne fonctionne que là), directement de Microsoft : vérifiée, tenue à jour par mazapan update"
+translations.pt.description = "A versão da Microsoft (o C# Dev Kit só roda nela), direto da Microsoft: verificada, atualizada pelo mazapan update"
+
+[[app]]
+id = "nodejs-lts"
+name = "Node.js (LTS)"
+description = "Node.js, the long-term release, with npm"
+category = "development"
+pacman = ["nodejs-lts-krypton", "npm"]
+translations.es.description = "Node.js, la versión de soporte largo, con npm"
+translations.de.description = "Node.js, die Langzeitversion, mit npm"
+translations.fr.description = "Node.js, la version à support long, avec npm"
+translations.pt.description = "Node.js, a versão de suporte longo, com npm"
+
+[[app]]
+id = "jdk17"
+name = "Java 17 (OpenJDK)"
+description = "Java 17, what Android's Gradle builds with"
+category = "development"
+pacman = ["jdk17-openjdk"]
+translations.es.description = "Java 17, con lo que compila el Gradle de Android"
+translations.de.description = "Java 17, womit Androids Gradle baut"
+translations.fr.description = "Java 17, ce qu'utilise le Gradle d'Android"
+translations.pt.description = "Java 17, com o que o Gradle do Android compila"
+
+[[app]]
+id = "android-studio"
+name = "Android Studio"
+description = "Android's IDE: its SDK, emulators and device manager (the SDK goes to ~/Android/Sdk the first time it opens)"
+category = "development"
+flatpak = "com.google.AndroidStudio"
+translations.es.description = "El IDE de Android: su SDK, emuladores y gestor de dispositivos (el SDK va a ~/Android/Sdk la primera vez que se abre)"
+translations.de.description = "Die IDE von Android: SDK, Emulatoren und Geräteverwaltung (das SDK landet beim ersten Öffnen in ~/Android/Sdk)"
+translations.fr.description = "L'IDE d'Android : son SDK, ses émulateurs et son gestionnaire d'appareils (le SDK va dans ~/Android/Sdk à la première ouverture)"
+translations.pt.description = "A IDE do Android: seu SDK, emuladores e gerenciador de dispositivos (o SDK vai para ~/Android/Sdk na primeira vez que abre)"
+
+[[app]]
+id = "expo"
+name = "Expo for Android"
+description = "Expo set up: Android's SDK and emulator found, phones over USB, a new Expo app one action away"
+category = "development"
+pacman = ["android-udev"]
+plugins = ["dev-expo"]
+translations.es.description = "Expo configurado: el SDK y el emulador de Android encontrados, teléfonos por USB, una app Expo nueva a una acción"
+translations.de.description = "Expo eingerichtet: Android-SDK und Emulator gefunden, Handys über USB, eine neue Expo-App mit einer Aktion"
+translations.fr.description = "Expo configuré : le SDK et l'émulateur Android trouvés, les téléphones en USB, une nouvelle app Expo à une action"
+translations.pt.description = "Expo configurado: o SDK e o emulador do Android encontrados, celulares por USB, um app Expo novo a uma ação"

@@ -1,0 +1,23 @@
+[plugin]
+id = "hw-framework16-keyboard"
+name = "Framework Laptop 16 keyboard lighting"
+version = "0.1.0"
+api = 1
+description = "Lets you, not only root, talk to the Framework Laptop 16's keyboard, to set its RGB lighting and keys (qmk_hid, or the VIA configurator in a browser)"
+categories = ["hardware"]
+
+[hardware]
+vendor = ["Framework"]
+product = ["*Laptop 16*"]
+
+[[targets]]
+template = "keyboard.rules.tmpl"
+output = "/etc/udev/rules.d/mazapan-framework16-keyboard.rules"
+system = true
+reload = "udevadm control --reload; udevadm trigger --subsystem-match=hidraw; true"
+
+# Each of the keyboard's raw HID devices is yours while you're at the machine.
+[[checks]]
+name = "{{ t \"check.access\" }}"
+run = '''for h in /sys/class/hidraw/hidraw*; do grep -qi '^HID_ID=0003:000032AC:00000012$' "$h/device/uevent" 2>/dev/null || continue; [ -r "/dev/${h##*/}" ] && [ -w "/dev/${h##*/}" ] || exit 1; done; exit 0'''
+session = true

@@ -1,0 +1,3 @@
+"plugin.name" = "Brillo de pantalla en ASUS con Panther Lake"
+"plugin.description" = "Un brillo de pantalla que cambia de verdad en el ASUS ExpertBook B9406 y el Zenbook UX5406AA (Intel Panther Lake), no solo al máximo o apagado: la retroiluminación del panel por DisplayPort AUX (DPCD)"
+"check.option" = "El driver xe lleva la retroiluminación por DPCD"

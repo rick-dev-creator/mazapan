@@ -30,7 +30,11 @@ FloatingWindow {
   property var limits: []          // limits --json accounts
   property bool loading: false
 
-  readonly property var agentColors: [Theme.accent, Theme.success, Theme.info, Theme.warning, Theme.danger, Theme.fgMuted]
+  // Each agent its own color, from the theme's terminal palette (the accent
+  // stays for what's chosen; amber and red for what needs attention).
+  readonly property var agentColor: ({ claude: Theme.ansi.yellow, opencode: Theme.ansi.blue, pi: Theme.ansi.green, codex: Theme.ansi.cyan,
+    gemini: Theme.ansi.magenta, crush: Theme.ansi.brightBlue, aider: Theme.ansi.brightGreen })
+  function colorOf(id) { return agentColor[id] || Theme.fgMuted }
   readonly property var names: ({ claude: "Claude Code", opencode: "OpenCode", pi: "Pi", codex: "Codex", gemini: "Gemini CLI", crush: "Crush", aider: "Aider" })
   function nameOf(id) { return names[id] || id }
   function base(p) { return String(p || "").split("/").filter(x => x !== "").pop() || "~" }
@@ -123,6 +127,46 @@ FloatingWindow {
 
   // --- the view -----------------------------------------------------------------
 
+  // A choice among a few (days, cost or tokens): quiet, the chosen one raised.
+  component Segmented: Rectangle {
+    id: seg
+    property var options: []   // [[value, label]…]
+    property var current
+    signal picked(var value)
+    implicitWidth: row.implicitWidth + 4
+    implicitHeight: 30
+    radius: Theme.radius
+    color: Theme.bgAlt
+    Row {
+      id: row
+      x: 2
+      y: 2
+      spacing: 2
+      Repeater {
+        model: seg.options
+        Rectangle {
+          required property var modelData
+          readonly property bool chosen: seg.current === modelData[0]
+          implicitWidth: label.implicitWidth + 22
+          implicitHeight: 26
+          radius: Theme.radius
+          color: chosen ? Theme.surfaceRaised : area.containsMouse ? Theme.surface : "transparent"
+          border.width: chosen ? 1 : 0
+          border.color: Theme.border
+          Text {
+            id: label
+            anchors.centerIn: parent
+            text: modelData[1]
+            color: chosen ? Theme.fg : Theme.fgMuted
+            font.family: Theme.fontMono
+            font.pointSize: 9
+          }
+          MouseArea { id: area; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: seg.picked(modelData[0]) }
+        }
+      }
+    }
+  }
+
   Flickable {
     id: flick
     anchors.fill: parent
@@ -143,18 +187,17 @@ FloatingWindow {
         spacing: 8
         Label { text: {{ tq "dash.title" }}; font.pointSize: 15; font.bold: true }
         Item { Layout.fillWidth: true }
-        Repeater {
-          model: [7, 30, 90]
-          Button {
-            required property int modelData
-            text: {{ tq "dash.days" }}.arg(modelData)
-            primary: win.days === modelData
-            onClicked: { win.days = modelData; win.load() }
-          }
+        Segmented {
+          options: [[7, {{ tq "dash.days" }}.arg(7)], [30, {{ tq "dash.days" }}.arg(30)], [90, {{ tq "dash.days" }}.arg(90)]]
+          current: win.days
+          onPicked: v => { win.days = v; win.load() }
         }
-        Item { implicitWidth: 12 }
-        Button { text: {{ tq "dash.cost" }}; primary: win.metric === "cost"; onClicked: win.metric = "cost" }
-        Button { text: {{ tq "dash.tokens" }}; primary: win.metric === "tokens"; onClicked: win.metric = "tokens" }
+        Item { implicitWidth: 8 }
+        Segmented {
+          options: [["cost", {{ tq "dash.cost" }}], ["tokens", {{ tq "dash.tokens" }}]]
+          current: win.metric
+          onPicked: v => win.metric = v
+        }
       }
 
       // The period in five numbers.
@@ -175,8 +218,7 @@ FloatingWindow {
             Layout.fillWidth: true
             implicitHeight: 64
             radius: Theme.radius
-            color: Theme.surface
-            border.color: Theme.border
+            color: Theme.bgAlt
             ColumnLayout {
               anchors.fill: parent
               anchors.margins: 10
@@ -206,7 +248,7 @@ FloatingWindow {
           plotAreaBackgroundColor: "transparent"
           labelTextColor: Theme.fgMuted
           labelFont.family: Theme.fontMono
-          grid.mainColor: Theme.border
+          grid.mainColor: Qt.rgba(Theme.border.r, Theme.border.g, Theme.border.b, 0.5)
           grid.subColor: "transparent"
           axisX.mainColor: Theme.border
           axisY.mainColor: Theme.border
@@ -228,7 +270,7 @@ FloatingWindow {
             required property string modelData
             required property int index
             label: win.nameOf(modelData)
-            color: win.agentColors[index % win.agentColors.length]
+            color: win.colorOf(modelData)
             values: win.dayList.map(day => win.rows.filter(r => r.day === day && r.agent === modelData).reduce((s, r) => s + win.chartVal(r), 0))
           }
           onObjectAdded: (i, set) => series.append(set)
@@ -243,7 +285,7 @@ FloatingWindow {
             required property string modelData
             required property int index
             spacing: 6
-            Rectangle { implicitWidth: 10; implicitHeight: 10; radius: 2; color: win.agentColors[index % win.agentColors.length] }
+            Rectangle { implicitWidth: 10; implicitHeight: 10; radius: 2; color: win.colorOf(modelData) }
             Caption { text: win.nameOf(modelData) }
           }
         }
@@ -274,12 +316,13 @@ FloatingWindow {
                   Layout.fillWidth: true
                   implicitHeight: 8
                   radius: 3
-                  color: Theme.surface
+                  color: Theme.bgAlt
                   Rectangle {
                     width: parent.width * (modelData.value / Math.max(1e-9, col.modelData[1][0].value))
                     height: parent.height
                     radius: 3
-                    color: Theme.accent
+                    color: Theme.fgMuted
+                    opacity: 0.55
                   }
                 }
                 Caption { text: win.show(modelData.value); Layout.preferredWidth: 70; horizontalAlignment: Text.AlignRight }
@@ -316,8 +359,8 @@ FloatingWindow {
                   implicitWidth: 16
                   implicitHeight: 14
                   radius: 2
-                  color: modelData > 0 ? Theme.accent : Theme.surface
-                  opacity: modelData > 0 ? 0.25 + 0.75 * modelData / dayRow.peak : 1
+                  color: modelData > 0 ? Theme.fg : Theme.bgAlt
+                  opacity: modelData > 0 ? 0.08 + 0.8 * modelData / dayRow.peak : 1
                 }
               }
             }
@@ -373,12 +416,12 @@ FloatingWindow {
                     Layout.fillWidth: true
                     implicitHeight: 8
                     radius: 3
-                    color: Theme.surface
+                    color: Theme.bgAlt
                     Rectangle {
                       width: parent.width * Math.min(1, modelData.percent / 100)
                       height: parent.height
                       radius: 3
-                      color: modelData.percent >= 90 ? Theme.danger : modelData.percent >= 80 ? Theme.warning : Theme.accent
+                      color: modelData.percent >= 90 ? Theme.danger : modelData.percent >= 80 ? Theme.warning : Theme.fgMuted
                       opacity: acct.modelData.stale ? 0.4 : 1
                     }
                   }

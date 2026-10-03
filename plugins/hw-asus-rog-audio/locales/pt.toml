@@ -1,0 +1,3 @@
+"plugin.name" = "Volume dos alto-falantes em notebooks ASUS ROG"
+"plugin.description" = "O volume dos notebooks ASUS ROG feito por software (o soft mixer do WirePlumber), longe das manias do mixer de hardware do codec Realtek que deixam os alto-falantes abafados; e o Master do ALC285 sem mudo"
+"check.soft" = "O volume das placas de som é feito por software"

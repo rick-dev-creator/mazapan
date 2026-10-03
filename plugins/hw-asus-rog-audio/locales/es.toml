@@ -1,0 +1,3 @@
+"plugin.name" = "Volumen de los altavoces en portátiles ASUS ROG"
+"plugin.description" = "El volumen de los portátiles ASUS ROG por software (el soft mixer de WirePlumber), lejos de las rarezas del mezclador por hardware del códec Realtek que hacen sonar apagados los altavoces; y el Master del ALC285 sin silenciar"
+"check.soft" = "El volumen de las tarjetas de sonido va por software"

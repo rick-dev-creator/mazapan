@@ -1,0 +1,3 @@
+"plugin.name" = "Brilho da tela em ASUS com Panther Lake"
+"plugin.description" = "Um brilho de tela que muda de verdade no ASUS ExpertBook B9406 e no Zenbook UX5406AA (Intel Panther Lake), não só no máximo ou apagado: a luz de fundo do painel via DisplayPort AUX (DPCD)"
+"check.option" = "O driver xe controla a luz de fundo via DPCD"

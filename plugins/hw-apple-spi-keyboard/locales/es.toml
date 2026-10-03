@@ -1,0 +1,3 @@
+"plugin.name" = "Teclado SPI del MacBook al arrancar"
+"plugin.description" = "El teclado y el touchpad integrados del MacBook y el MacBook Pro de 2015-2017 (por SPI) funcionando desde el principio del arranque, para poder escribir la contraseña del disco"
+"check.modules" = "El kernel tiene los módulos del teclado SPI (applespi y su controlador SPI)"

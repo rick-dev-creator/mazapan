@@ -1,0 +1,3 @@
+"plugin.name" = "Cursor con el driver nouveau"
+"plugin.description" = "Dibuja el cursor por software donde una GPU NVIDIA usa el driver abierto nouveau: en muchas GPU NVIDIA antiguas nouveau no muestra el cursor por hardware, y el puntero del ratón es invisible"
+"check.cursor" = "El cursor se dibuja por software con el driver nouveau"

@@ -1,0 +1,3 @@
+"plugin.name" = "Vulkan en gráficos Intel"
+"plugin.description" = "Vulkan en gráficos Intel (el driver de Mesa): juegos, Steam y Proton, y las apps que dibujan con Vulkan, en la GPU en lugar de fallar o caer en la CPU"
+"check.icd" = "El driver de Vulkan para gráficos Intel está instalado"

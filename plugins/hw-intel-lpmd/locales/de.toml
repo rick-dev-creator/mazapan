@@ -1,0 +1,3 @@
+"plugin.name" = "Intel-Stromsparmodus"
+"plugin.description" = "Intels Low Power Mode Daemon auf Laptops mit hybridem Intel-Prozessor (Alder Lake, Raptor Lake, Meteor Lake, Lunar Lake, Panther Lake): Leichte Arbeit bleibt auf den Effizienzkernen, und der Akku hält länger"
+"check.on" = "Intels Low Power Mode Daemon startet mit dem System"

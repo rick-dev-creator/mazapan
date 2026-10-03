@@ -1,0 +1,47 @@
+[plugin]
+id = "dev-expo"
+name = "Expo, set up"
+version = "0.1.0"
+api = 1
+description = "Expo apps on Android from the first try: Android's SDK and emulator found (ANDROID_HOME, adb and the emulator on the PATH), Java 17 for Gradle, phones over USB, and a new Expo app one action away. The Mobile profile in Apps turns it on"
+categories = ["tools"]
+optional = true
+
+[packages]
+pacman = ["nodejs-lts-krypton", "npm", "jdk17-openjdk", "android-udev"]
+
+[settings]
+# Where Android's SDK is (Android Studio puts it here the first time).
+sdk = "~/Android/Sdk"
+
+[[targets]]
+template = "expo.lua.tmpl"
+output = "~/.config/hypr/mazapan/expo.lua"
+reload = "hyprctl reload >/dev/null"
+
+[[actions]]
+name = "{{ t \"act.new\" }}"
+run = "mkdir -p ~/Projects && cd ~/Projects && npx --yes create-expo-app@latest && exec $SHELL"
+terminal = true
+keywords = "{{ t \"act.new.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.studio\" }}"
+run = "flatpak run com.google.AndroidStudio"
+keywords = "{{ t \"act.studio.kw\" }}"
+
+[[checks]]
+name = "{{ t \"check.node\" }}"
+run = "node --version | grep -Eq '^v(2[0-9]|[3-9][0-9])\\.'"
+
+[[checks]]
+name = "{{ t \"check.java\" }}"
+run = "test -x /usr/lib/jvm/java-17-openjdk/bin/java"
+
+[[checks]]
+name = "{{ t \"check.sdk\" }}"
+run = "test -x \"$(eval echo {{ shq settings.sdk }})/platform-tools/adb\""
+
+[[checks]]
+name = "{{ t \"check.kvm\" }}"
+run = "test -r /dev/kvm -a -w /dev/kvm"

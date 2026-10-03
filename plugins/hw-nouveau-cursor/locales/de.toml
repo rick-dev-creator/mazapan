@@ -1,0 +1,3 @@
+"plugin.name" = "Cursor mit dem nouveau-Treiber"
+"plugin.description" = "Zeichnet den Cursor per Software, wenn eine NVIDIA-GPU den offenen Treiber nouveau nutzt: Auf vielen älteren NVIDIA-GPUs zeigt nouveau den Hardware-Cursor nicht an, und der Mauszeiger ist unsichtbar"
+"check.cursor" = "Der Cursor wird mit dem nouveau-Treiber per Software gezeichnet"

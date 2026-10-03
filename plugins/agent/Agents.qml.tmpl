@@ -32,7 +32,7 @@ BarItem {
   Glyph {
     anchors.verticalCenter: parent.verticalCenter
     text: "󰚩"
-    color: AgentsService.waiting > 0 ? Theme.warning : AgentsService.working > 0 ? Theme.accentText : Theme.fgMuted
+    color: AgentsService.waiting > 0 ? Theme.warning : AgentsService.working > 0 ? Theme.fg : Theme.fgMuted
   }
   Label {
     visible: AgentsService.waiting > 0
@@ -74,7 +74,7 @@ BarItem {
         ListRow {
           required property var modelData
           glyph: root.stateGlyph[modelData.state] || "󰚩"
-          active: modelData.state === "waiting"
+          active: false
           title: AgentsService.nameOf(modelData.agent) + " · " + AgentsService.base(modelData.project)
           detail: (root.stateText[modelData.state] || modelData.state) + " · " + AgentsService.span(AgentsService.now - modelData.since)
             + (modelData.message ? " · " + modelData.message : "")
@@ -117,12 +117,12 @@ BarItem {
               Layout.fillWidth: true
               implicitHeight: 6
               radius: 3
-              color: Theme.surface
+              color: Theme.bgAlt
               Rectangle {
                 width: parent.width * Math.min(1, modelData.percent / 100)
                 height: parent.height
                 radius: 3
-                color: modelData.percent >= 90 ? Theme.danger : modelData.percent >= {{ if settings.limit_alert > 0 }}{{ settings.limit_alert }}{{ else }}80{{ end }} ? Theme.warning : Theme.accent
+                color: modelData.percent >= 90 ? Theme.danger : modelData.percent >= {{ if settings.limit_alert > 0 }}{{ settings.limit_alert }}{{ else }}80{{ end }} ? Theme.warning : Theme.fgMuted
                 opacity: acct.modelData.stale ? 0.4 : 1
               }
             }

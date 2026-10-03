@@ -15,7 +15,7 @@ public class AppCatalogTests
         Assert.Contains(profiles, p => p.Id == "gaming");
         Assert.All(apps, a => Assert.NotEqual("", a.In("es").Description));
         // Every profile's apps are in it (Parse checks), and every app has one way in.
-        Assert.All(apps, a => Assert.Contains(a.Kind, new[] { "pacman", "flatpak", "webapp", "plugin" }));
+        Assert.All(apps, a => Assert.Contains(a.Kind, new[] { "pacman", "flatpak", "webapp", "plugin", "vendor" }));
     }
 
     [Theory]

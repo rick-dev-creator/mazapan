@@ -1,0 +1,3 @@
+"plugin.name" = "Touchpad do ASUS ROG Flow Z13 ao digitar"
+"plugin.description" = "O touchpad do teclado destacável do ASUS ROG Flow Z13 (GZ302) ignorado enquanto você digita, como um integrado: chega de toques soltos que fazem o cursor pular"
+"check.internal" = "O touchpad do teclado do Z13 conta como integrado"

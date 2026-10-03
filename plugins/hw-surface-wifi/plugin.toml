@@ -1,0 +1,18 @@
+[plugin]
+id = "hw-surface-wifi"
+name = "Surface Wi-Fi firmware"
+version = "0.1.0"
+api = 1
+description = "The firmware for the Marvell Wi-Fi and Bluetooth in Microsoft Surface devices (linux-firmware-marvell), which Arch's linux-firmware doesn't bring along"
+categories = ["hardware"]
+
+[hardware]
+vendor = ["Microsoft Corporation"]
+product = ["*Surface*"]
+
+[packages]
+pacman = ["linux-firmware-marvell"]
+
+[[checks]]
+name = "{{ t \"check.firmware\" }}"
+run = "pacman -Q linux-firmware-marvell >/dev/null 2>&1"

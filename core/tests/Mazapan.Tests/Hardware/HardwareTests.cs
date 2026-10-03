@@ -148,4 +148,20 @@ public class HardwareTests
         foreach (var id in new[] { "hw-multi-gpu-cursor", "hw-apple-fnkeys", "hw-nvidia", "hw-intel-video", "hw-synaptics-intertouch", "hw-yoga-pro7-bass" })
             Assert.Contains(id, hw);
     }
+
+    // The installer turns on this machine's hardware plugins and installs
+    // their packages from the ISO's own repository, offline: each must be in
+    // what the ISO carries, or an install on that machine stops asking for it.
+    [Fact]
+    public void WhatTheInstallerTurnsOnTheIsoCarries()
+    {
+        var carried = File.ReadAllLines(Path.Join(Repo.Root, "iso", "target-packages.txt"))
+            .Select(l => l.Split('#')[0].Trim()).Where(l => l != "").ToHashSet();
+        var (all, broken) = Plugin.Discover([Path.Join(Repo.Root, "plugins")]);
+        Assert.Empty(broken);
+        var missing = all.Where(p => p.Hardware is { } h && !h.OnlyAny && !h.Live)
+            .SelectMany(p => p.Pacman.Where(x => !carried.Contains(x)).Select(x => $"{p.Id}: {x}")).ToList();
+        Assert.Empty(missing);
+    }
 }
+

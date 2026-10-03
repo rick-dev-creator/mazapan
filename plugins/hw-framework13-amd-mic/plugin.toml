@@ -1,0 +1,25 @@
+[plugin]
+id = "hw-framework13-amd-mic"
+name = "Framework Laptop 13 (AMD) microphones"
+version = "0.1.0"
+api = 1
+description = "The built-in microphones of the Framework Laptop 13 with AMD Ryzen working: its sound card on the profile that has them (HiFi: Mic1, Mic2, Speaker)"
+categories = ["hardware"]
+
+[hardware]
+vendor = ["Framework"]
+product = ["*Laptop 13*"]
+gpu = ["Advanced Micro Devices*"]
+
+# The profile preferred by WirePlumber whenever it has none stored for the
+# card; and set now (pactl), which stores it, as Omarchy does.
+[[targets]]
+template = "mic.conf.tmpl"
+output = "~/.config/wireplumber/wireplumber.conf.d/mazapan-framework13-amd-mic.conf"
+reload = '''[ -e ~/.config/wireplumber/wireplumber.conf.d/mazapan-framework13-amd-mic.conf ] || exit 0; c=$(pactl list cards 2>/dev/null | grep -B20 "Family 17h/19h" | grep "Name: " | awk '{ print $2 }'); [ -z "$c" ] || pactl set-card-profile "$c" "HiFi (Mic1, Mic2, Speaker)" 2>/dev/null; true'''
+
+# The analog card (none found: nothing to check) is on that profile.
+[[checks]]
+name = "{{ t \"check.profile\" }}"
+run = '''p=$(pactl list cards 2>/dev/null | awk '/^Card #/ { f = 0 } /Family 17h\/19h/ { f = 1 } f && /Active Profile:/ { sub(/.*Active Profile: */, ""); print; exit }'); [ -z "$p" ] || [ "$p" = "HiFi (Mic1, Mic2, Speaker)" ]'''
+session = true

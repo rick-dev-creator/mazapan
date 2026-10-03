@@ -1,0 +1,3 @@
+"plugin.name" = "Vulkan auf AMD-Grafik"
+"plugin.description" = "Vulkan auf AMD-Radeon-Grafik (Mesas Treiber RADV): Spiele, Steam und Proton und Apps, die mit Vulkan zeichnen, auf der GPU, statt zu scheitern oder auf die CPU auszuweichen"
+"check.icd" = "Der Vulkan-Treiber für AMD-Grafik ist installiert"

@@ -1,0 +1,28 @@
+[plugin]
+id = "hw-apple-spi-keyboard"
+name = "MacBook SPI keyboard at boot"
+version = "0.1.0"
+api = 1
+description = "The built-in keyboard and touchpad of the 2015-2017 MacBook and MacBook Pro (on SPI) working from the start of boot, so the disk password can be typed"
+categories = ["hardware"]
+
+[hardware]
+# The models whose keyboard and touchpad hang off SPI (the applespi driver).
+product = ["MacBook8,1", "MacBook9,1", "MacBook10,1", "MacBook12,1", "MacBookPro13,[123]", "MacBookPro14,[123]"]
+
+# applespi and the SPI controller under it in the initramfs: otherwise the
+# keyboard only comes up once the system has started, after the disk
+# password was asked for. The kernel's own applespi (Omarchy also installs
+# an out-of-tree driver from the AUR, for the Touch Bar: not here).
+[[targets]]
+template = "modules.conf.tmpl"
+output = "/etc/mkinitcpio.conf.d/mazapan-apple-spi-keyboard.conf"
+system = true
+reboot = true
+reload = "mkinitcpio -P"
+
+# mkinitcpio fails on a module the kernel doesn't have: looked for first.
+[[checks]]
+name = "{{ t \"check.modules\" }}"
+run = "for m in applespi intel_lpss_pci spi_pxa2xx_platform spi_pxa2xx_pci; do modinfo -n $m >/dev/null 2>&1 || { echo \"no $m in this kernel\"; exit 1; }; done"
+before_system = true

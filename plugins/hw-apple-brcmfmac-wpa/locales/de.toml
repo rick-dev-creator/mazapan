@@ -1,0 +1,3 @@
+"plugin.name" = "WLAN-Passwörter auf Macs mit Broadcom-WLAN"
+"plugin.description" = "Macs, deren Broadcom-WLAN der Treiber brcmfmac betreibt (ab 2015, auch T2-Macs), verbinden sich mit WPA2/WPA3-Netzen, die sonst das richtige Passwort ablehnen: den Handshake übernimmt wpa_supplicant, nicht die Firmware der Karte"
+"check.option" = "brcmfmac überlässt den WPA-Handshake wpa_supplicant"

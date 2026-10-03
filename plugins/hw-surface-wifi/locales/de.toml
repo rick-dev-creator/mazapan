@@ -1,0 +1,3 @@
+"plugin.name" = "Surface-WLAN-Firmware"
+"plugin.description" = "Die Firmware für das Marvell-WLAN und -Bluetooth in Microsoft-Surface-Geräten (linux-firmware-marvell), die das linux-firmware von Arch nicht mitbringt"
+"check.firmware" = "Die WLAN- und Bluetooth-Firmware von Marvell ist installiert"

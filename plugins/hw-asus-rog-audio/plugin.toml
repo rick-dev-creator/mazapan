@@ -1,0 +1,32 @@
+[plugin]
+id = "hw-asus-rog-audio"
+name = "ASUS ROG laptop speaker volume"
+version = "0.1.0"
+api = 1
+description = "Volume on ASUS ROG laptops set in software (WirePlumber's soft mixer), away from the Realtek codec's hardware mixer quirks that muffle the speakers; and the ALC285's Master unmuted"
+categories = ["hardware"]
+
+[hardware]
+# ROG models carry it in their name (Omarchy looks at the product family,
+# which isn't read here).
+vendor = ["ASUSTeK COMPUTER INC."]
+product = ["*ROG*"]
+
+# amixer, to unmute the ALC285's Master once (alsa-utils also keeps the
+# mixer's state across reboots).
+[packages]
+pacman = ["alsa-utils"]
+
+# WirePlumber's soft mixer for every ALSA card. The stored routes (with
+# volumes for the hardware mixer) dropped, so they're made anew either way;
+# the ALC285's Master, often muted by default and left alone by the soft
+# mixer, unmuted at 80%.
+[[targets]]
+template = "soft-mixer.conf.tmpl"
+output = "~/.config/wireplumber/wireplumber.conf.d/mazapan-asus-rog-soft-mixer.conf"
+reload = '''rm -rf ~/.local/state/wireplumber/default-routes; if [ -e ~/.config/wireplumber/wireplumber.conf.d/mazapan-asus-rog-soft-mixer.conf ] && command -v amixer >/dev/null; then for c in /proc/asound/card*/codec*; do grep -q ALC285 "$c" 2>/dev/null || continue; n=${c#/proc/asound/card}; amixer -c "${n%%/*}" set Master 80% unmute >/dev/null 2>&1; break; done; fi; systemctl --user restart wireplumber; true'''
+
+[[checks]]
+name = "{{ t \"check.soft\" }}"
+run = '''[ -z "$(ls -d /proc/asound/card[0-9]* 2>/dev/null)" ] || pw-dump 2>/dev/null | grep -q '"api.alsa.soft-mixer": true' '''
+session = true

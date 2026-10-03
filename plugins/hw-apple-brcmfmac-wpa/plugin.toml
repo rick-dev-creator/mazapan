@@ -1,0 +1,31 @@
+[plugin]
+id = "hw-apple-brcmfmac-wpa"
+name = "Wi-Fi passwords on Macs with Broadcom Wi-Fi"
+version = "0.1.0"
+api = 1
+description = "Macs whose Broadcom Wi-Fi runs on the brcmfmac driver (2015 on, T2 Macs too) join WPA2/WPA3 networks that otherwise turn the right password down: the handshake done by wpa_supplicant, not by the card's firmware"
+categories = ["hardware"]
+
+[hardware]
+# brcmfmac's own ids (brcm_hw_ids.h): BCM43602 and its single-band variants
+# (2015-2017), BCM4350, BCM4355 and BCM4364 (2018-2019, the T2-less iMac19,x
+# too), BCM4377/4378/4387 (the T2 era on); and the T2 chip, which every T2
+# Mac carries. The BCM4360 of 2013-2015 is left out: the wl driver runs it,
+# which never reads a brcmfmac option.
+vendor = ["Apple*"]
+pci = ["14e4:43ba", "14e4:43bb", "14e4:43bc", "14e4:43a3", "14e4:43dc", "14e4:4464", "14e4:4488", "14e4:4425", "14e4:4433", "106b:1801", "106b:1802"]
+
+# The firmware's supplicant (FWSUP, 0x2000) and authenticator (FWAUTH,
+# 0x80000) off: against an access point in WPA2/WPA3 transition mode the
+# four-way handshake they run never completes, and NetworkManager calls the
+# password wrong. The driver reads it when it loads: Wi-Fi isn't dropped
+# while applying, it takes effect after a reboot.
+[[targets]]
+template = "brcmfmac.conf.tmpl"
+output = "/etc/modprobe.d/mazapan-apple-brcmfmac.conf"
+system = true
+reboot = true
+
+[[checks]]
+name = "{{ t \"check.option\" }}"
+run = "modprobe -c | grep -q '^options brcmfmac .*feature_disable=0x82000'"

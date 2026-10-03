@@ -1,0 +1,21 @@
+[plugin]
+id = "hw-asus-rog"
+name = "ASUS ROG laptop controls"
+version = "0.1.0"
+api = 1
+description = "asusctl on ASUS ROG laptops: performance profiles, fan curves, a battery charge limit and the keyboard's lighting"
+categories = ["hardware"]
+
+[hardware]
+# ROG models carry it in their name (Omarchy looks at the product family,
+# which isn't read here: a ROG whose name lacks it isn't offered this).
+vendor = ["ASUSTeK COMPUTER INC."]
+product = ["*ROG*"]
+
+[packages]
+pacman = ["asusctl"]
+
+# asusd is started by its own udev rule on ASUS machines: from the next boot.
+[[checks]]
+name = "{{ t \"check.daemon\" }}"
+run = "systemctl is-active -q asusd.service || { echo 'asusd is not running (it starts with the next boot)'; exit 1; }"

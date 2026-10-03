@@ -1,0 +1,3 @@
+"plugin.name" = "Wi-Fi 6 en las tarjetas Intel BE200 y BE211"
+"plugin.description" = "Apaga el Wi-Fi 7 en las tarjetas Intel BE200 y BE211 (Dell XPS 14 y 16 con Panther Lake, y otros): con él, el receptor roto del driver hace que el punto de acceso baje a su velocidad mínima y el Wi-Fi no sirve; con Wi-Fi 6 va a toda velocidad"
+"check.option" = "El Wi-Fi 7 está apagado en el driver iwlwifi"

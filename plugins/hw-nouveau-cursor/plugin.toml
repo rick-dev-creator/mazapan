@@ -1,0 +1,23 @@
+[plugin]
+id = "hw-nouveau-cursor"
+name = "Cursor on the nouveau driver"
+version = "0.1.0"
+api = 1
+description = "Draws the cursor in software where an NVIDIA GPU runs the open nouveau driver: on many older NVIDIA GPUs nouveau doesn't show the hardware cursor, and the mouse pointer is invisible"
+categories = ["hardware"]
+requires = ["hypr-base"]
+
+[hardware]
+modules = ["nouveau"]
+
+[[targets]]
+template = "cursor.lua.tmpl"
+output = "~/.config/hypr/mazapan/hw-nouveau-cursor.lua"
+reload = "hyprctl reload >/dev/null"
+
+# Where nouveau drives a GPU and NVIDIA's own driver isn't being set up
+# (hw-nvidia), Hyprland draws the cursor itself.
+[[checks]]
+name = "{{ t \"check.cursor\" }}"
+run = "[ -z \"$(ls /sys/bus/pci/drivers/nouveau 2>/dev/null | grep :)\" ] || [ -e /etc/modprobe.d/mazapan-nvidia.conf ] || hyprctl getoption cursor:no_hardware_cursors | grep -qx 'int: 1'"
+session = true
