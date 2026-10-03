@@ -37,3 +37,7 @@
 "kind.install" = "instalar"
 "windows" = "Ventanas abiertas"
 "confirm" = "%1: ↵ otra vez para confirmar"
+"ask" = "Preguntar a un agente: %1"
+"ask.empty" = "Preguntar a un agente: escribe una pregunta tras el ?"
+"kind.ask" = "agente"
+"hints.ask" = "? preguntar a un agente"

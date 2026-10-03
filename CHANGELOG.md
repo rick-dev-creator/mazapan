@@ -6,6 +6,10 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- `? question` in the palette: a coding agent answers in a card (Claude
+  with the account that has room and a look at this desktop's state, never
+  changing it), to copy or continue in a terminal.
+
 - Share: what you copied, or files from Files (right click, Scripts,
   Share), to a device nearby with LocalSend or to one of yours with
   Tailscale. Tailscale from Apps comes ready: no sudo, sign in from the

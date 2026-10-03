@@ -21,6 +21,7 @@ public static partial class Program
         var sub = args.Length > 0 && !args[0].StartsWith('-') ? args[0] : "list";
         var rest = args.Length > 0 && !args[0].StartsWith('-') ? args[1..] : args;
         if (sub == "run") return AgentsRun(rest);
+        if (sub == "ask") return AgentsAsk(rest);
         if (sub == "event") return AgentsEvent(rest);
         if (sub == "keys") return AgentsKeys(rest);
         if (sub == "otel") return AgentsOtel(rest);
@@ -293,31 +294,146 @@ public static partial class Program
         if (agent.Binary == "") throw new MazapanException($"{agent.Name} isn't installed");
         var psi = new ProcessStartInfo(agent.Binary) { UseShellExecute = false };
         foreach (var a in args[1..]) psi.ArgumentList.Add(a);
-        if (agent.Id == "claude" && agent.Accounts.Count > 1)
-        {
-            var limits = ClaudeLimits(agents);
-            var pick = AccountLimits.Pick(limits);
-            if (pick == null)
-            {
-                var next = limits.SelectMany(l => l.Windows.Where(w => w.Percent >= 95 && w.ResetsAt != null).Select(w => (l, w.ResetsAt!.Value)))
-                    .OrderBy(x => x.Value).FirstOrDefault();
-                throw new MazapanException("every Claude account is at its limit" + (next.l != null ? $"; {next.l.Account.Label} is back {next.Value.ToLocalTime():ddd HH:mm}" : ""));
-            }
-            var home = Environment.GetEnvironmentVariable("HOME") ?? "";
-            // ~/.claude is Claude's own default: its profile is ~/.claude.json, so
-            // it's left unset for it.
-            if (pick.Account.ConfigDir.TrimEnd('/') != Paths.Join(home, ".claude")) psi.Environment["CLAUDE_CONFIG_DIR"] = pick.Account.ConfigDir;
-            else psi.Environment.Remove("CLAUDE_CONFIG_DIR");
-            var skipped = limits.TakeWhile(l => l != pick).Where(l => !AccountLimits.HasRoom(l)).ToList();
-            Console.Error.WriteLine($"mazapan: {agent.Name} as {pick.Account.Label}" +
-                (skipped.Count > 0 ? $" ({string.Join(", ", skipped.Select(s => s.Account.Label))} at its limit)" : ""));
-        }
+        if (agent.Id == "claude" && agent.Accounts.Count > 1) UseClaudeAccount(agents, agent, psi, quiet: false);
         // The API keys in the keyring it can take (not for Claude Code and Codex: they sign in).
         foreach (var (k, v) in Keys.Environment(agent.Id)) psi.Environment[k] = v;
         using var p = Process.Start(psi)!;
         p.WaitForExit();
         return p.ExitCode;
     }
+
+    /// <summary>
+    /// Claude with the first account that has room: its configuration
+    /// directory in the environment (none for ~/.claude, Claude's own
+    /// default). Says which, unless quiet. Every one at its limit: said, and
+    /// when the first comes back.
+    /// </summary>
+    static Account UseClaudeAccount(List<Agent> agents, Agent agent, ProcessStartInfo psi, bool quiet)
+    {
+        var limits = ClaudeLimits(agents);
+        var pick = AccountLimits.Pick(limits);
+        if (pick == null)
+        {
+            var next = limits.SelectMany(l => l.Windows.Where(w => w.Percent >= 95 && w.ResetsAt != null).Select(w => (l, w.ResetsAt!.Value)))
+                .OrderBy(x => x.Value).FirstOrDefault();
+            throw new MazapanException("every Claude account is at its limit" + (next.l != null ? $"; {next.l.Account.Label} is back {next.Value.ToLocalTime():ddd HH:mm}" : ""));
+        }
+        var home = Environment.GetEnvironmentVariable("HOME") ?? "";
+        if (pick.Account.ConfigDir.TrimEnd('/') != Paths.Join(home, ".claude")) psi.Environment["CLAUDE_CONFIG_DIR"] = pick.Account.ConfigDir;
+        else psi.Environment.Remove("CLAUDE_CONFIG_DIR");
+        var skipped = limits.TakeWhile(l => l != pick).Where(l => !AccountLimits.HasRoom(l)).ToList();
+        if (!quiet)
+            Console.Error.WriteLine($"mazapan: {agent.Name} as {pick.Account.Label}" +
+                (skipped.Count > 0 ? $" ({string.Join(", ", skipped.Select(s => s.Account.Label))} at its limit)" : ""));
+        return pick.Account;
+    }
+
+    // What an agent asked from the palette knows about where it is.
+    const string AskContext = "You are answering a question typed into the command palette of Mazapán, an Arch Linux desktop (Hyprland, Quickshell). "
+        + "Answer in the language of the question, briefly: a few sentences or a short list, Markdown. "
+        + "When the question is about this computer, use Mazapán's MCP tools (status, doctor, plugins, themes, history, agents_usage…) to look at its real state. "
+        + "Change nothing: when something should change, give the exact command (mazapan apply --set …, mazapan plugins enable …) for the person to run.";
+
+    // Mazapán's tools that only read (and preview): what the answer may use without asking.
+    static readonly string[] AskTools = ["status", "doctor", "themes", "plugins", "coverage", "history", "agents_usage", "agents_limits", "agents_spend", "preview_change"];
+
+    /// <summary>
+    /// mazapan agents ask [--agent ID] [--json] QUESTION: one question to a
+    /// coding agent without its interface (the palette's "?"), answered in
+    /// text. Claude with the account that has room and Mazapán's read-only
+    /// tools; opencode, Codex, Gemini CLI and pi each in their own
+    /// non-interactive way. --json gives the answer, and for Claude the
+    /// command that continues the conversation in a terminal.
+    /// </summary>
+    static int AgentsAsk(string[] args)
+    {
+        string? want = null;
+        var json = false;
+        var words = new List<string>();
+        for (var i = 0; i < args.Length; i++)
+        {
+            if (args[i] == "--json") json = true;
+            else if (args[i] == "--agent" && i + 1 < args.Length) want = args[++i];
+            else if (args[i] == "--") { words.AddRange(args[(i + 1)..]); break; }
+            else words.Add(args[i]);
+        }
+        var question = string.Join(' ', words).Trim();
+        if (question == "") throw new MazapanException("usage: mazapan agents ask [--agent ID] [--json] QUESTION");
+        var agents = Discovery.Find();
+        string[] order = ["claude", "opencode", "codex", "gemini", "pi"];
+        var agent = want != null
+            ? agents.FirstOrDefault(a => a.Id == want && a.Binary != "") ?? throw new MazapanException($"{want} isn't installed (mazapan agents)")
+            : order.Select(id => agents.FirstOrDefault(a => a.Id == id && a.Binary != "")).FirstOrDefault(a => a != null)
+              ?? throw new MazapanException("no coding agent here to ask (Claude Code, opencode, Codex, Gemini CLI or pi)");
+        var home = Environment.GetEnvironmentVariable("HOME") ?? "/";
+        var psi = new ProcessStartInfo(agent.Binary) { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true, RedirectStandardInput = true, WorkingDirectory = home };
+        string[] argv = agent.Id switch
+        {
+            "claude" => ["-p", question, "--output-format", "json", "--append-system-prompt", AskContext,
+                "--mcp-config", "{\"mcpServers\":{\"mazapan\":{\"command\":\"/usr/bin/mazapan\",\"args\":[\"mcp\"]}}}", "--strict-mcp-config",
+                "--allowedTools", string.Join(",", AskTools.Select(t => "mcp__mazapan__" + t))],
+            "opencode" => ["run", question],
+            "codex" => ["exec", "--skip-git-repo-check", "--sandbox", "read-only", question],
+            "gemini" => ["-p", question],
+            _ => ["-p", question],
+        };
+        foreach (var a in argv) psi.ArgumentList.Add(a);
+        Account? account = null;
+        if (agent.Id == "claude" && agent.Accounts.Count > 1) account = UseClaudeAccount(agents, agent, psi, quiet: true);
+        foreach (var (k, v) in Keys.Environment(agent.Id)) psi.Environment[k] = v;
+
+        string answer = "", session = "", problem = "";
+        using (var p = Process.Start(psi)!)
+        {
+            p.StandardInput.Close();
+            var out_ = p.StandardOutput.ReadToEndAsync();
+            var err = p.StandardError.ReadToEndAsync();
+            if (!p.WaitForExit(300_000))
+            {
+                try { p.Kill(true); } catch (InvalidOperationException) { }
+                problem = "it took more than five minutes";
+            }
+            else
+            {
+                var text = out_.GetAwaiter().GetResult();
+                if (agent.Id == "claude")
+                {
+                    try
+                    {
+                        using var doc = System.Text.Json.JsonDocument.Parse(text);
+                        answer = Discovery.Str(doc.RootElement, "result");
+                        session = Discovery.Str(doc.RootElement, "session_id");
+                        if (doc.RootElement.TryGetProperty("is_error", out var e) && e.ValueKind == System.Text.Json.JsonValueKind.True) { problem = answer; answer = ""; }
+                    }
+                    catch (System.Text.Json.JsonException) { answer = text.Trim(); }
+                }
+                else answer = text.Trim();
+                if (answer == "" && problem == "") problem = err.GetAwaiter().GetResult().Trim() is { Length: > 0 } e2 ? e2.Split('\n')[^1] : $"{agent.Name} gave no answer";
+            }
+        }
+        // Claude's conversation, again in a terminal: its account's directory, its session.
+        List<string>? resume = null;
+        if (agent.Id == "claude" && session != "" && SafeSession(session))
+        {
+            resume = [];
+            if (psi.Environment.TryGetValue("CLAUDE_CONFIG_DIR", out var dir) && dir is { Length: > 0 }) resume.AddRange(["env", "CLAUDE_CONFIG_DIR=" + dir]);
+            resume.AddRange([agent.Binary, "--resume", session]);
+        }
+        if (json)
+        {
+            Console.WriteLine(GoJson.Marshal(new Fields
+            {
+                { "version", AgentsVersion }, { "agent", agent.Id }, { "name", agent.Name }, { "account", account?.Label ?? "" },
+                { "answer", answer }, { "session", session }, { "resume", resume }, { "cwd", home }, { "problem", problem },
+            }));
+            return problem == "" ? 0 : 1;
+        }
+        if (problem != "") throw new MazapanException($"{agent.Name}: {problem}");
+        Console.WriteLine(answer);
+        return 0;
+    }
+
+    static bool SafeSession(string s) => s.Length is > 0 and < 100 && s.All(c => char.IsAsciiLetterOrDigit(c) || c == '-');
 
     /// <summary>
     /// mazapan agents keys [set|remove PROVIDER]: API keys in the keyring.

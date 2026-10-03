@@ -44,6 +44,13 @@ it (`otel`); telemetry of your own already there is left alone.
 Workspaces plugin): amber while it waits for you, the text's color while it
 works, green when it's done.
 
+**A question from the palette**: type `?` and the question (`? why is
+my battery draining`). The first coding agent here answers it in a card,
+without opening it: Claude Code with the account that has room and
+Mazapán's read-only tools (it can look at this desktop's state, never
+change it), else opencode, Codex, Gemini CLI or pi. The answer can be
+copied, or Claude's conversation continued in a terminal.
+
 **Ask an agent about this desktop**, from the palette, opens your agent
 (`command`; Claude with the first account that has room) with mazapan's
 report: state, failing checks, crashes, logged errors. "Copy a report"

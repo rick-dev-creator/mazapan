@@ -37,3 +37,7 @@
 "kind.install" = "installieren"
 "windows" = "Offene Fenster"
 "confirm" = "%1: zum Bestätigen noch einmal ↵"
+"ask" = "Einen Agenten fragen: %1"
+"ask.empty" = "Einen Agenten fragen: schreib eine Frage nach dem ?"
+"kind.ask" = "Agent"
+"hints.ask" = "? einen Agenten fragen"

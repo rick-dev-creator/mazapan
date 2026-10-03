@@ -16,7 +16,8 @@ the like), and the open windows below. The arrow keys move across them.
 Type to find apps, windows (by title, app or workspace), actions and
 keybindings. Letters needn't be together: "vsc" finds Visual Studio Code.
 Apps that aren't installed yet are found too, as "Install …", which opens
-them in the Apps panel. Start with `> ` to find only actions and keys.
+them in the Apps panel. Start with `> ` to find only actions and keys; with `? ` to ask a coding
+agent (with the Agents plugin: the answer comes in a card).
 
 ↑ ↓ (or Tab) pick, ↵ runs, Ctrl+C copies the command, Esc closes. A
 keybinding that's only a key says which keys to press.

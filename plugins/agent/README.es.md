@@ -45,6 +45,14 @@ telemetría, se respeta.
 plugin de Workspaces): ámbar mientras te espera, el color del texto
 mientras trabaja, verde cuando termina.
 
+**Una pregunta desde la paleta**: escribe `?` y la pregunta (`? por qué
+se gasta tanto la batería`). El primer agente que haya la responde en una
+tarjeta, sin abrirlo: Claude Code con la cuenta que tenga margen y las
+herramientas de solo lectura de Mazapán (puede mirar el estado de este
+escritorio, nunca cambiarlo); si no, opencode, Codex, Gemini CLI o pi. La
+respuesta se puede copiar, o seguir la conversación de Claude en una
+terminal.
+
 **Preguntar a un agente sobre este escritorio**, desde la paleta, abre tu
 agente (`command`; Claude con la primera cuenta que tenga margen) con el
 informe de mazapan: estado, comprobaciones que fallan, cierres inesperados,

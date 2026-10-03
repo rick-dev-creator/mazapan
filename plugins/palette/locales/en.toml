@@ -24,3 +24,7 @@
 "kind.install" = "install"
 "windows" = "Open windows"
 "confirm" = "%1: ↵ again to confirm"
+"ask" = "Ask an agent: %1"
+"ask.empty" = "Ask an agent: type a question after ?"
+"kind.ask" = "agent"
+"hints.ask" = "? ask an agent"

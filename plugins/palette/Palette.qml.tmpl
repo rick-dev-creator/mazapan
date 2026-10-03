@@ -235,8 +235,19 @@ Item {
     return scored.filter(s => s[0] >= floor).map(s => s[1])
   }
 
+  // "? question": asked to a coding agent, answered in a card (the agent plugin's).
+  readonly property bool canAsk: {{ if (under "~/.config/quickshell/mazapan/panels/ask.qml").size > 0 }}true{{ else }}false{{ end }}
+  function askItem(q) {
+    return {
+      kind: "ask", glyph: "󰚩", title: q === "" ? {{ tq "ask.empty" }} : {{ tq "ask" }}.arg(q), detail: "", command: "", searchable: false, key: "", words: "",
+      // The question goes as a file of the person's (an argument's brackets are qs ipc's).
+      argv: q === "" ? null : ["sh", "-c", 'd="${XDG_RUNTIME_DIR:-/tmp}/mazapan-ask"; mkdir -p "$d" && chmod 700 "$d" && f="$d/q-$$.txt" && printf "%s" "$1" > "$f" && exec qs ipc -c mazapan call mazapan open ask "$f"', "ask", q],
+    }
+  }
+
   readonly property var results: {
     if (!open) return []
+    if (canAsk && query.startsWith("?")) return [askItem(query.slice(1).trim())]
     const onlyActions = query.startsWith(">")
     // Nothing typed: the first screen, in the order it's shown.
     if (home) return tiles.concat(systemItems, homeWindows)
@@ -258,6 +269,7 @@ Item {
     const c = results[i]
     if (!c) return
     if (!c.argv) {
+      if (c.kind === "ask") return
       message = {{ tq "key_only" }}.arg(root.pretty(c.key))
       return
     }
@@ -632,6 +644,7 @@ Item {
                   case "app": return {{ tq "kind.app" }}
                   case "key": return {{ tq "kind.key" }}
                   case "install": return {{ tq "kind.install" }}
+                  case "ask": return {{ tq "kind.ask" }}
                   }
                   return {{ tq "kind.action" }}
                 }
@@ -680,7 +693,7 @@ Item {
             // On a tile, its command: learned as it's picked.
             text: root.message !== "" ? root.message
               : root.home && root.showCommands && root.current < root.homeOffset && root.results[root.current] ? "$ " + root.results[root.current].command
-              : {{ tq "hints" }}
+              : root.canAsk ? {{ tq "hints" }} + "   " + {{ tq "hints.ask" }} : {{ tq "hints" }}
             color: root.message !== "" ? Theme.accentText : Theme.fgSubtle
           }
           Caption { text: root.results.length }

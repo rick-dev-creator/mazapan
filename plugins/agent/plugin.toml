@@ -1,7 +1,7 @@
 [plugin]
 id = "agent"
 name = "Agents"
-version = "0.3.0"
+version = "0.4.0"
 api = 1
 description = "Your coding agents: in the bar, which is working and which waits for you (a click goes to its window), each account's limits and when they reset, and what they've used today, for Claude Code, opencode, pi, Codex… every account found by itself; and from the palette, ask one about this desktop with mazapan's report"
 categories = ["agent", "tools", "bar"]
@@ -52,6 +52,12 @@ reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 # The dashboard: its own Quickshell process, beside the shell's files (the
 # same theme and kit), opened by its launcher.
+# The palette's "? question": answered here.
+[[targets]]
+template = "Ask.qml.tmpl"
+output = "~/.config/quickshell/mazapan/panels/ask.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
 [[targets]]
 template = "Dashboard.qml.tmpl"
 output = "~/.config/quickshell/mazapan/agents-dashboard.qml"
