@@ -43,6 +43,8 @@ public static class Snapshots
         public DateTimeOffset Time;
         /// <summary>What it did, for listing: "theme gruvbox", "bar-clock.font_size".</summary>
         public string What = "";
+        /// <summary>Who did it: an agent's name (through the MCP server), "" for the person.</summary>
+        public string By = "";
         public List<Entry> Files = [];
         /// <summary>config.toml before and as the apply left it (hashes; "" when there was none).</summary>
         public string ConfigBefore = "", ConfigAfter = "";
@@ -61,7 +63,7 @@ public static class Snapshots
     /// (config.toml changes even though no file does). Call it holding the
     /// lock (Lock.Take).
     /// </summary>
-    public static Snapshot? Begin(List<Change> changes, List<string> orphans, bool adopt, string configPath, string what, bool configOnly = false)
+    public static Snapshot? Begin(List<Change> changes, List<string> orphans, bool adopt, string configPath, string what, bool configOnly = false, string by = "")
     {
         Recover();
         var touched = changes
@@ -72,7 +74,7 @@ public static class Snapshots
         var stamp = DateTime.UtcNow.ToString("yyyyMMdd-HHmmss-fff", CultureInfo.InvariantCulture);
         var id = stamp;
         for (var n = 2; Directory.Exists(Paths.Join(Root(), id)); n++) id = stamp + "-" + n;
-        var s = new Snapshot { ID = id, Time = DateTimeOffset.Now, What = what, Pending = true, ConfigBefore = SumOf(configPath) };
+        var s = new Snapshot { ID = id, Time = DateTimeOffset.Now, What = what, By = by, Pending = true, ConfigBefore = SumOf(configPath) };
         var dir = s.Dir();
         try
         {
@@ -164,6 +166,7 @@ public static class Snapshots
             { "id", s.ID },
             { "time", s.Time.ToString("o", CultureInfo.InvariantCulture) },
             { "what", s.What },
+            { "by", s.By },
             { "pending", s.Pending },
             {
                 "files", s.Files.Select(e => new Fields
@@ -205,6 +208,7 @@ public static class Snapshots
                     ID = Str(r, "id"),
                     Time = DateTimeOffset.Parse(Str(r, "time"), CultureInfo.InvariantCulture),
                     What = Str(r, "what"),
+                    By = Str(r, "by"),
                     Pending = r.TryGetProperty("pending", out var p) && p.ValueKind == JsonValueKind.True,
                     ConfigBefore = Str(r, "config_before"),
                     ConfigAfter = Str(r, "config_after"),

@@ -60,6 +60,14 @@ Ask an agent) abren la misma tarjeta, para escribir la pregunta. Un texto
 corto va dentro de la pregunta; una imagen u otro archivo, por su ruta,
 que Claude puede leer (y nada más).
 
+**Los cambios de un agente, tú los permites** (`approve_changes`):
+cuando un agente cambia este escritorio por el servidor MCP de mazapan (un
+tema, un ajuste, un plugin), antes aparece una tarjeta con quién lo pide y
+el diff exacto de cada archivo; no se escribe nada hasta que pulsas
+Permitir (sin respuesta en dos minutos, es que no). El Historial marca
+cada cambio suyo con el nombre del agente, y «Deshacer todos los de ese
+día» los revierte juntos.
+
 **Preguntar a un agente sobre este escritorio**, desde la paleta, abre tu
 agente (`command`; Claude con la primera cuenta que tenga margen) con el
 informe de mazapan: estado, comprobaciones que fallan, cierres inesperados,

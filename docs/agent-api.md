@@ -29,6 +29,7 @@ the CLI does, and nothing else:
 | `undo`           | put back what the last apply changed; with `id`, only if that one is still the last | yes |
 | `agents_usage`   | what every coding agent here used, by day, account, provider, model and project; cost reported and at API prices | no |
 | `agents_limits`  | each Claude account's windows (5-hour, weekly, per model): used and when each resets | no |
+| (approval)       | with the agent plugin's card, `apply_change` waits for the person: who asks (the client's name from `initialize`), what, and the exact diff; Allow writes it, anything else (Don't allow, two minutes) refuses with "the person didn't allow it"; the change is marked with the agent in the timeline (`by`) | — |
 | `agents_spend`   | what the API providers report was spent (OpenRouter's key; Anthropic's and OpenAI's organization, by day), a limit and what's left | no |
 
 A change is `{ "theme": "paper", "accent": "#4fa35f", "set": {"bar-clock.font_size": 11},

@@ -132,6 +132,8 @@ public static partial class Program
                 { "kind", "apply" },
                 { "time", JsTime(s.Time) },
                 { "what", s.What },
+                // An agent's (through the MCP server), by its name; "" the person's.
+                { "by", s.By },
                 { "title", list.Count > 0 ? string.Join("; ", list.Select(f => f["text"]))
                     : changes == null ? "an earlier change (what it was isn't kept)"
                     : "files of " + string.Join(", ", byPlugin.Select(g => (string)g["plugin_name"]! is { Length: > 0 } n ? n : "others")) },
@@ -345,13 +347,35 @@ public static partial class Program
 
     static int CmdTimelineUndo(string[] args)
     {
-        // -y before or after the ID.
+        // -y before or after the IDs.
         args = [.. args.Where(a => a.StartsWith('-')), .. args.Where(a => !a.StartsWith('-'))];
         var fs = new Flags("timeline undo")
             .Bool("y", "don't ask")
             .Parse(args);
-        if (fs.Rest.Count != 1) throw new MazapanException("usage: mazapan timeline undo ID [-y]");
-        var id = fs.Rest[0];
+        if (fs.Rest.Count == 0) throw new MazapanException("usage: mazapan timeline undo ID… [-y]");
+        if (fs.Rest.Count == 1) return UndoOne(fs.Rest[0], fs.IsSet("y"));
+        // Several (an agent's changes at once): newest first, each on what the
+        // one after it left; one that can't is said, the rest go on.
+        if (!fs.IsSet("y")) throw new MazapanException("several at once: with -y (mazapan timeline lists them)");
+        var order = Snapshots.List().Select(s => s.ID).ToList();
+        var failed = 0;
+        foreach (var id in fs.Rest.Distinct().OrderBy(id => order.IndexOf(id) is var i && i < 0 ? int.MaxValue : i))
+        {
+            try
+            {
+                if (UndoOne(id, true) != 0) failed++;
+            }
+            catch (MazapanException e)
+            {
+                Console.Error.WriteLine($"mazapan: {id}: {e.Message}");
+                failed++;
+            }
+        }
+        return failed == 0 ? 0 : 1;
+    }
+
+    static int UndoOne(string id, bool yes)
+    {
         var snaps = Snapshots.List();
         var at = snaps.FindIndex(s => s.ID == id);
         if (at < 0) throw new MazapanException($"no apply {id} (mazapan timeline)");
@@ -363,7 +387,7 @@ public static partial class Program
         {
             if (at != 0) throw new MazapanException($"{id} ({s.What}) changed files only, and applies came after it: only the last one's files can be put back (mazapan undo)");
             var undoArgs = new List<string> { "--id=" + id };
-            if (fs.IsSet("y")) undoArgs.Add("-y");
+            if (yes) undoArgs.Add("-y");
             return CmdUndo([.. undoArgs]);
         }
 
@@ -412,7 +436,7 @@ public static partial class Program
         foreach (var a in apply) Console.WriteLine($"  {a}");
         foreach (var l in left) Console.WriteLine($"  {Style.Amber}{l}{Style.Reset}");
         if (apply.Count == 0) throw new MazapanException("nothing of it is still as it left it: nothing to undo");
-        if (!fs.IsSet("y"))
+        if (!yes)
         {
             if (!IsTerminal(0)) throw new MazapanException("no terminal to ask on: undo with -y");
             if (!Confirm("Put these back as they were?")) return 0;

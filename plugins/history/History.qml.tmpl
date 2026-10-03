@@ -111,8 +111,9 @@ Item {
     return c.kind
   }
 
-  // An entry in words: its changes, or whose files, or the update.
-  function title(e) {
+  // An entry in words: its changes, or whose files, or the update; an agent's, marked.
+  function title(e) { return (e.by ? "󰚩 " : "") + title_(e) }
+  function title_(e) {
     if (e.kind === "update") return {{ tq "update" }}.arg(e.packages_changed)
     if (e.kind === "snapshot") return {{ tq "snapshot" }}.arg(e.what)
     if (e.kind === "apps") return (e.action === "install" ? {{ tq "apps_installed" }} : {{ tq "apps_removed" }}).arg(e.names.join(", "))
@@ -172,6 +173,25 @@ Item {
       + 'else hyprctl reload >/dev/null; qs ipc -c mazapan call mazapan reload >/dev/null; sleep 2; '
       + 'notify-send -a "$3" -u critical -i dialog-warning "$2" "$(grep "^mazapan:" ~/.local/state/mazapan/undo.log | tail -n 1 | sed "s/^mazapan: //")"; fi',
       e.id, {{ tq "undone" }}.arg(title(e)), {{ tq "undo_failed_title" }}, {{ tq "title" }}])
+    message = {{ tq "undoing" }}
+    failed = false
+  }
+
+  // An agent's changes the same day, newest first: undone together.
+  function agentDay(e) {
+    if (!e || !e.by) return []
+    // Each undone newest first, so one a later change of its own covered comes back to be undone.
+    const all = entries.filter(x => x.kind === "apply" && x.by === e.by && x.known !== false && day(x.time) === day(e.time))
+    return all.some(x => x.undo !== "none") ? all : []
+  }
+  function undoAll(list) {
+    if (list.length === 0) return
+    // $0 the app's name, $1 what's said when done, $2 when not; then the ids.
+    Quickshell.execDetached(["sh", "-c", 'mkdir -p ~/.local/state/mazapan; ok=$1; bad=$2; shift 2; '
+      + 'if mazapan timeline undo "$@" -y > ~/.local/state/mazapan/undo.log 2>&1; then notify-send -a "$0" -i edit-undo "$ok"; '
+      + 'else hyprctl reload >/dev/null; qs ipc -c mazapan call mazapan reload >/dev/null; sleep 2; '
+      + 'notify-send -a "$0" -u critical -i dialog-warning "$bad" "$(grep "^mazapan:" ~/.local/state/mazapan/undo.log | tail -n 1 | sed "s/^mazapan: //")"; fi',
+      {{ tq "title" }}, {{ tq "undone_agent" }}.arg(list[0].by).arg(list.length), {{ tq "undo_failed_title" }}].concat(list.map(x => x.id)))
     message = {{ tq "undoing" }}
     failed = false
   }
@@ -339,6 +359,13 @@ Item {
               width: parent.width
               spacing: 10
 
+              // Whose: an agent's, through mazapan's MCP server.
+              Caption {
+                visible: !!root.sel && !!root.sel.by
+                text: root.sel && root.sel.by ? "󰚩 " + {{ tq "by_agent" }}.arg(root.sel.by) : ""
+                color: Theme.fgMuted
+              }
+
               // Each change, and a theme's colors before and after.
               Repeater {
                 model: root.sel ? root.sel.changes : []
@@ -458,6 +485,12 @@ Item {
               primary: true
               text: root.sel && root.sel.undo === "rollback" ? {{ tq "rollback" }} : {{ tq "undo" }}
               onClicked: root.undo(root.sel)
+            }
+            Button {
+              readonly property var all: root.agentDay(root.sel)
+              visible: all.length > 1
+              text: {{ tq "undo_agent" }}.arg(root.sel ? root.sel.by : "").arg(all.length)
+              onClicked: root.undoAll(all)
             }
             Caption {
               visible: !!root.sel && root.sel.undo === "none" && root.sel.kind !== "snapshot"

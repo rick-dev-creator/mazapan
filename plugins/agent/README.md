@@ -57,6 +57,13 @@ files (Files: right click, Scripts, Ask an agent) open the same card, to
 type the question. A short text goes into the question itself; a picture
 or another file by its path, which Claude may read (and nothing else).
 
+**An agent's changes, yours to allow** (`approve_changes`): when an agent
+changes this desktop through mazapan's MCP server (a theme, a setting, a
+plugin), a card shows who asks and the exact diff of every file first;
+nothing is written until you click Allow (no answer in two minutes is no).
+History marks each of its changes with the agent's name, and "Undo all of
+its that day" takes them back together.
+
 **Ask an agent about this desktop**, from the palette, opens your agent
 (`command`; Claude with the first account that has room) with mazapan's
 report: state, failing checks, crashes, logged errors. "Copy a report"

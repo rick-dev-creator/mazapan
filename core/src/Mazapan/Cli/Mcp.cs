@@ -192,6 +192,10 @@ public static partial class Program
             switch (method)
             {
                 case "initialize":
+                    // Who's asking (Claude Code, opencode…): its changes are marked with it, and the person asked in its name.
+                    if (p.ValueKind == JsonValueKind.Object && p.TryGetProperty("clientInfo", out var ci) && ci.ValueKind == JsonValueKind.Object
+                        && ci.TryGetProperty("name", out var cn) && cn.ValueKind == JsonValueKind.String)
+                        AgentClient = Approval.Readable(cn.GetString() ?? "");
                     var asked = p.ValueKind == JsonValueKind.Object && p.TryGetProperty("protocolVersion", out var pv) ? pv.GetString() : null;
                     return RpcResult(id, new Fields
                     {
@@ -246,6 +250,9 @@ public static partial class Program
             }
         }
     }
+
+    /// <summary>The agent this MCP server serves, by name ("Claude Code"); "" outside it.</summary>
+    internal static string AgentClient = "";
 
     /// <summary>Runs a tool's command, with what it prints (and its errors) as the result.</summary>
     static (string Text, bool Ok) CallTool(Tool tool, JsonElement arguments)

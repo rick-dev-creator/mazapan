@@ -52,3 +52,6 @@ no_undo_files = "Nur die Dateien der letzten Änderung lassen sich zurückholen.
 press_enter = "Drücke Enter zum Schließen"
 "act.open" = "Verlauf"
 "act.open.kw" = "verlauf chronik rückgängig änderungen zeitmaschine zurücksetzen history"
+"by_agent" = "Von %1"
+"undo_agent" = "Alle von %1 an dem Tag rückgängig machen (%2)"
+"undone_agent" = "Die %2 Änderungen von %1 rückgängig gemacht"

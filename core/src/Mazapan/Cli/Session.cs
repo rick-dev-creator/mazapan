@@ -425,9 +425,22 @@ public static partial class Program
         var what = themeId != "" || accent != "" ? $"theme {s.Theme.Id}" + (s.Cfg.Accent != "" ? $", accent {s.Cfg.Accent}" : "") : "";
         if (edits.Count > 0) what = (what == "" ? "" : what + "; ") + string.Join(", ", edits);
         if (what == "") what = "apply";
+        // An agent's change: the person allows it first, seeing the diff (when
+        // the desktop has the card to ask on). Nothing to write: nothing to ask.
+        var by = fs.IsSet("agent") ? (AgentClient != "" ? AgentClient : "an agent") : "";
+        if (fs.IsSet("agent") && Approval.Wanted() && (configChanged || changes.Any(c => c.State != State.Unchanged) || orphans.Count > 0))
+        {
+            var diff = new StringWriter { NewLine = "\n" };
+            var was = Console.Out;
+            Console.SetOut(diff);
+            try { PrintDiffs(changes, orphans, owned, fs.IsSet("adopt")); }
+            finally { Console.SetOut(was); }
+            if (!Approval.Ask(by, what, Style.Strip(diff.ToString()), TimeSpan.FromMinutes(2)))
+                throw new MazapanException("the person didn't allow it: nothing changed");
+        }
         // Packages alone are a change too: undo takes them out.
         var snap = noSnapshots ? null : Snapshots.Begin(changes, orphans, fs.IsSet("adopt"), Settings.Path, what,
-            configOnly: configChanged || (fs.IsSet("system") && rootWork > 0));
+            configOnly: configChanged || (fs.IsSet("system") && rootWork > 0), by: by);
         // The machine's very first apply (an install, a first setup): the
         // welcome opens at the next login (the welcome plugin reads this).
         // Written first: the shell reloads as the files are written.

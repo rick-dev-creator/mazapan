@@ -6,6 +6,11 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- An agent's change to the desktop (through mazapan's MCP server) waits
+  for you: a card with who asks and the exact diff, Allow or Don't allow.
+  History marks its changes with the agent's name and undoes a day's of
+  them at once.
+
 - `? question` in the palette: a coding agent answers in a card (Claude
   with the account that has room and a look at this desktop's state, never
   changing it), to copy or continue in a terminal. The same about a

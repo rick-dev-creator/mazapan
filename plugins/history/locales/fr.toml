@@ -52,3 +52,6 @@ no_undo_files = "Seuls les fichiers du dernier changement peuvent être remis en
 press_enter = "Appuyez sur Entrée pour fermer"
 "act.open" = "Historique"
 "act.open.kw" = "historique chronologie annuler changements retour arrière time machine rollback"
+"by_agent" = "Par %1"
+"undo_agent" = "Annuler tous ceux de %1 ce jour-là (%2)"
+"undone_agent" = "Les %2 changements de %1 annulés"

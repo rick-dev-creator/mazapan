@@ -82,6 +82,23 @@ public sealed class UndoTests : IDisposable
     }
 
     [Fact]
+    public void AnAgentsApplyIsMarkedWithItsName()
+    {
+        var path = Path.Join(home.Path, ".config", "y.conf");
+        var f = new RenderedFile { Plugin = "p", Path = path, Content = "x\n" };
+        var owned = Apply.LoadOwned(Apply.StatePath());
+        var (changes, orphans) = Apply.Plan([f], owned);
+        var snap = Snapshots.Begin(changes, orphans, false, Config.Settings.Path, "bar-clock.format", by: "Claude Code")!;
+        Apply.Execute(changes, orphans, owned, false);
+        owned.Save(Apply.StatePath());
+        Snapshots.Finish(snap, Config.Settings.Path);
+        Assert.Equal("Claude Code", Snapshots.List().Single(x => x.ID == snap.ID).By);
+        Assert.Equal("Claude Code", Mazapan.Cli.ApprovalNames.Readable("claude-code"));
+        Assert.Equal("my-tool 2b", Mazapan.Cli.ApprovalNames.Readable("my-tool 2\"<b>"));
+        Assert.Equal("an agent", Mazapan.Cli.ApprovalNames.Readable("\n"));
+    }
+
+    [Fact]
     public void UndoPutsBackFilesOwnershipAndConfig()
     {
         var path = Path.Join(home.Path, ".config", "x.conf");
