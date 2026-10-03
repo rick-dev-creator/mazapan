@@ -18,3 +18,5 @@ release (a tag `vX.Y.Z`) names them.
   logs in and opens the keyring.
 - Locked before it sleeps: the lid never opens on an unlocked desktop.
 - The firewall on: nothing comes in that wasn't asked for.
+- Unattended installs: a drive labeled cidata with the installer's answers
+  (mazapan.json) installs by itself.

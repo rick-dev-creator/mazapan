@@ -64,6 +64,15 @@ public static partial class Program
     static (Answers, Disk) ReadAnswers(string path)
     {
         var a = Answers.Parse(File.ReadAllText(path));
+        if (a.Disk == "auto")
+        {
+            // Only when it can't be the wrong one: a single fixed disk big enough.
+            var can = ListDisks().Where(d => !d.Removable && !d.TooSmall).ToList();
+            if (can.Count != 1)
+                throw new MazapanException($"answers: disk \"auto\" needs exactly one disk to install on, and there are {can.Count}" +
+                    (can.Count > 1 ? $" ({string.Join(", ", can.Select(d => d.Path))}): name one" : ""));
+            a.Disk = can[0].Path;
+        }
         var disk = ListDisks().FirstOrDefault(d => d.Path == a.Disk)
             ?? throw new MazapanException($"answers: {a.Disk} isn't a disk to install on (mazapan install disks)");
         if (disk.TooSmall) throw new MazapanException($"answers: {a.Disk} is too small");

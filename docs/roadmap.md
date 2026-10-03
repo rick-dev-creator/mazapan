@@ -80,7 +80,22 @@ configuration rolled back on its own, the next one went through.
 **C. Tested**
 7. Unattended installs (`cidata`), first as the release gate: every
    release installs itself in a VM, boots, and passes its checks before
-   it's published.
+   it's published. Built (2026-10-03): a drive labeled cidata (a USB
+   stick, a VM's seed) with `mazapan.json` on it, the installer's own
+   answers (`"disk": "auto"` takes the one disk there is; `"after"`:
+   poweroff, reboot or none), installs with nobody there, as Omarchy's;
+   the live desktop's installer shows how it goes; on a writable drive the
+   recovery key and the log are left on it. `vm/gate [encrypted|plain]`
+   is the gate: a fresh VM installs itself from the newest ISO, starts
+   (the disk's password typed by QEMU), and passes there: every check in
+   the session, no failed units, the keyring open with the one password;
+   with `MAZAPAN_GATE_REPO`, an update from the release's repository too.
+   Passing (2026-10-03), encrypted (with the update, 0.1.0 → 0.4.0) and
+   plain. Found on the way: the live ISO ran out of memory installing on
+   8 GB (archiso copied its 4 GB image to RAM: `copytoram=n` now), the
+   unattended install waits for cloud-init (its SSH keys), and the web apps
+   check failed on every fresh install (it asks for a browser only when
+   there are web apps).
 8. The live USB on real hardware (an RTX 4090 with an AMD iGPU, four
    screens), without installing; what fails, fixed.
 
@@ -153,6 +168,7 @@ Hyprland, the shell restarted on its own). Better than it:
 
 | # | Item | State |
 |---|------|-------|
+| — | Toward 1.0, C7: unattended installs, the release gate | **Done** (2026-10-03): `cidata` + mazapan.json installs by itself; `vm/gate` passes encrypted and plain. C8 (the live USB on real hardware) needs the person |
 | — | Toward 1.0, B: safe to install | **Done** (2026-10-03): encrypted by default with a recovery key, one password (keyring included), locked before sleep, firewall on |
 | — | Toward 1.0, A: it updates itself | **Done** (2026-10-03): its own signed repository with channels, versions and releases, the updater after Omarchy's. Pending, the person's: the release key, hosting, uploading |
 | 1 | Updates you can trust | **Done** (2026-09-28); follow-ups listed below |

@@ -94,6 +94,19 @@ vm/vm ssh 'cd my-arch && MAZAPAN_SIGN_KEY=… pkg/release'          # → out/re
 vm/vm ssh 'cd my-arch && MAZAPAN_SIGN_KEY=… pkg/release promote X.Y.Z'   # → stable
 ```
 
+Before a release is promoted, the gate: the ISO built from it installs
+itself unattended in a fresh VM, starts, and every check passes there
+(`vm/gate`, encrypted; `vm/gate plain` too). With the test repository
+(below) it updates from it as well:
+
+```sh
+vm/vm iso                                   # the ISO, as it will be published
+vm/gate && vm/gate plain                    # → [gate] PASS the release gate (…)
+# With an update from the release's repository (a test build, as below:
+# iso/build run in the dev VM with MAZAPAN_REPO_SERVER='file:///srv/mazapan-repo/$channel/$arch'):
+MAZAPAN_GATE_REPO=out/repo vm/gate
+```
+
 `out/repo` is then uploaded to where `pkg/repository.toml` says. To try a
 release without publishing one: a throwaway key (`pkg/release keys`),
 `MAZAPAN_KEYS`, `MAZAPAN_VERSION`, `MAZAPAN_REPO_SERVER=file://…` and

@@ -111,7 +111,8 @@ public sealed partial class Answers
     public void Check()
     {
         void Need(bool ok, string what) { if (!ok) throw new MazapanException("answers: " + what); }
-        Need(DiskRe().IsMatch(Disk) && !Disk.Contains(".."), $"disk {Quote(Disk)} isn't a device");
+        // "auto": the one disk there is to install on (unattended installs).
+        Need(Disk == "auto" || DiskRe().IsMatch(Disk) && !Disk.Contains(".."), $"disk {Quote(Disk)} isn't a device");
         Need(UserRe().IsMatch(User), $"user name {Quote(User)}: lowercase letters, digits, - and _, starting with a letter");
         Need(!Taken.Contains(User), $"user name {Quote(User)} is taken by the system");
         Need(FullName.Length <= 100 && !FullName.Any(c => c is ':' or ',' or '\n' or '\r' || char.IsControl(c)), "the full name can't have : , or line breaks");

@@ -1,0 +1,51 @@
+#!/bin/sh
+# An unattended install, as Omarchy's: a drive labeled cidata (a USB stick,
+# or a VM's seed) with mazapan.json on it, the installer's answers (the same
+# JSON; "disk": "auto" takes the one disk there is, "after": "poweroff"
+# (default), "reboot" or "none"). Installed with nobody there; the live
+# desktop's installer shows how it goes. With a writable drive, the
+# recovery key (encrypted) and the log are left on it. A failed install
+# leaves the machine on, for someone to look.
+set -u
+dev=
+for _ in $(seq 1 20); do
+  dev=$(blkid -L cidata 2>/dev/null || blkid -L CIDATA 2>/dev/null) && break
+  sleep 0.5
+done
+[ -n "$dev" ] || exit 0
+mnt=/run/mazapan-cidata
+mkdir -p "$mnt"
+mount -o rw "$dev" "$mnt" 2>/dev/null || mount -o ro "$dev" "$mnt" 2>/dev/null || exit 0
+if [ ! -f "$mnt/mazapan.json" ]; then umount "$mnt"; exit 0; fi
+
+# cloud-init first (the same drive's user-data): what it sets up, the SSH
+# keys to reach the new system with, is part of the install. Waited for
+# here: ordered after it, this would wait for the whole boot (it comes
+# after multi-user.target), and this is part of that boot.
+if command -v cloud-init >/dev/null; then timeout 600 cloud-init status --wait >/dev/null 2>&1; fi
+
+answers=/run/mazapan-unattended.json
+log=/run/mazapan-unattended.log
+(umask 077; cp "$mnt/mazapan.json" "$answers")
+after=$(jq -r '.after // "poweroff"' "$answers" 2>/dev/null || echo poweroff)
+# Readable by the live session (its installer follows it); it holds no password.
+echo "START unattended" > "$log"
+chmod 644 "$log"
+mazapan install run "$answers" >> "$log" 2>&1
+code=$?
+echo "EXIT $code" >> "$log"
+rm -f "$answers"
+if touch "$mnt/.mazapan-w" 2>/dev/null; then
+  rm -f "$mnt/.mazapan-w"
+  key=$(sed -n 's/^recovery //p' "$log")
+  [ -z "$key" ] || (umask 077; printf '%s\n' "$key" > "$mnt/mazapan-recovery-key.txt")
+  cp /var/log/mazapan-install.log "$mnt/mazapan-install.log" 2>/dev/null
+fi
+sync
+umount "$mnt" 2>/dev/null
+[ "$code" = 0 ] || exit "$code"
+case $after in
+  reboot) systemctl reboot ;;
+  none) ;;
+  *) systemctl poweroff ;;
+esac

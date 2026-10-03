@@ -1,0 +1,126 @@
+#!/usr/bin/env bash
+# The release gate: the newest ISO (vm/.state/iso) installs itself,
+# unattended, in a fresh try VM (its cidata seed brings mazapan.json), the
+# installed system starts (the disk's password typed, when encrypted), goes
+# straight to its desktop, and every check passes there: the desktop's,
+# no failed units, and, encrypted, the keyring open with that one password.
+# Nothing is typed by hand; it stops the VM when it's done.
+#
+#   vm/gate [encrypted|plain]     encrypted by default, as the installer
+#
+# MAZAPAN_GATE_REPO=DIR also updates the installed system from that
+# repository (pkg/release's out/repo), copied to /srv/mazapan-repo: the ISO
+# has to be built with MAZAPAN_REPO_SERVER='file:///srv/mazapan-repo/$channel/$arch'
+# and the test key (see CONTRIBUTING).
+set -euo pipefail
+
+repo="$(cd "$(dirname "$0")/.." && pwd)"
+vm="$repo/vm/vm"
+state="$repo/vm/.state"
+mode="${1:-encrypted}"
+[[ $mode == encrypted || $mode == plain ]] || { echo "usage: vm/gate [encrypted|plain]" >&2; exit 2; }
+user=gate
+pass=gatepassword # letters only: typed with QEMU's sendkey at the disk's prompt
+export MAZAPAN_MEM="${MAZAPAN_MEM:-8G}" # the live ISO is copied to memory
+
+step() { printf '\e[1;35m[gate]\e[0m %s\n' "$*"; }
+pass_() { printf '\e[1;32m[gate] PASS\e[0m %s\n' "$*"; }
+fail() {
+  printf '\e[1;31m[gate] FAIL\e[0m %s\n' "$*" >&2
+  "$vm" try stop >/dev/null 2>&1 || true
+  exit 1
+}
+running() { [[ -f $state/try.pid ]] && kill -0 "$(cat "$state/try.pid")" 2>/dev/null; }
+# Waits without hammering SSH: the firewall rate-limits it (6 in 30 s).
+pause() { timeout "$1" bash -c 'until false; do sleep 5; done' || true; }
+as_user() { MAZAPAN_TRY_USER=$user timeout 60 "$vm" try ssh "$@"; }
+type_password() {
+  local c
+  for c in $(grep -o . <<<"$pass"); do "$vm" try key "$c" >/dev/null 2>&1; done
+  "$vm" try key ret >/dev/null 2>&1
+}
+
+answers="$state/gate-answers.json"
+cat > "$answers" <<EOF
+{"disk":"auto","encrypt":$([[ $mode == encrypted ]] && echo true || echo false),"user":"$user","fullname":"Gate",
+ "password":"$pass","timezone":"UTC","language":"en","locale":"en_US.UTF-8","kb_layout":"us","kb_variant":"",
+ "theme":"phosphor","apps":[],"after":"none"}
+EOF
+
+step "a fresh try VM, the answers on its cidata seed ($mode)"
+"$vm" try stop >/dev/null 2>&1 || true
+rm -f "$state/gate-install.log"
+MAZAPAN_TRY_ANSWERS="$answers" "$vm" try reset >/dev/null
+rm -f "$answers"
+
+step "the ISO installs itself"
+"$vm" try headless >/dev/null
+start=$SECONDS
+# "after": "none": it stays on once done, for its log to be read whole.
+while :; do
+  (( SECONDS - start < 2700 )) || fail "the install didn't finish in 45 minutes"
+  running || fail "the live system stopped during the install"
+  pause 30
+  timeout 20 "$vm" try ssh 'cat /run/mazapan-unattended.log' > "$state/gate-install.log.new" 2>/dev/null \
+    && [[ -s $state/gate-install.log.new ]] && mv "$state/gate-install.log.new" "$state/gate-install.log"
+  grep -q '^EXIT ' "$state/gate-install.log" 2>/dev/null && break
+done
+rm -f "$state/gate-install.log.new"
+if ! grep -q '^EXIT 0$' "$state/gate-install.log"; then
+  fail "the install failed: $(timeout 20 "$vm" try ssh 'tail -5 /var/log/mazapan-install.log' 2>/dev/null) (vm/.state/gate-install.log)"
+fi
+"$vm" try stop >/dev/null 2>&1 || true
+pass_ "installed in $(( (SECONDS - start) / 60 )) min"
+
+step "the installed system starts"
+MAZAPAN_TRY_NOISO=1 "$vm" try headless >/dev/null
+if [[ $mode == encrypted ]]; then
+  # Past GRUB's menu (a key there would stop it), at the disk's prompt.
+  pause 32
+  type_password
+fi
+up=
+for i in $(seq 1 20); do
+  as_user true 2>/dev/null && { up=1; break; }
+  # Typed too early, once: again.
+  [[ $mode == encrypted && $i == 8 ]] && type_password
+  pause 12
+done
+[[ -n $up ]] || fail "it didn't come up (no SSH as $user)"
+if [[ $mode == plain ]]; then
+  # The login screen: the password, as a person types it.
+  pause 15
+  type_password
+fi
+pause 30 # the desktop settling: the shell, the first apply
+pass_ "started"
+
+step "checks"
+doctor=$(MAZAPAN_TRY_USER=$user timeout 120 "$vm" try run 'mazapan doctor --json' 2>/dev/null) || true
+[[ -n $doctor ]] || fail "mazapan doctor --json gave nothing"
+jq -e '.session == true' <<<"$doctor" >/dev/null || fail "no graphical session ($([[ $mode == plain ]] && echo "the login screen didn't take the password" || echo "not straight in after the start"))"
+failed=$(jq -r '[.checks[] | select(.ok == false and .skipped != true) | .name] | join(", ")' <<<"$doctor")
+[[ -z $failed ]] || fail "checks failing: $failed"
+pass_ "$(jq '[.checks[] | select(.ok)] | length' <<<"$doctor") checks pass, in the session"
+units=$(as_user 'systemctl --failed --no-legend --plain | cut -d" " -f1 | paste -sd" "' 2>/dev/null || true)
+[[ -z $units ]] || fail "failed units: $units"
+pass_ "no failed units"
+if [[ $mode == encrypted ]]; then
+  locked=$(as_user 'DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus busctl --user call org.freedesktop.secrets /org/freedesktop/secrets/collection/login org.freedesktop.DBus.Properties Get ss org.freedesktop.Secret.Collection Locked' 2>&1 || true)
+  [[ $locked == "v b false" ]] || fail "the keyring isn't open with the disk's password: $locked"
+  pass_ "one password: the keyring is open"
+fi
+
+if [[ -n ${MAZAPAN_GATE_REPO:-} ]]; then
+  step "an update from $MAZAPAN_GATE_REPO"
+  pause 30
+  tar -C "$MAZAPAN_GATE_REPO" -cf - . | as_user "cat > /tmp/repo.tar; printf '%s\n' '$pass' | sudo -S -p '' sh -c 'mkdir -p /srv/mazapan-repo && tar -C /srv/mazapan-repo -xf /tmp/repo.tar && echo \"$user ALL=(ALL) NOPASSWD: ALL\" > /etc/sudoers.d/99-gate && chmod 440 /etc/sudoers.d/99-gate'" >/dev/null 2>&1 \
+    || fail "couldn't put the repository on it"
+  pause 30
+  out=$(MAZAPAN_TRY_USER=$user timeout 900 "$vm" try ssh 'mazapan update -y 2>&1; echo "exit=$?"' 2>&1 | sed 's/\x1b\[[0-9;]*m//g') || true
+  grep -q '^exit=0$' <<<"$out" || fail "the update didn't go through: $(tail -5 <<<"$out")"
+  pass_ "$(grep -m1 '^Mazap\|^Updated' <<<"$out")"
+fi
+
+"$vm" try stop >/dev/null 2>&1 || true
+pass_ "the release gate ($mode)"

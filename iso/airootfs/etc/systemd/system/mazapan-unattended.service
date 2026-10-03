@@ -1,0 +1,11 @@
+[Unit]
+Description=Mazapán: an unattended install, when a cidata drive brings mazapan.json
+After=local-fs.target
+
+[Service]
+# Not oneshot: the boot (and the live desktop) doesn't wait for the install.
+Type=exec
+ExecStart=/usr/local/bin/mazapan-unattended
+
+[Install]
+WantedBy=multi-user.target

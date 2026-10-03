@@ -27,7 +27,11 @@ Item {
   readonly property string stateFile: Quickshell.env("HOME") + "/.local/state/mazapan/installer.json"
   // Only the user's own runtime folder (0700): the answers carry the password.
   readonly property string runDir: Quickshell.env("XDG_RUNTIME_DIR") || ""
-  readonly property string runLog: runDir + "/mazapan-install.log"
+  // An unattended install (a cidata drive with mazapan.json: the ISO's
+  // mazapan-unattended) is followed here, not started again.
+  readonly property string unattendedLog: "/run/mazapan-unattended.log"
+  property bool unattended: false
+  readonly property string runLog: unattended ? unattendedLog : runDir + "/mazapan-install.log"
   readonly property string answersFile: runDir + "/mazapan-install.json"
   readonly property string applyLog: Quickshell.env("HOME") + "/.local/state/mazapan/installer-apply.log"
   // Where you are before the keyboard: its suggestions come from there.
@@ -542,6 +546,28 @@ Item {
     stdinEnabled: true
     onStarted: { write(root.recoveryKey); stdinEnabled = false }
     onExited: { stdinEnabled = true; qrImage.source = ""; qrImage.source = "file://" + root.qrFile }
+  }
+
+  FileView {
+    id: unattendedView
+    path: root.unattendedLog
+    printErrors: false
+    onLoaded: {
+      if (root.unattended || !text().startsWith("START unattended")) return
+      root.unattended = true
+      root.runId = "unattended"
+      root.progress = 0
+      root.phase = "running"
+      root.show()
+      runView.reload()
+    }
+  }
+  // It starts as the computer does: looked for while nothing else runs.
+  Timer {
+    interval: 2000
+    repeat: true
+    running: !root.unattended && root.phase !== "running"
+    onTriggered: unattendedView.reload()
   }
 
   property string runStep: "disk"

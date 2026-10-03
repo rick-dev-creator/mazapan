@@ -97,10 +97,16 @@ file_permissions+=(
   ["/home/live/"]="1000:1000:750"
   ["/etc/sudoers.d"]="0:0:750"
   ["/etc/sudoers.d/mazapan-live"]="0:0:440"
+  ["/usr/local/bin/mazapan-unattended"]="0:0:755"
 )
 CONF
 # The boot menus say what this is.
 sed -i 's/Arch Linux install medium/mazapan/' "$p"/efiboot/loader/entries/*.conf "$p"/syslinux/*.cfg "$p"/grub/*.cfg
+# Run from the stick, not copied to memory: archiso copies its 4 GB image to
+# RAM when it thinks there's room, and on an 8 GB machine the live desktop
+# and the install then run out of it (the install stalls).
+sed -i 's/archisosearchuuid=%ARCHISO_UUID%/& copytoram=n/' "$p"/efiboot/loader/entries/*.conf "$p"/syslinux/*.cfg "$p"/grub/*.cfg
+grep -q 'copytoram=n' "$p"/efiboot/loader/entries/*.conf || die "the boot entries changed: copytoram=n wasn't added"
 
 log "mkarchiso (a few minutes)"
 sudo mkarchiso -v -w "$work/mkarchiso" -o "$out" "$p" >"$work/mkarchiso.log" 2>&1 \

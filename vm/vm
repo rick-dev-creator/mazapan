@@ -25,7 +25,8 @@
 # as root over SSH; run/exec/shot act in the live session's desktop.
 #   vm/vm try start | headless | wait | ssh | run | exec | key | mouse | shot | stop | reset
 # Once installed: MAZAPAN_TRY_USER=<the account> vm/vm try ssh|run|shot…
-# (MAZAPAN_TRY_NOISO=1 vm/vm try headless: the disk alone, the ISO out)
+# (MAZAPAN_TRY_NOISO=1 vm/vm try headless: the disk alone, the ISO out;
+#  MAZAPAN_TRY_ANSWERS=file vm/vm try reset: an unattended install, see vm/gate)
 set -euo pipefail
 
 repo="$(cd "$(dirname "$0")/.." && pwd)"
@@ -88,7 +89,13 @@ make_seed() {
   local tmp; tmp="$(mktemp -d)"
   sed "s|@SSH_PUBKEY@|$(cat "$key.pub")|" "$repo/vm/cloud-init/${tag}user-data.tmpl" > "$tmp/user-data"
   cp "$repo/vm/cloud-init/meta-data" "$tmp/meta-data"
-  xorriso -as mkisofs -quiet -V cidata -J -R -o "$seed" "$tmp/user-data" "$tmp/meta-data" \
+  local files=("$tmp/user-data" "$tmp/meta-data")
+  # An unattended install (the ISO's mazapan-unattended): its answers on the seed.
+  if [[ $mode == try && -n ${MAZAPAN_TRY_ANSWERS:-} ]]; then
+    cp "$MAZAPAN_TRY_ANSWERS" "$tmp/mazapan.json"
+    files+=("$tmp/mazapan.json")
+  fi
+  xorriso -as mkisofs -quiet -V cidata -J -R -o "$seed" "${files[@]}" \
     2>"$state/xorriso.log" || { cat "$state/xorriso.log" >&2; die "seed build failed"; }
   rm -rf "$tmp"
 }
