@@ -134,6 +134,7 @@ api = 1                    # manifest API; the core refuses other values
 description = "one line"
 requires = ["shell-bar", "hypr-base >= 0.1"]   # other plugins it needs
 categories = ["theme"]     # bar, panel, theme, window, hardware, tools, agent
+optional = false           # true: off until turned on (an extra, not everyone's)
 
 [packages]
 pacman = ["foot"]          # checked on apply, warned about if missing

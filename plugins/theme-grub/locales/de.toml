@@ -1,0 +1,3 @@
+"plugin.name" = "Bootmenü im Theme"
+"plugin.description" = "Das GRUB-Menü (und die Snapshots darin) in den Farben des Themes: ein Design vom ersten Bildschirm bis zum Desktop. Das Installationsprogramm schaltet es ein"
+"check" = "Das Bootmenü ist im Theme"

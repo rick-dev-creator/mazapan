@@ -58,3 +58,6 @@ tz_failed = "Die Zeitzone wurde nicht geändert (Passwort abgelehnt oder Fehler)
 "keys.super" = "Mit SUPER, damit es nie einer App eine Taste wegnimmt"
 "keys.change" = "Ändern"
 "keys.cancel" = "Abbrechen"
+"kb.keep" = "Tippe ins Feld oben. Diese Tastatur behalten? Die vorige kommt in %1 s zurück."
+"kb.back" = "Zurück"
+"kb.keep_it" = "Behalten"

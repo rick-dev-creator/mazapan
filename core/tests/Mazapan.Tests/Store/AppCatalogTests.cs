@@ -37,6 +37,28 @@ public class AppCatalogTests
         var text = "[[app]]\nid = \"a\"\nname = \"A\"\ncategory = \"utilities\"\npacman = [\"a\"]\n\n[[profile]]\nid = \"p\"\nname = \"P\"\napps = [\"a\", \"b\"]\n";
         Assert.Throws<MazapanException>(() => AppCatalog.Parse(text, "t"));
     }
+
+    [Fact]
+    public void OthersCatalogsAddToMazapans()
+    {
+        using var d = new Mazapan.Tests.Foundation.TempDir();
+        var own = d.Write("own.toml", "[[app]]\nid = \"a\"\nname = \"A\"\ncategory = \"utilities\"\npacman = [\"a\"]\n");
+        // Its own b, mazapan's a again (the first one's stays), and a profile of both.
+        var other = d.Write("other.toml", "[[app]]\nid = \"a\"\nname = \"Not A\"\ncategory = \"games\"\npacman = [\"evil\"]\n\n" +
+            "[[app]]\nid = \"b\"\nname = \"B\"\ncategory = \"games\"\nflatpak = \"org.example.B\"\n\n" +
+            "[[profile]]\nid = \"fun\"\nname = \"Fun\"\napps = [\"a\", \"b\"]\n");
+        var basic = d.Write("basic.toml", "[[profile]]\nid = \"mine\"\nname = \"Mine\"\nbasic = true\napps = [\"a\"]\n");
+        var (profiles, apps, problems) = AppCatalog.LoadAll(own, [other, basic, Path.Join(d.Path, "missing.toml"), "http://example.com/apps.toml"]);
+        Assert.Equal(["a", "b"], apps.Select(a => a.Id));
+        Assert.Equal(["a"], apps[0].Pacman);
+        Assert.Equal("", apps[0].From);
+        Assert.Equal(other, apps[1].From);
+        Assert.Equal(["fun"], profiles.Select(p => p.Id));
+        // Only mazapan's has the basic profile; the rest is said, not fatal.
+        Assert.Equal(3, problems.Count);
+        Assert.Contains(problems, p => p.Contains("basic"));
+        Assert.Contains(problems, p => p.Contains("not https"));
+    }
 }
 
 public class AppsLedgerTests

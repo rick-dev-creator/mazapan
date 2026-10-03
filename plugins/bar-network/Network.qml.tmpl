@@ -9,6 +9,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Io
 import Quickshell.Networking
 import qs
 import "../../components/kit"
@@ -60,6 +61,7 @@ BarItem {
       if (!visible) {
         asking = null
         problem = ""
+        qr = ""
       }
     }
 
@@ -230,6 +232,92 @@ BarItem {
         Layout.topMargin: 2
         text: {{ tq "hint" }}
       }
+    }
+
+    // --- share, and how fast ------------------------------------------------
+    Rule {}
+    RowLayout {
+      Layout.fillWidth: true
+      spacing: 6
+      Button {
+        visible: root.wifiConnected !== null
+        text: popup.qr !== "" ? {{ tq "share_hide" }} : {{ tq "share" }}
+        onClicked: popup.qr !== "" ? popup.qr = "" : wifiShare.running = true
+      }
+      Item { Layout.fillWidth: true }
+      Button {
+        text: speed.running ? {{ tq "speed_running" }} : {{ tq "speed_test" }}
+        enabled: !speed.running
+        onClicked: { popup.speedText = ""; speed.running = true }
+      }
+    }
+    // This Wi-Fi as a code a phone's camera joins (WIFI:…;; the usual form),
+    // its password from NetworkManager; drawn only while asked for.
+    property string qr: ""
+    property string qrSsid: ""
+    Process {
+      id: wifiShare
+      command: ["sh", "-c", 'c=$(nmcli -t -f NAME,TYPE connection show --active | awk -F: \'$2=="802-11-wireless"{print $1; exit}\'); [ -n "$c" ] || exit 1; '
+        + 'nmcli -s -g 802-11-wireless.ssid,802-11-wireless-security.psk connection show id "$c"']
+      stdout: StdioCollector {
+        onStreamFinished: {
+          const [ssid, psk] = text.split("\n")
+          if (!ssid) return
+          const esc = v => v.replace(/([\\;,:"])/g, "\\$1")
+          popup.qrSsid = ssid
+          qrMake.payload = psk ? `WIFI:T:WPA;S:${esc(ssid)};P:${esc(psk)};;` : `WIFI:T:nopass;S:${esc(ssid)};;`
+          qrMake.running = true
+        }
+      }
+    }
+    Process {
+      id: qrMake
+      property string payload: ""
+      readonly property string file: Quickshell.env("XDG_RUNTIME_DIR") + "/mazapan-wifi-qr.svg"
+      command: ["sh", "-c", 'umask 077; qrencode -t SVG -m 2 -o "$0"', file]
+      stdinEnabled: true
+      onStarted: { write(payload); payload = ""; stdinEnabled = false }
+      onExited: { stdinEnabled = true; popup.qr = ""; popup.qr = "file://" + file }
+    }
+    ColumnLayout {
+      visible: popup.qr !== ""
+      Layout.alignment: Qt.AlignHCenter
+      spacing: 4
+      Image {
+        source: popup.qr
+        Layout.preferredWidth: 180
+        Layout.preferredHeight: 180
+        Layout.alignment: Qt.AlignHCenter
+        sourceSize: Qt.size(360, 360)
+        smooth: false
+        cache: false
+      }
+      Caption { text: {{ tq "share_scan" }}.arg(popup.qrSsid); Layout.alignment: Qt.AlignHCenter }
+    }
+
+    // How fast: Cloudflare's own speed test endpoints (no account, no token).
+    property string speedText: ""
+    Process {
+      id: speed
+      command: ["sh", "-c", 'u=https://speed.cloudflare.com; '
+        + 'p=$(curl -s -o /dev/null -w "%{time_connect}" --max-time 5 "$u/__down?bytes=0"); '
+        + 'd=$(curl -s -o /dev/null -w "%{speed_download}" --max-time 15 "$u/__down?bytes=25000000"); '
+        + 'up=$(head -c 10000000 /dev/zero | curl -s -o /dev/null -w "%{speed_upload}" --max-time 15 --data-binary @- "$u/__up"); '
+        + 'echo "$d $up $p"']
+      stdout: StdioCollector {
+        onStreamFinished: {
+          const [d, u, p] = text.trim().split(" ").map(Number)
+          const mbps = v => Math.round(v * 8 / 1e5) / 10
+          popup.speedText = !(d > 0) ? {{ tq "speed_failed" }}
+            : {{ tq "speed_result" }}.arg(mbps(d)).arg(mbps(u || 0)).arg(Math.round((p || 0) * 1000))
+        }
+      }
+    }
+    Caption {
+      visible: popup.speedText !== ""
+      text: popup.speedText
+      Layout.fillWidth: true
+      horizontalAlignment: Text.AlignHCenter
     }
   }
 }

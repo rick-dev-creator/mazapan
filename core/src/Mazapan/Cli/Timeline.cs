@@ -167,7 +167,7 @@ public static partial class Program
         // doing the other.
         var txs = AppsLedger.List(AppsState());
         var appsNow = txs.Count > 0 ? AppsNow.Read() : null;
-        var catalog = txs.Count > 0 ? Mazapan.Store.AppCatalog.Load(Paths.Join(Root(), "catalog", "apps.toml")).Apps : [];
+        var catalog = txs.Count > 0 ? AppsCatalog(false).Apps : [];
         foreach (var tx in txs)
             out_.Add((tx.Time, new Fields
             {

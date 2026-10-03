@@ -19,3 +19,10 @@
 "hint" = "clique: conectar · clique direito: esquecer"
 
 "check" = "A rede está funcionando"
+"share" = "Compartilhar esta Wi-Fi"
+"share_hide" = "Ocultar o código"
+"share_scan" = "A câmera de um celular entra em “%1” com este código"
+"speed_test" = "Teste de velocidade"
+"speed_running" = "Testando…"
+"speed_failed" = "Não foi possível chegar ao teste de velocidade"
+"speed_result" = "↓ %1 Mbps   ↑ %2 Mbps   %3 ms"

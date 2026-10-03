@@ -130,8 +130,48 @@ Item {
     reloadableId: "mazapan-settings"
     property string page: "keyboard"
     property bool reopen: false
+    // A keyboard being tried: the one before ({layout, variant}) and when
+    // it comes back unless kept (ms since the epoch; 0: none).
+    property string kbBefore: ""
+    property double kbUntil: 0
     // Back after a reload an apply caused: open again, and wait for its end.
     onLoaded: if (reopen) Qt.callLater(() => { root.show(); waiting.restart() })
+  }
+
+  // A keyboard one can't type with (one's password included) mustn't stay:
+  // picked, it's tried, and the one before comes back after a while unless
+  // it's kept, as a monitor's mode.
+  property int kbLeft: 0
+  function setKeyboard(layout, variant) {
+    return ["--set=hypr-base.kb_layout=" + JSON.stringify(layout), "--set=hypr-base.kb_variant=" + JSON.stringify(variant)]
+  }
+  function tryKeyboard(layout, variant) {
+    if (layout === root.layout && variant === root.variant) return
+    if (session.kbUntil === 0) session.kbBefore = JSON.stringify({ layout: root.layout, variant: root.variant })
+    session.kbUntil = Date.now() + 20000
+    kbLeft = 20
+    apply(setKeyboard(layout, variant))
+  }
+  function keepKeyboard() {
+    session.kbUntil = 0
+    session.kbBefore = ""
+  }
+  function keyboardBack() {
+    let before = null
+    try {
+      before = JSON.parse(session.kbBefore)
+    } catch (e) {}
+    keepKeyboard()
+    if (before && before.layout) apply(setKeyboard(before.layout, before.variant || ""))
+  }
+  Timer {
+    interval: 500
+    repeat: true
+    running: session.kbUntil > 0
+    onTriggered: {
+      root.kbLeft = Math.max(0, Math.ceil((session.kbUntil - Date.now()) / 1000))
+      if (root.kbLeft === 0) root.keyboardBack()
+    }
   }
 
   function toggle() {
@@ -454,10 +494,23 @@ Item {
                 text: modelData.name
                 detail: modelData.layout + (modelData.variant ? " · " + modelData.variant : "")
                 selected: root.layout === modelData.layout && root.variant === modelData.variant
-                onPicked: root.apply(["--set=hypr-base.kb_layout=" + JSON.stringify(modelData.layout), "--set=hypr-base.kb_variant=" + JSON.stringify(modelData.variant)])
+                onPicked: root.tryKeyboard(modelData.layout, modelData.variant)
               }
             }
             TextField { Layout.fillWidth: true; placeholder: {{ tq "kb.try" }} }
+            // Being tried: kept, or the one before back.
+            RowLayout {
+              visible: session.kbUntil > 0
+              Layout.fillWidth: true
+              spacing: 10
+              Label {
+                text: {{ tq "kb.keep" }}.arg(root.kbLeft)
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+              }
+              Button { text: {{ tq "kb.back" }}; onClicked: root.keyboardBack() }
+              Button { text: {{ tq "kb.keep_it" }}; primary: true; onClicked: root.keepKeyboard() }
+            }
           }
 
           // Touchpad and mouse.

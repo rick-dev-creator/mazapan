@@ -1,0 +1,3 @@
+"plugin.name" = "Menu de démarrage dans le thème"
+"plugin.description" = "Le menu de GRUB (et les instantanés qu'il contient) aux couleurs du thème : un seul design du premier écran au bureau. L'installateur l'active"
+"check" = "Le menu de démarrage est dans le thème"

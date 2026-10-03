@@ -1,0 +1,5 @@
+"plugin.name" = "Actualizaciones descargadas de antemano"
+"plugin.description" = "Las actualizaciones que haya, descargadas en segundo plano mientras está enchufada y con una conexión que no se cobra por uso, para que actualizar tarde un momento. No se instala nada hasta que lo digas. El instalador lo enciende"
+"check" = "Las actualizaciones se descargan de antemano"
+"setting.every" = "Horas entre una búsqueda y otra"
+"setting.every.help" = "Cada cuánto busca actualizaciones para descargarlas de antemano."

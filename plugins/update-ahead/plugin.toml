@@ -1,0 +1,36 @@
+[plugin]
+id = "update-ahead"
+name = "Updates downloaded ahead"
+version = "0.1.0"
+api = 1
+description = "The updates there are, downloaded in the background while plugged in and on a connection that isn't metered, so updating takes moments. Nothing is installed until you say. The installer turns it on"
+categories = ["hardware"]
+
+# For every machine, but it downloads on its own: on only when asked.
+[hardware]
+any = true
+
+[packages]
+pacman = ["pacman-contrib", "networkmanager"]
+
+[settings]
+# Hours between looks.
+every = { default = 6, min = 1, max = 48 }
+
+# checkupdates -d: the pending packages into pacman's cache, from a database
+# of its own (the system's isn't synced: no half upgrade). On power only,
+# and not on a metered connection (NetworkManager says).
+[[targets]]
+template = "download.service.tmpl"
+output = "/etc/systemd/system/mazapan-download.service"
+system = true
+
+[[targets]]
+template = "download.timer.tmpl"
+output = "/etc/systemd/system/mazapan-download.timer"
+system = true
+reload = "systemctl daemon-reload; if [ -e /etc/systemd/system/mazapan-download.timer ]; then systemctl enable --now mazapan-download.timer; else systemctl disable --now mazapan-download.timer 2>/dev/null; fi; true"
+
+[[checks]]
+name = "{{ t \"check\" }}"
+run = "systemctl is-enabled -q mazapan-download.timer"

@@ -1,3 +1,4 @@
+using Mazapan.Config;
 using Mazapan.Plugins;
 using Mazapan.Util;
 
@@ -31,6 +32,22 @@ public class PluginTests
             new Dictionary<string, object> { ["min_width"] = 480.5 }, // float for int
         })
             Assert.Contains("[plugins.columns]", Assert.Throws<MazapanException>(() => p.Resolve(bad)).Message);
+    }
+
+    [Fact]
+    public void AnOptionalPluginIsOffUntilTurnedOn()
+    {
+        var p = Mk("reminders", "0.1.0");
+        var cfg = new Settings();
+        Assert.True(cfg.IsOn(p));
+        p.Meta.Optional = true;
+        Assert.False(cfg.IsOn(p));
+        cfg.TurnOn(p);
+        Assert.True(cfg.IsOn(p));
+        Assert.Equal(["reminders"], cfg.Enabled);
+        cfg.TurnOff(p);
+        Assert.False(cfg.IsOn(p));
+        Assert.Empty(cfg.Disabled);
     }
 
     [Theory]

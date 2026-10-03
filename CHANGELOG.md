@@ -32,3 +32,18 @@ release (a tag `vX.Y.Z`) names them.
   over the theme's.
 - Settings › Keys: every keybinding in one list, changed by pressing the
   new keys (one already taken is said).
+- Updates: firmware (fwupd) and plugin updates in the same panel; updates
+  downloaded ahead in the background, on power and unmetered only.
+- The boot menu and the boot splash (with the disk's password) in the
+  theme's colors.
+- Wi-Fi shared as a QR code, and a speed test, from the network card.
+- Extras, off until turned on: reminders (a bell in the bar), a crash
+  watcher that offers to ask an agent, and a screensaver in the theme.
+- The Apps menu takes catalogs from others (`app_catalogs` in config.toml).
+- A keyboard picked in Settings is tried first: the one before comes back
+  by itself unless it's kept.
+- What each Flatpak app may reach (the internet, sound and microphone,
+  devices, your files, Bluetooth), switched in Apps › Permissions or with
+  `mazapan apps permit`.
+- A plugin that can't be read is left out and said; the rest of the
+  desktop still applies.

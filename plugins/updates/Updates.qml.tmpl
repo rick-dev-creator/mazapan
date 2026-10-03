@@ -37,6 +37,8 @@ Item {
   readonly property var flatpaks: d ? d.flatpaks || [] : []
   readonly property var news: d ? d.news || [] : []
   readonly property var whatsNew: d ? d.whats_new || [] : []
+  readonly property var firmware: d ? d.firmware || [] : []
+  readonly property var pluginUpdates: d ? d.plugins || [] : []
   readonly property var stepNames: ({
     ready: {{ tq "step.ready" }}, keys: {{ tq "step.keys" }}, packages: {{ tq "step.packages" }},
     config: {{ tq "step.config" }}, checks: {{ tq "step.checks" }}, rollback: {{ tq "step.rollback" }}
@@ -183,6 +185,51 @@ Item {
           color: Theme.warning
           wrapMode: Text.Wrap
           Layout.fillWidth: true
+        }
+
+        // Plugins from git with a new version: their own update, in a terminal,
+        // which asks again for anything new they'd be able to do.
+        ColumnLayout {
+          visible: root.pluginUpdates.length > 0 && !UpdatesService.running
+          Layout.fillWidth: true
+          spacing: 2
+          RowLayout {
+            Layout.fillWidth: true
+            Caption { text: {{ tq "plugins" }}; Layout.fillWidth: true }
+            Button {
+              text: {{ tq "plugins.update" }}
+              onClicked: { root.close(); Quickshell.execDetached(["foot", "--hold", "sh", "-c", "mazapan plugins update && mazapan apply"]) }
+            }
+          }
+          Label {
+            text: root.pluginUpdates.map(p => p.id).join(", ")
+            elide: Text.ElideRight
+            Layout.fillWidth: true
+          }
+        }
+
+        // Firmware (fwupd): its own update, in a terminal (some finish at the next start).
+        ColumnLayout {
+          visible: root.firmware.length > 0 && !UpdatesService.running
+          Layout.fillWidth: true
+          spacing: 2
+          RowLayout {
+            Layout.fillWidth: true
+            Caption { text: {{ tq "firmware" }}; Layout.fillWidth: true }
+            Button {
+              text: {{ tq "firmware.update" }}
+              onClicked: { root.close(); Quickshell.execDetached(["foot", "--hold", "fwupdmgr", "update"]) }
+            }
+          }
+          Repeater {
+            model: root.firmware
+            Label {
+              required property var modelData
+              text: modelData.device + "   " + modelData.from + " → " + modelData.to
+              elide: Text.ElideRight
+              Layout.fillWidth: true
+            }
+          }
         }
 
         // The packages and apps.

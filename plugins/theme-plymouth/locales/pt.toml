@@ -1,0 +1,4 @@
+"plugin.name" = "Tela de inicialização no tema"
+"plugin.description" = "A tela enquanto o computador inicia, e a senha do disco pedida ali, nas cores do tema e no seu idioma (Plymouth): um só design da primeira tela à área de trabalho. O instalador a liga"
+"password" = "A senha do disco"
+"check" = "A tela de inicialização está no tema"

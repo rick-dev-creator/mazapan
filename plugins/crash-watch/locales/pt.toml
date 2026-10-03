@@ -1,0 +1,8 @@
+"plugin.name" = "Vigia de falhas"
+"plugin.description" = "Quando um app fecha inesperadamente (o próprio desktop incluído), uma notificação diz qual, com «Perguntar a um agente»: o agente recebe o relatório, com a falha nele"
+"title" = "Vigia de falhas"
+"crashed" = "%1 fechou inesperadamente"
+"how" = "Falhou (%1) às %2."
+"ask" = "Perguntar a um agente"
+"setting.every" = "Com que frequência olhar (segundos)"
+"setting.every.help" = "Com que frequência procura falhas novas."

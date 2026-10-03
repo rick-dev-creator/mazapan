@@ -1,0 +1,7 @@
+# Text shown by the crash watcher. %1, %2 are filled in at runtime.
+"title" = "Crash watcher"
+"crashed" = "%1 closed unexpectedly"
+"how" = "It crashed (%1) at %2."
+"ask" = "Ask an agent"
+"setting.every" = "How often to look (seconds)"
+"setting.every.help" = "How often it looks for new crashes."

@@ -110,6 +110,53 @@ Item {
     }
   }
 
+  // --- what a Flatpak app may reach ------------------------------------------------
+
+  // The app whose permissions are shown (null: none), and them.
+  property var perms: null
+  property var permsNow: []
+  property bool permsChanged: false
+  readonly property var permNames: ({
+    network: [{{ tq "perm.network" }}, {{ tq "perm.network.help" }}],
+    sound: [{{ tq "perm.sound" }}, {{ tq "perm.sound.help" }}],
+    devices: [{{ tq "perm.devices" }}, {{ tq "perm.devices.help" }}],
+    home: [{{ tq "perm.home" }}, {{ tq "perm.home.help" }}],
+    files: [{{ tq "perm.files" }}, {{ tq "perm.files.help" }}],
+    downloads: [{{ tq "perm.downloads" }}, {{ tq "perm.downloads.help" }}],
+    bluetooth: [{{ tq "perm.bluetooth" }}, {{ tq "perm.bluetooth.help" }}],
+  })
+  function showPerms(a) {
+    plan = null
+    perms = a
+    permsNow = []
+    permsReader.command = ["mazapan", "apps", "permissions", a.id, "--json"]
+    permsReader.running = true
+  }
+  function permit(key, on) {
+    if (!perms || permsWriter.running) return
+    permsWriter.command = key === "reset" ? ["mazapan", "apps", "permit", perms.id, "reset"]
+      : ["mazapan", "apps", "permit", perms.id, key, on ? "on" : "off"]
+    permsWriter.running = true
+  }
+  Process {
+    id: permsReader
+    stdout: StdioCollector {
+      onStreamFinished: {
+        try {
+          const o = JSON.parse(text)
+          root.permsNow = o.permissions || []
+          root.permsChanged = !!o.changed
+        } catch (e) {
+          root.permsNow = []
+        }
+      }
+    }
+  }
+  Process {
+    id: permsWriter
+    onExited: if (root.perms) root.showPerms(root.perms)
+  }
+
   // --- asking -------------------------------------------------------------------
 
   // One plan at a time: asked again while one is being worked out, the
@@ -322,7 +369,7 @@ Item {
   component AppRow: Rectangle {
     id: rowItem
     property var app
-    implicitHeight: 54
+    implicitHeight: app && app.from ? 68 : 54
     radius: Theme.radius
     color: ra.containsMouse ? Theme.surface : "transparent"
     MouseArea { id: ra; anchors.fill: parent; hoverEnabled: true }
@@ -337,11 +384,25 @@ Item {
         Layout.fillWidth: true
         Label { text: rowItem.app.name; elide: Text.ElideRight; Layout.fillWidth: true }
         Caption { text: rowItem.app.description; elide: Text.ElideRight; Layout.fillWidth: true }
+        // Another's catalog (config.toml's app_catalogs): whose, said.
+        Caption {
+          visible: !!rowItem.app.from
+          text: {{ tq "from" }}.arg(String(rowItem.app.from).replace(/^https:\/\/([^/]+).*$/, "$1"))
+          color: Theme.fgSubtle
+          elide: Text.ElideRight
+          Layout.fillWidth: true
+        }
       }
       Button {
         visible: rowItem.app.installed && !!rowItem.app.desktop
         text: {{ tq "open" }}
         onClicked: root.launch(rowItem.app)
+      }
+      // A Flatpak app: what it may reach, held back if wanted.
+      Button {
+        visible: rowItem.app.installed && !!rowItem.app.flatpak
+        text: {{ tq "permissions" }}
+        onClicked: root.showPerms(rowItem.app)
       }
       Button {
         visible: rowItem.app.removable
@@ -380,7 +441,8 @@ Item {
       radius: Theme.radius
       focus: true
       Keys.onEscapePressed: {
-        if (root.plan) root.plan = null
+        if (root.perms) root.perms = null
+        else if (root.plan) root.plan = null
         else if (root.profile !== "") root.profile = ""
         else root.close()
       }
@@ -623,6 +685,69 @@ Item {
             text: {{ tq "install_chosen" }}
             primary: true
             onClicked: root.ask(root.chosenIds, false)
+          }
+        }
+
+        // --- what a Flatpak app may reach -----------------------------------------------
+        Rectangle {
+          visible: !!root.perms
+          Layout.fillWidth: true
+          implicitHeight: permsBody.implicitHeight + 24
+          radius: Theme.radius
+          color: Theme.bg
+          border.color: Theme.accent
+          border.width: 1
+
+          ColumnLayout {
+            id: permsBody
+            x: 12
+            y: 12
+            width: parent.width - 24
+            spacing: 8
+
+            Label { text: root.perms ? {{ tq "perm.title" }}.arg(root.perms.name) : ""; font.bold: true }
+            GridLayout {
+              columns: 2
+              columnSpacing: 24
+              rowSpacing: 6
+              Layout.fillWidth: true
+              Repeater {
+                model: root.permsNow
+                RowLayout {
+                  required property var modelData
+                  Layout.fillWidth: true
+                  Layout.preferredWidth: 1
+                  spacing: 10
+                  ColumnLayout {
+                    spacing: 0
+                    Layout.fillWidth: true
+                    Label { text: (root.permNames[modelData.key] || [modelData.key])[0] }
+                    Caption { text: (root.permNames[modelData.key] || ["", ""])[1]; elide: Text.ElideRight; Layout.fillWidth: true }
+                  }
+                  Toggle {
+                    checked: modelData.on
+                    enabled: !permsWriter.running
+                    onToggled: on => root.permit(modelData.key, on)
+                  }
+                }
+              }
+            }
+            RowLayout {
+              Layout.fillWidth: true
+              spacing: 10
+              Caption {
+                text: {{ tq "perm.note" }}
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+              }
+              Button {
+                visible: root.permsChanged
+                text: {{ tq "perm.reset" }}
+                enabled: !permsWriter.running
+                onClicked: root.permit("reset", false)
+              }
+              Button { text: {{ tq "perm.done" }}; primary: true; onClicked: root.perms = null }
+            }
           }
         }
 

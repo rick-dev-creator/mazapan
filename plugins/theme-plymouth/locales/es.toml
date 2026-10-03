@@ -1,0 +1,4 @@
+"plugin.name" = "Pantalla de arranque en el tema"
+"plugin.description" = "La pantalla mientras arranca la computadora, y la contraseña del disco pedida ahí, con los colores del tema y en tu idioma (Plymouth): un solo diseño desde la primera pantalla hasta el escritorio. El instalador lo enciende"
+"password" = "La clave del disco"
+"check" = "La pantalla de arranque está en el tema"

@@ -188,6 +188,9 @@ Item {
       .concat(worldLanguages.filter(w => !languages.includes(w[0])))
     return q === "" ? all : all.filter(l => (l[0] + " " + l[1] + " " + Qt.locale(l[0]).nativeLanguageName).toLowerCase().includes(q))
   }
+  // Text in another direction set apart (Unicode's first-strong isolate):
+  // "العربية · us · UTC" keeps its order.
+  function isolated(s) { return "\u2068" + s + "\u2069" }
   // A language in its own words: "Español", "Français", "日本語".
   property var selfNames: ({})
   function nativeName(code) {
@@ -649,8 +652,11 @@ Item {
       anchors.rightMargin: 14
       spacing: 0
       Item { Layout.fillHeight: true }
-      Label { text: choice.text; font.bold: choice.selected; elide: Text.ElideRight; Layout.fillWidth: true }
-      Caption { visible: choice.detail !== ""; text: choice.detail; elide: Text.ElideRight; Layout.fillWidth: true }
+      // Aligned as the list is, whatever the script: an Arabic or a Hebrew
+      // name would otherwise go to the right on its own (Qt's natural
+      // alignment), the list ragged.
+      Label { text: choice.text; font.bold: choice.selected; elide: Text.ElideRight; horizontalAlignment: Text.AlignLeft; Layout.fillWidth: true }
+      Caption { visible: choice.detail !== ""; text: choice.detail; elide: Text.ElideRight; horizontalAlignment: Text.AlignLeft; Layout.fillWidth: true }
       Item { Layout.fillHeight: true }
     }
   }
@@ -1100,7 +1106,7 @@ Item {
             spacing: 10
             Row2 { key: {{ tq "r.disk" }}; value: root.diskNow ? (root.diskNow.model || root.diskNow.path) + " · " + root.size(root.diskNow.size) + (root.encrypt ? " · " + {{ tq "r.encrypted" }} : "") : "" }
             Row2 { key: {{ tq "r.account" }}; value: root.fullname.trim() + " (" + root.user + ") · " + root.hostname }
-            Row2 { key: {{ tq "r.language" }}; value: root.nativeName(root.language) + " · " + root.layout + (root.variant ? " " + root.variant : "") + " · " + (root.timezone || "UTC").replace(/_/g, " ") }
+            Row2 { key: {{ tq "r.language" }}; value: root.isolated(root.nativeName(root.language)) + " · " + root.layout + (root.variant ? " " + root.variant : "") + " · " + (root.timezone || "UTC").replace(/_/g, " ") }
             Row2 { key: {{ tq "r.apps" }}; value: root.appIds.length === 0 ? {{ tq "r.no_apps" }} : root.appIds.map(id => root.appName(id)).join(", ") }
             Row2 { visible: root.sshKeys.length > 0; key: {{ tq "r.ssh" }}; value: {{ tq "r.ssh_d" }}.arg(root.sshKeys.join(", ")) }
             Item { Layout.fillHeight: true }

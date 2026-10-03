@@ -54,3 +54,6 @@ tz_failed = "The time zone didn't change (the password was refused, or it failed
 "keys.super" = "With SUPER, so it never takes a key from an app"
 "keys.change" = "Change"
 "keys.cancel" = "Cancel"
+"kb.keep" = "Type in the field above. Keep this keyboard? The one before comes back in %1 s."
+"kb.back" = "Back now"
+"kb.keep_it" = "Keep it"

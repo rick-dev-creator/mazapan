@@ -1,0 +1,8 @@
+"plugin.name" = "Surveillance des plantages"
+"plugin.description" = "Quand une app se ferme de façon inattendue (le bureau lui-même compris), une notification dit laquelle, avec « Demander à un agent » : l'agent reçoit le rapport, le plantage dedans"
+"title" = "Surveillance des plantages"
+"crashed" = "%1 s'est fermé de façon inattendue"
+"how" = "Il a planté (%1) à %2."
+"ask" = "Demander à un agent"
+"setting.every" = "Fréquence (secondes)"
+"setting.every.help" = "À quelle fréquence il cherche de nouveaux plantages."

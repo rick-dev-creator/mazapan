@@ -58,3 +58,6 @@ tz_failed = "Le fuseau horaire n'a pas changé (mot de passe refusé, ou échec)
 "keys.super" = "Avec SUPER, pour ne jamais prendre une touche à une app"
 "keys.change" = "Changer"
 "keys.cancel" = "Annuler"
+"kb.keep" = "Tapez dans le champ ci-dessus. Garder ce clavier ? L'ancien revient dans %1 s."
+"kb.back" = "Revenir"
+"kb.keep_it" = "Le garder"

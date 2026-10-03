@@ -1,0 +1,8 @@
+"plugin.name" = "Protetor de tela"
+"plugin.description" = "Depois de um tempo sem uso, cada tela mostra a hora nas cores do tema, movendo-se devagar para nada ficar marcado; uma tecla ou o mouse e some. Um vídeo ou uma chamada o mantêm longe"
+"act.show" = "Protetor de tela agora"
+"act.show.kw" = "protetor tela relógio ausente"
+"setting.after" = "Depois de (minutos)"
+"setting.after.help" = "Minutos sem uso até aparecer. O bloqueio vem depois, como diz Inatividade."
+"setting.date" = "Mostrar a data"
+"setting.date.help" = "A data sob a hora."

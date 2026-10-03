@@ -192,4 +192,68 @@ public static partial class Program
             return [];
         }
     }
+
+    /// <summary>A device's firmware with a newer version (fwupd).</summary>
+    internal sealed record Firmware(string Device, string From, string To, string Summary);
+
+    /// <summary>
+    /// The firmware with updates, as fwupd knows them (fwupdmgr get-updates):
+    /// none without fwupd, or with nothing to update (it exits non-zero then).
+    /// Updated with `fwupdmgr update`, which may finish at the next start.
+    /// </summary>
+    internal static List<Firmware> PendingFirmware()
+    {
+        if (Exec.LookPath("fwupdmgr") == null) return [];
+        var r = Exec.Run("fwupdmgr", ["get-updates", "--json"]);
+        if (r.ExitCode != 0 || r.Stdout.Trim() == "") return [];
+        return ParseFirmware(r.Stdout);
+    }
+
+    internal static List<Firmware> ParseFirmware(string json)
+    {
+        var out_ = new List<Firmware>();
+        try
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(json);
+            if (!doc.RootElement.TryGetProperty("Devices", out var devices)) return out_;
+            foreach (var d in devices.EnumerateArray())
+            {
+                string S(System.Text.Json.JsonElement e, string k) =>
+                    e.TryGetProperty(k, out var v) && v.ValueKind == System.Text.Json.JsonValueKind.String ? v.GetString()! : "";
+                if (!d.TryGetProperty("Releases", out var rel) || rel.GetArrayLength() == 0) continue;
+                var newest = rel[0];
+                out_.Add(new Firmware(S(d, "Name"), S(d, "Version"), S(newest, "Version"), S(newest, "Summary")));
+            }
+        }
+        catch (System.Text.Json.JsonException) { }
+        return out_;
+    }
+
+    /// <summary>A plugin from git with a newer commit where it follows.</summary>
+    internal sealed record PluginUpdate(string Id, string From, string To);
+
+    /// <summary>
+    /// The plugins from git whose branch or tag has moved (git ls-remote: the
+    /// checkout isn't touched). Said only: `mazapan plugins update` brings
+    /// them, asking again for anything new they'd be able to do.
+    /// </summary>
+    internal static List<PluginUpdate> PendingPluginUpdates()
+    {
+        var out_ = new List<PluginUpdate>();
+        Install.PluginsLock lk;
+        try { lk = Install.PluginsLock.Load(); }
+        catch (MazapanException) { return out_; }
+        foreach (var e in lk.Plugins)
+        {
+            var dir = Paths.Join(Install.Git.Dir, e.Id);
+            if (!Directory.Exists(dir)) continue;
+            var (text, err) = Install.Git.TryRun(dir, "ls-remote", "origin", e.Ref == "" ? "HEAD" : e.Ref);
+            if (err != null) continue;
+            // A tag's own commit is the peeled line (^{}), when there is one.
+            var lines = text.Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(l => l.Split('\t')).Where(f => f.Length == 2).ToList();
+            var head = (lines.FirstOrDefault(f => f[1].EndsWith("^{}", StringComparison.Ordinal)) ?? lines.FirstOrDefault())?[0];
+            if (head != null && head != e.Commit) out_.Add(new PluginUpdate(e.Id, Install.Git.Short(e.Commit), Install.Git.Short(head)));
+        }
+        return out_;
+    }
 }

@@ -1,0 +1,39 @@
+[plugin]
+id = "theme-plymouth"
+name = "Boot screen in the theme"
+version = "0.1.0"
+api = 1
+description = "The screen while the computer starts, and the disk's password asked there, in the theme's colors and your language (Plymouth): one design from the first screen to the desktop. The installer turns it on"
+categories = ["hardware", "theme"]
+
+# For every machine, but it changes how the computer starts: on only when asked.
+[hardware]
+any = true
+
+[packages]
+pacman = ["plymouth"]
+
+# The theme (a Plymouth script, drawn from the theme's colors: no pictures),
+# in a folder of its own that only this plugin writes.
+[[targets]]
+template = "mazapan.plymouth.tmpl"
+output = "/usr/share/plymouth/themes/mazapan/mazapan.plymouth"
+system = true
+
+[[targets]]
+template = "mazapan.script.tmpl"
+output = "/usr/share/plymouth/themes/mazapan/mazapan.script"
+system = true
+reload = "if [ -e /usr/share/plymouth/themes/mazapan/mazapan.plymouth ]; then plymouth-set-default-theme mazapan; else plymouth-set-default-theme -r; fi; mkinitcpio -P >/dev/null"
+
+# Plymouth in the initramfs, right after systemd (or udev): it asks for the
+# disk's password itself, in the theme.
+[[targets]]
+template = "mkinitcpio.conf.tmpl"
+output = "/etc/mkinitcpio.conf.d/mazapan-plymouth.conf"
+system = true
+reload = "mkinitcpio -P >/dev/null"
+
+[[checks]]
+name = "{{ t \"check\" }}"
+run = "[ \"$(plymouth-set-default-theme)\" = mazapan ]"

@@ -31,6 +31,9 @@ public static partial class Program
           apps [list|plan|plan-remove|install|remove|undo] [ID...] [--json] [--gui] [-y]
                          the apps the catalog knows how to install, by profile
                          (Gaming, Development…), and installing or removing them
+          apps permissions ID [--json] | permit ID KEY on|off | permit ID reset
+                         what a Flatpak app may reach (network, sound, devices,
+                         home, files, downloads, bluetooth), changed for you
           timeline undo ID [-y]
                          put back what one apply changed (a theme, a setting, a
                          plugin on or off), even if others came after it

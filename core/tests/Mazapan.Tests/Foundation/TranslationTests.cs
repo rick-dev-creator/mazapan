@@ -24,6 +24,15 @@ public partial class TranslationTests
         Directory.GetDirectories(Path.Join(Repo.Root, "plugins")).Concat(Directory.GetDirectories(Path.Join(Repo.Root, "community")))
             .Select(d => Path.Join(d, "locales")).Where(Directory.Exists);
 
+    // The boot screen's text is drawn before anything but the initramfs is
+    // there, by a renderer that knows only ASCII.
+    [Fact]
+    public void TheBootScreenSaysItInAscii()
+    {
+        foreach (var f in Directory.GetFiles(Path.Join(Repo.Root, "plugins", "theme-plymouth", "locales"), "*.toml"))
+            Assert.True(Keys(f)["password"].All(c => c >= ' ' && c <= '~'), $"{f}: \"password\" isn't ASCII");
+    }
+
     [Fact]
     public void EveryLanguageSaysEverything()
     {

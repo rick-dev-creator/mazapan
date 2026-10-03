@@ -1,0 +1,8 @@
+"plugin.name" = "Absturzwächter"
+"plugin.description" = "Wenn sich eine App unerwartet schließt (der Desktop selbst eingeschlossen), sagt eine Benachrichtigung welche, mit „Einen Agenten fragen“: der Agent bekommt den Bericht, mit dem Absturz darin"
+"title" = "Absturzwächter"
+"crashed" = "%1 wurde unerwartet beendet"
+"how" = "Abgestürzt (%1) um %2."
+"ask" = "Einen Agenten fragen"
+"setting.every" = "Wie oft nachsehen (Sekunden)"
+"setting.every.help" = "Wie oft es nach neuen Abstürzen sucht."

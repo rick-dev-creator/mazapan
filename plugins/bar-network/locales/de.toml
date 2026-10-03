@@ -19,3 +19,10 @@
 "hint" = "Klick: verbinden · Rechtsklick: vergessen"
 
 "check" = "Netzwerk ist verbunden"
+"share" = "Dieses WLAN teilen"
+"share_hide" = "Code ausblenden"
+"share_scan" = "Die Kamera eines Telefons verbindet sich mit diesem Code mit „%1“"
+"speed_test" = "Geschwindigkeitstest"
+"speed_running" = "Wird getestet…"
+"speed_failed" = "Der Geschwindigkeitstest war nicht erreichbar"
+"speed_result" = "↓ %1 Mbit/s   ↑ %2 Mbit/s   %3 ms"

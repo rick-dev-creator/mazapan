@@ -1,0 +1,3 @@
+"plugin.name" = "Menu de inicialização no tema"
+"plugin.description" = "O menu do GRUB (e os snapshots nele) nas cores do tema: um só design da primeira tela à área de trabalho. O instalador o liga"
+"check" = "O menu de inicialização está no tema"

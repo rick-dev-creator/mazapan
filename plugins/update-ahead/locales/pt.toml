@@ -1,0 +1,5 @@
+"plugin.name" = "Atualizações baixadas antes"
+"plugin.description" = "As atualizações que houver, baixadas em segundo plano enquanto está na tomada e numa conexão que não é medida, para que atualizar leve um instante. Nada é instalado até você dizer. O instalador o liga"
+"check" = "As atualizações são baixadas antes"
+"setting.every" = "Horas entre buscas"
+"setting.every.help" = "Com que frequência procura atualizações para baixar antes."

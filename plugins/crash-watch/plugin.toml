@@ -1,0 +1,24 @@
+[plugin]
+id = "crash-watch"
+name = "Crash watcher"
+version = "0.1.0"
+api = 1
+description = "When an app closes unexpectedly (the desktop itself included), a notification says which, with \"Ask an agent\": the agent gets the report, the crash in it"
+categories = ["agent", "tools"]
+requires = ["shell-bar", "agent"]
+optional = true
+
+[packages]
+pacman = ["quickshell", "libnotify", "systemd", "foot"]
+
+[settings]
+# How often to look (seconds).
+every = { default = 30, min = 10, max = 300 }
+
+# systemd-coredump keeps every crash; it's read from coredumpctl since the
+# last one said (~/.local/state/mazapan/crash-watch.json), so one that took
+# the desktop down is said at the next login.
+[[targets]]
+template = "CrashWatch.qml.tmpl"
+output = "~/.config/quickshell/mazapan/panels/crash-watch.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"

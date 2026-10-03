@@ -1,0 +1,8 @@
+"plugin.name" = "Vigilante de cierres"
+"plugin.description" = "Cuando una app se cierra de forma inesperada (el escritorio incluido), una notificación dice cuál, con «Preguntar a un agente»: el agente recibe el informe, con el cierre en él"
+"title" = "Vigilante de cierres"
+"crashed" = "%1 se cerró de forma inesperada"
+"how" = "Falló (%1) a las %2."
+"ask" = "Preguntar a un agente"
+"setting.every" = "Cada cuánto mirar (segundos)"
+"setting.every.help" = "Cada cuánto busca cierres nuevos."

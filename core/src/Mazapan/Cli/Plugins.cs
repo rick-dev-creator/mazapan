@@ -20,8 +20,11 @@ public static partial class Program
         var out_ = new List<Plugin>();
         var failed = new List<Plugin>();
         var problems = new List<string>();
+        // One that can't be read is left out, said, and the rest still applies:
+        // a broken plugin mustn't leave the person without a desktop. Unless
+        // one that's on needs it (below: an unmet requirement, which stops it).
         foreach (var (id, err) in broken)
-            if (!cfg.IsDisabled(id)) problems.Add(err);
+            if (!cfg.IsDisabled(id)) Console.Error.WriteLine($"warning: plugin {id} left out, it can't be read: {err.Replace('\n', ' ')}");
         var found = new HashSet<string>();
         foreach (var p in all)
         {
@@ -57,7 +60,7 @@ public static partial class Program
     {
         (true, true) => "enabled",
         (true, false) => "on, not this machine",
-        (false, _) when p.Hardware != null => "off",
+        (false, _) when p.OffByDefault => "off",
         _ => "disabled",
     };
 

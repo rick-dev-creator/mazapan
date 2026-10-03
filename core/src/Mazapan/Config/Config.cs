@@ -24,6 +24,8 @@ public sealed class Settings
     public List<string> Disabled = [];
     /// <summary>Catalogs of plugins to add besides mazapan's own: URLs or paths of index.toml files.</summary>
     public List<string> Catalogs = [];
+    /// <summary>Catalogs of apps besides mazapan's own (the Apps menu): URLs or paths of apps.toml files.</summary>
+    public List<string> AppCatalogs = [];
     /// <summary>Hardware plugins are off until turned on: the ones that are.</summary>
     public List<string> Enabled = [];
     /// <summary>Per-plugin setting overrides: [plugins.&lt;id&gt;] key = value</summary>
@@ -49,6 +51,7 @@ public sealed class Settings
         c.Disabled = r.Strings("disabled_plugins");
         c.Enabled = r.Strings("enabled_plugins");
         c.Catalogs = r.Strings("catalogs");
+        c.AppCatalogs = r.Strings("app_catalogs");
         if (r.Raw("plugins") is { } plugins)
             foreach (var (id, v) in plugins)
             {
@@ -78,6 +81,7 @@ public sealed class Settings
         if (Disabled.Count > 0) TomlWriter.Key(b, "disabled_plugins", Disabled);
         if (Enabled.Count > 0) TomlWriter.Key(b, "enabled_plugins", Enabled);
         if (Catalogs.Count > 0) TomlWriter.Key(b, "catalogs", Catalogs);
+        if (AppCatalogs.Count > 0) TomlWriter.Key(b, "app_catalogs", AppCatalogs);
         if (Plugins.Count > 0)
         {
             b.Append("\n[plugins]\n");
@@ -94,20 +98,21 @@ public sealed class Settings
 
     /// <summary>
     /// IsOn: a plugin is on unless disabled; a hardware plugin is off unless
-    /// enabled (it's for some machines, and can write system files).
+    /// enabled (it's for some machines, and can write system files), and so
+    /// is an optional one (an extra, there for whoever wants it).
     /// </summary>
-    public bool IsOn(Plugins.Plugin p) => p.Hardware != null ? Enabled.Contains(p.Id) : !Disabled.Contains(p.Id);
+    public bool IsOn(Plugins.Plugin p) => p.OffByDefault ? Enabled.Contains(p.Id) : !Disabled.Contains(p.Id);
 
     public void TurnOn(Plugins.Plugin p)
     {
         Disabled.RemoveAll(d => d == p.Id);
-        if (p.Hardware != null && !Enabled.Contains(p.Id)) Enabled.Add(p.Id);
+        if (p.OffByDefault && !Enabled.Contains(p.Id)) Enabled.Add(p.Id);
     }
 
     public void TurnOff(Plugins.Plugin p)
     {
         Enabled.RemoveAll(d => d == p.Id);
-        if (p.Hardware == null && !Disabled.Contains(p.Id)) Disabled.Add(p.Id);
+        if (!p.OffByDefault && !Disabled.Contains(p.Id)) Disabled.Add(p.Id);
     }
 
     /// <summary>A plugin's overrides, or null.</summary>

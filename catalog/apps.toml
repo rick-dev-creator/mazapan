@@ -20,6 +20,12 @@
 #
 # [[profile]] is a set of apps for a use ("Gaming"), offered as one card.
 # No AUR: the repositories, Flathub or the web.
+#
+# Others can keep catalogs of their own, in this same form: config.toml's
+#   app_catalogs = ["https://example.com/apps.toml"]
+# adds them to the Apps menu (https, or a path; read again once a day). An
+# id already here stays this one's, their profiles can use these apps, and
+# only this catalog has the basic profile.
 
 # --- profiles ---------------------------------------------------------------
 

@@ -1,0 +1,8 @@
+"plugin.name" = "Économiseur d'écran"
+"plugin.description" = "Après un moment sans utilisation, chaque écran montre l'heure aux couleurs du thème, en se déplaçant lentement pour que rien ne marque l'écran ; une touche ou la souris et il disparaît. Une vidéo ou un appel le tiennent à l'écart"
+"act.show" = "Économiseur d'écran maintenant"
+"act.show.kw" = "économiseur écran horloge absent veille"
+"setting.after" = "Après (minutes)"
+"setting.after.help" = "Minutes sans utilisation avant qu'il apparaisse. Le verrouillage vient après, selon Inactivité."
+"setting.date" = "Afficher la date"
+"setting.date.help" = "La date sous l'heure."

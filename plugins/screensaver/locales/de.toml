@@ -1,0 +1,8 @@
+"plugin.name" = "Bildschirmschoner"
+"plugin.description" = "Nach einer Weile ohne Nutzung zeigt jeder Bildschirm die Uhrzeit in den Farben des Themes, langsam wandernd, damit sich nichts einbrennt; eine Taste oder die Maus und er ist weg. Ein Video oder ein Anruf halten ihn fern"
+"act.show" = "Bildschirmschoner jetzt"
+"act.show.kw" = "bildschirmschoner uhr abwesend"
+"setting.after" = "Nach (Minuten)"
+"setting.after.help" = "Minuten ohne Nutzung, bis er erscheint. Die Sperre kommt danach, wie Inaktivität sagt."
+"setting.date" = "Datum anzeigen"
+"setting.date.help" = "Das Datum unter der Uhrzeit."

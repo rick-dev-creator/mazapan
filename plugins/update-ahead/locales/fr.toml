@@ -1,0 +1,5 @@
+"plugin.name" = "Mises à jour téléchargées d'avance"
+"plugin.description" = "Les mises à jour disponibles, téléchargées en arrière-plan quand l'ordinateur est branché et sur une connexion non limitée, pour que mettre à jour prenne un instant. Rien n'est installé avant que vous le disiez. L'installateur l'active"
+"check" = "Les mises à jour sont téléchargées d'avance"
+"setting.every" = "Heures entre deux recherches"
+"setting.every.help" = "Fréquence à laquelle il cherche des mises à jour à télécharger d'avance."

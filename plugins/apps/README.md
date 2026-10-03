@@ -22,3 +22,13 @@ app's id or a profile's), `mazapan apps remove ID…`.
 
 The catalog is `catalog/apps.toml` in Mazapán's repository: data, not
 code; add an app or a profile with a pull request.
+Others' catalogs, in the same form, are added in config.toml:
+`app_catalogs = ["https://example.com/apps.toml"]`; their apps say whose
+they are.
+
+A Flatpak app's **Permissions**: what it may reach (the internet, sound and
+microphone, devices, your files, all files, Downloads, Bluetooth), each a
+switch, from its next start; "Its own again" undoes them. Only Flatpak apps
+can be held back: one from the repositories reaches whatever you can.
+From a terminal: `mazapan apps permissions ID`, `mazapan apps permit ID
+network off`.

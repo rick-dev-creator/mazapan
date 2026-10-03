@@ -1,0 +1,6 @@
+"act.show" = "Screensaver now"
+"act.show.kw" = "screensaver clock idle away"
+"setting.after" = "After (minutes)"
+"setting.after.help" = "Minutes without use until it shows. The lock comes after, as Idle says."
+"setting.date" = "Show the date"
+"setting.date.help" = "The date under the time."

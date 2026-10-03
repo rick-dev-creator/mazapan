@@ -59,7 +59,7 @@ public static partial class CatalogIndex
         {
             try
             {
-                var text = Read(c, refresh);
+                var text = Fetch(c, refresh, t => Parse(t, c));
                 if (text == null) continue;
                 foreach (var e in Parse(text, c))
                     if (seen.Add(e.Id)) entries.Add(e);
@@ -72,7 +72,12 @@ public static partial class CatalogIndex
         return (entries, problems);
     }
 
-    static string? Read(string catalog, bool refresh)
+    /// <summary>
+    /// A catalog's text, from a path or an https URL (cached for a day; the
+    /// last good one when it can't be reached). Only what passes check is
+    /// cached. Shared by the plugin catalogs and the app catalogs.
+    /// </summary>
+    internal static string? Fetch(string catalog, bool refresh, Action<string> check)
     {
         if (catalog.StartsWith("http://"))
             throw new MazapanException("not https: anyone on the way could point its plugins elsewhere");
@@ -95,7 +100,7 @@ public static partial class CatalogIndex
             using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(15), MaxResponseContentBufferSize = 1 << 20 };
             http.DefaultRequestHeaders.UserAgent.ParseAdd("mazapan");
             var text = http.GetStringAsync(catalog).GetAwaiter().GetResult();
-            Parse(text, catalog); // cache only what reads
+            check(text); // cache only what reads
             Files.WriteAtomic(cache, text);
             File.Delete(failed);
             return text;

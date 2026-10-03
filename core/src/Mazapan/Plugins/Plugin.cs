@@ -24,7 +24,12 @@ public sealed partial class Plugin
         public List<string> Requires = [];
         /// <summary>Categories, for the Plugins panel: bar, panel, theme, window, hardware, tools, agent.</summary>
         public List<string> Categories = [];
+        /// <summary>Optional: off until turned on, as hardware plugins are (the extras: a screensaver, reminders…).</summary>
+        public bool Optional;
     }
+
+    /// <summary>Off until turned on (enabled_plugins), rather than on until turned off (disabled_plugins).</summary>
+    public bool OffByDefault => Hardware != null || Meta.Optional;
 
     public MetaTable Meta { get; } = new();
 
@@ -114,6 +119,12 @@ public sealed partial class Plugin
         "/etc/systemd/system/ufw.service.d",
         // Hibernation: what a battery about to die does.
         "/etc/UPower/UPower.conf.d",
+        // The boot menu in the theme: a script grub-mkconfig runs.
+        "/etc/grub.d",
+        // The boot screen in the theme: Plymouth's theme, a folder only it writes.
+        "/usr/share/plymouth/themes/mazapan",
+        // Units of mazapan's own (mazapan-*.service, .timer): downloading ahead.
+        "/etc/systemd/system",
     ];
 
     static readonly HashSet<string> KnownToolkits =
@@ -256,6 +267,7 @@ public sealed partial class Plugin
         p.Meta.Description = meta.String("description");
         p.Meta.Requires = meta.Strings("requires");
         p.Meta.Categories = meta.Strings("categories");
+        p.Meta.Optional = meta.Bool("optional");
         foreach (var c in p.Meta.Categories)
             if (!Install.CatalogIndex.KnownCategories.Contains(c))
                 throw new MazapanException($"{path}: [plugin] category \"{c}\": one of {string.Join(", ", Install.CatalogIndex.KnownCategories)}");

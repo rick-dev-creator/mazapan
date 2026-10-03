@@ -1,0 +1,3 @@
+"plugin.name" = "Menú de arranque en el tema"
+"plugin.description" = "El menú de GRUB (y los snapshots en él) con los colores del tema: un solo diseño desde la primera pantalla hasta el escritorio. El instalador lo enciende"
+"check" = "El menú de arranque está en el tema"

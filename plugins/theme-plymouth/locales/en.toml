@@ -1,0 +1,4 @@
+# "password" is drawn as the computer starts, by a renderer that knows
+# only ASCII: no accents, no other scripts (a test checks every language).
+"password" = "The disk's password"
+"check" = "The boot screen is in the theme"

@@ -9,7 +9,7 @@ requires = ["shell-bar"]
 
 # Quickshell talks to NetworkManager over D-Bus.
 [packages]
-pacman = ["quickshell", "networkmanager"]
+pacman = ["quickshell", "networkmanager", "qrencode", "curl"]
 
 [[targets]]
 template = "Network.qml.tmpl"

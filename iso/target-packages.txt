@@ -47,6 +47,7 @@ avahi
 mazapan
 mazapan-keyring
 ufw
+plymouth
 upower
 pam-fde-boot-pw
 base-devel

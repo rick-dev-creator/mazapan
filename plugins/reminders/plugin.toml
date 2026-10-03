@@ -1,0 +1,34 @@
+[plugin]
+id = "reminders"
+name = "Reminders"
+version = "0.1.0"
+api = 1
+description = "A bell in the bar: what to remember and when (in ten minutes, at five, tomorrow morning), said as a notification then. Missed while the computer was off, said at the next start"
+categories = ["bar", "tools"]
+requires = ["shell-bar"]
+optional = true
+
+[packages]
+pacman = ["quickshell", "libnotify"]
+
+# One for the whole shell, however many bars: it keeps them
+# (~/.local/state/mazapan/reminders.json) and says them when it's time.
+[[targets]]
+template = "qmldir.tmpl"
+output = "~/.config/quickshell/mazapan/components/reminders/qmldir"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
+template = "RemindersService.qml.tmpl"
+output = "~/.config/quickshell/mazapan/components/reminders/RemindersService.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
+template = "Reminders.qml.tmpl"
+output = "~/.config/quickshell/mazapan/widgets/right/03-reminders.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[actions]]
+name = "{{ t \"act.new\" }}"
+run = "qs ipc -c mazapan call reminders open"
+keywords = "{{ t \"act.new.kw\" }}"

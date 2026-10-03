@@ -161,8 +161,9 @@ Hyprland, the shell restarted on its own). Better than it:
   --continue`): its plugins may need its own code.
 - Orphans offered, never removed alone; the cache keeps three versions
   (paccache.timer, weekly: rollbacks come from it).
-- After 1.0: downloading ahead (on power, unmetered), firmware (fwupd),
-  a pinned Arch snapshot.
+- Since (2026-10-03): downloading ahead (on power, unmetered), firmware
+  (fwupd) and plugin updates in the same panel. After 1.0: a pinned Arch
+  snapshot.
 
 ## Progress
 
@@ -189,15 +190,15 @@ Hyprland, the shell restarted on its own). Better than it:
 | 13 | The same desktop anywhere | Planned |
 | 14 | Workspace sessions | Dropped (2026-09-30): Hyprland's workspaces are enough |
 | 15 | The CLI in your language | Dropped (2026-09-30): the CLI stays in English; everything graphical is localized |
-| 16 | Installation and first boot | **Done** (2026-09-30): catalog (17), welcome, the ISO with its graphical installer (any language, time zone, keyboard), snapshots from the install on; what any machine needs (its hardware's drivers chosen live and installed offline, touchpad, keyring, default apps, printing, input methods); audited. Its own signed repository and unattended installs since (1.0's A and C7). Pending: publishing the ISO (hosting), real hardware, right-to-left languages in the list |
-| 17 | Apps: install and remove | **Done** (2026-09-29): catalog, `mazapan apps`, the Apps menu with profiles (several at once); Flatpak apps show without a new login (2026-09-30); audited. Pending: catalogs from others |
-| 18 | Settings with a face | In progress: the Settings panel (keyboard, touchpad and mouse, default apps, language and time zone) done (2026-09-30); Text (the fonts, each shown in itself, and the size; `font_ui`, `font_mono`, `font_size` over the theme's, on the timeline), Keys (every keybinding, changed by pressing the new keys, the desktop's own resting in a submap meanwhile, a key already taken said) and Security (the password) done (2026-10-03). Left: a revert timer for a keyboard layout one can't type in |
-| 19 | Security | In progress: researched (2026-09-30); the disk encrypted with a recovery key and one password, locked before sleep, the firewall (1.0's B), the password changed in one place, the privacy dots, hibernation (2026-10-03). To do: per-app permissions; fingerprint and FIDO2 need the hardware; TPM later |
-| 20 | Updates, visible | **Done** (2026-09-30): the bar says when there are, a panel shows them (news, restart), updated with a click (pkexec), Flatpak apps too; the updater redone after Omarchy's (2026-10-03). Pending: firmware, downloading ahead, plugin updates alongside |
-| 21 | Boot and login in the theme | In progress: the login screen (plugin `login`, greetd) done; the boot splash and menu to do |
-| 22 | Sharing | Planned |
+| 16 | Installation and first boot | **Done** (2026-09-30): catalog (17), welcome, the ISO with its graphical installer (any language, time zone, keyboard), snapshots from the install on; what any machine needs (its hardware's drivers chosen live and installed offline, touchpad, keyring, default apps, printing, input methods); audited. Its own signed repository and unattended installs since (1.0's A and C7). Right-to-left names aligned in the language list (2026-10-03). Pending: publishing the ISO (hosting), real hardware |
+| 17 | Apps: install and remove | **Done** (2026-09-29): catalog, `mazapan apps`, the Apps menu with profiles (several at once); Flatpak apps show without a new login (2026-09-30); audited; catalogs from others (`app_catalogs` in config.toml, their apps saying whose they are, 2026-10-03) |
+| 18 | Settings with a face | **Done**: the Settings panel (keyboard, touchpad and mouse, default apps, language and time zone) done (2026-09-30); Text (the fonts, each shown in itself, and the size; `font_ui`, `font_mono`, `font_size` over the theme's, on the timeline), Keys (every keybinding, changed by pressing the new keys, the desktop's own resting in a submap meanwhile, a key already taken said) and Security (the password) done (2026-10-03). A keyboard picked is tried: the one before comes back after 20 s unless kept (2026-10-03) |
+| 19 | Security | In progress: researched (2026-09-30); the disk encrypted with a recovery key and one password, locked before sleep, the firewall (1.0's B), the password changed in one place, the privacy dots, hibernation, what each Flatpak app may reach (2026-10-03). To do: the portal's grants (camera, location) and screen capture through Hyprland; fingerprint and FIDO2 need the hardware; TPM later |
+| 20 | Updates, visible | **Done** (2026-09-30): the bar says when there are, a panel shows them (news, restart), updated with a click (pkexec), Flatpak apps too; the updater redone after Omarchy's; firmware (fwupd) and plugin updates in the same panel, downloaded ahead on power and unmetered (`update-ahead`) (2026-10-03) |
+| 21 | Boot and login in the theme | **Done** (2026-10-03): the login screen (plugin `login`, greetd); the boot menu (`theme-grub`) and the boot splash with the disk's password (`theme-plymouth`) in the theme's colors, turned on by the installer |
+| 22 | Sharing | In progress: Wi-Fi as a QR and a speed test in the network card (2026-10-03). To do: sending to a device nearby (LocalSend) or on the tailnet (needs a second device) |
 | 23 | More capture | Planned |
-| 24 | Extras | Planned |
+| 24 | Extras | In progress: optional plugins (`optional = true`: off until turned on); reminders, the crash watcher (to the agent) and the screensaver in the theme (2026-10-03). Dictation later; the niche ones (Windows VM, converter) as community plugins |
 
 Part two (items 9–15, 2026-09-29): what's still missing next to Omarchy,
 and what would set this apart from it. 9–12 done; 13 left; 14 and 15
@@ -1113,6 +1114,13 @@ Order: 1, then 2, 3, 4, 5.
   subvolume with a swap file the size of the memory (below zram) where
   there's a battery, resume= on GRUB's line too; the lid suspends then
   hibernates on battery, a dying battery hibernates (UPower).
+- What a Flatpak app may reach (Flatseal's model): Apps › Permissions on
+  an installed Flatpak app, and `mazapan apps permissions|permit`: the
+  internet, sound and microphone, devices, home, all files, Downloads,
+  Bluetooth, each the person's own `flatpak override --user`, from the
+  app's next start; "Its own again" resets them. Said plainly to hold for
+  Flatpak apps only. Still to do: the portal's grants (camera, location,
+  screenshots) and screen capture asked for any app through Hyprland.
 
 Not now: AppArmor (no Arch-based distro turns it on; CachyOS warns it
 breaks things); time-boxed passwordless sudo for agents (sudo stays per
@@ -1162,6 +1170,16 @@ installed as root with an initramfs rebuild each time; the boot menu
   lock screen: one design from boot to desktop.
 - The initramfs rebuilt only when the splash actually changed.
 
+*Done (2026-10-03).* `theme-grub`: a script in /etc/grub.d writes GRUB's
+theme (gfxmenu, from the theme's colors, the terminal font copied next to
+it) whenever grub.cfg is made, so a snapshot added to the menu keeps it.
+`theme-plymouth`: a Plymouth script theme (no pictures: any theme has it)
+with the disk's password asked in the person's language; the initramfs
+rebuilt only when its files change. The initramfs's renderer knows only
+ASCII, so it says "Mazapan" and draws a star per letter (a test keeps
+every translation of the question ASCII). Both turned on by the
+installer; the release gate checks them.
+
 ## 22. Sharing
 
 **Omarchy today.** LocalSend send from a menu (clipboard, file, folder)
@@ -1203,6 +1221,20 @@ cheatsheets.
   language chosen in its settings, reminders in the notification center,
   the crash watcher feeding the agent API (6).
 - The niche ones (Windows VM, converter) as community plugins.
+
+*Done so far (2026-10-03).* `optional = true` in a plugin's manifest:
+off until turned on, as hardware plugins are, but nothing as root.
+`reminders`: a bell in the bar, what and when (in 10 or 30 minutes, an
+hour, tonight, tomorrow morning, or at a time), said as a notification;
+one due while the computer was off said at the next start; "Remind me of
+something" in the palette, `qs ipc … reminders add` from a script.
+`crash-watch`: systemd-coredump read since the last one said (so one that
+took the desktop down is said at the next login), a notification with
+"Ask an agent" running the agent plugin's own action, a crash loop said
+once every ten minutes. `screensaver`: after a while without use, the
+time on the theme's background with its colors drifting, moved each
+minute against burn-in; the idle inhibitors (a video, a call, "keep
+awake") keep it away; still with the theme's motion off.
 
 ## Also pending
 

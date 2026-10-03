@@ -19,7 +19,7 @@ Singleton {
   property bool checking: false
   // The last look failed (checkupdates missing, the config broken…): said, not "up to date".
   property string checkError: ""
-  readonly property int count: data ? (data.packages || []).length + (data.flatpaks || []).length : 0
+  readonly property int count: data ? (data.packages || []).length + (data.flatpaks || []).length + (data.firmware || []).length + (data.plugins || []).length : 0
   readonly property bool restart: !!data && data.restart === true
 
   // The update: its log's first line says which run it is.

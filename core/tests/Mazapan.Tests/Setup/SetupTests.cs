@@ -148,7 +148,7 @@ public class SetupTests
         Assert.Contains("autologin = true", Archinstall.UserConfig(a));
         Assert.Contains("pam-fde-boot-pw", doc.RootElement.GetProperty("packages").GetRawText());
         // Snapshots still (not in the boot menu: /boot isn't on btrfs).
-        Assert.Contains("enabled_plugins = [\"hw-snapshots\", \"firewall\", \"login\"]", Archinstall.UserConfig(a));
+        Assert.Contains("enabled_plugins = [\"hw-snapshots\", \"theme-grub\", \"theme-plymouth\", \"update-ahead\", \"firewall\", \"login\"]", Archinstall.UserConfig(a));
         Assert.DoesNotContain("grub-btrfs", doc.RootElement.GetProperty("packages").GetRawText());
         Assert.Contains("greetd", doc.RootElement.GetProperty("packages").GetRawText());
     }
@@ -236,7 +236,7 @@ public class SetupTests
         Assert.Contains("start-hyprland", files);
         Assert.DoesNotContain("--autologin", files);
         Assert.DoesNotContain("Default_keyring", files); // PAM opens the login keyring
-        Assert.Contains("enabled_plugins = [\"hw-snapshots\", \"hw-snapshots-grub\", \"firewall\", \"login\"]", files);
+        Assert.Contains("enabled_plugins = [\"hw-snapshots\", \"hw-snapshots-grub\", \"theme-grub\", \"theme-plymouth\", \"update-ahead\", \"firewall\", \"login\"]", files);
         Assert.DoesNotContain("autologin", files); // not encrypted: the login screen, always
         Assert.Contains("snapper --no-dbus -c root create", post);
         Assert.True(post.IndexOf("mazapan apply") < post.IndexOf("snapper --no-dbus -c root create"));

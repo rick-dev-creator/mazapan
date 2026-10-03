@@ -1,0 +1,29 @@
+[plugin]
+id = "theme-grub"
+name = "Boot menu in the theme"
+version = "0.1.0"
+api = 1
+description = "GRUB's menu (and the snapshots in it) in the theme's colors: one design from the first screen to the desktop. The installer turns it on"
+categories = ["hardware", "theme"]
+
+[hardware]
+bootloader = ["grub"]
+
+[packages]
+pacman = ["grub"]
+
+# Run by grub-mkconfig: it writes GRUB's theme next to grub.cfg (from this
+# theme's colors) and points GRUB at it. Taken off, the theme goes and
+# grub.cfg is written again without it.
+[[targets]]
+template = "grub-theme.sh.tmpl"
+output = "/etc/grub.d/mazapan_theme"
+system = true
+reload = "if [ -e /etc/grub.d/mazapan_theme ]; then chmod 755 /etc/grub.d/mazapan_theme; else rm -rf /boot/grub/themes/mazapan; fi; grub-mkconfig -o /boot/grub/grub.cfg >/dev/null 2>&1"
+
+# What can be seen as the person: /boot is often the EFI partition, root's
+# only (FAT, umask 077), so grub.cfg can't be read; the script that puts
+# the theme in it, ready for grub-mkconfig, can.
+[[checks]]
+name = "{{ t \"check\" }}"
+run = "[ -x /etc/grub.d/mazapan_theme ]"

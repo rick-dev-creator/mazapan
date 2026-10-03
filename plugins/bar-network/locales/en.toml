@@ -17,3 +17,10 @@
 "hint" = "click: connect · right-click: forget"
 
 "check" = "Network is up"
+"share" = "Share this Wi-Fi"
+"share_hide" = "Hide the code"
+"share_scan" = "A phone's camera joins “%1” from this code"
+"speed_test" = "Speed test"
+"speed_running" = "Testing…"
+"speed_failed" = "Couldn't reach the speed test"
+"speed_result" = "↓ %1 Mbps   ↑ %2 Mbps   %3 ms"

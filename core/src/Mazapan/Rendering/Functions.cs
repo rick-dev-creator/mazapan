@@ -42,6 +42,12 @@ static class Functions
         g.Add("rgb", DelegateCustomFunction.CreateFunc((string c) => "rgb(" + Six(c) + ")"));
         // rgba "#ffb000" 0.5 -> "rgba(ffb00080)"  (Hyprland color syntax)
         g.Add("rgba", DelegateCustomFunction.CreateFunc((string c, double a) => $"rgba({Six(c)}{AlphaByte(a):x2})"));
+        // rgbf "#ffb000" -> "1.000, 0.690, 0.000"  (Plymouth's scripts: 0 to 1)
+        g.Add("rgbf", DelegateCustomFunction.CreateFunc((string c) =>
+        {
+            var (r, gr, b) = Channels(c);
+            return string.Join(", ", new[] { r, gr, b }.Select(v => (v / 255.0).ToString("0.000", CultureInfo.InvariantCulture)));
+        }));
         // cssa "#ffb000" 0.5 -> "rgba(255, 176, 0, 0.5)"  (CSS syntax)
         g.Add("cssa", DelegateCustomFunction.CreateFunc((string c, double a) =>
         {

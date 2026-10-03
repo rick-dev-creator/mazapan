@@ -15,6 +15,8 @@ public sealed class App
     public List<string> Pacman = [];
     public string Flatpak = "", Webapp = "", Plugin = "";
     public List<string> Plugins = [];
+    /// <summary>The catalog it's from when it isn't mazapan's (config.toml's app_catalogs).</summary>
+    public string From = "";
     public Dictionary<string, (string Name, string Description)> Translations = [];
 
     /// <summary>How it's installed: pacman, flatpak, webapp or plugin.</summary>
@@ -37,6 +39,8 @@ public sealed class Profile
     /// <summary>What every computer gets (the installer's, preselected).</summary>
     public bool Basic;
     public List<string> Apps = [];
+    /// <summary>The catalog it's from when it isn't mazapan's.</summary>
+    public string From = "";
     public Dictionary<string, (string Name, string Description)> Translations = [];
 
     public (string Name, string Description) In(string lang)
@@ -76,7 +80,38 @@ public static partial class AppCatalog
         return Parse(text, path);
     }
 
-    public static (List<Profile> Profiles, List<App> Apps) Parse(string text, string from)
+    /// <summary>
+    /// Mazapán's catalog, then others' (config.toml: app_catalogs = [URL or
+    /// path, …]), as plugin catalogs are added. An id already there stays
+    /// the first one's; another catalog's profile can be made of any app
+    /// known by then, but only mazapan's has the basic one. A catalog that
+    /// can't be read is said and the rest still count.
+    /// </summary>
+    public static (List<Profile> Profiles, List<App> Apps, List<string> Problems) LoadAll(string own, IEnumerable<string> others, bool refresh = false)
+    {
+        var (profiles, apps) = Load(own);
+        var problems = new List<string>();
+        foreach (var c in others)
+        {
+            try
+            {
+                var text = Mazapan.Install.CatalogIndex.Fetch(c, refresh, t => Parse(t, c, apps));
+                if (text == null) continue;
+                var (ps, xs) = Parse(text, c, apps);
+                bool Taken(string id) => apps.Any(a => a.Id == id) || profiles.Any(p => p.Id == id);
+                foreach (var a in xs.Where(a => !Taken(a.Id)).ToList()) { a.From = c; apps.Add(a); }
+                foreach (var p in ps.Where(p => !Taken(p.Id)).ToList()) { p.From = c; profiles.Add(p); }
+            }
+            catch (Exception ex) when (ex is MazapanException or IOException or HttpRequestException or TaskCanceledException or UnauthorizedAccessException)
+            {
+                problems.Add($"app catalog {c}: {ex.Message}");
+            }
+        }
+        return (profiles, apps, problems);
+    }
+
+    /// <summary>Parse reads one catalog; known: the apps of the catalogs before it (another's, then).</summary>
+    public static (List<Profile> Profiles, List<App> Apps) Parse(string text, string from, IReadOnlyList<App>? known = null)
     {
         var r = new TomlReader(Toml.Parse(text, from), from);
         var apps = new List<App>();
@@ -131,7 +166,8 @@ public static partial class AppCatalog
             // One name, one thing: an id is an app's or a profile's.
             if (apps.Any(a => a.Id == p.Id)) throw new MazapanException($"{from}: profile {p.Id}: an app has that id too");
             if (p.Basic && profiles.Any(x => x.Basic)) throw new MazapanException($"{from}: profile {p.Id}: only one is basic");
-            if (p.Apps.FirstOrDefault(id => apps.All(a => a.Id != id)) is { } missing)
+            if (p.Basic && known != null) throw new MazapanException($"{from}: profile {p.Id}: only mazapan's catalog has the basic profile");
+            if (p.Apps.FirstOrDefault(id => apps.All(a => a.Id != id) && (known == null || known.All(a => a.Id != id))) is { } missing)
                 throw new MazapanException($"{from}: profile {p.Id}: no app \"{missing}\"");
             if (profiles.Any(x => x.Id == p.Id)) throw new MazapanException($"{from}: profile {p.Id} twice");
             profiles.Add(p);

@@ -1,0 +1,5 @@
+"plugin.name" = "Updates vorab geladen"
+"plugin.description" = "Die vorhandenen Updates, im Hintergrund geladen, solange der Computer am Strom und nicht in einem getakteten Netz ist, damit Aktualisieren nur einen Moment dauert. Nichts wird installiert, bevor du es sagst. Das Installationsprogramm schaltet es ein"
+"check" = "Updates werden vorab geladen"
+"setting.every" = "Stunden zwischen den Suchen"
+"setting.every.help" = "Wie oft nach Updates gesucht wird, die vorab geladen werden."

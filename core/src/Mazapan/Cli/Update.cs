@@ -83,6 +83,12 @@ public static partial class Program
             { "news", news.Select(n => (object)new Fields
                 { { "title", n.Title }, { "link", n.Link }, { "date", n.Date.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture) }, { "action", n.NeedsAction() } }).ToList() },
             { "flatpaks", flatpaks },
+            // Plugins from git with a newer version: mazapan plugins update brings them.
+            { "plugins", PendingPluginUpdates().Select(p => (object)new Fields
+                { { "id", p.Id }, { "from", p.From }, { "to", p.To } }).ToList() },
+            // Firmware (fwupd): shown, updated by fwupdmgr update (it may finish at the next start).
+            { "firmware", PendingFirmware().Select(f => (object)new Fields
+                { { "device", f.Device }, { "from", f.From }, { "to", f.To }, { "summary", f.Summary } }).ToList() },
             { "error", error },
             { "news_error", newsError },
         }));
@@ -187,6 +193,25 @@ public static partial class Program
                 var mark = it.NeedsAction() ? Style.Red + "!" + Style.Reset : " ";
                 Console.WriteLine($"  {mark} {it.Date:yyyy-MM-dd}  {it.Title}\n    {Style.Dim}{it.Link}{Style.Reset}");
             }
+        }
+
+        // Firmware is said, not updated here: fwupdmgr update does it (often at
+        // the next start, outside the system's own rollback).
+        var firmware = PendingFirmware();
+        if (firmware.Count > 0)
+        {
+            Header($"Firmware ({firmware.Count})");
+            foreach (var f in firmware) Console.WriteLine($"    {f.Device,-28} {Style.Dim}{f.From}{Style.Reset} → {f.To}");
+            Console.WriteLine($"  {Style.Dim}fwupdmgr update installs it (some at the next start){Style.Reset}");
+        }
+
+        // Plugins from git: their own update, which asks for what's new they'd do.
+        var pluginUpdates = PendingPluginUpdates();
+        if (pluginUpdates.Count > 0)
+        {
+            Header($"Plugins ({pluginUpdates.Count})");
+            foreach (var p in pluginUpdates) Console.WriteLine($"    {p.Id,-28} {Style.Dim}{p.From}{Style.Reset} → {p.To}");
+            Console.WriteLine($"  {Style.Dim}mazapan plugins update brings them (asking again for anything new they'd do){Style.Reset}");
         }
 
         if (fileChanges + orphans.Count > 0)

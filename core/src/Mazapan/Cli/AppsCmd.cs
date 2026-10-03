@@ -36,13 +36,16 @@ public static partial class Program
             .Bool("gui", "from the Apps panel: the password through polkit, no terminal")
             .Bool("y", "don't ask")
             .Parse(rest);
-        var (profiles, apps) = AppCatalog.Load(Paths.Join(Root(), "catalog", "apps.toml"));
+        var (profiles, apps) = AppsCatalog(sub == "list" && !fs.IsSet("json"));
         var yes = fs.IsSet("y") || fs.IsSet("gui");
         switch (sub)
         {
             case "list": return AppsList(profiles, apps, fs.IsSet("json"));
             case "plan": return AppsPlan(Pick(profiles, apps, fs.Rest), fs.IsSet("json"), remove: false);
             case "plan-remove": return AppsPlan(Pick(profiles, apps, fs.Rest), fs.IsSet("json"), remove: true);
+            // The person's own overrides: no root, no lock.
+            case "permissions": return AppsPermissions(apps, fs.Rest, fs.IsSet("json"));
+            case "permit": return AppsPermit(apps, fs.Rest);
         }
         // One at a time: pacman takes one anyway, and two runs would each
         // record the other's work.
@@ -52,8 +55,20 @@ public static partial class Program
             "install" => AppsInstall(Pick(profiles, apps, fs.Rest), fs.IsSet("gui"), yes),
             "remove" => AppsRemove(Pick(profiles, apps, fs.Rest), fs.IsSet("gui"), yes),
             "undo" => AppsUndo(fs.Rest, apps, fs.IsSet("gui"), yes),
-            _ => throw new MazapanException("usage: mazapan apps [list|plan|plan-remove|install|remove|undo] [ID...] [--json] [--gui] [-y]"),
+            _ => throw new MazapanException("usage: mazapan apps [list|plan|plan-remove|install|remove|undo|permissions|permit] [ID...] [--json] [--gui] [-y]"),
         };
+    }
+
+    /// <summary>
+    /// The apps one can install: mazapan's catalog, then config.toml's
+    /// app_catalogs. One that can't be read is left out (said, when asked).
+    /// </summary>
+    internal static (List<Profile> Profiles, List<App> Apps) AppsCatalog(bool say)
+    {
+        var (profiles, apps, problems) = AppCatalog.LoadAll(Paths.Join(Root(), "catalog", "apps.toml"), Settings.Load().AppCatalogs);
+        if (say)
+            foreach (var p in problems) Console.Error.WriteLine("warning: " + p);
+        return (profiles, apps);
     }
 
     static FileStream AppsLock()
@@ -189,14 +204,14 @@ public static partial class Program
                 "profiles", profiles.Select(p => new Fields
                 {
                     { "id", p.Id }, { "name", p.In(lang).Name }, { "description", p.In(lang).Description },
-                    { "glyph", p.Glyph }, { "basic", p.Basic }, { "apps", p.Apps },
+                    { "glyph", p.Glyph }, { "basic", p.Basic }, { "apps", p.Apps }, { "from", p.From },
                 }).ToList()
             },
             {
                 "apps", apps.Select(a => new Fields
                 {
                     { "id", a.Id }, { "name", a.In(lang).Name }, { "description", a.In(lang).Description },
-                    { "category", a.Category }, { "kind", a.Kind },
+                    { "category", a.Category }, { "kind", a.Kind }, { "from", a.From }, { "flatpak", a.Flatpak },
                     // A web app's launcher is the one webapps made for it.
                     { "desktop", a.Webapp != "" && now.Webapps.TryGetValue(a.Webapp.TrimEnd('/'), out var wid) ? $"mazapan-webapp-{wid}.desktop" : a.Desktop },
                     { "installed", now.Has(a) },
@@ -640,7 +655,7 @@ public static partial class Program
         if (plugins is { Count: > 0 })
         {
             var after = AppsNow.Read();
-            var catalogApps = AppCatalog.Load(Paths.Join(Root(), "catalog", "apps.toml")).Apps;
+            var catalogApps = AppsCatalog(false).Apps;
             var stillWanted = catalogApps.Where(after.Has).SelectMany(a => a.Plugins.Concat(a.Plugin != "" ? [a.Plugin] : [])).ToHashSet();
             if (after.Webapps.Count > 0) stillWanted.Add("webapps");
             var off = plugins.Where(p => !stillWanted.Contains(p) && after.Found.FirstOrDefault(x => x.Id == p) is { } pl && after.Cfg != null && after.Cfg.IsOn(pl)).ToList();

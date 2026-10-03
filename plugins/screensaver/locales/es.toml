@@ -1,0 +1,8 @@
+"plugin.name" = "Salvapantallas"
+"plugin.description" = "Tras un rato sin uso, cada pantalla muestra la hora con los colores del tema, moviéndose despacio para que nada se quede marcado; una tecla o el ratón y desaparece. Un vídeo o una llamada lo mantienen lejos"
+"act.show" = "Salvapantallas ahora"
+"act.show.kw" = "salvapantallas protector reloj ausente"
+"setting.after" = "Tras (minutos)"
+"setting.after.help" = "Minutos sin uso hasta que aparece. El bloqueo viene después, según Inactividad."
+"setting.date" = "Mostrar la fecha"
+"setting.date.help" = "La fecha bajo la hora."

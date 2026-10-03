@@ -1,0 +1,4 @@
+"plugin.name" = "Écran de démarrage dans le thème"
+"plugin.description" = "L'écran pendant le démarrage, et le mot de passe du disque demandé là, aux couleurs du thème et dans votre langue (Plymouth) : un seul design du premier écran au bureau. L'installateur l'active"
+"password" = "Le mot de passe du disque"
+"check" = "L'écran de démarrage est dans le thème"

@@ -15,6 +15,8 @@
 #                     move X Y | down | up | click X Y | rclick X Y | mclick X Y
 #                     | wheel X Y up|down [notches] | drag X1 Y1 X2 Y2 [ms]
 #   vm/vm shot [file] screenshot of the guest desktop (default vm/.state/shot.png)
+#   vm/vm screen [file] the screen as QEMU sees it (boot, GRUB, the disk's
+#                     password), when started with MAZAPAN_VGA=std
 #   vm/vm stop        power off
 #   vm/vm reset       throw away the overlay and seed: fresh first boot
 #   vm/vm destroy     delete all VM state, including the base image
@@ -151,6 +153,11 @@ boot() {
       -virtfs "local,path=$repo,mount_tag=myarch,security_model=none,id=myarch"
     )
   fi
+  # MAZAPAN_VGA=std: a plain VGA card, whose screen QEMU can capture before
+  # the system draws its own (firmware, GRUB, the disk's password): vm/vm
+  # try screen. Slower graphics; for looking at boot only.
+  local gpu=(-device "virtio-vga-gl,xres=$w,yres=$h,max_outputs=$outputs")
+  if [[ ${MAZAPAN_VGA:-} == std ]]; then gpu=(-device VGA,vgamem_mb=64); display=(-display none); fi
   log "booting ($cpus cpus, $mem, ${res}); serial log: vm/.state/${serial##*/}"
   setsid -f qemu-system-x86_64 \
     -name "$name" \
@@ -158,7 +165,7 @@ boot() {
     "${machine[@]}" \
     -device virtio-tablet-pci -device virtio-keyboard-pci \
     -audiodev pipewire,id=snd0 -device ich9-intel-hda -device hda-duplex,audiodev=snd0 \
-    -device "virtio-vga-gl,xres=$w,yres=$h,max_outputs=$outputs" \
+    "${gpu[@]}" \
     "${display[@]}" \
     -serial "file:$serial" \
     -monitor "unix:$mon_sock,server,nowait" \
@@ -302,6 +309,31 @@ else:
 PY
 }
 
+# The screen as QEMU sees it, whatever draws it (MAZAPAN_VGA=std).
+# One QMP command (system_powerdown…), no output.
+qmp() {
+  [[ -S $qmp_sock ]] || return 1
+  python3 - "$qmp_sock" "$1" <<'PY'
+import socket, sys, json
+s = socket.socket(socket.AF_UNIX); s.connect(sys.argv[1]); f = s.makefile("rw"); f.readline()
+for c in [{"execute": "qmp_capabilities"}, {"execute": sys.argv[2]}]:
+    f.write(json.dumps(c) + "\n"); f.flush(); r = json.loads(f.readline())
+    if "error" in r: sys.exit(r["error"]["desc"])
+PY
+}
+
+cmd_screen() {
+  local out="${1:-$state/screen.png}"
+  python3 - "$qmp_sock" "$(realpath -m "$out")" <<'PY'
+import socket, sys, json
+s = socket.socket(socket.AF_UNIX); s.connect(sys.argv[1]); f = s.makefile("rw"); f.readline()
+for c in [{"execute": "qmp_capabilities"}, {"execute": "screendump", "arguments": {"filename": sys.argv[2], "format": "png"}}]:
+    f.write(json.dumps(c) + "\n"); f.flush(); r = json.loads(f.readline())
+    if "error" in r: sys.exit("screendump: " + r["error"]["desc"])
+PY
+  log "saved $out"
+}
+
 cmd_shot() {
   local out="${1:-$state/shot.png}"
   cmd_run grim - > "$out"
@@ -310,7 +342,14 @@ cmd_shot() {
 
 cmd_stop() {
   running || { log "not running"; return; }
-  ssh "${ssh_opts[@]}" "$ssh_user@127.0.0.1" sudo systemctl poweroff 2>/dev/null || kill "$(cat "$pidfile")"
+  # Shut down, not pulled out: a hard stop can leave files written but empty
+  # (btrfs commits every 30 s; SSH host keys from the first boot were).
+  # The power button (ACPI, through QMP) when SSH can't do it; killed only
+  # if it hasn't stopped in 90 s.
+  ssh "${ssh_opts[@]}" "$ssh_user@127.0.0.1" sudo systemctl poweroff 2>/dev/null || qmp system_powerdown || true
+  local i
+  for i in $(seq 1 90); do running || break; sleep 1; done
+  running && kill "$(cat "$pidfile")"
   while running; do sleep 1; done
   rm -f "$pidfile"
   log "stopped"
@@ -337,7 +376,7 @@ cmd_destroy() {
 }
 
 case "${1:-}" in
-  create|start|headless|wait|ssh|provision|run|exec|key|mouse|shot|stop|reset|destroy|iso)
+  create|start|headless|wait|ssh|provision|run|exec|key|mouse|shot|screen|stop|reset|destroy|iso)
     c=$1; shift; "cmd_$c" "$@" ;;
   *) sed -n "2,/^set -e/{/^set -e/d;s/^# \\{0,1\\}//p}" "$0"; exit 1 ;;
 esac

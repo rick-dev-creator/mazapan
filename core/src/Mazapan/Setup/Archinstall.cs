@@ -18,7 +18,7 @@ public static class Archinstall
     const long MiB = 1024 * 1024;
 
     /// <summary>What goes in besides archinstall's own: the desktop and what building from the AUR needs.</summary>
-    public static readonly string[] Packages = ["mazapan", "mazapan-keyring", "ufw", "base-devel", "git", "sof-firmware", "reflector", "avahi"];
+    public static readonly string[] Packages = ["mazapan", "mazapan-keyring", "ufw", "plymouth", "base-devel", "git", "sof-firmware", "reflector", "avahi"];
 
     /// <summary>Mirrors the new system uses once installed (the install itself uses the ISO's).</summary>
     public static readonly string[] Mirrors =
@@ -158,6 +158,8 @@ public static class Archinstall
     public static string Post(Answers a, string server = "")
     {
         var s = new StringBuilder("set -eu\n");
+        // The boot screen (Plymouth) shows only with splash on the kernel's line.
+        s.Append("grep -q 'GRUB_CMDLINE_LINUX_DEFAULT=.*splash' /etc/default/grub || sed -i -E 's|^(GRUB_CMDLINE_LINUX_DEFAULT=\"[^\"]*)|\\1 splash|' /etc/default/grub\n");
         if (a.Hibernate == true && a.MemoryMiB > 0)
         {
             // Hibernation: a swap file as big as the memory, below zram (which
@@ -265,6 +267,12 @@ public static class Archinstall
         // in the boot menu when /boot is on btrfs (each has its kernel).
         c.Enabled.Add("hw-snapshots");
         if (!a.Encrypt) c.Enabled.Add("hw-snapshots-grub");
+        // The boot menu and the boot screen in the theme (GRUB, which every
+        // install has; Plymouth, which also asks for the disk's password).
+        c.Enabled.Add("theme-grub");
+        c.Enabled.Add("theme-plymouth");
+        // Updates downloaded ahead (on power, not metered): updating takes moments.
+        c.Enabled.Add("update-ahead");
         // Hibernation: the lid's sleep turns into it after a while, and a
         // battery about to die hibernates (the swap file is the install's).
         if (a.Hibernate == true) c.Enabled.Add("hibernate");

@@ -15,3 +15,18 @@ public class PasswordTests
         Assert.Null(Program.PasswordProblem("p4ss word!", true));
     }
 }
+
+public class FirmwareTests
+{
+    [Fact]
+    public void FwupdsUpdatesAreRead()
+    {
+        const string json = """
+            {"Devices":[{"Name":"System Firmware","Version":"1.10","Releases":[{"Version":"1.12","Summary":"UEFI update"}]},
+                        {"Name":"SSD","Version":"3","Releases":[]}]}
+            """;
+        var got = Program.ParseFirmware(json);
+        Assert.Equal([new Program.Firmware("System Firmware", "1.10", "1.12", "UEFI update")], got);
+        Assert.Empty(Program.ParseFirmware("not json"));
+    }
+}

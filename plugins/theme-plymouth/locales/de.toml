@@ -1,0 +1,4 @@
+"plugin.name" = "Startbildschirm im Theme"
+"plugin.description" = "Der Bildschirm beim Start des Computers, und das Festplattenpasswort, dort abgefragt, in den Farben des Themes und deiner Sprache (Plymouth): ein Design vom ersten Bildschirm bis zum Desktop. Das Installationsprogramm schaltet ihn ein"
+"password" = "Das Passwort der Festplatte"
+"check" = "Der Startbildschirm ist im Theme"

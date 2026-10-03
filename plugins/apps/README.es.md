@@ -23,3 +23,13 @@ necesita. Desde una terminal: `mazapan apps`, `mazapan apps install ID…`
 
 El catálogo es `catalog/apps.toml` en el repositorio de Mazapán: datos, no
 código; añade una app o un perfil con un pull request.
+Los catálogos de otros, con la misma forma, se añaden en config.toml:
+`app_catalogs = ["https://example.com/apps.toml"]`; sus apps dicen de quién
+son.
+
+Los **Permisos** de una app Flatpak: a qué puede acceder (internet, sonido y
+micrófono, dispositivos, tus archivos, todos los archivos, Descargas,
+Bluetooth), cada uno un interruptor, desde su próximo inicio; «Volver a los
+suyos» los deshace. Solo las apps Flatpak se pueden limitar: una de los
+repositorios llega a todo lo que tú puedes. Desde una terminal: `mazapan
+apps permissions ID`, `mazapan apps permit ID network off`.
