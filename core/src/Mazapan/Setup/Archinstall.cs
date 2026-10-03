@@ -18,7 +18,7 @@ public static class Archinstall
     const long MiB = 1024 * 1024;
 
     /// <summary>What goes in besides archinstall's own: the desktop and what building from the AUR needs.</summary>
-    public static readonly string[] Packages = ["mazapan", "base-devel", "git", "sof-firmware", "reflector", "avahi"];
+    public static readonly string[] Packages = ["mazapan", "mazapan-keyring", "ufw", "base-devel", "git", "sof-firmware", "reflector", "avahi"];
 
     /// <summary>Mirrors the new system uses once installed (the install itself uses the ISO's).</summary>
     public static readonly string[] Mirrors =
@@ -35,7 +35,7 @@ public static class Archinstall
     static string[] Snapshots(Answers a) =>
         a.Encrypt ? ["snapper", "snap-pac"] : ["snapper", "snap-pac", "grub-btrfs", "inotify-tools"];
 
-    public static string Config(Answers a, long diskBytes, string consoleKeymap)
+    public static string Config(Answers a, long diskBytes, string consoleKeymap, string server = "")
     {
         var esp = a.Encrypt ? 2048 * MiB : 512 * MiB;
         var mainStart = MiB + esp;
@@ -90,7 +90,7 @@ public static class Archinstall
                 { "print_service_config", new Fields { { "enabled", true } } },
             } },
             { "bootloader_config", new Fields { { "bootloader", "Grub" }, { "uki", false }, { "removable", false } } },
-            { "custom_commands", new List<object> { Post(a) } },
+            { "custom_commands", new List<object> { Post(a, server) } },
             { "disk_config", disk },
             { "hostname", a.Hostname },
             { "kernels", new List<object> { "linux" } },
@@ -102,7 +102,7 @@ public static class Archinstall
             } },
             { "network_config", new Fields { { "type", "nm" } } },
             { "ntp", true },
-            { "packages", Packages.Concat(Snapshots(a)).Concat(a.HardwarePackages).Concat(a.Encrypt ? [] : ["greetd"]).Concat(a.SshKeys.Count > 0 ? ["openssh"] : [])
+            { "packages", Packages.Concat(Snapshots(a)).Concat(a.HardwarePackages).Concat(["greetd", "pam-fde-boot-pw"]).Concat(a.SshKeys.Count > 0 ? ["openssh"] : [])
                 .Concat(NeedsCjk(a) ? ["noto-fonts-cjk"] : [])
                 .Concat(TypesCjk(a) ? ["fcitx5", "fcitx5-gtk", "fcitx5-qt", "fcitx5-configtool", "fcitx5-mozc", "fcitx5-chinese-addons", "fcitx5-hangul"] : [])
                 .Cast<object>().ToList() },
@@ -152,7 +152,7 @@ public static class Archinstall
     /// screen (plugin login), or, encrypted, straight in (the disk's
     /// password was the login).
     /// </summary>
-    public static string Post(Answers a)
+    public static string Post(Answers a, string server = "")
     {
         var s = new StringBuilder("set -eu\n");
         if (!a.Encrypt)
@@ -167,9 +167,18 @@ public static class Archinstall
         }
         else
         {
-            s.Append("install -d /etc/systemd/system/getty@tty1.service.d\n");
-            s.Append(Write("/etc/systemd/system/getty@tty1.service.d/autologin.conf",
-                $"[Service]\nExecStart=\nExecStart=-/usr/bin/agetty --noreset --noclear --autologin {a.User} - ${{TERM}}\n"));
+            // systemd's initramfs (sd-encrypt, sd-vconsole), as the Arch Wiki
+            // and every systemd distro: archinstall makes the older one
+            // (encrypt, keymap) unless there's a security key. With systemd's,
+            // the password typed as it starts stays in the kernel keyring,
+            // where the login takes it (pam_fde_boot_pw: one password), and
+            // the installer's keyboard is in it (sd-vconsole: the password is
+            // typed in the layout it was chosen in).
+            s.Append("sed -i -E '/^HOOKS=/{s/\\budev\\b/systemd/; s/\\bkeymap consolefont\\b/sd-vconsole/; s/\\bencrypt\\b/sd-encrypt/}' /etc/mkinitcpio.conf\n");
+            s.Append("sed -i -E 's/cryptdevice=UUID=([^: ]+):root/rd.luks.name=\\1=root/' /etc/default/grub\n");
+            s.Append("grep -q '^HOOKS=.*sd-encrypt' /etc/mkinitcpio.conf && grep -q 'rd.luks.name=' /etc/default/grub\n");
+            s.Append("mkinitcpio -P\n");
+            s.Append("grub-mkconfig -o /boot/grub/grub.cfg\n");
             s.Append("grub-install --target=x86_64-efi --efi-directory=/boot --boot-directory=/boot --removable\n");
         }
         // Arch's own pacman.conf (archinstall copies the ISO's, which only
@@ -180,6 +189,18 @@ public static class Archinstall
             Write("/etc/pacman.conf", PacmanConf).TrimEnd('\n') + "; fi\n");
         s.Append("sed -i -e '/^#\\[multilib\\]/,/^#Include/ s/^#//' -e 's/^#Color/Color/' /etc/pacman.conf\n");
         s.Append("rm -f /var/lib/pacman/sync/offline.*\n");
+        // Mazapán's own repository, so it updates itself: the stable channel,
+        // its keys in pacman's keyring. Not while it isn't published (server
+        // empty): pacman fails on a repository it can't reach.
+        // Only with its keys in pacman's keyring: without them its packages
+        // would stop every update. A failure here never stops the install.
+        if (server != "")
+            s.Append($"if [ -f {Pacman.Repository.Keyring} ] && pacman-key -l >/dev/null 2>&1 && pacman-key --populate mazapan >/dev/null 2>&1; then " +
+                Write(Pacman.Repository.Mirrorlist, Pacman.Repository.MirrorlistText(server, "stable")).TrimEnd('\n') + "; " +
+                Pacman.Repository.EnableScript + "; else echo \"Mazapán's repository not added: its keys aren't there\"; fi\n");
+        // pacman's cache pruned weekly, three versions of each package kept:
+        // what a rollback takes the previous one from (pacman-contrib).
+        s.Append("systemctl enable paccache.timer\n");
         // The mirrors nearest to where you are, when there's a connection
         // now (else the worldwide ones stay).
         if (a.Country != "")
@@ -196,18 +217,6 @@ public static class Archinstall
         var home = "/home/" + a.User;
         s.Append($"install -d -o {a.User} -g {a.User} {home}/.config {home}/.config/mazapan {home}/.local {home}/.local/state {home}/.local/state/mazapan {home}/.cache\n");
         s.Append(Write($"{home}/.config/mazapan/config.toml", UserConfig(a)));
-        if (a.Encrypt)
-        {
-            // Nobody types a password to log in (the disk's was it), so the
-            // keyring can't be opened with one: it has none (the disk is
-            // encrypted). With the login screen, PAM opens it with the password.
-            s.Append($"install -d -o {a.User} -g {a.User} {home}/.local/share\n");
-            s.Append($"install -d -m 700 -o {a.User} -g {a.User} {home}/.local/share/keyrings\n");
-            s.Append(Write($"{home}/.local/share/keyrings/Default_keyring.keyring",
-                "[keyring]\ndisplay-name=Default keyring\nctime=0\nmtime=0\nlock-on-idle=false\nlock-after=false\n"));
-            s.Append(Write($"{home}/.local/share/keyrings/default", "Default_keyring\n"));
-            s.Append($"chmod 600 {home}/.local/share/keyrings/Default_keyring.keyring {home}/.local/share/keyrings/default\n");
-        }
         // The first login opens the welcome where the installer left off.
         s.Append(Write($"{home}/.local/state/mazapan/welcome.json", "{\"step\":\"look\",\"done\":false}\n"));
         if (a.Apps.Count > 0) s.Append(Write($"{home}/.local/state/mazapan/first-apps", string.Join('\n', a.Apps) + "\n"));
@@ -244,8 +253,14 @@ public static class Archinstall
         // in the boot menu when /boot is on btrfs (each has its kernel).
         c.Enabled.Add("hw-snapshots");
         if (!a.Encrypt) c.Enabled.Add("hw-snapshots-grub");
-        // The login screen, unless the disk's password is the login.
-        if (!a.Encrypt) c.Enabled.Add("login");
+        // The firewall: nothing in that wasn't asked for; SSH too when the
+        // install was given keys to be reached with.
+        c.Enabled.Add("firewall");
+        if (a.SshKeys.Count > 0) c.Plugins["firewall"] = new(StringComparer.Ordinal) { ["ssh"] = true };
+        // The login screen; encrypted, straight in once each start (the disk's
+        // password, just typed, was the login, and opens the keyring too).
+        c.Enabled.Add("login");
+        if (a.Encrypt) c.Plugins["login"] = new(StringComparer.Ordinal) { ["autologin"] = true };
         // Typing Chinese, Japanese, Korean, where it's the language or the place.
         if (TypesCjk(a)) c.Enabled.Add("input-method");
         // This machine's hardware plugins (its GPU's drivers…), their packages
@@ -277,10 +292,11 @@ public static class Archinstall
 
     const string BashProfile = """
 
-        # mazapan: the desktop on tty1. The first time, mazapan writes it.
+        # mazapan: the desktop on tty1. The first time, and whenever Mazapán
+        # changed since (an update by hand), mazapan writes it.
         # Not exec'd: if Hyprland stops there's a shell here, not a loop.
         if [[ -z $WAYLAND_DISPLAY && $(tty) == /dev/tty1 ]]; then
-          [[ -e ~/.config/hypr/hyprland.lua ]] || mazapan apply >~/.cache/mazapan-first-apply.log 2>&1
+          mazapan apply --if-updated >~/.cache/mazapan-login-apply.log 2>&1
           start-hyprland >~/.cache/start-hyprland.log 2>&1
         fi
 

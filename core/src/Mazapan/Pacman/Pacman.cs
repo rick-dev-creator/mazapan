@@ -177,6 +177,79 @@ public static class Packages
         if (RunAsRoot("-Syu", "--noconfirm") is { } err) throw new MazapanException(err);
     }
 
+    /// <summary>The keyrings among what's pending: they go first (Keyrings).</summary>
+    public static readonly string[] KeyringPackages = ["archlinux-keyring", "mazapan-keyring"];
+
+    /// <summary>
+    /// Keyrings brings the keyrings up to date before the rest, as Arch's own
+    /// advice and Omarchy do: packages signed by a key the old keyring
+    /// doesn't know would stop the whole upgrade. Upgrade follows at once.
+    /// </summary>
+    public static void Keyrings(IEnumerable<string> names)
+    {
+        var list = names.Where(n => KeyringPackages.Contains(n)).ToList();
+        if (list.Count == 0) return;
+        if (RunAsRoot(["-Sy", "--needed", "--noconfirm", .. list]) is { } err) throw new MazapanException("the keyrings: " + err);
+    }
+
+    /// <summary>Orphans: installed as a dependency, and nothing needs them anymore (pacman -Qtdq).</summary>
+    public static List<string> Orphans()
+    {
+        var r = Exec.Run("pacman", ["-Qtdq"]);
+        return r.ExitCode == 0 ? [.. Exec.Lines(r.Stdout).Select(l => l.Trim()).Where(Applying.AsRoot.IsPackage)] : [];
+    }
+
+    public static bool RemoveOrphans(List<string> names) =>
+        names.Count > 0 && names.All(Applying.AsRoot.IsPackage) && RunAsRoot(["-Rns", "--noconfirm", "--", .. names]) == null;
+
+    public const string Log = "/var/log/pacman.log";
+
+    /// <summary>How long pacman's log is now: what an update adds comes after.</summary>
+    public static long LogLength() => File.Exists(Log) ? new FileInfo(Log).Length : 0;
+
+    public static string LogSince(long offset)
+    {
+        try
+        {
+            using var f = new FileStream(Log, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            if (offset > f.Length) offset = 0; // rotated
+            f.Seek(offset, SeekOrigin.Begin);
+            return new StreamReader(f, Files.Utf8).ReadToEnd();
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            return "";
+        }
+    }
+
+    /// <summary>
+    /// InitramfsFailed: what pacman's log says its mkinitcpio hook did, when it
+    /// failed (null if it didn't run or went well). A system rebooted with a
+    /// failed initramfs doesn't start: that's a failed update, rolled back.
+    /// </summary>
+    public static string? InitramfsFailed(string log)
+    {
+        // Only an image that wasn't made counts: mkinitcpio reports errors it
+        // builds through (a module in MODULES that's gone) and still makes it.
+        // The reason given is the error before the failure.
+        var inHook = false;
+        string? lastError = null;
+        foreach (var line in log.Split('\n'))
+        {
+            if (line.Contains("[ALPM] running '", StringComparison.Ordinal))
+            {
+                inHook = line.Contains("mkinitcpio", StringComparison.Ordinal);
+                lastError = null;
+                continue;
+            }
+            if (!inHook || !line.Contains("[ALPM-SCRIPTLET]", StringComparison.Ordinal)) continue;
+            var text = line[(line.IndexOf("[ALPM-SCRIPTLET]", StringComparison.Ordinal) + 16)..].Trim();
+            if (text.Contains("==> ERROR:", StringComparison.Ordinal)) lastError = text;
+            else if (text.Contains("Image generation FAILED", StringComparison.Ordinal)) return lastError ?? text;
+        }
+        return null;
+    }
+
     /// <summary>
     /// ArchiveUrl finds the package file for name at version on the Arch Linux
     /// Archive, which keeps every version ever published (signed, so pacman

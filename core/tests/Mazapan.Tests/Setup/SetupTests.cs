@@ -137,13 +137,20 @@ public class SetupTests
         using var creds = JsonDocument.Parse(Archinstall.Creds(a));
         Assert.Equal(a.Password, creds.RootElement.GetProperty("encryption_password").GetString());
         Assert.Equal(a.Password, creds.RootElement.GetProperty("users")[0].GetProperty("!password").GetString());
-        Assert.Contains("--autologin rick", Decoded(Archinstall.Post(a)));
-        Assert.Contains("lock-on-idle=false", Decoded(Archinstall.Post(a)));
-        Assert.DoesNotContain("login", Archinstall.UserConfig(a));
+        // One password: greetd goes straight in that start, and the keyring
+        // opens with the disk's password (not a keyring without one).
+        Assert.DoesNotContain("--autologin", Decoded(Archinstall.Post(a)));
+        // systemd's initramfs: the password stays in the kernel keyring for the login.
+        Assert.Contains("s/\\bencrypt\\b/sd-encrypt/", Archinstall.Post(a));
+        Assert.Contains("rd.luks.name=", Archinstall.Post(a));
+        Assert.DoesNotContain("sd-encrypt", Archinstall.Post(Answers.Parse(Good)));
+        Assert.DoesNotContain("lock-on-idle=false", Decoded(Archinstall.Post(a)));
+        Assert.Contains("autologin = true", Archinstall.UserConfig(a));
+        Assert.Contains("pam-fde-boot-pw", doc.RootElement.GetProperty("packages").GetRawText());
         // Snapshots still (not in the boot menu: /boot isn't on btrfs).
-        Assert.Contains("enabled_plugins = [\"hw-snapshots\"]", Archinstall.UserConfig(a));
+        Assert.Contains("enabled_plugins = [\"hw-snapshots\", \"firewall\", \"login\"]", Archinstall.UserConfig(a));
         Assert.DoesNotContain("grub-btrfs", doc.RootElement.GetProperty("packages").GetRawText());
-        Assert.DoesNotContain("greetd", doc.RootElement.GetProperty("packages").GetRawText());
+        Assert.Contains("greetd", doc.RootElement.GetProperty("packages").GetRawText());
     }
 
     [Theory]
@@ -183,6 +190,20 @@ public class SetupTests
         Assert.Throws<MazapanException>(() => Archinstall.Config(Answers.Parse(Good), 4L * 1024 * 1024 * 1024, "us"));
 
     [Fact]
+    public void MazapanUpdatesFromItsRepositoryOnceItsPublished()
+    {
+        var a = Answers.Parse(Good);
+        Assert.DoesNotContain("[mazapan]", Archinstall.Post(a));
+        var post = Archinstall.Post(a, "https://example.org/$channel/$arch");
+        Assert.Contains("# mazapan channel: stable\n", Decoded(post));
+        Assert.Contains("Server = https://example.org/stable/$arch\n", Decoded(post));
+        Assert.Contains("[mazapan]", post);
+        Assert.Contains("pacman-key --populate mazapan", post);
+        // Before the first update, which needs it.
+        Assert.True(post.IndexOf("[mazapan]", StringComparison.Ordinal) < post.IndexOf("pacman -Syu", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void AfterwardsTheAccountHasItsDesktop()
     {
         var a = Answers.Parse(Good);
@@ -197,7 +218,8 @@ public class SetupTests
         Assert.Contains("start-hyprland", files);
         Assert.DoesNotContain("--autologin", files);
         Assert.DoesNotContain("Default_keyring", files); // PAM opens the login keyring
-        Assert.Contains("enabled_plugins = [\"hw-snapshots\", \"hw-snapshots-grub\", \"login\"]", files);
+        Assert.Contains("enabled_plugins = [\"hw-snapshots\", \"hw-snapshots-grub\", \"firewall\", \"login\"]", files);
+        Assert.DoesNotContain("autologin", files); // not encrypted: the login screen, always
         Assert.Contains("snapper --no-dbus -c root create", post);
         Assert.True(post.IndexOf("mazapan apply") < post.IndexOf("snapper --no-dbus -c root create"));
         Assert.Contains("Option \"XkbLayout\" \"latam\"", files);

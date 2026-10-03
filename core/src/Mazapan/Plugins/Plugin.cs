@@ -110,6 +110,8 @@ public sealed partial class Plugin
         // The login screen: greetd's configuration (its own is left alone), how it's
         // started, and its own PAM service (a new one: the system's aren't touched).
         "/etc/greetd", "/etc/systemd/system/greetd.service.d", "/etc/pam.d",
+        // The firewall: ufw started at every start, while mazapan's drop-in is there.
+        "/etc/systemd/system/ufw.service.d",
     ];
 
     static readonly HashSet<string> KnownToolkits =

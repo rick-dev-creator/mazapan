@@ -25,6 +25,7 @@
 # as root over SSH; run/exec/shot act in the live session's desktop.
 #   vm/vm try start | headless | wait | ssh | run | exec | key | mouse | shot | stop | reset
 # Once installed: MAZAPAN_TRY_USER=<the account> vm/vm try ssh|run|shot…
+# (MAZAPAN_TRY_NOISO=1 vm/vm try headless: the disk alone, the ISO out)
 set -euo pipefail
 
 repo="$(cd "$(dirname "$0")/.." && pwd)"
@@ -116,15 +117,22 @@ boot() {
   [[ -f $disk && -f $seed ]] || cmd_create
   local w=${res%x*} h=${res#*x} machine
   if [[ $mode == try ]]; then
-    local iso="${MAZAPAN_ISO:-$(ls -t "$state"/iso/*.iso 2>/dev/null | head -1)}"
-    [[ -f $iso ]] || die "no ISO: vm/vm iso first (or MAZAPAN_ISO=path)"
+    local iso="${MAZAPAN_ISO:-$(ls -t "$state"/iso/*.iso 2>/dev/null | head -1)}" cd=()
+    # MAZAPAN_TRY_NOISO=1: the disk alone (what was installed), as with the
+    # stick taken out (firmware would start the ISO first otherwise).
+    if [[ ${MAZAPAN_TRY_NOISO:-} == 1 ]]; then
+      log "booting the disk (no ISO)"
+    else
+      [[ -f $iso ]] || die "no ISO: vm/vm iso first (or MAZAPAN_ISO=path)"
+      log "booting ${iso##*/} (UEFI, blank disk $disk_size)"
+      cd=(-drive "file=$iso,media=cdrom,readonly=on")
+    fi
     [[ -f $vars ]] || cmd_create
-    log "booting ${iso##*/} (UEFI, blank disk $disk_size)"
     machine=(
       -drive "if=pflash,format=raw,unit=0,readonly=on,file=$ovmf/OVMF_CODE.4m.fd"
       -drive "if=pflash,format=raw,unit=1,file=$vars"
       -drive "file=$disk,if=virtio,discard=unmap"
-      -drive "file=$iso,media=cdrom,readonly=on"
+      "${cd[@]}"
       -drive "file=$seed,media=cdrom,readonly=on"
       -nic "user,model=virtio-net-pci,hostfwd=tcp:127.0.0.1:$ssh_port-:22"
     )

@@ -8,7 +8,9 @@ cd "$(dirname "$0")"
 if [ "$1" = test ]; then
   dotnet test tests/Mazapan.Tests --nologo -v q
 fi
-dotnet publish src/Mazapan -c Release -r linux-x64 -o obj/publish --nologo -v q
+# The version `mazapan --version` says: the package's (pkg/version).
+version=$(../pkg/version)
+dotnet publish src/Mazapan -c Release -r linux-x64 -o obj/publish --nologo -v q -p:InformationalVersion="$version"
 mkdir -p ../bin
 install -m 755 obj/publish/mazapan ../bin/mazapan
-echo "built ../bin/mazapan"
+echo "built ../bin/mazapan $version"

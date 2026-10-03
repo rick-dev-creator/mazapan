@@ -76,3 +76,25 @@ session), `iso/packages.txt` (the live system's packages) and
 `iso/target-packages.txt` (the offline repository: everything an install
 puts on the disk). An install that stops asking for a package means it's
 missing from that last list.
+
+## A release
+
+Every release goes to the edge channel first, and to stable once it has
+proved itself there. The version comes from git (`pkg/version`): a tag
+`vX.Y.Z` is a release, commits after it are `X.Y.Z.rN.gHASH`. What changed
+goes in `CHANGELOG.md` under "Unreleased", renamed to the version when
+it's tagged (`## X.Y.Z — date`). Before the first tag a build is
+`0.0.0.rN`, older than any release. A channel never goes back: a release
+older than what it has is refused, and a file once published is never
+replaced (a rebuild of the same version keeps the published one).
+
+```sh
+core/build test                         # bin/mazapan, with the version in it
+vm/vm ssh 'cd my-arch && MAZAPAN_SIGN_KEY=… pkg/release'          # → out/repo/edge
+vm/vm ssh 'cd my-arch && MAZAPAN_SIGN_KEY=… pkg/release promote X.Y.Z'   # → stable
+```
+
+`out/repo` is then uploaded to where `pkg/repository.toml` says. To try a
+release without publishing one: a throwaway key (`pkg/release keys`),
+`MAZAPAN_KEYS`, `MAZAPAN_VERSION`, `MAZAPAN_REPO_SERVER=file://…` and
+`MAZAPAN_RELEASE_DIRTY=1`, as `pkg/release` and `pkg/PKGBUILD` describe.

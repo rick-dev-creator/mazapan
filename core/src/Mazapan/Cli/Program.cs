@@ -17,6 +17,10 @@ public static partial class Program
           doctor [--json]
                  run every plugin's checks now
           history        past updates and how they went
+          channel [stable|edge]
+                         where Mazapán's own updates come from: stable, or every
+                         release first (edge); without one, which it is
+          version        this Mazapán's version
           timeline [--json]
                          what changed on the desktop, in words: every apply and
                          update, newest first
@@ -98,6 +102,8 @@ public static partial class Program
                 "install" => CmdInstall(rest),
                 "rollback" => CmdRollback(rest),
                 "coverage" => CmdCoverage(rest),
+                "channel" => CmdChannel(rest),
+                "version" or "--version" => PrintVersion(),
                 "-h" or "--help" or "help" => Help(),
                 _ => Unknown(),
             };
@@ -119,6 +125,17 @@ public static partial class Program
     static int Help()
     {
         Console.Write(Usage);
+        return 0;
+    }
+
+    /// <summary>The version core/build gave the binary (pkg/version): the package's.</summary>
+    internal static string Version =>
+        typeof(Program).Assembly.GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
+            is [System.Reflection.AssemblyInformationalVersionAttribute a, ..] ? a.InformationalVersion : "0.0.0-dev";
+
+    static int PrintVersion()
+    {
+        Console.WriteLine("mazapan " + Version);
         return 0;
     }
 

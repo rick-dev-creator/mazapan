@@ -14,3 +14,9 @@ leaves the text login.
 
 Its files are system files: `mazapan apply --system` writes them, and a
 new theme reaches the login screen on the next `mazapan apply --system`.
+
+With an encrypted disk (the installer's default), its password is typed
+once, as the computer starts: "Straight in at start" then logs that
+account in by itself, once each start, and the same password opens the
+keyring (pam_fde_boot_pw, from Mazapán's own repository). After logging
+out, or with the setting off, it's the login screen as always.

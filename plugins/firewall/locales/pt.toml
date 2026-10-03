@@ -1,0 +1,5 @@
+"plugin.name" = "Firewall"
+"plugin.description" = "Um firewall, como o botão do macOS: não entra nada que este computador não tenha pedido, sai tudo o que ele pede (ufw). Impressoras e dispositivos da rede continuam sendo encontrados. O instalador o liga"
+"check.on" = "O firewall está ligado"
+"setting.ssh" = "Deixar o SSH entrar"
+"setting.ssh.help" = "A porta 22 aberta, com limite de tentativas: só para um computador acessado a partir de outro. O instalador a liga quando recebeu chaves SSH."

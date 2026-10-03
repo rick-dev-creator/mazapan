@@ -4,3 +4,5 @@ mazapan
 # Names and text in Chinese, Japanese, Korean (the rest of the world's
 # scripts are in noto-fonts, which mazapan brings).
 noto-fonts-cjk
+# The recovery key as a code to photograph, at the end of an encrypted install.
+qrencode

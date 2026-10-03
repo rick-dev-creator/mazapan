@@ -29,6 +29,11 @@ static class Functions
         // shq "it's $HOME" -> "'it'\''s $HOME'": one word in a shell command,
         // nothing in it expanded ($, `, globs): for settings in commands.
         g.Add("shq", DelegateCustomFunction.CreateFunc((string s) => ShellQuote(s)));
+        // username "rick" -> "rick": a setting that names an account, only
+        // as a Linux user name can be (else ""), so it's safe as it is in any
+        // file: for system files that name who logs in.
+        g.Add("username", DelegateCustomFunction.CreateFunc((string s) =>
+            System.Text.RegularExpressions.Regex.IsMatch(s, @"^[a-z_][a-z0-9_-]{0,31}\z") ? s : ""));
         // c "accent" -> "#ffb000"; fails the render on unknown tokens.
         g.Add("c", DelegateCustomFunction.CreateFunc((string name) => t.Color(name)));
         // hex "#ffb000" -> "ffb000"

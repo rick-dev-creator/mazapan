@@ -1,0 +1,31 @@
+# pam_fde_boot_pw (Kenny Levinsen, greetd's author; MIT): the disk's
+# password, typed as the computer starts, handed to the session's keyring.
+# For an encrypted disk whose password is the login: greetd logs in by
+# itself that boot (its autologin skips PAM's auth step, so
+# pam_systemd_loadkey can't), and this module, in the session step, gives
+# gnome-keyring the password it unlocks with. Not in Arch's repositories:
+# built here, from a pinned commit, into Mazapán's own.
+
+pkgname=pam-fde-boot-pw
+_commit=49bf498fd8d13f73e4a24221818a8a5d2af20088
+pkgver=0.r20250214
+pkgrel=1
+pkgdesc="The disk encryption password from the kernel keyring into the PAM session (gnome-keyring)"
+arch=(x86_64)
+url="https://git.sr.ht/~kennylevinsen/pam_fde_boot_pw"
+license=(MIT)
+depends=(pam keyutils)
+makedepends=(git meson ninja)
+options=(!debug)
+source=("git+https://git.sr.ht/~kennylevinsen/pam_fde_boot_pw#commit=$_commit")
+sha256sums=('SKIP')
+
+build() {
+  arch-meson pam_fde_boot_pw build
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --destdir "$pkgdir"
+  install -Dm644 pam_fde_boot_pw/LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

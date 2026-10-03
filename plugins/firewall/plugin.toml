@@ -1,0 +1,37 @@
+[plugin]
+id = "firewall"
+name = "Firewall"
+version = "0.1.0"
+api = 1
+description = "A firewall, as macOS has one switch for: nothing comes in that this computer didn't ask for, everything it asks for goes out (ufw). Printers and devices on the network are still found. The installer turns it on"
+categories = ["hardware"]
+
+# For every machine, but it changes what the network lets in: on only when asked.
+[hardware]
+any = true
+
+[packages]
+pacman = ["ufw"]
+
+[settings]
+# Let SSH in (port 22): only for a computer meant to be reached from
+# another one. The installer turns it on when it was given SSH keys.
+ssh = false
+
+# ufw on, at every start, with nothing coming in that wasn't asked for and
+# everything going out (as Omarchy and CachyOS). Only while this file is
+# there: taken off, ufw is turned off and not started any more. ufw's own
+# rules already let in the answers to what this computer asked, and mDNS
+# and SSDP (printers and devices found on the network). SSH only when
+# asked (ssh), rate-limited as ufw does. Each step on its own: ufw's own
+# enabling fails where there's no running firewall to load (installing,
+# in a chroot), and it must still start at the next boot.
+[[targets]]
+template = "firewall.conf.tmpl"
+output = "/etc/systemd/system/ufw.service.d/mazapan.conf"
+system = true
+reload = "systemctl daemon-reload; if [ -e /etc/systemd/system/ufw.service.d/mazapan.conf ]; then ufw default deny incoming; ufw default allow outgoing; {{ if settings.ssh }}ufw limit 22/tcp comment mazapan-ssh{{ else }}ufw delete limit 22/tcp >/dev/null 2>&1 || true{{ end }}; ufw --force enable; systemctl enable ufw.service; else ufw --force disable; systemctl disable ufw.service; fi"
+
+[[checks]]
+name = "{{ t \"check.on\" }}"
+run = "systemctl is-enabled -q ufw.service && systemctl is-active -q ufw.service"

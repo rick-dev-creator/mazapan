@@ -45,6 +45,9 @@ avahi
 
 # Setup.Archinstall.Packages: the desktop, and building from the AUR
 mazapan
+mazapan-keyring
+ufw
+pam-fde-boot-pw
 base-devel
 git
 

@@ -2,3 +2,6 @@
 [Service]
 ExecStart=
 ExecStart=/usr/bin/greetd --config /etc/greetd/mazapan.toml
+# The kernel keyring the disk's password is in (systemd-cryptsetup puts
+# it there as the computer starts), for pam_fde_boot_pw: as GDM does.
+KeyringMode=inherit

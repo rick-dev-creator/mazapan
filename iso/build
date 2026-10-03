@@ -25,11 +25,18 @@ die() { printf '\e[1;31m[iso]\e[0m %s\n' "$*" >&2; exit 1; }
 sudo rm -rf "$work"
 mkdir -p "$work"/{pkg,repo} "$out"
 
-log "mazapan package"
-cp "$repo/pkg/PKGBUILD" "$work/pkg/"
-(cd "$work/pkg" && MAZAPAN_REPO="$repo" BUILDDIR="$work/pkg/build" PKGDEST="$work/repo" \
-  SRCDEST="$work/pkg" LOGDEST="$work/pkg" makepkg --nodeps --force --noconfirm >"$work/pkg/makepkg.log" 2>&1) \
-  || { tail -20 "$work/pkg/makepkg.log" >&2; die "makepkg failed"; }
+# MAZAPAN_REPO_SERVER and MAZAPAN_KEYS reach the packages (a test
+# repository and its key, in the VMs): see pkg/PKGBUILD.
+# Every package of Mazapán's own: pkg/PKGBUILD, and each pkg/*/PKGBUILD.
+for p in mazapan $(cd "$repo/pkg" && ls -d */ | tr -d / | while read -r d; do [[ -f $d/PKGBUILD ]] && echo "$d"; done); do
+  log "$p package"
+  d="$work/pkg/$p"
+  mkdir -p "$d"
+  if [[ $p == mazapan ]]; then cp "$repo/pkg/PKGBUILD" "$d/"; else cp "$repo/pkg/$p"/* "$d/"; fi
+  (cd "$d" && MAZAPAN_REPO="$repo" BUILDDIR="$d/build" PKGDEST="$work/repo" \
+    SRCDEST="$d" LOGDEST="$d" PKGEXT=.pkg.tar.zst makepkg --nodeps --force --noconfirm --nosign >"$d/makepkg.log" 2>&1) \
+    || { tail -20 "$d/makepkg.log" >&2; die "makepkg $p failed"; }
+done
 repo-add -q "$work/repo/mazapan.db.tar.gz" "$work"/repo/*.pkg.tar.zst
 
 # Arch's repositories, and this one: to build with (mkarchiso), and to fill

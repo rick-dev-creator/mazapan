@@ -1,0 +1,5 @@
+"plugin.name" = "Firewall"
+"plugin.description" = "Eine Firewall, wie der eine Schalter bei macOS: Nichts kommt herein, worum dieser Computer nicht gebeten hat, alles, worum er bittet, geht hinaus (ufw). Drucker und Geräte im Netzwerk werden weiterhin gefunden. Das Installationsprogramm schaltet sie ein"
+"check.on" = "Die Firewall ist an"
+"setting.ssh" = "SSH hereinlassen"
+"setting.ssh.help" = "Port 22 offen, mit Versuchsbegrenzung: nur für einen Computer, auf den von einem anderen zugegriffen wird. Das Installationsprogramm schaltet es ein, wenn es SSH-Schlüssel erhalten hat."

@@ -161,6 +161,9 @@ public static class Renderer
             {
                 ["plugin"] = p.Id,
                 ["home"] = home,
+                // Whose desktop this is (the account applying it): for the
+                // login screen's autologin (through `username`).
+                ["user"] = Environment.GetEnvironmentVariable("USER") is { Length: > 0 } u ? u : Environment.UserName,
                 ["lang"] = lang,
                 ["lang_code"] = code,
             });

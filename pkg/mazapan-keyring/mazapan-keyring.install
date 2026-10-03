@@ -1,0 +1,11 @@
+post_upgrade() {
+  # As archlinux-keyring: only once pacman's keyring exists (pacstrap makes
+  # it; pacman-key --populate would make an empty one otherwise).
+  if [ -f usr/share/pacman/keyrings/mazapan.gpg ] && usr/bin/pacman-key -l >/dev/null 2>&1; then
+    usr/bin/pacman-key --populate mazapan
+  fi
+}
+
+post_install() {
+  post_upgrade
+}

@@ -8,3 +8,9 @@ que piden hacer algo) y si un kernel nuevo necesita reiniciar.
 "Actualizar ahora" corre `mazapan update` con la contraseña en el diálogo
 de polkit: un snapshot antes, las comprobaciones del escritorio después,
 y vuelta atrás si fallan.
+
+Mientras corre, el panel muestra sus pasos, cada uno con su ✓
+(preparando, las claves, los paquetes, la configuración, las
+comprobaciones), y ofrece reiniciar cuando cambió el kernel o Hyprland.
+Cuando la actualización trae un Mazapán nuevo, primero dice qué trae de
+nuevo, según su registro de cambios.

@@ -1,0 +1,19 @@
+#!/bin/sh
+# Mazapán's version, from git: the last tag vX.Y.Z (a release), or with
+# what came after it (X.Y.Z.rN.gHASH, between releases), in the form pacman
+# takes as a pkgver (no hyphens; a tag like v1.0.0-rc1 isn't one). Before the
+# first tag: 0.0.0.rN.gHASH, older than any release (v0.1.0 included).
+# The binary (core/build) and the package (pkg/PKGBUILD) both take it from here.
+# MAZAPAN_VERSION says one instead (tests in the VMs: a release without a tag).
+[ -z "${MAZAPAN_VERSION:-}" ] || { echo "$MAZAPAN_VERSION"; exit 0; }
+repo="$(cd "$(dirname "$0")/.." && pwd)"
+if d=$(git -C "$repo" describe --tags --long --match 'v[0-9]*.[0-9]*.[0-9]*' --exclude '*-*' 2>/dev/null); then
+  # v0.2.0-3-gabc1234 → 0.2.0.r3.gabc1234; v0.2.0-0-g… → 0.2.0
+  v=${d%-*-g*}; rest=${d#"$v"-}; n=${rest%%-*}; h=${rest#*-}
+  v=${v#v}
+  if [ "$n" = 0 ]; then echo "$v"; else echo "$v.r$n.$h"; fi
+elif n=$(git -C "$repo" rev-list --count HEAD 2>/dev/null); then
+  echo "0.0.0.r$n.g$(git -C "$repo" rev-parse --short HEAD)"
+else
+  echo 0.0.0
+fi

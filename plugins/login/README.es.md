@@ -16,3 +16,10 @@ desactivarla deja el inicio de sesión en texto.
 Sus archivos son del sistema: `mazapan apply --system` los escribe, y un
 tema nuevo llega a la pantalla de inicio de sesión con el siguiente
 `mazapan apply --system`.
+
+Con el disco cifrado (lo que el instalador hace por defecto), su
+contraseña se escribe una vez, al arrancar: "Entrar directo al arrancar"
+deja entrar a esa cuenta sola, una vez por arranque, y la misma contraseña
+abre el keyring (pam_fde_boot_pw, del repositorio propio de Mazapán). Al
+cerrar sesión, o con el ajuste apagado, es la pantalla de inicio de
+siempre.

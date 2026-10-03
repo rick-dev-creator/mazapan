@@ -36,6 +36,11 @@ Item {
   readonly property var packages: d ? d.packages || [] : []
   readonly property var flatpaks: d ? d.flatpaks || [] : []
   readonly property var news: d ? d.news || [] : []
+  readonly property var whatsNew: d ? d.whats_new || [] : []
+  readonly property var stepNames: ({
+    ready: {{ tq "step.ready" }}, keys: {{ tq "step.keys" }}, packages: {{ tq "step.packages" }},
+    config: {{ tq "step.config" }}, checks: {{ tq "step.checks" }}, rollback: {{ tq "step.rollback" }}
+  })
 
   PanelWindow {
     visible: root.open
@@ -95,10 +100,51 @@ Item {
               text: UpdatesService.running ? {{ tq "running" }} : UpdatesService.exit === 0 ? {{ tq "done" }} : {{ tq "failed" }}
               font.bold: true
             }
+            // Its steps, a ✓ each; what went wrong said where it did.
+            Repeater {
+              model: UpdatesService.steps
+              RowLayout {
+                required property var modelData
+                Layout.fillWidth: true
+                spacing: 8
+                // A step still "running" once the update is over never finished: ✗.
+                readonly property string st: modelData.state === "run" && !UpdatesService.running ? "fail" : modelData.state
+                Label {
+                  text: parent.st === "ok" ? "✓" : parent.st === "fail" ? "✗" : parent.st === "skip" ? "–" : "…"
+                  color: parent.st === "ok" ? Theme.success : parent.st === "fail" ? Theme.danger : Theme.fgMuted
+                  Layout.preferredWidth: 14
+                }
+                Label { text: root.stepNames[modelData.id] || modelData.id; Layout.preferredWidth: 160 }
+                Caption {
+                  visible: parent.st === "fail" || parent.st === "skip"
+                  text: modelData.detail
+                  elide: Text.ElideRight
+                  Layout.fillWidth: true
+                }
+              }
+            }
             Caption {
-              visible: text !== ""
+              visible: text !== "" && (UpdatesService.steps.length === 0 || UpdatesService.running)
               text: UpdatesService.last
               elide: Text.ElideRight
+              Layout.fillWidth: true
+            }
+          }
+        }
+
+        // What's new in Mazapán, when the update brings it (its changelog).
+        ColumnLayout {
+          visible: root.whatsNew.length > 0 && !UpdatesService.running
+          Layout.fillWidth: true
+          spacing: 2
+          Caption { text: {{ tq "whats_new" }} }
+          Repeater {
+            model: root.whatsNew.reduce((a, r) => a.concat(r.items), []).slice(0, 8)
+            Label {
+              required property var modelData
+              // The changelog's Markdown, as plain text.
+              text: "• " + modelData.replace(/`/g, "")
+              wrapMode: Text.Wrap
               Layout.fillWidth: true
             }
           }

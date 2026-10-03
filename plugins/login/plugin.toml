@@ -11,7 +11,14 @@ categories = ["hardware"]
 any = true
 
 [packages]
-pacman = ["greetd", "hyprland", "quickshell", "gnome-keyring"]
+pacman = ["greetd", "hyprland", "quickshell", "gnome-keyring", "pam-fde-boot-pw"]
+
+[settings]
+# This account goes straight in when the computer starts, once each start:
+# only for an encrypted disk whose password is this account's (it was just
+# typed to unlock the disk, and it opens the keyring too). Off: the login
+# screen, always.
+autologin = false
 
 # greetd started with mazapan's configuration (its own file stays as the
 # package has it), and as the login manager from the next start. Taken off,

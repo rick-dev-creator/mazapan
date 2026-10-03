@@ -7,8 +7,11 @@
 general {
     lock_cmd = pidof hyprlock || hyprlock
 {{- if settings.lock_on_sleep }}
-    # Locked before sleeping (the lid, the power key, a suspend).
+    # Locked before sleeping (the lid, the power key, a suspend), and the
+    # sleep held back until the lock screen is really up (logind's delay
+    # inhibitor, as xss-lock did): nothing on screen when the lid opens.
     before_sleep_cmd = loginctl lock-session
+    inhibit_sleep = 3
 {{- else }}
     # Nothing to wait for before sleeping.
     inhibit_sleep = 0

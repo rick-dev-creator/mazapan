@@ -1,0 +1,37 @@
+# Mazapán's signing keys in pacman's keyring (as archlinux-keyring), from
+# pkg/keys, or MAZAPAN_KEYS (a throwaway key, for tests in the VMs).
+#   cd pkg/mazapan-keyring && makepkg
+
+pkgname=mazapan-keyring
+pkgver=0
+pkgrel=1
+pkgdesc="Mazapán's package signing keys"
+arch=(any)
+license=(unknown)
+install=$pkgname.install
+
+_repo=$(realpath "${MAZAPAN_REPO:-$startdir/../..}")
+_keys=$(realpath "${MAZAPAN_KEYS:-$_repo/pkg/keys}")
+
+pkgver() {
+  # When the keys (or this package) last changed, to the second: two
+  # changes in a day (a key revoked) are two versions.
+  if [[ -n ${MAZAPAN_KEYS:-} ]]; then
+    date -u -r "$_keys/mazapan-trusted" +%Y%m%d.%H%M%S
+  else
+    local d
+    d=$(TZ=UTC git -C "$_repo" log -1 --format=%cd --date=format-local:%Y%m%d.%H%M%S -- pkg/keys pkg/mazapan-keyring 2>/dev/null)
+    echo "${d:-0}"
+  fi
+}
+
+package() {
+  local d="$pkgdir/usr/share/pacman/keyrings"
+  install -d "$d"
+  # Without keys yet (Mazapán not published), an empty keyring: installed
+  # all the same, so the install's package list never depends on it.
+  [[ -f $_keys/mazapan.gpg ]] || return 0
+  install -m644 "$_keys/mazapan.gpg" "$d/mazapan.gpg"
+  install -m644 "$_keys/mazapan-trusted" "$d/mazapan-trusted"
+  install -m644 "$_keys/mazapan-revoked" "$d/mazapan-revoked"
+}

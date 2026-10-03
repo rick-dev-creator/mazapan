@@ -1,0 +1,3 @@
+"check.on" = "The firewall is on"
+"setting.ssh" = "Let SSH in"
+"setting.ssh.help" = "Port 22 open, rate-limited: only for a computer meant to be reached from another one. The installer turns it on when it was given SSH keys."

@@ -13,3 +13,13 @@ command = "start-hyprland -- --config /etc/greetd/mazapan-hyprland.lua"
 user = "greeter"
 # The greeter itself logs in as greetd's own service (no keyring for it).
 service = "greetd"
+{{- who = username user }}
+{{- if settings.autologin && who != "" }}
+
+# Straight in, once each start: the disk's password, typed as it started,
+# was the login (an encrypted disk), and it opens the keyring too
+# (pam_fde_boot_pw, in mazapan-greetd). After logging out, the login screen.
+[initial_session]
+command = "sh /etc/greetd/mazapan-session.sh"
+user = "{{ who }}"
+{{- end }}

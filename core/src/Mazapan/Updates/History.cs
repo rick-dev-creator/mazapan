@@ -36,6 +36,8 @@ public sealed class Record
     public DateTimeOffset Finished;
     public List<Pacman.Change> Changes = [];
     public List<Health.Result> Checks = [];
+    /// <summary>The checks before the update: what already failed then isn't its doing.</summary>
+    public List<Health.Result> Baseline = [];
     public string Outcome = "";
     public string Note = "";
     /// <summary>
@@ -82,15 +84,16 @@ public sealed class Record
                 if (c.To != "") x.Add("to", c.To);
                 return (object?)x;
             }).ToList());
-        if (Checks.Count > 0)
-            f.Add("checks", Checks.Select(c =>
-            {
-                var x = new GoJsonCodec.Fields { { "plugin", c.Plugin }, { "name", c.Name }, { "ok", c.OK } };
-                if (c.Skipped) x.Add("skipped", true);
-                if (c.Output != "") x.Add("output", c.Output);
-                x.Add("took", c.Took.Ticks * 100); // time.Duration: nanoseconds
-                return (object?)x;
-            }).ToList());
+        static object? Check(Health.Result c)
+        {
+            var x = new GoJsonCodec.Fields { { "plugin", c.Plugin }, { "name", c.Name }, { "ok", c.OK } };
+            if (c.Skipped) x.Add("skipped", true);
+            if (c.Output != "") x.Add("output", c.Output);
+            x.Add("took", c.Took.Ticks * 100); // time.Duration: nanoseconds
+            return x;
+        }
+        if (Checks.Count > 0) f.Add("checks", Checks.Select(Check).ToList());
+        if (Baseline.Count > 0) f.Add("baseline", Baseline.Select(Check).ToList());
         f.Add("outcome", Outcome);
         if (Note != "") f.Add("note", Note);
         f.Add("owned", Owned);
@@ -133,6 +136,7 @@ public sealed class Record
         else if (Is(key, "finished")) Finished = Time(v, Finished);
         else if (Is(key, "changes")) Changes = List(v, Changes, PackageChangeFrom);
         else if (Is(key, "checks")) Checks = List(v, Checks, CheckResultFrom);
+        else if (Is(key, "baseline")) Baseline = List(v, Baseline, CheckResultFrom);
         else if (Is(key, "outcome")) Outcome = Str(v, Outcome);
         else if (Is(key, "note")) Note = Str(v, Note);
         else if (Is(key, "owned")) Owned = Applying.Owned.FromTree(v, "apply.Owned");

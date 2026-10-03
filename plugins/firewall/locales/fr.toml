@@ -1,0 +1,5 @@
+"plugin.name" = "Pare-feu"
+"plugin.description" = "Un pare-feu, comme l'interrupteur de macOS : rien n'entre que cet ordinateur n'ait demandé, tout ce qu'il demande sort (ufw). Les imprimantes et les appareils du réseau sont toujours trouvés. L'installateur l'active"
+"check.on" = "Le pare-feu est activé"
+"setting.ssh" = "Laisser entrer SSH"
+"setting.ssh.help" = "Le port 22 ouvert, avec limite de tentatives : seulement pour un ordinateur auquel on se connecte depuis un autre. L'installateur l'active quand il a reçu des clés SSH."

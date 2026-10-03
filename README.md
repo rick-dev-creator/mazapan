@@ -17,7 +17,7 @@ plugins/   built-in plugins, same API as third-party ones: theme targets,
 themes/    token palettes
 docs/      plugin API and design notes
 iso/       the ISO: archiso's live profile + the installer (built in the dev VM: vm/vm iso)
-pkg/       mazapan as a pacman package (the ISO installs it)
+pkg/       mazapan and mazapan-keyring as pacman packages, the version, releases
 vm/        dev VM, and a second one to try the ISO (vm/vm try)
 ```
 
@@ -83,7 +83,16 @@ mazapan doctor           # run every plugin's health check now
 mazapan history          # past updates and how they went
 mazapan rollback [ID]    # undo an update: previous packages from pacman's
                         # cache, generated files as they were
+mazapan channel [stable|edge]  # where Mazapán's own updates come from
+mazapan version
 ```
+
+An update is a few steps, each with its ✓: getting ready (room, power,
+the machine kept awake), the keyrings first when they change, the
+packages (Arch's, Mazapán's from its own signed repository, the Flatpak
+apps), the configuration written again, the checks; then what needs a
+restart, offered. The updates panel shows the same steps, and what's new
+in Mazapán from its changelog.
 
 Rolling back needs no reboot: it reinstalls the previous version of exactly
 the packages the update changed, from pacman's cache or, when the cache no

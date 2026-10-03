@@ -61,6 +61,7 @@ public static partial class Program
                 throw;
             }
             owned.Save(Apply.StatePath());
+            StampVersion();
             foreach (var (p, bak) in res.Backups.OrderBy(kv => kv.Key, StringComparer.Ordinal))
                 Console.WriteLine($"backed up {Tilde(p)} -> {Paths.Base(bak)}");
             foreach (var p in res.Removed) Console.WriteLine($"removed {Tilde(p)} (no plugin generates it anymore)");
@@ -249,6 +250,27 @@ public static partial class Program
     [GeneratedRegex(@"^#[0-9a-fA-F]{6}\z")]
     private static partial Regex AccentPattern();
 
+    /// <summary>
+    /// The version of Mazapán this account's desktop was last written by: a
+    /// login after Mazapán changed (an update through pacman by hand, or
+    /// another account's) applies it (apply --if-updated), so nothing needs
+    /// migrations or a hook in pacman.
+    /// </summary>
+    static string VersionStamp => Paths.ExpandHome("~/.local/state/mazapan/applied-version");
+
+    static void StampVersion()
+    {
+        try
+        {
+            Directory.CreateDirectory(Paths.Dir(VersionStamp));
+            Files.WriteAtomic(VersionStamp, Version + "\n");
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { } // only means one more apply
+    }
+
+    static bool UpToDate() => File.Exists(VersionStamp) && File.ReadAllText(VersionStamp).Trim() == Version
+        && File.Exists(Apply.StatePath());
+
     static int CmdApply(string[] args)
     {
         var fs = new Flags("apply")
@@ -266,7 +288,9 @@ public static partial class Program
             .List("reset", "back to the plugin's default: plugin.key")
             .List("enable", "enable a plugin")
             .List("disable", "disable a plugin")
+            .Bool("if-updated", "only if this Mazapán isn't the one that last wrote the desktop (at login)")
             .Parse(args);
+        if (fs.IsSet("if-updated") && UpToDate()) return 0;
         var themeId = fs.Get("theme");
         var accent = fs.Get("accent");
         var language = fs.Get("language");

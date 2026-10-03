@@ -79,7 +79,8 @@ Item {
   property string variant: ""
   property string timezone: ""
   property string disk: ""
-  property bool encrypt: false
+  // Encrypted unless turned off (as FileVault): a lost computer is read by nobody.
+  property bool encrypt: true
   property string fullname: ""
   property string user: ""
   property bool userEdited: false
@@ -112,7 +113,8 @@ Item {
         for (const k of ["chosen", "plus", "minus"]) if (o[k] && typeof o[k] === "object") root[k] = o[k]
       } catch (e) {}
       loaded_ = true
-      if (root.phase === "running") runView.reload()
+      // Done too: the recovery key is only in the run's log (never saved).
+      if (root.phase === "running" || root.phase === "done") runView.reload()
       root.maybeOpen()
     }
     onLoadFailed: {
@@ -528,6 +530,20 @@ Item {
     }
   }
 
+  // Encrypted: the recovery key the install made (only in memory, never
+  // saved), and whether the person has said it's kept.
+  property string recoveryKey: ""
+  property bool noRecovery: false
+  property bool keyKept: false
+  readonly property string qrFile: "/tmp/mazapan-recovery-qr.svg"
+  Process {
+    id: qr
+    command: ["sh", "-c", 'umask 077; qrencode -t SVG -m 2 -o "$0"', root.qrFile]
+    stdinEnabled: true
+    onStarted: { write(root.recoveryKey); stdinEnabled = false }
+    onExited: { stdinEnabled = true; qrImage.source = ""; qrImage.source = "file://" + root.qrFile }
+  }
+
   property string runStep: "disk"
   property real progress: 0
   property string runFail: ""
@@ -559,6 +575,8 @@ Item {
         else if (l.startsWith("fail ")) fail = l.slice(5)
         else if (l.startsWith("EXIT ")) exit = Number(l.slice(5))
         else if (l.startsWith("mazapan: ")) last = l.slice(8)
+        else if (l.startsWith("recovery ")) { if (root.recoveryKey === "") { root.recoveryKey = l.slice(9).trim(); qr.running = true } }
+        else if (l === "norecovery") root.noRecovery = true
       }
       root.runStep = st
       const at = root.stepAt_[st] || [0, 0]
@@ -1152,6 +1170,61 @@ Item {
           Layout.fillWidth: true
           Layout.preferredWidth: 0
         }
+        // The recovery key: as text and a code to photograph, kept before restarting.
+        Rectangle {
+          visible: root.phase === "done" && root.recoveryKey !== ""
+          Layout.alignment: Qt.AlignHCenter
+          Layout.fillWidth: true
+          Layout.maximumWidth: 640
+          implicitHeight: recCol.implicitHeight + 32
+          radius: Theme.radius
+          color: Theme.surface
+          border.color: Theme.warning
+          border.width: 1
+          ColumnLayout {
+            id: recCol
+            anchors.fill: parent
+            anchors.margins: 16
+            spacing: 10
+            Label { text: {{ tq "recovery.title" }}; font.bold: true; font.pointSize: 13 }
+            Caption { text: {{ tq "recovery.d" }}; wrapMode: Text.Wrap; Layout.fillWidth: true }
+            RowLayout {
+              spacing: 16
+              Image {
+                id: qrImage
+                Layout.preferredWidth: 150
+                Layout.preferredHeight: 150
+                sourceSize: Qt.size(300, 300)
+                smooth: false
+                cache: false
+              }
+              Label {
+                // Eight groups of eight, two to a line: easy to copy by hand.
+                text: root.recoveryKey.split("-").reduce((a, g, i) => a + g + (i % 2 ? "\n" : "  "), "").trim()
+                font.family: Theme.fontMono
+                font.pointSize: 14
+                Layout.fillWidth: true
+              }
+            }
+            RowLayout {
+              Layout.fillWidth: true
+              Label { text: {{ tq "recovery.kept" }}; Layout.fillWidth: true; wrapMode: Text.Wrap }
+              Toggle {
+                checked: root.keyKept
+                onToggled: on => root.keyKept = on
+              }
+            }
+          }
+        }
+        Caption {
+          visible: root.phase === "done" && root.noRecovery
+          text: {{ tq "recovery.none" }}
+          color: Theme.warning
+          horizontalAlignment: Text.AlignHCenter
+          wrapMode: Text.Wrap
+          Layout.fillWidth: true
+          Layout.preferredWidth: 0
+        }
         RowLayout {
           Layout.alignment: Qt.AlignHCenter
           spacing: 10
@@ -1168,6 +1241,9 @@ Item {
           Button {
             visible: root.phase === "done"
             primary: true
+            // Not before the recovery key is kept: it's shown only now.
+            enabled: root.recoveryKey === "" || root.keyKept
+            opacity: enabled ? 1 : 0.5
             text: {{ tq "done.restart" }}
             onClicked: Quickshell.execDetached(["systemctl", "reboot"])
           }

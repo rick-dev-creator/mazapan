@@ -94,7 +94,7 @@ public static partial class Program
     static int InstallPlan(string path)
     {
         var (a, disk) = ReadAnswers(path);
-        Console.Write(Archinstall.Config(a, disk.Size, Keymap(a)));
+        Console.Write(Archinstall.Config(a, disk.Size, Keymap(a), Mazapan.Pacman.Repository.Server(Root())));
         return 0;
     }
 
@@ -180,7 +180,7 @@ public static partial class Program
         Directory.CreateDirectory(dir, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
         var config = Paths.Join(dir, "config.json");
         var creds = Paths.Join(dir, "creds.json");
-        Files.WriteAtomic(config, Archinstall.Config(a, disk.Size, Keymap(a)));
+        Files.WriteAtomic(config, Archinstall.Config(a, disk.Size, Keymap(a), Mazapan.Pacman.Repository.Server(Root())));
         File.WriteAllText(creds, "");
         File.SetUnixFileMode(creds, UnixFileMode.UserRead | UnixFileMode.UserWrite);
         File.WriteAllText(creds, Archinstall.Creds(a));
@@ -201,8 +201,94 @@ public static partial class Program
             Console.WriteLine($"fail archinstall {code}");
             throw new MazapanException($"archinstall stopped ({code}): {InstallLog}");
         }
+        // The account's keyring made now, with its password: one made at the
+        // first login isn't seen by apps until the next start (gnome-keyring
+        // #137), and it's the first login that saves the Wi-Fi's and the
+        // browser's passwords.
+        LoginKeyring(a);
+        // Encrypted: a recovery key as well, for the day the password is
+        // forgotten (as Ubuntu and macOS give one). The installer shows it,
+        // and the person says it's kept before restarting. Without it the
+        // system is still fine: said, not a failed install.
+        if (a.Encrypt)
+        {
+            if (RecoveryKey(a) is { } key) Console.WriteLine("recovery " + key);
+            else Console.WriteLine("norecovery");
+        }
         Console.WriteLine("done");
         return 0;
+    }
+
+    /// <summary>
+    /// The login keyring, created in the new system with the account's
+    /// password (gnome-keyring-daemon --unlock, on stdin), by a daemon of its
+    /// own that's stopped right after. A failure only means the first login
+    /// makes it, as it always did.
+    /// </summary>
+    static void LoginKeyring(Answers a)
+    {
+        var home = "/home/" + a.User;
+        var psi = new ProcessStartInfo("arch-chroot")
+        {
+            RedirectStandardOutput = true, RedirectStandardError = true, RedirectStandardInput = true,
+        };
+        foreach (var x in (string[])["/mnt", "runuser", "-u", a.User, "--", "env", "-i", "HOME=" + home, "XDG_RUNTIME_DIR=/tmp",
+                     "PATH=/usr/bin", "timeout", "5", "gnome-keyring-daemon", "--foreground", "--unlock", "--components=secrets"])
+            psi.ArgumentList.Add(x);
+        try
+        {
+            using var p = Process.Start(psi)!;
+            p.StandardInput.Write(a.Password);
+            p.StandardInput.Close();
+            var err = p.StandardError.ReadToEndAsync();
+            p.StandardOutput.ReadToEnd();
+            p.WaitForExit();
+            err.GetAwaiter().GetResult();
+            using var log = new StreamWriter(InstallLog, append: true);
+            log.WriteLine($"== the login keyring: {(File.Exists($"/mnt{home}/.local/share/keyrings/login.keyring") ? "made" : "not made")}");
+        }
+        catch (System.ComponentModel.Win32Exception) { }
+    }
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"\b[cbdefghijklnrtuv]{8}(?:-[cbdefghijklnrtuv]{8}){7}\b")]
+    private static partial System.Text.RegularExpressions.Regex RecoveryKeyPattern();
+
+    /// <summary>
+    /// A recovery key enrolled in the new disk's LUKS header
+    /// (systemd-cryptenroll --recovery-key, unlocked with the password),
+    /// or null if it couldn't be. Never written anywhere: only printed.
+    /// </summary>
+    static string? RecoveryKey(Answers a)
+    {
+        var (code, out_, _) = AppsCapture("lsblk", "-lnp", "-o", "PATH,FSTYPE", a.Disk);
+        if (code != 0) return null;
+        var luks = out_.Split('\n').Select(l => l.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            .FirstOrDefault(f => f.Length == 2 && f[1] == "crypto_LUKS")?[0];
+        if (luks == null) return null;
+        var psi = new ProcessStartInfo("systemd-cryptenroll")
+        {
+            RedirectStandardOutput = true, RedirectStandardError = true, RedirectStandardInput = true,
+        };
+        foreach (var x in (string[])["--recovery-key", luks]) psi.ArgumentList.Add(x);
+        // The password unlocks the header, through the environment (never a
+        // command line anyone could read).
+        psi.Environment["PASSWORD"] = a.Password;
+        psi.Environment["SYSTEMD_COLORS"] = "0";
+        try
+        {
+            using var p = Process.Start(psi)!;
+            p.StandardInput.Close();
+            var err = p.StandardError.ReadToEndAsync();
+            var text = p.StandardOutput.ReadToEnd() + "\n" + err.GetAwaiter().GetResult();
+            p.WaitForExit();
+            using (var log = new StreamWriter(InstallLog, append: true))
+                log.WriteLine($"== systemd-cryptenroll --recovery-key {luks}: exit {p.ExitCode}");
+            return p.ExitCode == 0 && RecoveryKeyPattern().Match(text) is { Success: true } m ? m.Value : null;
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            return null;
+        }
     }
 
     /// <summary>

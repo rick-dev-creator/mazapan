@@ -1,0 +1,141 @@
+#!/usr/bin/env bash
+# Publishes Mazapán to its own repository: the packages (mazapan and
+# mazapan-keyring) built, signed, and added to a channel's database, in
+# out/repo/<channel>/x86_64/: what's uploaded to where pkg/repository.toml
+# says. Every release goes to edge first; promote takes one to stable.
+#
+#   pkg/release                  this checkout (bin/mazapan built from it) → edge
+#   pkg/release promote VERSION  that edge release → stable (a tagged one: vX.Y.Z)
+#   pkg/release keys KEYID DIR   a key's public half as pkg/keys wants it
+#
+# Signs with MAZAPAN_SIGN_KEY (gpg, from GNUPGHOME), which must be in the
+# keyring the package ships (pkg/keys, or MAZAPAN_KEYS for a test key).
+# On Arch, with makepkg and repo-add, not as root: the dev VM.
+set -euo pipefail
+
+repo="$(cd "$(dirname "$0")/.." && pwd)"
+out="${MAZAPAN_RELEASE_OUT:-$repo/out/repo}"
+keys="${MAZAPAN_KEYS:-$repo/pkg/keys}"
+arch=x86_64
+
+log() { printf '\e[1;35m[release]\e[0m %s\n' "$*"; }
+die() { printf '\e[1;31m[release]\e[0m %s\n' "$*" >&2; exit 1; }
+
+[[ $EUID -ne 0 ]] || die "not as root (makepkg won't run as root)"
+
+sign_key() {
+  local k="${MAZAPAN_SIGN_KEY:-}"
+  [[ -n $k ]] || die "MAZAPAN_SIGN_KEY: the key to sign with"
+  local fpr
+  fpr=$(gpg --batch --with-colons --list-secret-keys -- "$k" 2>/dev/null | awk -F: '$1=="fpr"{print $10; exit}')
+  [[ -n $fpr ]] || die "no secret key $k in ${GNUPGHOME:-~/.gnupg}"
+  # A package signed by a key installed systems don't trust can't be installed.
+  grep -qx "$fpr:4:" "$keys/mazapan-trusted" 2>/dev/null || die "$fpr isn't in $keys/mazapan-trusted"
+  ! grep -qx "$fpr" "$keys/mazapan-revoked" 2>/dev/null || die "$fpr is revoked"
+  echo "$fpr"
+}
+
+# Adds package files to a channel: each signed, the database signed too.
+# The folder keeps every version (promote takes a tested one from edge
+# later; nothing published is ever replaced): a file already there with
+# that name stays as it is, and is never rebuilt over (its bytes are what
+# mirrors and caches have). A channel never goes back: a package older
+# than the channel's is refused. FROM_EDGE: signatures already made there,
+# checked against this key.
+add() {
+  local channel=$1 fpr=$2; shift 2
+  local dir="$out/$channel/$arch" f b name cur
+  mkdir -p "$dir"
+  local added=()
+  for f in "$@"; do
+    b=${f##*/}
+    name=${b%-*-*-*.pkg.tar.zst}
+    # The version this channel has of it now, if any.
+    cur=$(tar -xOzf "$dir/mazapan.db.tar.gz" 2>/dev/null --wildcards "$name-[0-9]*/desc" | awk 'p{print;exit} /^%VERSION%$/{p=1}' || true)
+    local ver=${b#"$name"-}; ver=${ver%-*.pkg.tar.zst}
+    if [[ -n $cur ]] && (( $(vercmp "$ver" "$cur") < 0 )); then
+      die "$channel has $name $cur: $ver would take it back"
+    fi
+    if [[ -f $dir/$b ]]; then
+      log "$b is already on $channel: kept as published"
+    else
+      cp "$f" "$dir/"
+      if [[ ${FROM_EDGE:-} == 1 ]]; then
+        gpg --batch --status-fd 1 --verify "$f.sig" "$f" 2>/dev/null | grep -q "^\[GNUPG:\] VALIDSIG .*$fpr" \
+          || die "$b: edge's signature isn't $fpr's"
+        cp "$f.sig" "$dir/"
+      else
+        gpg --batch --yes -u "$fpr" --detach-sign "$dir/$b"
+      fi
+    fi
+    added+=("$b")
+  done
+  (cd "$dir" && repo-add -q -p --sign --key "$fpr" mazapan.db.tar.gz "${added[@]}")
+  # What's new, for the updates panel (the panel shows what's newer than
+  # what a system has, up to the version it gets).
+  cp -f "$repo/CHANGELOG.md" "$dir/CHANGELOG.md"
+}
+
+case "${1:-}" in
+  keys)
+    [[ $# -eq 3 ]] || die "usage: pkg/release keys KEYID DIR"
+    mkdir -p "$3"
+    fpr=$(gpg --batch --with-colons --list-keys -- "$2" | awk -F: '$1=="fpr"{print $10; exit}')
+    [[ -n $fpr ]] || die "no key $2"
+    grep -qx "$fpr:4:" "$3/mazapan-trusted" 2>/dev/null || echo "$fpr:4:" >> "$3/mazapan-trusted"
+    touch "$3/mazapan-revoked"
+    # Every trusted key, the older ones too (a new key comes in a keyring
+    # signed by one installed systems already trust).
+    mapfile -t all < <(cut -d: -f1 "$3/mazapan-trusted")
+    gpg --batch --armor --export -- "${all[@]}" > "$3/mazapan.gpg"
+    log "$fpr in $3"
+    ;;
+
+  promote)
+    [[ $# -eq 2 ]] || die "usage: pkg/release promote VERSION"
+    v=$2
+    [[ $v =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || die "only a tagged release reaches stable (X.Y.Z), not $v"
+    fpr=$(sign_key)
+    src="$out/edge/$arch"
+    shopt -s nullglob
+    pkgs=("$src"/mazapan-"$v"-*-"$arch".pkg.tar.zst)
+    [[ ${#pkgs[@]} -eq 1 ]] || die "edge has no mazapan $v (pkg/release first)"
+    # The other packages as edge has them (the keyring, the PAM module…):
+    # each one's newest, by its name (what's before its version-release-arch).
+    others=()
+    for name in $(for f in "$src"/*.pkg.tar.zst; do b=${f##*/}; b=${b%-*-*-*.pkg.tar.zst}; [[ $b == mazapan ]] || echo "$b"; done | sort -u); do
+      others+=("$(printf '%s\n' "$src/$name"-[0-9]*.pkg.tar.zst | sort -V | tail -1)")
+    done
+    [[ " ${others[*]##*/} " == *" mazapan-keyring-"* ]] || die "edge has no mazapan-keyring"
+    FROM_EDGE=1 add stable "$fpr" "${pkgs[0]}" "${others[@]}"
+    log "mazapan $v is on stable: upload $out/stable"
+    ;;
+
+  "")
+    fpr=$(sign_key)
+    v=$("$repo/pkg/version")
+    [[ -x $repo/bin/mazapan ]] || die "no bin/mazapan: core/build first"
+    built=$("$repo/bin/mazapan" --version)
+    [[ $built == "mazapan $v" ]] || die "bin/mazapan is \"$built\", this checkout $v: core/build"
+    # A release is a commit (MAZAPAN_RELEASE_DIRTY=1 only for tests in the VMs).
+    st=$(git -C "$repo" status --porcelain) || die "git can't read the checkout"
+    [[ -z $st || ${MAZAPAN_RELEASE_DIRTY:-} == 1 ]] || die "the checkout has changes not committed: a release is a commit"
+    work=$(mktemp -d)
+    trap 'rm -rf "$work"' EXIT
+    # Every package of Mazapán's own: pkg/PKGBUILD, and each pkg/*/PKGBUILD.
+    for p in mazapan $(cd "$repo/pkg" && ls -d */ | tr -d / | while read -r d; do [[ -f $d/PKGBUILD ]] && echo "$d"; done); do
+      mkdir -p "$work/$p"
+      if [[ $p == mazapan ]]; then cp "$repo/pkg/PKGBUILD" "$work/$p/"; else cp "$repo/pkg/$p"/* "$work/$p/"; fi
+      log "$p"
+      # MAZAPAN_KEYS reaches it only when the caller set it (a test key):
+      # the real keys are pkg/keys, and the keyring's version comes from git.
+      (cd "$work/$p" && MAZAPAN_REPO="$repo" BUILDDIR="$work/$p/build" PKGDEST="$work/out" \
+        SRCDEST="$work/$p" LOGDEST="$work/$p" PKGEXT=.pkg.tar.zst makepkg --nodeps --force --noconfirm --nosign >"$work/$p/makepkg.log" 2>&1) \
+        || { tail -20 "$work/$p/makepkg.log" >&2; die "makepkg $p failed"; }
+    done
+    add edge "$fpr" "$work"/out/*.pkg.tar.zst
+    log "mazapan $v is on edge: upload $out/edge"
+    ;;
+
+  *) die "usage: pkg/release | pkg/release promote VERSION | pkg/release keys KEYID DIR" ;;
+esac

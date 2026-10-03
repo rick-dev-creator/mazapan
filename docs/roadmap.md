@@ -5,12 +5,156 @@ ships most of these in some form, including a plugin system and an AI
 agent for crashes; each item says what it does today and what "much better"
 means here. Ordered by impact.
 
-Suggested start: 1, 2 and 3.
+## Toward 1.0: a stable version anyone can install
+
+Decided on 2026-10-03. Most of what a desktop needs is done (the
+progress below); what's missing is what makes it a system someone can
+install and keep: an installed Mazapán never updates itself today (the
+installer takes the package from the ISO's own repository, and the
+installed system has no `[mazapan]` repository), nothing protects the
+disk, nothing has run on real hardware, and nothing is published. Until
+1.0, work goes in this order; everything else waits.
+
+**A. It updates itself** (blocks everything else)
+1. Mazapán's own signed package repository: `mazapan` and a
+   `mazapan-keyring` package (pacman-key, as archlinux-keyring), in
+   channels: `stable`, `edge` (every release first), and `dev` (a
+   checkout, the dev VM's). The installed system has it from the install
+   on; `mazapan channel` switches. *Done* (2026-10-03) but for what's the
+   person's: the release key (`pkg/keys`), where it's hosted
+   (`pkg/repository.toml`), and uploading there.
+2. Real versions: tags `vX.Y.Z` (not a commit count), `mazapan --version`,
+   a changelog, and one command that makes a release (core, package,
+   signature, repository database). *Done* (2026-10-03): `pkg/version`,
+   `mazapan version`, `CHANGELOG.md`, `pkg/release` and `pkg/release
+   promote`.
+3. The updater, below. *Done* (2026-10-03).
+
+Tested end to end in the VMs with a throwaway key and a `file://`
+repository: a release to edge, promoted to stable; an ISO built with it;
+installed (the [mazapan] section, the mirrorlist on stable, the key in
+pacman's keyring, paccache.timer); then 0.1 → 0.2 → 0.3 → 0.4 from the
+terminal and 0.4 → 0.5 from the panel (signatures checked, snapper's
+pair, the new mazapan finishing the update, the panel's steps, "what's
+new"); channels switched; a login applying a changed Mazapán. Learned:
+a repository pacman can't reach stops every update, Arch's too, so it
+has to be hosted somewhere that stays up; repo-add makes symlinks
+(`mazapan.db`), which uploading to GitHub has to copy as files.
+
+**B. Safe to install** (the essentials of 19)
+4. The disk encrypted by default, a recovery key, the keymap in the
+   initramfs, one password (19, part 1). Built (2026-10-03): the
+   installer's switch starts on; at the end, a recovery key
+   (systemd-cryptenroll) as text and a QR code, and the restart waits
+   until the person says it's kept. One password: greetd goes straight in
+   that start (the login plugin's `autologin`, on for an encrypted
+   install), and the keyring opens with the disk's password through
+   pam_fde_boot_pw (by greetd's author: greetd's autologin skips PAM's
+   auth step, where pam_systemd_loadkey works; it injects it in the
+   session step), packaged in Mazapán's own repository. Not Omarchy's
+   keyring without a password any more. What it took, found in the VM:
+   systemd's initramfs (archinstall makes the older `encrypt` one unless
+   there's a security key: the post-install switches it to sd-encrypt and
+   sd-vconsole, `rd.luks.name=`), the module before PAM's session include
+   (its pam_keyinit makes the disk's password unreadable), and the login
+   keyring made while installing, with the password (one made at the
+   first login isn't on D-Bus until the next start: gnome-keyring #137).
+   Tested from the ISO: the password typed once at start, the desktop
+   straight in, the keyring open, a secret saved and read with no prompt,
+   on the very first start.
+5. Locked before it sleeps (19, part 2, its first half). Built
+   (2026-10-03): hypridle holds the sleep until the lock screen is up
+   (`inhibit_sleep = 3`).
+6. The firewall on (19, part 4). Built (2026-10-03): plugin `firewall`
+   (ufw: nothing in, everything out; mDNS and SSDP still), on from the
+   installer; SSH let in (rate-limited) only when the install was given
+   keys to be reached with. Docker's published ports go past it
+   (ufw-docker is AUR only): said in its README.
+
+Block B tested end to end (2026-10-03): an encrypted install from the
+ISO, the recovery key on the installer's last screen, the first start
+(one password, keyring open, firewall on, hypridle holding sleep), and
+updates from the signed repository on it: one that broke the
+configuration rolled back on its own, the next one went through.
+
+**C. Tested**
+7. Unattended installs (`cidata`), first as the release gate: every
+   release installs itself in a VM, boots, and passes its checks before
+   it's published.
+8. The live USB on real hardware (an RTX 4090 with an AMD iGPU, four
+   screens), without installing; what fails, fixed.
+
+**D. Published**
+9. The ISO published, with its checksum and signature, and an install
+   guide.
+10. A license (the package says `unknown`).
+11. The 34 built-in plugins without a README.
+
+Then 1.0. After it, in this order: the rest of 18 (fonts, keybindings),
+21 (the boot splash and menu in the theme), the rest of 19 (fingerprint,
+the privacy dots, hibernation), the rest of 20 (firmware, downloading
+ahead), 13, then 22–24.
+
+Pending decisions (the person's): where the repository and the ISO are
+hosted (GitHub Releases if the project is public, the Gitea's Arch
+package registry if not), public or private, and the license. A pinned
+Arch snapshot (Omarchy's stable mirror) waits until after 1.0: it needs
+hosting and someone to move it forward, and the checks, rollback and
+snapshots already cover a bad update.
+
+### The updater: Omarchy's, as simple, and more
+
+Omarchy's (`omarchy-update`, 4.0.4) is one confirmation and a short
+sequence: free space checked, the package cache pruned, a snapshot, the
+machine kept awake, the keyrings first (a stale `archlinux-keyring` is
+the most common reason an Arch update fails), `pacman -Syu`, migrations,
+AUR, orphans offered, the log searched for a failed initramfs, then a
+reboot offered when the kernel changed or Hyprland's binary was replaced,
+and the shell restarted. Its own repository has channels (stable, rc,
+edge, dev), and stable also pins Arch itself to a tested date
+(`stable-mirror.omarchy.org`).
+
+Done (2026-10-03). Ours keeps that shape (one button or one command, one confirmation, a few
+lines with a ✓ each) and what it already does better: the preview with
+the Arch news that need a hand, checks before and after with an automatic
+rollback without a reboot, the history, no migrations (an update is an
+apply), the panel with pkexec, Flatpak apps.
+
+```
+Update Mazapán                          34 packages · reboot (kernel)
+  ✓ Getting ready      free space, on power, kept awake
+  ✓ Keys               archlinux-keyring, mazapan-keyring
+  ✓ Snapshot           (snap-pac: bootable from the menu)
+  ✓ Packages           Arch, Mazapán, Flatpak apps
+  ✓ Configuration      mazapan apply
+  ✓ Checks             one breaks → rolled back on its own
+  Done. The kernel changed: [Reboot now] [Later]
+```
+
+New, from Omarchy: the free space, kept awake (systemd-inhibit), the
+keyrings first, what needs a restart after (the kernel, a replaced
+Hyprland, the shell restarted on its own). Better than it:
+- A failed initramfs is a failed update: rolled back, and no reboot
+  offered (Omarchy only warns).
+- "What's new" in the panel, from the changelog, not a link.
+- `pacman -Syu` by hand: each account remembers the Mazapán that last
+  wrote its desktop, and a login with another one applies it (`mazapan
+  apply --if-updated`; Omarchy runs its migrations at login too). No hook
+  in pacman.
+- When the update brings a new Mazapán, the new one writes the
+  configuration, runs the checks and, if needed, rolls back (`update
+  --continue`): its plugins may need its own code.
+- Orphans offered, never removed alone; the cache keeps three versions
+  (paccache.timer, weekly: rollbacks come from it).
+- After 1.0: downloading ahead (on power, unmetered), firmware (fwupd),
+  a pinned Arch snapshot.
 
 ## Progress
 
 | # | Item | State |
 |---|------|-------|
+| — | Toward 1.0, B: safe to install | **Done** (2026-10-03): encrypted by default with a recovery key, one password (keyring included), locked before sleep, firewall on |
+| — | Toward 1.0, A: it updates itself | **Done** (2026-10-03): its own signed repository with channels, versions and releases, the updater after Omarchy's. Pending, the person's: the release key, hosting, uploading |
 | 1 | Updates you can trust | **Done** (2026-09-28); follow-ups listed below |
 | 2 | Monitors | **Done** (2026-09-28); follow-ups listed below |
 | 3 | One command palette | **Done** (2026-09-28): first version; follow-ups listed below |
@@ -46,7 +190,7 @@ dropped.
 Part three (items 16–24, 2026-09-29): what Omarchy (4.0 "Quattro", read
 from its scripts) has that this still doesn't, each done better. Without
 16 nobody else can use this, so it came first; 16, 17 and 20 done.
-Next: 19 (security), then finishing 18 and 21, then 13, then 22–24.
+Next: the road to 1.0, above.
 
 ## The core: Go to C#
 

@@ -27,8 +27,11 @@ Singleton {
   property int exit: -1
   property string last: ""
   property string runId: ""
-  // The one running (or last run) brought a new kernel: restart after it.
+  // The one running (or last run) needs a restart after it: what
+  // `mazapan update` said ("::reboot kernel|hyprland").
   property bool restartAfter: false
+  // Its steps as it goes ("::step ID run|ok|fail|skip DETAIL"), in order.
+  property var steps: []
 
   function check() {
     if (checking || running) return
@@ -68,12 +71,13 @@ Singleton {
   function update() {
     if (running) return
     runId = String(Date.now())
-    restartAfter = restart
+    restartAfter = false
+    steps = []
     running = true
     exit = -1
     last = ""
     Quickshell.execDetached(["sh", "-c", 'd=$0; id=$1; ok=$2; bad=$3; title=$4; mkdir -p "$d"; echo "START $id $$" > "$d/run.log"; '
-      + 'mazapan update -y --gui >> "$d/run.log" 2>&1; c=$?; echo "DONE $c" >> "$d/run.log"; '
+      + 'MAZAPAN_STEP_TAG=$id mazapan update -y --gui >> "$d/run.log" 2>&1; c=$?; echo "DONE $c" >> "$d/run.log"; '
       + 'if [ "$c" = 0 ]; then notify-send -a "$title" -i system-software-update "$ok"; else notify-send -a "$title" -u critical -i dialog-warning "$bad"; fi',
       root.dir, root.runId, {{ tq "done" }}, {{ tq "failed" }}, {{ tq "title" }}])
     log.reload()
@@ -94,7 +98,22 @@ Singleton {
       if (root.running && root.runId !== "" && start[1] !== root.runId) return
       if (root.runId === "") root.runId = start[1]
       const done = lines.find(l => l.startsWith("DONE "))
-      root.last = lines.filter(l => !l.startsWith("START ") && !l.startsWith("DONE ")).slice(-1)[0] || ""
+      const steps = []
+      let reboot = false
+      // Only the lines with this run's id are its steps (not output that looks alike).
+      const tag = "::" + start[1] + ":"
+      for (const l of lines) {
+        const m = l.startsWith(tag) ? /^step (\w+) (run|ok|fail|skip)(?: (.*))?$/.exec(l.slice(tag.length)) : null
+        if (m) {
+          const i = steps.findIndex(x => x.id === m[1])
+          const st = { id: m[1], state: m[2], detail: m[3] || "" }
+          if (i >= 0) steps[i] = st
+          else steps.push(st)
+        } else if (l.startsWith(tag + "reboot ")) reboot = true
+      }
+      root.steps = steps
+      root.restartAfter = reboot
+      root.last = lines.filter(l => !l.startsWith("START ") && !l.startsWith("DONE ") && !l.startsWith(tag)).slice(-1)[0] || ""
       if (done) {
         const was = root.running
         root.running = false
