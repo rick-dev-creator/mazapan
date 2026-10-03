@@ -6,6 +6,13 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- Agents: API keys kept in the keyring, not in plain files ("Agents: an
+  API key" in the palette); `mazapan agents run` gives them to opencode, pi
+  and the others, never to Claude Code or Codex. What OpenRouter, Anthropic
+  and OpenAI bill shows in the card and the dashboard, with an OpenRouter
+  key's limit. A dot on the workspace where an agent waits for you, works
+  or is done.
+
 - Agents: Claude Code's hooks can't block a prompt even with an older
   Mazapán (they never fail), and say when work goes on after a permission;
   a minute idle after an answer no longer reads as "waiting for you".

@@ -24,8 +24,10 @@ BarItem {
   Connections {
     target: AgentsService
     function onAskedChanged() {
+      // The focused monitor's bar (unknown until Hyprland's first event after the shell starts: the first screen's).
       const f = Hyprland.focusedMonitor
-      if (root.barScreen && f && f.name === root.barScreen.name && !popup.visible) popup.toggle()
+      const name = f ? f.name : (Quickshell.screens.length ? Quickshell.screens[0].name : "")
+      if (root.barScreen && name === root.barScreen.name && !popup.visible) popup.toggle()
     }
   }
 
@@ -134,6 +136,37 @@ BarItem {
               horizontalAlignment: Text.AlignRight
             }
           }
+        }
+      }
+    }
+
+    // --- what the providers report (API keys in the keyring) ---------------------------
+    Rule { visible: AgentsService.spend.length > 0; Layout.fillWidth: true }
+    Caption { visible: AgentsService.spend.length > 0; text: {{ tq "spend" }}.toUpperCase() }
+    Repeater {
+      model: AgentsService.spend
+      ColumnLayout {
+        id: prov
+        required property var modelData
+        readonly property bool limited: modelData.problem === "" && modelData.limit !== null && modelData.remaining !== null
+        Layout.fillWidth: true
+        spacing: 2
+        RowLayout {
+          Layout.fillWidth: true
+          spacing: 8
+          Label { text: prov.modelData.name; Layout.fillWidth: true; elide: Text.ElideRight }
+          Caption {
+            text: prov.modelData.problem !== "" ? prov.modelData.problem
+              : {{ tq "spend.row" }}.arg(root.usd(prov.modelData.today)).arg(30).arg(root.usd(prov.modelData.period))
+            color: prov.modelData.problem !== "" ? Theme.fgSubtle : Theme.fgMuted
+          }
+        }
+        // A key's limit: what's left (amber under a tenth).
+        Caption {
+          visible: prov.limited
+          Layout.alignment: Qt.AlignRight
+          text: prov.limited ? {{ tq "spend.left" }}.arg(root.usd(prov.modelData.remaining)).arg(root.usd(prov.modelData.limit)) : ""
+          color: prov.limited && prov.modelData.remaining < prov.modelData.limit * 0.1 ? Theme.warning : Theme.fgSubtle
         }
       }
     }

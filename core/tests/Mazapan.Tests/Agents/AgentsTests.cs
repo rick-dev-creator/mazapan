@@ -215,5 +215,47 @@ public class AgentsTests
             Environment.SetEnvironmentVariable("XDG_RUNTIME_DIR", old);
         }
     }
-}
 
+    [Fact]
+    public void ProvidersSpendIsReadInTheirOwnUnits()
+    {
+        // Anthropic: cents, as decimal strings ("123.45" is $1.23), a bucket per UTC day.
+        using (var a = System.Text.Json.JsonDocument.Parse("""
+            {"data":[{"starting_at":"2026-10-03T00:00:00Z","ending_at":"2026-10-04T00:00:00Z","results":[{"amount":"123.45","currency":"USD"},{"amount":"76.55","currency":"USD"}]},
+                     {"starting_at":"2026-10-04T00:00:00Z","ending_at":"2026-10-05T00:00:00Z","results":[]}],"has_more":true,"next_page":"page_x"}
+            """))
+        {
+            var days = Spend.ParseAnthropic(a.RootElement, out var next);
+            Assert.Equal([("2026-10-03", 2.0), ("2026-10-04", 0.0)], days.Select(d => (d.Day, Math.Round(d.Usd, 6))));
+            Assert.Equal("page_x", next);
+        }
+        // OpenAI: dollars, start times in Unix seconds.
+        using (var o = System.Text.Json.JsonDocument.Parse("""
+            {"data":[{"start_time":1759449600,"end_time":1759536000,"results":[{"amount":{"value":0.06,"currency":"usd"}},{"amount":{"value":1.5,"currency":"usd"}}]}],"has_more":false,"next_page":null}
+            """))
+        {
+            var days = Spend.ParseOpenAI(o.RootElement, out var next);
+            Assert.Equal([("2025-10-03", 1.56)], days.Select(d => (d.Day, Math.Round(d.Usd, 6))));
+            Assert.Null(next);
+        }
+        // OpenRouter: its key's own numbers, in dollars; the period the closest it has.
+        using var r = System.Text.Json.JsonDocument.Parse("""
+            {"data":{"label":"sk-or-v1-...","limit":100,"limit_remaining":74.5,"usage":25.5,"usage_daily":1.25,"usage_weekly":6,"usage_monthly":20}}
+            """);
+        var or = Spend.ParseOpenRouter(r.RootElement, 30);
+        Assert.Equal((1.25, 20.0, 100.0, 74.5), (or.Today, or.Period, or.Limit!.Value, or.Remaining!.Value));
+        Assert.Equal(6, Spend.ParseOpenRouter(r.RootElement, 7).Period);
+    }
+
+    [Fact]
+    public void AgentsThatSignInAreGivenNoKey()
+    {
+        Assert.False(Keys.Takes("claude"));   // ANTHROPIC_API_KEY would win over its subscription
+        Assert.False(Keys.Takes("codex"));
+        Assert.True(Keys.Takes("opencode"));
+        Assert.True(Keys.Takes("pi"));
+        Assert.Empty(Keys.Environment("claude"));
+        Assert.Throws<Mazapan.Util.MazapanException>(() => Keys.Of("nope"));
+        Assert.All(Keys.Providers.Where(p => !p.Admin), p => Assert.EndsWith("_API_KEY", p.Env));
+    }
+}

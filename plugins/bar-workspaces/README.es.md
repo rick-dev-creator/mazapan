@@ -5,7 +5,9 @@ Los números de los espacios de trabajo en la barra: del 1 al 5 siempre
 (su tecla). En el que estás es un bloque del color de acento que se desliza
 de un número a otro; uno que se ve en otro monitor va subrayado; los vacíos
 van atenuados. Un clic en un número va a ese espacio; la rueda encima los
-recorre.
+recorre. Con el plugin de Agentes, un punto en un número indica que ahí
+hay una sesión de un agente: ámbar mientras te espera, el color del texto
+mientras trabaja, verde cuando termina.
 
 Un clic derecho en un número abre una vista previa en vivo de ese espacio
 (otra vez para cerrarla), cada ventana en su lugar y tamaño reales; crece

@@ -29,6 +29,7 @@ the CLI does, and nothing else:
 | `undo`           | put back what the last apply changed; with `id`, only if that one is still the last | yes |
 | `agents_usage`   | what every coding agent here used, by day, account, provider, model and project; cost reported and at API prices | no |
 | `agents_limits`  | each Claude account's windows (5-hour, weekly, per model): used and when each resets | no |
+| `agents_spend`   | what the API providers report was spent (OpenRouter's key; Anthropic's and OpenAI's organization, by day), a limit and what's left | no |
 
 A change is `{ "theme": "paper", "accent": "#4fa35f", "set": {"bar-clock.font_size": 11},
 "reset": ["bar-clock.format"], "enable": ["agent"], "disable": ["bar-weather"] }`,
@@ -137,6 +138,8 @@ here. Numbers only, read locally; no prompt or answer is read or kept.
 mazapan agents [list] [--json]        # the agents and every account (Claude configurations, opencode/pi providers, Codex)
 mazapan agents usage [--days N] [--json]
 mazapan agents limits [--json]        # each Claude account's windows
+mazapan agents spend [--days N] [--json]  # what the providers report was spent (keys in the keyring)
+mazapan agents keys [set|remove PROVIDER] # API keys in the keyring (set: the key on stdin)
 mazapan agents sessions [--json]      # open sessions: working / waiting / done / running
 mazapan agents run AGENT [ARGS…]      # claude: with the first account that has room
 mazapan agents hooks install|remove   # Claude Code's hooks for the sessions (the agent plugin does it)
@@ -162,8 +165,21 @@ mazapan agents hooks install|remove   # Claude Code's hooks for the sessions (th
 - *Limits.* Anthropic's usage endpoint with the account's own token, read
   only: an expired token is never refreshed (that would change it under
   Claude Code); the last values read are shown instead, `stale`.
+- *Keys.* API keys live in the keyring (the Secret Service, through
+  `secret-tool`, attributes `service mazapan-agents provider ID`): `keys set`
+  reads one from stdin, hidden when typed; nothing prints one. `agents run`
+  gives an agent the keys it can take as their variables
+  (`OPENROUTER_API_KEY`…), never to Claude Code or Codex, which sign in and
+  would take a key over their subscription. Admin keys (`anthropic-admin`,
+  `openai-admin`) are only for reading the spend.
+- *Spend.* What the providers bill, with those keys: OpenRouter's
+  `/api/v1/key` (today, the period closest to the one asked, its limit and
+  what's left), Anthropic's cost report and OpenAI's costs (by UTC day; an
+  admin key each). Kept 15 minutes in `~/.cache/mazapan/agents/spend.json`,
+  numbers only. `spend --json`, version 1: `days`, `providers` (provider,
+  name, days [{day, usd}], today, period, limit, remaining, problem).
 - *Sessions.* Claude Code's hooks (`SessionStart`, `UserPromptSubmit`,
-  `PreToolUse`, `Notification`, `Stop`, `SessionEnd`) and opencode's plugin
+  `PreToolUse`, `PostToolUse`, `Notification`, `Stop`, `SessionEnd`) and opencode's plugin
   call `mazapan agents event`, which records the state in the runtime
   directory; agents that tell nothing show as running while their process
   is. A session's processes lead to its window.

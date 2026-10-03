@@ -18,7 +18,11 @@ Singleton {
   property var sessions: []    // [{agent, id, account, project, state, since, message, pids}]
   property var accounts: []    // [{account, read, stale, problem, windows: [{name, percent, resets_at}]}]
   property var today: []       // [{agent, answers, tokens, api, reported}]
+  property var spend: []       // what the providers report: [{provider, name, today, period, limit, remaining, problem}]
   property int asked: 0        // the palette asked for the card
+  // Each workspace with a session's window: what the most pressing one does
+  // (waiting, then working, then done), for a dot on its number.
+  property var byWorkspace: ({}) // workspace id -> state
   property double now: Date.now()
 
   readonly property bool any: agents.length > 0
@@ -50,6 +54,7 @@ Singleton {
     run(lister, ["list", "--json"])
     run(limits, ["limits", "--json"])
     run(usage, ["usage", "--json", "--days", "1"])
+    run(spendProc, ["spend", "--json", "--days", "30"])
   }
 
   // --- the notifications -----------------------------------------------------------
@@ -138,6 +143,38 @@ Singleton {
     }
   }
 
+  // --- where each session is ----------------------------------------------------------
+
+  readonly property var rank: ({ waiting: 3, working: 2, done: 1 })
+  function placeSessions() {
+    if (!sessions.some(s => rank[s.state] && s.pids && s.pids.length)) {
+      if (Object.keys(byWorkspace).length) byWorkspace = ({})
+      return
+    }
+    if (!placer.running) placer.running = true
+  }
+  Process {
+    id: placer
+    command: ["hyprctl", "clients", "-j"]
+    stdout: StdioCollector {
+      onStreamFinished: {
+        let list = []
+        try { list = JSON.parse(text) } catch (e) { return }
+        const out = {}
+        for (const s of root.sessions) {
+          const r = root.rank[s.state]
+          if (!r) continue
+          // Its window: the client whose process is the session's or one above it (its terminal).
+          const c = (s.pids || []).map(p => list.find(x => x.pid === p)).find(x => x)
+          if (!c || !c.workspace || c.workspace.id <= 0) continue
+          const id = c.workspace.id
+          if (!out[id] || root.rank[out[id]] < r) out[id] = s.state
+        }
+        if (JSON.stringify(out) !== JSON.stringify(root.byWorkspace)) root.byWorkspace = out
+      }
+    }
+  }
+
   // --- reading ----------------------------------------------------------------------
 
   Process {
@@ -155,9 +192,14 @@ Singleton {
           const list = JSON.parse(text).sessions || []
           root.noteSessions(list)
           root.sessions = list
+          root.placeSessions()
         } catch (e) {}
       }
     }
+  }
+  Process {
+    id: spendProc
+    stdout: StdioCollector { onStreamFinished: { try { root.spend = JSON.parse(text).providers || [] } catch (e) {} } }
   }
   Process {
     id: limits

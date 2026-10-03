@@ -26,6 +26,10 @@ import qs
 {{- if settings.preview }}
 import "../../components/workspaces"
 {{- end }}
+{{- agents = (under "~/.config/quickshell/mazapan/components/agents/AgentsService.qml").size > 0 }}
+{{- if agents }}
+import "../../components/agents"
+{{- end }}
 
 Item {
   id: root
@@ -189,6 +193,23 @@ Item {
             ColorAnimation { duration: Theme.duration }
           }
         }
+
+{{- if agents }}
+
+        // A coding agent's session here: waiting for you (the warning
+        // color), working (the text's), done (success's).
+        Rectangle {
+          readonly property string agentState: AgentsService.byWorkspace[cell.modelData] || ""
+          visible: agentState !== ""
+          anchors { top: parent.top; right: parent.right; topMargin: 4; rightMargin: 5 }
+          width: 5
+          height: 5
+          radius: 2.5
+          color: agentState === "waiting" ? Theme.warning : agentState === "working" ? (cell.focused ? Theme.accentFg : Theme.fgMuted) : Theme.success
+          border.width: cell.focused && agentState !== "working" ? 1 : 0
+          border.color: Theme.accentFg
+        }
+{{- end }}
 
         Rectangle {
           visible: cell.shown

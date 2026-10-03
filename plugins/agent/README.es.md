@@ -21,8 +21,20 @@ cuenta pasa del `limit_alert` (80 %) de un límite.
 
 **El panel** («Panel» en la tarjeta, o la paleta): coste o tokens por día
 de cada agente, por modelo, por proyecto, cuándo trabajas (día × hora), el
-uso de la caché y los límites de cada cuenta, en 7, 30 o 90 días. En su
+uso de la caché y los límites de cada cuenta, en 7, 30 o 90 días, y lo que facturan los propios proveedores de API. En su
 propia ventana, aparte de la barra.
+
+**Claves de API en el llavero**, no en un `.env` en claro: «Agentes: una
+clave de API» en la paleta (o `mazapan agents keys set openrouter`, la
+clave se escribe oculta). `mazapan agents run opencode` (pi, aider…) abre
+el agente con ellas como sus variables; Claude Code y Codex inician sesión
+y no reciben ninguna. Una clave de OpenRouter, o una de administrador de
+Anthropic u OpenAI, muestra además lo que facturan, hoy y en el periodo, y
+el límite de la clave de OpenRouter.
+
+**Un punto en el workspace** donde está la ventana de una sesión (con el
+plugin de Workspaces): ámbar mientras te espera, el color del texto
+mientras trabaja, verde cuando termina.
 
 **Preguntar a un agente sobre este escritorio**, desde la paleta, abre tu
 agente (`command`; Claude con la primera cuenta que tenga margen) con el

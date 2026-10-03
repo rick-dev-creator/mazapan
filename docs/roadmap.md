@@ -108,9 +108,12 @@ the VM; 1 is the person's. Done in 2: every agent and account found
 (several Claude configurations, opencode, pi, Codex), usage and API-priced
 cost from their own logs, Claude's limits per account, `mazapan agents run
 claude` taking the account with room, the dashboard (QtGraphs), MCP tools.
-Not yet in 2: the OpenTelemetry receiver, the API providers' own spend
-endpoints, API keys moved to the keyring. Not yet in 3: the dot on the
-session's workspace. Untried until real accounts and hardware: Claude's
+Since then (2026-10-04): API keys in the keyring (`mazapan agents keys`,
+given to the agents that take them by `agents run`, never to Claude Code
+or Codex), the spend the providers report (OpenRouter's key, Anthropic's
+and OpenAI's cost reports with an admin key) in the card and the
+dashboard, and the dot on the session's workspace. Not yet in 2: the
+OpenTelemetry receiver. Untried until real accounts and hardware: Claude's
 limits endpoint with the person's accounts, Rider's first start, Android
 Studio and the emulator, each hardware plugin on its machine.
 

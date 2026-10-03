@@ -4,7 +4,10 @@ The workspace numbers in the bar: 1 to 5 always (`persistent`), any other
 while it exists, 10 shown as 0 (its key). The one you're on is a solid
 block in the accent color that slides from number to number; one showing
 on another monitor is underlined; empty ones are dimmed. A click on a
-number goes there; scrolling over them steps through them.
+number goes there; scrolling over them steps through them. With the
+Agents plugin, a dot on a number says a coding agent's session is there:
+amber while it waits for you, the text's color while it works, green when
+it's done.
 
 A right click on a number opens a live preview of that workspace (again
 to close), every window at its real place and size; it grows a moment

@@ -1,14 +1,14 @@
 [plugin]
 id = "agent"
 name = "Agents"
-version = "0.2.0"
+version = "0.3.0"
 api = 1
 description = "Your coding agents: in the bar, which is working and which waits for you (a click goes to its window), each account's limits and when they reset, and what they've used today, for Claude Code, opencode, pi, Codex… every account found by itself; and from the palette, ask one about this desktop with mazapan's report"
 categories = ["agent", "tools", "bar"]
 requires = ["shell-bar"]
 
 [packages]
-pacman = ["quickshell", "libnotify", "sqlite", "qt6-graphs", "jq"]
+pacman = ["quickshell", "libnotify", "sqlite", "qt6-graphs", "jq", "libsecret"]
 
 [settings]
 # The agent to open, as its command: it gets the report as its first
@@ -64,6 +64,11 @@ template = "claude-hooks.sh.tmpl"
 output = "~/.local/share/mazapan/bin/agent-claude-hooks"
 reload = "sh ~/.local/share/mazapan/bin/agent-claude-hooks >/dev/null 2>&1; true"
 
+# The palette's "API key" action: one provider's key into the keyring.
+[[targets]]
+template = "agent-keys.sh.tmpl"
+output = "~/.local/share/mazapan/bin/agent-keys"
+
 [[actions]]
 name = "{{ t \"ask\" }}"
 # Claude Code with the first account that has room (mazapan agents run).
@@ -80,6 +85,12 @@ keywords = "{{ t \"report.kw\" }}"
 name = "{{ t \"act.open\" }}"
 run = "qs ipc -c mazapan call agents open"
 keywords = "{{ t \"act.open.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.keys\" }}"
+run = "sh ~/.local/share/mazapan/bin/agent-keys"
+terminal = true
+keywords = "{{ t \"act.keys.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.dashboard\" }}"

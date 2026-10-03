@@ -30,6 +30,7 @@ FloatingWindow {
   property string metric: "cost"   // cost (API prices) or tokens
   property var usageData: null     // usage --json ("data" is a window's children)
   property var limits: []          // limits --json accounts
+  property var spend: []           // spend --json providers
   property bool loading: false
 
   // Each agent its own color, from the theme's terminal palette (the accent
@@ -58,6 +59,10 @@ FloatingWindow {
     usage.command = ["mazapan", "agents", "usage", "--json", "--days", String(days)]
     usage.running = true
     if (!limitsProc.running) limitsProc.running = true
+    if (!spendProc.running) {
+      spendProc.command = ["mazapan", "agents", "spend", "--json", "--days", String(days)]
+      spendProc.running = true
+    }
   }
   Component.onCompleted: load()
 
@@ -75,6 +80,10 @@ FloatingWindow {
     id: limitsProc
     command: ["mazapan", "agents", "limits", "--json"]
     stdout: StdioCollector { onStreamFinished: { try { win.limits = JSON.parse(text).accounts || [] } catch (e) {} } }
+  }
+  Process {
+    id: spendProc
+    stdout: StdioCollector { onStreamFinished: { try { win.spend = JSON.parse(text).providers || [] } catch (e) {} } }
   }
   // Fresh every five minutes while open.
   Timer { interval: 300000; repeat: true; running: true; onTriggered: win.load() }
@@ -435,6 +444,49 @@ FloatingWindow {
                   }
                   Caption { text: Math.round(modelData.percent) + "%"; Layout.preferredWidth: 40; horizontalAlignment: Text.AlignRight }
                 }
+              }
+            }
+          }
+
+          // What the providers themselves say was spent (their keys in the keyring).
+          Item { implicitHeight: 6 }
+          Caption { text: {{ tq "spend" }}.toUpperCase() }
+          Caption { visible: win.spend.length === 0; text: {{ tq "dash.no_spend" }}; color: Theme.fgSubtle; wrapMode: Text.Wrap; Layout.fillWidth: true }
+          Repeater {
+            model: win.spend
+            ColumnLayout {
+              id: prov
+              required property var modelData
+              Layout.fillWidth: true
+              spacing: 4
+              RowLayout {
+                Layout.fillWidth: true
+                Label { text: prov.modelData.name; Layout.fillWidth: true; elide: Text.ElideRight }
+                Caption {
+                  text: prov.modelData.problem !== "" ? prov.modelData.problem
+                    : {{ tq "spend.row" }}.arg(win.usd(prov.modelData.today)).arg(win.days).arg(win.usd(prov.modelData.period))
+                  color: Theme.fgSubtle
+                }
+              }
+              // Its limit, where the key has one.
+              RowLayout {
+                visible: prov.modelData.limit !== null && prov.modelData.remaining !== null
+                Layout.fillWidth: true
+                spacing: 8
+                Rectangle {
+                  readonly property real used: prov.modelData.limit ? 1 - prov.modelData.remaining / prov.modelData.limit : 0
+                  Layout.fillWidth: true
+                  implicitHeight: 8
+                  radius: 3
+                  color: Theme.bgAlt
+                  Rectangle {
+                    width: parent.width * Math.min(1, Math.max(0, parent.used))
+                    height: parent.height
+                    radius: 3
+                    color: parent.used >= 0.9 ? Theme.danger : parent.used >= 0.8 ? Theme.warning : Theme.fgMuted
+                  }
+                }
+                Caption { text: {{ tq "spend.left" }}.arg(win.usd(prov.modelData.remaining || 0)).arg(win.usd(prov.modelData.limit || 0)) }
               }
             }
           }

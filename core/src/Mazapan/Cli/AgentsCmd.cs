@@ -22,21 +22,24 @@ public static partial class Program
         var rest = args.Length > 0 && !args[0].StartsWith('-') ? args[1..] : args;
         if (sub == "run") return AgentsRun(rest);
         if (sub == "event") return AgentsEvent(rest);
+        if (sub == "keys") return AgentsKeys(rest);
         var fs = new Flags("agents " + sub)
             .Bool("json", "as JSON, for the bar, the dashboard and agents")
             .String("days", "how far back, in days (usage; 30)")
             .Bool("refresh", "fetch the price table again now (usage)")
             .Parse(rest);
         var json = fs.IsSet("json");
+        var days = fs.Get("days") is { Length: > 0 } d ? (int.TryParse(d, out var n) ? n : 0) : 30;
+        if (sub == "spend") return AgentsSpend(days, fs.IsSet("refresh"), json);
         var agents = Discovery.Find();
         return sub switch
         {
             "list" => AgentsList(agents, json),
-            "usage" => AgentsUsage(agents, fs.Get("days") is { Length: > 0 } d ? (int.TryParse(d, out var n) ? n : 0) : 30, fs.IsSet("refresh"), json),
+            "usage" => AgentsUsage(agents, days, fs.IsSet("refresh"), json),
             "limits" => AgentsLimits(agents, json),
             "sessions" => AgentsSessions(json),
             "hooks" => AgentsHooks(agents, fs.Rest, json),
-            _ => throw new MazapanException("usage: mazapan agents [list|usage|limits|sessions|hooks install|remove|run AGENT [ARGS…]] [--json] [--days N]"),
+            _ => throw new MazapanException("usage: mazapan agents [list|usage|limits|spend|sessions|hooks install|remove|keys [set|remove PROVIDER]|run AGENT [ARGS…]] [--json] [--days N]"),
         };
     }
 
@@ -279,8 +282,73 @@ public static partial class Program
             Console.Error.WriteLine($"mazapan: {agent.Name} as {pick.Account.Label}" +
                 (skipped.Count > 0 ? $" ({string.Join(", ", skipped.Select(s => s.Account.Label))} at its limit)" : ""));
         }
+        // The API keys in the keyring it can take (not for Claude Code and Codex: they sign in).
+        foreach (var (k, v) in Keys.Environment(agent.Id)) psi.Environment[k] = v;
         using var p = Process.Start(psi)!;
         p.WaitForExit();
         return p.ExitCode;
+    }
+
+    /// <summary>
+    /// mazapan agents keys [set|remove PROVIDER]: API keys in the keyring.
+    /// set reads the key from stdin (typed hidden in a terminal), so it never
+    /// shows in a command line or the shell's history. Listed by provider only.
+    /// </summary>
+    static int AgentsKeys(string[] args)
+    {
+        var json = args.Contains("--json");
+        args = [.. args.Where(a => a != "--json")];
+        switch (args)
+        {
+            case []:
+                var kept = Keys.Kept();
+                if (json)
+                {
+                    Console.WriteLine(GoJson.Marshal(new Fields
+                    {
+                        { "version", AgentsVersion },
+                        { "providers", Keys.Providers.Select(p => new Fields { { "id", p.Id }, { "name", p.Name }, { "env", p.Env }, { "admin", p.Admin }, { "kept", kept.Contains(p) } }).ToList() },
+                    }));
+                    return 0;
+                }
+                foreach (var p in Keys.Providers)
+                    Console.WriteLine($"  {(kept.Contains(p) ? Style.Green + "✓" : " ")}{Style.Reset} {p.Id,-16} {Style.Dim}{p.Name}{(p.Env != "" ? " · " + p.Env : " · its spend")}{Style.Reset}");
+                Console.WriteLine($"{Style.Dim}mazapan agents keys set PROVIDER (the key on stdin) · remove PROVIDER{Style.Reset}");
+                return 0;
+            case ["set", var id]:
+                var provider = Keys.Of(id);
+                var key = Console.IsInputRedirected ? Console.In.ReadToEnd() : ReadSecret($"{provider.Name} API key: ");
+                Keys.Set(id, key);
+                Console.WriteLine($"{provider.Name}: kept in the keyring.");
+                return 0;
+            case ["remove", var id]:
+                Console.WriteLine(Keys.Remove(id) ? $"{Keys.Of(id).Name}: taken out of the keyring." : $"{Keys.Of(id).Name}: there was none.");
+                return 0;
+            default:
+                throw new MazapanException("usage: mazapan agents keys [set|remove PROVIDER] [--json]");
+        }
+    }
+
+    /// <summary>mazapan agents spend: what the providers say was spent, with the keys in the keyring.</summary>
+    static int AgentsSpend(int days, bool refresh, bool json)
+    {
+        var list = Spend.Read(days, refresh);
+        if (json)
+        {
+            Console.WriteLine(GoJson.Marshal(new Fields { { "version", AgentsVersion }, { "days", days }, { "providers", list.Select(Spend.Json).ToList() } }));
+            return 0;
+        }
+        if (list.Count == 0)
+        {
+            Console.WriteLine("No provider to ask: an OpenRouter key, or an admin key for Anthropic or OpenAI (mazapan agents keys).");
+            return 0;
+        }
+        foreach (var s in list)
+        {
+            if (s.Problem != "") { Console.WriteLine($"{s.Name,-20} {Style.Dim}{s.Problem}{Style.Reset}"); continue; }
+            Console.WriteLine($"{s.Name,-20} today ${s.Today:0.00} · {days} days ${s.Period:0.00}"
+                + (s.Limit is { } l ? $" · limit ${l:0.00}" + (s.Remaining is { } r ? $", ${r:0.00} left" : "") : ""));
+        }
+        return 0;
     }
 }

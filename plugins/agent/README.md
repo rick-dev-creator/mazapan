@@ -22,7 +22,19 @@ an account passes `limit_alert` (80 %) of a limit.
 **The dashboard** ("Dashboard" in the card, or the palette): cost or
 tokens by day for each agent, by model, by project, when you work
 (weekday × hour), the cache's share, and every account's limits, over 7,
-30 or 90 days. Its own window, apart from the bar.
+30 or 90 days, and what the API providers themselves bill. Its own
+window, apart from the bar.
+
+**API keys in the keyring**, not in a plain `.env`: "Agents: an API key"
+in the palette (or `mazapan agents keys set openrouter`, the key typed
+hidden). `mazapan agents run opencode` (pi, aider…) starts the agent with
+them as its variables; Claude Code and Codex sign in and get none. An
+OpenRouter key, or an admin key for Anthropic or OpenAI, also shows what
+they bill, today and over the period, and an OpenRouter key's limit.
+
+**A dot on the workspace** where a session's window is (with the
+Workspaces plugin): amber while it waits for you, the text's color while it
+works, green when it's done.
 
 **Ask an agent about this desktop**, from the palette, opens your agent
 (`command`; Claude with the first account that has room) with mazapan's
