@@ -23,21 +23,21 @@ BarItem {
   open: popup.visible
   onClicked: popup.toggle()
 
-  function apps(s) { return s === "" ? [] : s.split(",").filter(a => a !== "") }
 
   Process {
     id: probe
     command: ["sh", Quickshell.env("HOME") + "/.local/share/mazapan/bin/privacy"]
     stdout: StdioCollector {
       onStreamFinished: {
-        const f = {}
-        for (const part of text.trim().split(";")) {
-          const i = part.indexOf("=")
-          if (i > 0) f[part.slice(0, i)] = part.slice(i + 1)
-        }
-        root.mic = root.apps(f.mic || "")
-        root.cam = root.apps(f.cam || "")
-        root.screen = root.apps(f.screen || "")
+        let o = {}
+        try {
+          o = JSON.parse(text)
+        } catch (e) {}
+        // A list's length is the dot: its names only say who.
+        const list = x => Array.isArray(x) ? x.map(a => String(a) || "?") : []
+        root.mic = list(o.mic)
+        root.cam = list(o.cam)
+        root.screen = list(o.screen)
       }
     }
   }

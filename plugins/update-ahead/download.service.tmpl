@@ -10,6 +10,15 @@ After=network-online.target
 Type=oneshot
 # Not on a metered connection (a phone's hotspot…).
 ExecCondition=/bin/sh -c '! nmcli -t -f GENERAL.METERED device show 2>/dev/null | grep -q "^GENERAL.METERED:yes"'
+# Its own database, root's alone: checkupdates' default is in /tmp, where
+# another account could make the folder first (and point it at the
+# system's database: a half upgrade). A private /tmp too.
+PrivateTmp=yes
+StateDirectory=mazapan-checkup
+StateDirectoryMode=0700
+Environment=CHECKUPDATES_DB=/var/lib/mazapan-checkup/db
 ExecStart=/usr/bin/checkupdates -d
+# 2 is "nothing new": not a failure.
+SuccessExitStatus=2
 Nice=19
 IOSchedulingClass=idle

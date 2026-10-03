@@ -24,12 +24,13 @@ every = { default = 6, min = 1, max = 48 }
 template = "download.service.tmpl"
 output = "/etc/systemd/system/mazapan-download.service"
 system = true
+reload = "systemctl daemon-reload"
 
 [[targets]]
 template = "download.timer.tmpl"
 output = "/etc/systemd/system/mazapan-download.timer"
 system = true
-reload = "systemctl daemon-reload; if [ -e /etc/systemd/system/mazapan-download.timer ]; then systemctl enable --now mazapan-download.timer; else systemctl disable --now mazapan-download.timer 2>/dev/null; fi; true"
+reload = "systemctl daemon-reload; if [ -e /etc/systemd/system/mazapan-download.timer ]; then systemctl enable --now mazapan-download.timer; else systemctl stop mazapan-download.timer mazapan-download.service 2>/dev/null; rm -f /etc/systemd/system/timers.target.wants/mazapan-download.timer; systemctl daemon-reload; fi; true"
 
 [[checks]]
 name = "{{ t \"check\" }}"

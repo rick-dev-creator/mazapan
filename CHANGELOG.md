@@ -54,5 +54,11 @@ release (a tag `vX.Y.Z`) names them.
 - Every built-in plugin has its page in the Plugins panel.
 - Installing an app works before a repository was ever fetched (installed
   offline, or Mazapán's repository newly added).
+- Fixed after an audit: the privacy dots no longer keep a processor busy,
+  and no app name can hide them; changing the password checks the current
+  one first; a plugin that can't be read keeps its files; hibernation only
+  where its swap file fits; updates downloaded ahead in a folder of root's
+  own; the text size slider applies; Wi-Fi codes right for any name or
+  password; the boot menu never stops grub.cfg from being written.
 - A plugin that can't be read is left out and said; the rest of the
   desktop still applies.

@@ -13,6 +13,7 @@ public class SetupTests
          "theme":"phosphor","apps":["vscode","steam"]}
         """;
 
+    internal static string WithKey(string key, string json) => With(key, json);
     static string With(string key, string json) =>
         Good.Replace($"\"{key}\":", $"\"{key}_old\":").TrimEnd().TrimEnd('}') + $",\"{key}\":{json}}}";
 
@@ -342,4 +343,27 @@ public class InstallProgressTests
     [InlineData("xx", null)]
     public void TextInPicturesIsReadInTheLanguage(string lang, string? data) =>
         Assert.Equal(data, Mazapan.Setup.Archinstall.OcrData(lang));
+
+    [Fact]
+    public void HibernationOnlyWhereItFitsAndNeverStopsTheInstall()
+    {
+        const long GiB = 1L << 30;
+        Assert.True(Archinstall.HibernationFits(512 * GiB, 32 * 1024, true));
+        Assert.False(Archinstall.HibernationFits(32 * GiB, 32 * 1024, true));
+        var a = Answers.Parse(SetupTests.WithKey("encrypt", "true"));
+        a.Hibernate = true;
+        a.MemoryMiB = 16 * 1024;
+        var post = Archinstall.Post(a);
+        // The swap file failing: no resume, the plugin taken off, the rest goes on.
+        Assert.Contains("hibernate=1; if btrfs filesystem mkswapfile", post);
+        Assert.Contains("else rm -f /swap/swapfile; hibernate=0;", post);
+        Assert.Contains("[ \"$hibernate\" = 1 ] || sed -i", post);
+        var f = Path.GetTempFileName();
+        File.WriteAllText(f, post);
+        var p = System.Diagnostics.Process.Start("bash", ["-n", f])!;
+        p.WaitForExit();
+        File.Delete(f);
+        Assert.Equal(0, p.ExitCode);
+    }
 }
+

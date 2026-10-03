@@ -37,6 +37,10 @@ Item {
     capturing = null
     Quickshell.execDetached(["hyprctl", "dispatch", 'hl.dsp.submap("reset")'])
   }
+  // Loaded after a reload or a crash while listening: the desktop's own keys
+  // may still be resting; and going, they come back.
+  Component.onCompleted: Quickshell.execDetached(["hyprctl", "dispatch", 'hl.dsp.submap("reset")'])
+  Component.onDestruction: if (capturing) Quickshell.execDetached(["hyprctl", "dispatch", 'hl.dsp.submap("reset")'])
   // A key as Hyprland names it ("" for one that isn't a key on its own: a modifier).
   function keyName(e) {
     const k = e.key
@@ -44,6 +48,7 @@ Item {
     if (k >= Qt.Key_0 && k <= Qt.Key_9) return String.fromCharCode(k)
     if (k >= Qt.Key_F1 && k <= Qt.Key_F24) return "F" + (k - Qt.Key_F1 + 1)
     // With SHIFT a digit comes as its sign (US layout's): the digit it is.
+    // Only with SHIFT held: unshifted, on AZERTY, "&" is its own key.
     const shifted = { [Qt.Key_Exclam]: "1", [Qt.Key_At]: "2", [Qt.Key_NumberSign]: "3", [Qt.Key_Dollar]: "4", [Qt.Key_Percent]: "5",
                       [Qt.Key_AsciiCircum]: "6", [Qt.Key_Ampersand]: "7", [Qt.Key_Asterisk]: "8", [Qt.Key_ParenLeft]: "9", [Qt.Key_ParenRight]: "0" }
     const named = { [Qt.Key_Space]: "space", [Qt.Key_Return]: "Return", [Qt.Key_Enter]: "Return", [Qt.Key_Tab]: "Tab",
@@ -54,7 +59,19 @@ Item {
                     [Qt.Key_Backslash]: "backslash", [Qt.Key_Print]: "Print", [Qt.Key_Delete]: "Delete",
                     [Qt.Key_Backspace]: "BackSpace", [Qt.Key_Home]: "Home", [Qt.Key_End]: "End",
                     [Qt.Key_PageUp]: "Prior", [Qt.Key_PageDown]: "Next", [Qt.Key_Insert]: "Insert" }
-    return shifted[k] || named[k] || ""
+    return ((e.modifiers & Qt.ShiftModifier) ? shifted[k] : undefined) || named[k] || ""
+  }
+  // A modifier on its own (keep listening), not a key that can't be named.
+  function isModifier(k) {
+    return [Qt.Key_Shift, Qt.Key_Control, Qt.Key_Alt, Qt.Key_AltGr, Qt.Key_Meta, Qt.Key_Super_L, Qt.Key_Super_R,
+            Qt.Key_Hyper_L, Qt.Key_Hyper_R, Qt.Key_CapsLock].includes(k)
+  }
+  // A binding's keys, each one: "SUPER + 1…0" is ten, "SUPER + ← ↑ → ↓" four.
+  function expandKeys(key) {
+    const s = String(key || "")
+    if (s.includes("1…0")) return "1234567890".split("").map(d => s.replace("1…0", d))
+    if (s.includes("← ↑ → ↓")) return ["left", "up", "right", "down"].map(d => s.replace("← ↑ → ↓", d))
+    return [s]
   }
   function combo(e) {
     const mods = []
@@ -72,8 +89,13 @@ Item {
   }
   function took(e) {
     const c = combo(e)
-    if (c === "") return      // a modifier on its own: keep listening
-    const other = keyActions.find(a => a !== capturing && sameKeys(a.key, c))
+    if (c === "") {
+      // A modifier on its own: keep listening. Any other key it can't name
+      // (a letter of another alphabet, an unshifted sign): said.
+      if (!isModifier(e.key)) keyMessage = {{ tq "keys.unusable" }}
+      return
+    }
+    const other = keyActions.find(a => a !== capturing && expandKeys(a.key).some(k => sameKeys(k, c)))
     if (other) { keyMessage = {{ tq "keys.taken" }}.arg(c).arg(other.name); return }
     if (!c.startsWith("SUPER")) { keyMessage = {{ tq "keys.super" }}; return }
     const a = capturing
@@ -453,7 +475,7 @@ Item {
               text: ({ keyboard: {{ tq "p.keyboard" }}, pointer: {{ tq "p.pointer" }}, text: {{ tq "p.text" }}, keys: {{ tq "p.keys" }}, apps: {{ tq "p.apps" }},
                        region: {{ tq "p.region" }}, display: {{ tq "p.display" }}, security: {{ tq "p.security" }} })[modelData]
               selected: session.page === modelData
-              onPicked: { session.page = modelData; root.problem = ""; if (modelData === "text" && root.uiFonts.length === 0) fontsProbe.running = true }
+              onPicked: { if (root.capturing) root.endCapture(); session.page = modelData; root.problem = ""; if (modelData === "text" && root.uiFonts.length === 0) fontsProbe.running = true }
             }
           }
           Item { Layout.fillHeight: true }
@@ -642,6 +664,7 @@ Item {
               Button { text: {{ tq "font.theme" }}; onClicked: root.apply(["--font-ui=theme", "--font-mono=theme", "--font-size=theme"]) }
             }
             RowLayout {
+              id: sizeRow
               Layout.fillWidth: true
               // 8 to 16 points, by halves; applied once the slider rests.
               property real pending: 0
@@ -653,7 +676,8 @@ Item {
                 value: (Theme.fontSize - 8) / 8
                 onMoved: v => { parent.pending = 8 + Math.round(v * 16) / 2; sizeApply.restart() }
               }
-              Timer { id: sizeApply; interval: 600; onTriggered: root.apply(["--font-size=" + parent.pending]) }
+              // (A Timer has no parent of its own: the row, by its id.)
+              Timer { id: sizeApply; interval: 600; onTriggered: root.apply(["--font-size=" + sizeRow.pending]) }
             }
             TextField { id: fontSearch; Layout.fillWidth: true; placeholder: {{ tq "font.search" }} }
             RowLayout {

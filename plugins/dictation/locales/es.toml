@@ -20,3 +20,4 @@
 "setting.type" = "Escribirlo donde estás"
 "setting.type.help" = "Apagado: se copia, para pegarlo."
 "locked" = "La pantalla se bloqueó: no se escribió nada"
+"no_mic" = "No se puede escuchar: no hay micrófono o el sistema de sonido no está en marcha"

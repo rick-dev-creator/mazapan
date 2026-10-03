@@ -14,3 +14,8 @@ desktop's own tools (capture, recording, the color picker, the bar's
 previews, the lock screen) don't ask, and neither does screen sharing
 through the portal, which shows its own picker. `screen_ask` (on) turns
 it off; a change counts from the next login.
+
+What that holds back, plainly: apps in a sandbox (Flatpak). A program
+running as you outside one can use the very tools that don't ask (grim,
+for one), as on any Linux desktop; the dialog is for apps, not a wall
+against what you run yourself.

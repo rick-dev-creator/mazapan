@@ -64,7 +64,7 @@ public static partial class CatalogIndex
                 foreach (var e in Parse(text, c))
                     if (seen.Add(e.Id)) entries.Add(e);
             }
-            catch (Exception ex) when (ex is MazapanException or IOException or HttpRequestException or TaskCanceledException or UnauthorizedAccessException)
+            catch (Exception ex) when (ex is MazapanException or IOException or HttpRequestException or TaskCanceledException or UnauthorizedAccessException or UriFormatException or InvalidOperationException)
             {
                 problems.Add($"catalog {c}: {ex.Message}");
             }
@@ -81,6 +81,8 @@ public static partial class CatalogIndex
     {
         if (catalog.StartsWith("http://"))
             throw new MazapanException("not https: anyone on the way could point its plugins elsewhere");
+        if (catalog.StartsWith("https://") && !(Uri.TryCreate(catalog, UriKind.Absolute, out var uri) && uri.Scheme == "https" && uri.Host != ""))
+            throw new MazapanException("not an address");
         if (!catalog.StartsWith("https://"))
         {
             var path = Paths.ExpandHome(catalog);

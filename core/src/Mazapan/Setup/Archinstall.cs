@@ -35,12 +35,19 @@ public static class Archinstall
     static string[] Snapshots(Answers a) =>
         a.Encrypt ? ["snapper", "snap-pac"] : ["snapper", "snap-pac", "grub-btrfs", "inotify-tools"];
 
+    /// <summary>The main partition's size on a disk (whole MiBs, after the EFI partition, one MiB left for GPT's backup table).</summary>
+    static long MainSize(long diskBytes, bool encrypt) => diskBytes / MiB * MiB - (MiB + (encrypt ? 2048 * MiB : 512 * MiB)) - MiB;
+
+    /// <summary>A swap file as big as the memory still leaves the system 16 GiB.</summary>
+    public static bool HibernationFits(long diskBytes, long memoryMiB, bool encrypt) =>
+        MainSize(diskBytes, encrypt) - memoryMiB * MiB >= 16L * 1024 * MiB;
+
     public static string Config(Answers a, long diskBytes, string consoleKeymap, string server = "")
     {
         var esp = a.Encrypt ? 2048 * MiB : 512 * MiB;
         var mainStart = MiB + esp;
         // Whole MiBs, and one left at the end for GPT's backup table.
-        var mainSize = diskBytes / MiB * MiB - mainStart - MiB;
+        var mainSize = MainSize(diskBytes, a.Encrypt);
         if (mainSize < 8 * 1024 * MiB) throw new MazapanException("the disk is too small");
         Fields Size(long bytes) => new()
         {
@@ -179,9 +186,12 @@ public static class Archinstall
             // Hibernation: a swap file as big as the memory, below zram (which
             // is tried first), and where to resume from on the kernel's line
             // as well (systemd also finds it on its own, through EFI).
-            s.Append($"btrfs filesystem mkswapfile --size {a.MemoryMiB}m --uuid clear /swap/swapfile\n");
+            // Failing (no room after all), the rest of the install goes on
+            // without it: no swap file, no resume, the plugin off.
+            s.Append($"hibernate=1; if btrfs filesystem mkswapfile --size {a.MemoryMiB}m --uuid clear /swap/swapfile; then\n");
             s.Append("echo '/swap/swapfile none swap defaults,pri=0 0 0' >> /etc/fstab\n");
             s.Append("sed -i -E \"s|^(GRUB_CMDLINE_LINUX_DEFAULT=\\\"[^\\\"]*)|\\1 resume=UUID=$(findmnt -no UUID /) resume_offset=$(btrfs inspect-internal map-swapfile -r /swap/swapfile)|\" /etc/default/grub\n");
+            s.Append("else rm -f /swap/swapfile; hibernate=0; echo \"hibernation left off: no room for its swap file\"; fi\n");
         }
         if (!a.Encrypt)
         {
@@ -245,6 +255,8 @@ public static class Archinstall
         var home = "/home/" + a.User;
         s.Append($"install -d -o {a.User} -g {a.User} {home}/.config {home}/.config/mazapan {home}/.local {home}/.local/state {home}/.local/state/mazapan {home}/.cache\n");
         s.Append(Write($"{home}/.config/mazapan/config.toml", UserConfig(a)));
+        if (a.Hibernate == true && a.MemoryMiB > 0)
+            s.Append($"[ \"$hibernate\" = 1 ] || sed -i -E 's/\"hibernate\", //; s/, \"hibernate\"//; s/\\[\"hibernate\"\\]/[]/' {home}/.config/mazapan/config.toml\n");
         // The first login opens the welcome where the installer left off.
         s.Append(Write($"{home}/.local/state/mazapan/welcome.json", "{\"step\":\"look\",\"done\":false}\n"));
         if (a.Apps.Count > 0) s.Append(Write($"{home}/.local/state/mazapan/first-apps", string.Join('\n', a.Apps) + "\n"));

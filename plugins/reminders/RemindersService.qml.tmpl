@@ -22,10 +22,18 @@ Singleton {
   readonly property string dir: (Quickshell.env("XDG_STATE_HOME") || Quickshell.env("HOME") + "/.local/state") + "/mazapan"
   property string saved: ""
 
+  // Added before the file is read (a script at login): held, then put
+  // with the saved ones, never saved over them.
+  property var early: []
   function add(text, at) {
     const t = String(text).trim()
     if (t === "" || !(at > 0)) return
-    items = [...items, { id: Date.now() + "-" + Math.floor(Math.random() * 1e6), text: t, at: at }].sort((a, b) => a.at - b.at)
+    const r = { id: Date.now() + "-" + Math.floor(Math.random() * 1e6), text: t, at: at }
+    if (!loaded) {
+      early = [...early, r]
+      return
+    }
+    items = [...items, r].sort((a, b) => a.at - b.at)
     save()
     due()
   }
@@ -69,6 +77,16 @@ Singleton {
     save()
   }
 
+  function joinEarly() {
+    loaded = true
+    if (early.length > 0) {
+      items = [...items, ...early].sort((a, b) => a.at - b.at)
+      early = []
+      save()
+    }
+    due()
+  }
+
   Timer {
     interval: 10000
     repeat: true
@@ -95,11 +113,10 @@ Singleton {
       if (o && Array.isArray(o.reminders))
         root.items = o.reminders.filter(i => i && typeof i.text === "string" && typeof i.at === "number")
           .map(i => ({ id: String(i.id ?? i.at), text: i.text, at: i.at })).sort((a, b) => a.at - b.at)
-      root.loaded = true
-      root.due()
+      root.joinEarly()
     }
     // Not there yet: none; written on the first one.
-    onLoadFailed: root.loaded = true
+    onLoadFailed: root.joinEarly()
   }
 
   IpcHandler {

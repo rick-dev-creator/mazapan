@@ -5,6 +5,15 @@ namespace Mazapan.Tests.Cli;
 public class PasswordTests
 {
     [Fact]
+    public void TheCurrentPasswordIsCheckedAgainstTheAccountsHash()
+    {
+        var hash = System.Runtime.InteropServices.Marshal.PtrToStringUTF8(Mazapan.Cli.Program.Crypt("correct horse", "$6$abcdefghijklmnop$"))!;
+        Assert.StartsWith("$6$", hash);
+        Assert.True(Mazapan.Cli.Program.Crypts("correct horse", hash));
+        Assert.False(Mazapan.Cli.Program.Crypts("correct hors", hash));
+    }
+
+    [Fact]
     public void ANewPasswordIsChecked()
     {
         Assert.NotNull(Program.PasswordProblem("", false));

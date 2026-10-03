@@ -42,6 +42,17 @@ public static partial class Program
             throw new MazapanException(problem);
         }
 
+        // The current password checked first, against the keyring when it's
+        // there (nothing asked yet, nothing changed): a typo stops here. Done
+        // already (a second run): the new one opens it.
+        var keyring = Paths.ExpandHome("~/.local/share/keyrings/login.keyring");
+        if (File.Exists(keyring) && Setup.KeyringControl.Change(old, old) == Setup.KeyringControl.Result.Denied
+            && Setup.KeyringControl.Change(new_, new_) != Setup.KeyringControl.Result.Ok)
+        {
+            Console.WriteLine("fail check the current password isn't right");
+            throw new MazapanException("the current password isn't right: nothing was changed");
+        }
+
         // Disk and account: as root (polkit from the panel, sudo from a terminal).
         var psi = new ProcessStartInfo(gui ? "pkexec" : "sudo") { UseShellExecute = false, RedirectStandardInput = true, RedirectStandardOutput = true };
         psi.ArgumentList.Add(Environment.ProcessPath ?? "/usr/bin/mazapan");
@@ -68,7 +79,6 @@ public static partial class Program
                 ? why : "nothing was changed (the password for root wasn't given?)");
 
         // The keyring: the person's own, through its daemon, in their session.
-        var keyring = Paths.ExpandHome("~/.local/share/keyrings/login.keyring");
         if (!File.Exists(keyring)) Console.WriteLine("step keyring skip no login keyring");
         else
         {
@@ -171,6 +181,13 @@ public static partial class Program
             Console.WriteLine("fail check " + problem);
             return 1;
         }
+        // The current one is the account's (or the new one is already: a
+        // second run): checked before anything changes, the disk included.
+        if (AccountPassword(user) is { } hash && !Crypts(old, hash) && !Crypts(new_, hash))
+        {
+            Console.WriteLine("fail check the current password isn't right");
+            return 1;
+        }
 
         // The disk: changed only from the current password, and kept only once
         // the new one is seen to open it.
@@ -235,6 +252,31 @@ public static partial class Program
 
     [System.Runtime.InteropServices.DllImport("libc", EntryPoint = "geteuid")]
     static extern uint GetEuid();
+
+    /// <summary>The account's password hash from /etc/shadow, or null: none to check against (locked, empty, unreadable).</summary>
+    static string? AccountPassword(string user)
+    {
+        try
+        {
+            foreach (var line in File.ReadLines("/etc/shadow"))
+                if (line.Split(':') is [var name, var hash, ..] && name == user)
+                    return hash.StartsWith('$') ? hash : null;
+        }
+        catch (IOException) { }
+        catch (UnauthorizedAccessException) { }
+        return null;
+    }
+
+    /// <summary>Whether a password makes this hash (crypt(3), libxcrypt: yescrypt, sha512…).</summary>
+    internal static bool Crypts(string password, string hash)
+    {
+        var r = Crypt(password, hash);
+        return r != IntPtr.Zero && System.Runtime.InteropServices.Marshal.PtrToStringUTF8(r) == hash;
+    }
+
+    [System.Runtime.InteropServices.DllImport("libcrypt.so.2", EntryPoint = "crypt")]
+    internal static extern IntPtr Crypt([System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPUTF8Str)] string key,
+        [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPUTF8Str)] string salt);
 }
 
 [System.Text.Json.Serialization.JsonSerializable(typeof(Dictionary<string, string>))]

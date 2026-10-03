@@ -21,9 +21,12 @@ say() { # what [urgency]: one notification, replaced as it goes
 # Locked: nothing heard, nothing typed (it would land in the password).
 locked() { pgrep -u "$(id -u)" -x hyprlock >/dev/null; }
 
-# Listening: this press stops it and writes it down.
-if [ -f "$run/pid" ] && kill -0 "$(cat "$run/pid")" 2>/dev/null; then
-  pid=$(cat "$run/pid")
+# Listening: this press stops it and writes it down. Each recording has
+# its own file, so one started while the last is being written down
+# doesn't lose either. "stop" (the two-minute timer) only ever stops.
+pid= heard=
+[ -f "$run/pid" ] && read -r pid heard < "$run/pid"
+if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
   # TERM, not INT: started in the background by a script, it ignores INT.
   # pw-record finishes the file on either.
   kill -TERM "$pid"
@@ -32,9 +35,9 @@ if [ -f "$run/pid" ] && kill -0 "$(cat "$run/pid")" 2>/dev/null; then
   kill -KILL "$pid" 2>/dev/null
   rm -f "$run/pid"
   say {{ shq (t "writing") }}
-  text=$(whisper-cli -m "$models/ggml-$model.bin" -f "$run/heard.wav" -l "$lang" -nt -np 2>/dev/null \
+  text=$(whisper-cli -m "$models/ggml-$model.bin" -f "$heard" -l "$lang" -nt -np 2>/dev/null \
     | sed 's/\[[A-Z_ ]*\]//g; s/^[[:space:]]*//; s/[[:space:]]*$//' | grep -v '^$' | tr '\n' ' ' | sed 's/[[:space:]]*$//')
-  rm -f "$run/heard.wav"
+  rm -f "$heard"
   if locked; then
     say {{ shq (t "locked") }}
     exit 0
@@ -54,6 +57,8 @@ if [ -f "$run/pid" ] && kill -0 "$(cat "$run/pid")" 2>/dev/null; then
   exit 0
 fi
 
+[ "$1" = stop ] && exit 0
+rm -f "$run/pid"
 locked && exit 0
 
 # The model, the first time: downloaded, checked, kept.
@@ -64,11 +69,14 @@ case "$model" in
   *) exit 1 ;;
 esac
 if [ ! -f "$models/ggml-$model.bin" ]; then
-  [ -f "$run/downloading" ] && exit 0 # pressed again meanwhile
+  # Pressed again meanwhile: nothing more (a mark older than 30 minutes is
+  # one left by a download that died).
+  [ -n "$(find "$run/downloading" -mmin -30 2>/dev/null)" ] && exit 0
   mkdir -p "$models"
   touch "$run/downloading"
   say {{ shq (t "downloading") }}
-  if curl -fsSL --proto '=https' -o "$models/ggml-$model.bin.part" "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-$model.bin" \
+  # Given up on when it stalls (under 1 kB/s for a minute).
+  if curl -fsSL --proto '=https' --connect-timeout 15 --speed-limit 1024 --speed-time 60 -o "$models/ggml-$model.bin.part" "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-$model.bin" \
     && echo "$sum  $models/ggml-$model.bin.part" | sha256sum -c --status; then
     mv "$models/ggml-$model.bin.part" "$models/ggml-$model.bin"
     rm -f "$run/downloading"
@@ -80,9 +88,17 @@ if [ ! -f "$models/ggml-$model.bin" ]; then
   exit 0
 fi
 
-# Listening, until the key again (or two minutes: then as if pressed).
-pw-record --rate 16000 --channels 1 --format s16 "$run/heard.wav" &
+# Listening, until the key again (or two minutes: then stopped as if
+# pressed; the timer only stops, never starts one).
+heard="$run/heard.$(date +%s%N).wav"
+pw-record --rate 16000 --channels 1 --format s16 "$heard" &
 rec=$!
-echo "$rec" > "$run/pid"
+echo "$rec $heard" > "$run/pid"
+sleep 0.3
+if ! kill -0 "$rec" 2>/dev/null; then
+  rm -f "$run/pid" "$heard"
+  say {{ shq (t "no_mic") }} critical
+  exit 0
+fi
 say {{ shq (t "listening") }}
-( sleep 120; [ "$(cat "$run/pid" 2>/dev/null)" = "$rec" ] && sh "$0" ) >/dev/null 2>&1 &
+( sleep 120; p=; [ -f "$run/pid" ] && read -r p h < "$run/pid"; [ "$p" = "$rec" ] && kill -0 "$rec" 2>/dev/null && sh "$0" stop ) >/dev/null 2>&1 &

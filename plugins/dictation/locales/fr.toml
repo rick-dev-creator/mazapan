@@ -20,3 +20,4 @@
 "setting.type" = "Taper là où vous êtes"
 "setting.type.help" = "Désactivé : copié, pour le coller."
 "locked" = "L'écran s'est verrouillé : rien n'a été tapé"
+"no_mic" = "Écoute impossible : pas de micro, ou le système audio ne tourne pas"

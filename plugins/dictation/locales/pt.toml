@@ -20,3 +20,4 @@
 "setting.type" = "Digitar onde você está"
 "setting.type.help" = "Desligado: é copiado, para colar."
 "locked" = "A tela foi bloqueada: nada foi digitado"
+"no_mic" = "Não é possível ouvir: sem microfone, ou o sistema de som não está rodando"

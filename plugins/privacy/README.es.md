@@ -15,3 +15,8 @@ selector de color, las vistas previas de la barra, la pantalla de
 bloqueo) no preguntan, ni compartir pantalla por el portal, que muestra
 su propio selector. `screen_ask` (encendido) lo apaga; un cambio vale
 desde el próximo inicio de sesión.
+
+Lo que eso frena, dicho claro: las apps en un sandbox (Flatpak). Un
+programa que corre como tú fuera de uno puede usar las mismas herramientas
+que no preguntan (grim, por ejemplo), como en cualquier escritorio Linux;
+el diálogo es para las apps, no un muro contra lo que tú mismo ejecutas.

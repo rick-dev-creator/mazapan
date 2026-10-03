@@ -18,3 +18,4 @@
 "setting.type" = "Type it where you are"
 "setting.type.help" = "Off: it's copied instead, to paste."
 "locked" = "The screen got locked: nothing was typed"
+"no_mic" = "Can't listen: no microphone, or the sound system isn't running"

@@ -182,6 +182,13 @@ public static partial class Program
         // file as big as the memory (what a hibernation writes, at most).
         a.Hibernate ??= HasBattery();
         a.MemoryMiB = MemoryMiB();
+        // Only where the swap file leaves the system room (a small disk with
+        // a lot of memory: off, said in the log).
+        if (a.Hibernate == true && !Archinstall.HibernationFits(disk.Size, a.MemoryMiB, a.Encrypt))
+        {
+            Console.WriteLine("note hibernation left off: the disk is too small for a swap file as big as the memory");
+            a.Hibernate = false;
+        }
         a.Check();
         if (!Directory.Exists("/sys/firmware/efi"))
         {

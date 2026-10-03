@@ -20,3 +20,4 @@
 "setting.type" = "Dort tippen, wo du bist"
 "setting.type.help" = "Aus: stattdessen kopiert, zum Einfügen."
 "locked" = "Der Bildschirm wurde gesperrt: nichts wurde getippt"
+"no_mic" = "Zuhören nicht möglich: kein Mikrofon, oder das Audiosystem läuft nicht"

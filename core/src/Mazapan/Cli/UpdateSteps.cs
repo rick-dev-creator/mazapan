@@ -247,11 +247,16 @@ public static partial class Program
         {
             var dir = Paths.Join(Install.Git.Dir, e.Id);
             if (!Directory.Exists(dir)) continue;
-            var (text, err) = Install.Git.TryRun(dir, "ls-remote", "origin", e.Ref == "" ? "HEAD" : e.Ref);
+            // Exactly the ref followed: ls-remote matches a pattern's tail, so
+            // "main" alone would also find refs/heads/release/main.
+            string[] wanted = e.Ref == "" ? ["HEAD"] : [$"refs/tags/{e.Ref}^{{}}", $"refs/tags/{e.Ref}", $"refs/heads/{e.Ref}"];
+            var (text, err) = e.Ref == ""
+                ? Install.Git.TryRun(dir, "ls-remote", "origin", "HEAD")
+                : Install.Git.TryRun(dir, "ls-remote", "origin", $"refs/heads/{e.Ref}", $"refs/tags/{e.Ref}");
             if (err != null) continue;
-            // A tag's own commit is the peeled line (^{}), when there is one.
+            // A tag's own commit is its peeled line (^{}), when there is one.
             var lines = text.Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(l => l.Split('\t')).Where(f => f.Length == 2).ToList();
-            var head = (lines.FirstOrDefault(f => f[1].EndsWith("^{}", StringComparison.Ordinal)) ?? lines.FirstOrDefault())?[0];
+            var head = wanted.Select(w => lines.FirstOrDefault(f => f[1] == w)).FirstOrDefault(f => f != null)?[0];
             if (head != null && head != e.Commit) out_.Add(new PluginUpdate(e.Id, Install.Git.Short(e.Commit), Install.Git.Short(head)));
         }
         return out_;

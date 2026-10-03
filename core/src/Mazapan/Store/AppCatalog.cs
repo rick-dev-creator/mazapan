@@ -102,7 +102,7 @@ public static partial class AppCatalog
                 foreach (var a in xs.Where(a => !Taken(a.Id)).ToList()) { a.From = c; apps.Add(a); }
                 foreach (var p in ps.Where(p => !Taken(p.Id)).ToList()) { p.From = c; profiles.Add(p); }
             }
-            catch (Exception ex) when (ex is MazapanException or IOException or HttpRequestException or TaskCanceledException or UnauthorizedAccessException)
+            catch (Exception ex) when (ex is MazapanException or IOException or HttpRequestException or TaskCanceledException or UnauthorizedAccessException or UriFormatException or InvalidOperationException)
             {
                 problems.Add($"app catalog {c}: {ex.Message}");
             }

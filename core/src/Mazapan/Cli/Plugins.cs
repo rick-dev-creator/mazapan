@@ -13,6 +13,9 @@ public static partial class Program
     /// isn't what plugins.lock says (moved, edited, or needing more than was
     /// approved): applying would run what nobody agreed to.
     /// </summary>
+    /// <summary>Plugins that can't be read and aren't turned off: their files aren't orphans while they are.</summary>
+    internal static List<string> BrokenNotOff = [];
+
     static List<Plugin> EnabledPlugins(Settings cfg)
     {
         var (all, broken) = Plugin.Discover(PluginDirs());
@@ -23,6 +26,9 @@ public static partial class Program
         // One that can't be read is left out, said, and the rest still applies:
         // a broken plugin mustn't leave the person without a desktop. Unless
         // one that's on needs it (below: an unmet requirement, which stops it).
+        // Its files stay meanwhile (Session.Plan keeps orphans): left out isn't
+        // taken off, and a plugin.toml fixed tomorrow finds them as they were.
+        BrokenNotOff = [.. broken.Keys.Where(id => !cfg.IsDisabled(id))];
         foreach (var (id, err) in broken)
             if (!cfg.IsDisabled(id)) Console.Error.WriteLine($"warning: plugin {id} left out, it can't be read: {err.Replace('\n', ' ')}");
         var found = new HashSet<string>();
