@@ -1,22 +1,63 @@
 [plugin]
 id = "agent"
-name = "Agent"
-version = "0.1.0"
+name = "Agents"
+version = "0.2.0"
 api = 1
-description = "Ask a coding agent about this desktop from the palette: it gets mazapan's report (state, failing checks, crashes, logged errors) and mazapan's own ways to change things safely"
-categories = ["agent", "tools"]
+description = "Your coding agents: in the bar, which is working and which waits for you (a click goes to its window), each account's limits and when they reset, and what they've used today, for Claude Code, opencode, pi, Codex… every account found by itself; and from the palette, ask one about this desktop with mazapan's report"
+categories = ["agent", "tools", "bar"]
+requires = ["shell-bar"]
+
+[packages]
+pacman = ["quickshell", "libnotify", "sqlite"]
 
 [settings]
 # The agent to open, as its command: it gets the report as its first
-# message. "claude" is Claude Code; any agent that takes a prompt as its
-# argument works ("codex", "opencode run"…). To let it use mazapan directly
-# (status, previews, apply, undo), register the MCP server with it, e.g.
+# message. "claude" is Claude Code (with the first of your accounts that has
+# room); any agent that takes a prompt as its argument works ("codex",
+# "opencode run"…). To let it use mazapan directly (status, previews, apply,
+# undo), register the MCP server with it, e.g.
 #   claude mcp add --scope user mazapan -- mazapan mcp
 command = "claude"
+# Claude Code tells which session works or waits through hooks this plugin
+# puts in each configuration's settings.json (your own hooks stay; a copy
+# of the file is kept the first time). Off: taken out again.
+claude_hooks = true
+# A notification when a session waits for you, or is done after working
+# this many seconds (0: never).
+notify_after = { default = 30, min = 0, max = 3600 }
+# A notification when an account's limit passes this percentage (0: never).
+limit_alert = { default = 80, min = 0, max = 100 }
+
+[[targets]]
+template = "qmldir.tmpl"
+output = "~/.config/quickshell/mazapan/components/agents/qmldir"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
+template = "AgentsService.qml.tmpl"
+output = "~/.config/quickshell/mazapan/components/agents/AgentsService.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
+template = "Agents.qml.tmpl"
+output = "~/.config/quickshell/mazapan/widgets/right/01-agents.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+# opencode tells its sessions' state through a plugin of its own.
+[[targets]]
+template = "opencode-sessions.js.tmpl"
+output = "~/.config/opencode/plugin/mazapan-sessions.js"
+
+# Claude Code's hooks: put in or taken out with the setting.
+[[targets]]
+template = "claude-hooks.sh.tmpl"
+output = "~/.local/share/mazapan/bin/agent-claude-hooks"
+reload = "sh ~/.local/share/mazapan/bin/agent-claude-hooks >/dev/null 2>&1; true"
 
 [[actions]]
 name = "{{ t \"ask\" }}"
-run = "{{ settings.command }} \"$(mazapan report)\""
+# Claude Code with the first account that has room (mazapan agents run).
+run = "{{ if settings.command == \"claude\" }}mazapan agents run claude{{ else }}{{ settings.command }}{{ end }} \"$(mazapan report)\""
 terminal = true
 keywords = "{{ t \"ask.kw\" }}"
 
@@ -24,3 +65,8 @@ keywords = "{{ t \"ask.kw\" }}"
 name = "{{ t \"report\" }}"
 run = "mazapan report | wl-copy"
 keywords = "{{ t \"report.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.open\" }}"
+run = "qs ipc -c mazapan call agents open"
+keywords = "{{ t \"act.open.kw\" }}"

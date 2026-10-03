@@ -31,6 +31,10 @@ public static partial class Program
           apps [list|plan|plan-remove|install|remove|undo] [ID...] [--json] [--gui] [-y]
                          the apps the catalog knows how to install, by profile
                          (Gaming, Development…), and installing or removing them
+          agents [list|usage|limits] [--json] [--days N] | agents run AGENT [ARGS…]
+                         the coding agents here, every account, what each spent
+                         and each account's limits; run one with an account
+                         that has room
           apps permissions ID [--json] | permit ID KEY on|off | permit ID reset
                          what a Flatpak app may reach (network, sound, devices,
                          home, files, downloads, bluetooth), changed for you
@@ -109,6 +113,7 @@ public static partial class Program
                 "coverage" => CmdCoverage(rest),
                 "channel" => CmdChannel(rest),
                 "password" => CmdPassword(rest),
+                "agents" => CmdAgents(rest),
                 "version" or "--version" => PrintVersion(),
                 "-h" or "--help" or "help" => Help(),
                 _ => Unknown(),
