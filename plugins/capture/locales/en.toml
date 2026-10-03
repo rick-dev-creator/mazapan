@@ -33,3 +33,5 @@
 "key.qr" = "q"
 "qr_copied" = "What the QR code holds is copied (not shown: it may be a password)"
 "no_qr" = "No QR code found"
+"key.ask" = "k"
+"ask" = "Ask"

@@ -51,6 +51,12 @@ Mazapán's read-only tools (it can look at this desktop's state, never
 change it), else opencode, Codex, Gemini CLI or pi. The answer can be
 copied, or Claude's conversation continued in a terminal.
 
+**About this**: a capture ("Ask" in the capture's bar, or its key), the
+selected text ("Ask an agent about the selected text" in the palette) or
+files (Files: right click, Scripts, Ask an agent) open the same card, to
+type the question. A short text goes into the question itself; a picture
+or another file by its path, which Claude may read (and nothing else).
+
 **Ask an agent about this desktop**, from the palette, opens your agent
 (`command`; Claude with the first account that has room) with mazapan's
 report: state, failing checks, crashes, logged errors. "Copy a report"

@@ -53,7 +53,9 @@ Item {
   readonly property string shot: dir + "/shot.png"
   readonly property string state: dir + "/recording" // "<pid> <start>" while recording
   // The action keys, in the system's language (English ones work too).
-  readonly property var keysFor: ({ copy: {{ tq "key.copy" }}, save: {{ tq "key.save" }}, text: {{ tq "key.text" }}, qr: {{ tq "key.qr" }}, annotate: {{ tq "key.annotate" }}, record: {{ tq "key.record" }} })
+  readonly property var keysFor: ({ copy: {{ tq "key.copy" }}, save: {{ tq "key.save" }}, text: {{ tq "key.text" }}, qr: {{ tq "key.qr" }}, annotate: {{ tq "key.annotate" }}, record: {{ tq "key.record" }}, ask: {{ tq "key.ask" }} })
+  // Asking a coding agent about it: with the Agents plugin's Ask card.
+  readonly property bool canAsk: {{ if (under "~/.config/quickshell/mazapan/panels/ask.qml").size > 0 }}true{{ else }}false{{ end }}
 
   function q(s) { return "'" + String(s).replace(/'/g, "'\\''") + "'" }
   function tilde(p) { return p.startsWith(home) ? "~" + p.slice(home.length) : p }
@@ -151,6 +153,7 @@ Item {
       save: `cp shot.png ${tilde(pictures)}/…`,
       text: `tesseract shot.png - -l ${ocrLangs} | wl-copy`,
       qr: `zbarimg -q --raw shot.png | wl-copy`,
+      ask: `mazapan agents ask --file shot.png …`,
       record: command("record", "…").replace(q(videos + "/Recording ….mp4"), tilde(videos) + "/…") }
     hint = shown[action] ?? ""
   }
@@ -172,7 +175,11 @@ Item {
       }
       const stamp = Qt.formatDateTime(new Date(), "yyyy-MM-dd HH-mm-ss")
       let script
-      if (actions.includes("qr")) {
+      if (actions.includes("ask")) {
+        // A copy of its own for the agent (the shot goes), in the runtime folder.
+        script = `d="\${XDG_RUNTIME_DIR:-/tmp}/mazapan-ask"; mkdir -p "$d" && chmod 700 "$d" && f="$d/capture-${stamp}.png" && cp ${q(shot)} "$f" && `
+          + `sh "$HOME/.local/share/mazapan/bin/agent-ask" "$f"`
+      } else if (actions.includes("qr")) {
         // What a QR holds can be a password or a Wi-Fi key: copied, never
         // shown, and marked secret so the clipboard history doesn't keep it.
         script = `command -v zbarimg >/dev/null || { ${say({{ tq "missing" }}.arg("zbarimg"), true)}; exit; }; `
@@ -239,6 +246,7 @@ Item {
     else if (is("save", Qt.Key_S)) act(["save"])
     else if (is("text", Qt.Key_T)) act(["text"])
     else if (is("qr", Qt.Key_Q)) act(["qr"])
+    else if (canAsk && is("ask", Qt.Key_K)) act(["ask"])
     else if (is("annotate", Qt.Key_A)) annotating = true
     else if (is("record", Qt.Key_R)) record()
     else return
@@ -558,6 +566,7 @@ Item {
             Action { action: "save"; text: "󰆓 " + {{ tq "save" }}; onClicked: root.act(["save"]) }
             Action { action: "text"; text: "󰈙 " + {{ tq "text" }}; onClicked: root.act(["text"]) }
             Action { action: "qr"; text: "󰐲 " + {{ tq "qr" }}; onClicked: root.act(["qr"]) }
+            Action { visible: root.canAsk; action: "ask"; text: "󰚩 " + {{ tq "ask" }}; onClicked: root.act(["ask"]) }
             Button { text: "󰏫 " + {{ tq "annotate" }}; onClicked: root.annotating = true }
             Action { action: "record"; text: "󰑋 " + {{ tq "record" }}; onClicked: root.record() }
           }
@@ -598,7 +607,7 @@ Item {
             Layout.maximumWidth: 520
             elide: Text.ElideMiddle
             text: root.hint !== "" ? "$ " + root.hint
-              : "↵ " + {{ tq "copy" }} + " + " + {{ tq "save" }} + "   " + ["copy", "save", "text", "qr", "annotate", "record"].map(a => root.keysFor[a]).join(" ") + "   esc"
+              : "↵ " + {{ tq "copy" }} + " + " + {{ tq "save" }} + "   " + ["copy", "save", "text", "qr"].concat(root.canAsk ? ["ask"] : [], ["annotate", "record"]).map(a => root.keysFor[a]).join(" ") + "   esc"
             color: root.hint !== "" ? Theme.accentText : Theme.fgMuted
           }
         }

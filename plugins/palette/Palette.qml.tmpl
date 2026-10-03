@@ -240,8 +240,8 @@ Item {
   function askItem(q) {
     return {
       kind: "ask", glyph: "󰚩", title: q === "" ? {{ tq "ask.empty" }} : {{ tq "ask" }}.arg(q), detail: "", command: "", searchable: false, key: "", words: "",
-      // The question goes as a file of the person's (an argument's brackets are qs ipc's).
-      argv: q === "" ? null : ["sh", "-c", 'd="${XDG_RUNTIME_DIR:-/tmp}/mazapan-ask"; mkdir -p "$d" && chmod 700 "$d" && f="$d/q-$$.txt" && printf "%s" "$1" > "$f" && exec qs ipc -c mazapan call mazapan open ask "$f"', "ask", q],
+      // To the Ask card, through the agent plugin's script (a request file: an argument's brackets are qs ipc's).
+      argv: q === "" ? null : ["sh", "-c", 'MAZAPAN_ASK="$1" exec sh "$HOME/.local/share/mazapan/bin/agent-ask"', "ask", q],
     }
   }
 

@@ -53,6 +53,13 @@ escritorio, nunca cambiarlo); si no, opencode, Codex, Gemini CLI o pi. La
 respuesta se puede copiar, o seguir la conversación de Claude en una
 terminal.
 
+**Sobre esto**: una captura ("Preguntar" en la barra de la captura, o su
+tecla), el texto seleccionado («Preguntar a un agente sobre el texto
+seleccionado» en la paleta) o archivos (Archivos: clic derecho, Scripts,
+Ask an agent) abren la misma tarjeta, para escribir la pregunta. Un texto
+corto va dentro de la pregunta; una imagen u otro archivo, por su ruta,
+que Claude puede leer (y nada más).
+
 **Preguntar a un agente sobre este escritorio**, desde la paleta, abre tu
 agente (`command`; Claude con la primera cuenta que tenga margen) con el
 informe de mazapan: estado, comprobaciones que fallan, cierres inesperados,

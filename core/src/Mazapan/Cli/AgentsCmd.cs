@@ -350,15 +350,36 @@ public static partial class Program
         string? want = null;
         var json = false;
         var words = new List<string>();
+        var files = new List<string>();
         for (var i = 0; i < args.Length; i++)
         {
             if (args[i] == "--json") json = true;
             else if (args[i] == "--agent" && i + 1 < args.Length) want = args[++i];
+            else if (args[i] == "--file" && i + 1 < args.Length) files.Add(Path.GetFullPath(Paths.ExpandHome(args[++i])));
             else if (args[i] == "--") { words.AddRange(args[(i + 1)..]); break; }
             else words.Add(args[i]);
         }
         var question = string.Join(' ', words).Trim();
-        if (question == "") throw new MazapanException("usage: mazapan agents ask [--agent ID] [--json] QUESTION");
+        if (question == "") throw new MazapanException("usage: mazapan agents ask [--agent ID] [--file PATH]… [--json] QUESTION");
+        // What it's about: a short text, in the question itself (any agent
+        // reads it); a picture or anything else, by its path (Claude may read
+        // it, and nothing else).
+        var readFiles = false;
+        foreach (var f in files)
+        {
+            if (!File.Exists(f)) throw new MazapanException($"{f}: no such file");
+            var info = new FileInfo(f);
+            string? text = null;
+            if (info.Length <= 32 << 10)
+            {
+                var bytes = File.ReadAllBytes(f);
+                if (!bytes.Contains((byte)0))
+                    try { text = new System.Text.UTF8Encoding(false, true).GetString(bytes); }
+                    catch (System.Text.DecoderFallbackException) { }
+            }
+            if (text != null) question += $"\n\n{Paths.Base(f)}:\n```\n{text.TrimEnd()}\n```";
+            else { question += $"\n\nThe file: {f}"; readFiles = true; }
+        }
         var agents = Discovery.Find();
         string[] order = ["claude", "opencode", "codex", "gemini", "pi"];
         var agent = want != null
@@ -371,7 +392,7 @@ public static partial class Program
         {
             "claude" => ["-p", question, "--output-format", "json", "--append-system-prompt", AskContext,
                 "--mcp-config", "{\"mcpServers\":{\"mazapan\":{\"command\":\"/usr/bin/mazapan\",\"args\":[\"mcp\"]}}}", "--strict-mcp-config",
-                "--allowedTools", string.Join(",", AskTools.Select(t => "mcp__mazapan__" + t))],
+                "--allowedTools", string.Join(",", AskTools.Select(t => "mcp__mazapan__" + t).Concat(readFiles ? ["Read"] : []))],
             "opencode" => ["run", question],
             "codex" => ["exec", "--skip-git-repo-check", "--sandbox", "read-only", question],
             "gemini" => ["-p", question],

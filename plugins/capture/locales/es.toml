@@ -44,3 +44,5 @@
 "key.qr" = "q"
 "qr_copied" = "Lo que contiene el código QR está copiado (no se muestra: puede ser una contraseña)"
 "no_qr" = "No se encontró un código QR"
+"key.ask" = "p"
+"ask" = "Preguntar"

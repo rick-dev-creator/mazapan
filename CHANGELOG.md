@@ -8,7 +8,8 @@ release (a tag `vX.Y.Z`) names them.
 
 - `? question` in the palette: a coding agent answers in a card (Claude
   with the account that has room and a look at this desktop's state, never
-  changing it), to copy or continue in a terminal.
+  changing it), to copy or continue in a terminal. The same about a
+  capture ("Ask" in its bar), the selected text, or files from Files.
 
 - Share: what you copied, or files from Files (right click, Scripts,
   Share), to a device nearby with LocalSend or to one of yours with
