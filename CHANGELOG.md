@@ -30,3 +30,5 @@ release (a tag `vX.Y.Z`) names them.
 - Hibernation on laptops: nothing lost when the battery dies.
 - Settings › Text: the fonts (each shown in itself) and the text's size,
   over the theme's.
+- Settings › Keys: every keybinding in one list, changed by pressing the
+  new keys (one already taken is said).

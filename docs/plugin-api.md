@@ -287,6 +287,10 @@ label = "{{ t \"home\" }}"     # its name there, short ("Theme"); default: name
 confirm = true                 # done only on a second ↵ (power off, reboot)
 ```
 
+A `key` written as one of the plugin's settings (`key = "{{ settings.key }}"`)
+can be changed in Settings › Keys, by pressing the new keys; a fixed one is
+only shown there.
+
 ## Coverage
 
 What a plugin themes, so `mazapan coverage` (and the theme picker) can tell

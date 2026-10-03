@@ -67,6 +67,12 @@ end)
 hl.bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mod .. " + J", hl.dsp.layout("togglesplit"))
 hl.bind(mod .. " + SHIFT + E", hl.dsp.exec_cmd("hyprctl dispatch 'hl.dsp.exit()'"))
+-- Settings › Keys listening for a new keybinding: the desktop's own keys
+-- rest meanwhile, so the one pressed reaches it (it gives them back). SUPER +
+-- Escape gives them back too, should it not.
+hl.define_submap("mazapan-keys", function()
+  hl.bind(mod .. " + escape", hl.dsp.submap("reset"))
+end)
 
 hl.bind(mod .. " + left",  hl.dsp.focus({ direction = "left" }))
 hl.bind(mod .. " + right", hl.dsp.focus({ direction = "right" }))

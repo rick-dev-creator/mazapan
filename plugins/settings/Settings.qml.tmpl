@@ -20,7 +20,66 @@ Item {
   property bool open: false
   property var screenAtOpen: null
   readonly property string logFile: Quickshell.env("HOME") + "/.local/state/mazapan/settings.log"
-  readonly property var pages: ["keyboard", "pointer", "text", "apps", "region", "display", "security"]
+  readonly property var pages: ["keyboard", "pointer", "text", "keys", "apps", "region", "display", "security"]
+
+  // Keys: every plugin's keybinding; the ones from a setting can be changed,
+  // by pressing the new keys (the desktop's own rest meanwhile: a submap).
+  readonly property var keyActions: {{ json actions }}.filter(a => a.key)
+  property var capturing: null      // the action whose key is being changed
+  property string keyMessage: ""
+  function startCapture(a) {
+    capturing = a
+    keyMessage = ""
+    Quickshell.execDetached(["hyprctl", "dispatch", 'hl.dsp.submap("mazapan-keys")'])
+    keysFocus.forceActiveFocus()
+  }
+  function endCapture() {
+    capturing = null
+    Quickshell.execDetached(["hyprctl", "dispatch", 'hl.dsp.submap("reset")'])
+  }
+  // A key as Hyprland names it ("" for one that isn't a key on its own: a modifier).
+  function keyName(e) {
+    const k = e.key
+    if (k >= Qt.Key_A && k <= Qt.Key_Z) return String.fromCharCode(k)
+    if (k >= Qt.Key_0 && k <= Qt.Key_9) return String.fromCharCode(k)
+    if (k >= Qt.Key_F1 && k <= Qt.Key_F24) return "F" + (k - Qt.Key_F1 + 1)
+    // With SHIFT a digit comes as its sign (US layout's): the digit it is.
+    const shifted = { [Qt.Key_Exclam]: "1", [Qt.Key_At]: "2", [Qt.Key_NumberSign]: "3", [Qt.Key_Dollar]: "4", [Qt.Key_Percent]: "5",
+                      [Qt.Key_AsciiCircum]: "6", [Qt.Key_Ampersand]: "7", [Qt.Key_Asterisk]: "8", [Qt.Key_ParenLeft]: "9", [Qt.Key_ParenRight]: "0" }
+    const named = { [Qt.Key_Space]: "space", [Qt.Key_Return]: "Return", [Qt.Key_Enter]: "Return", [Qt.Key_Tab]: "Tab",
+                    [Qt.Key_Left]: "left", [Qt.Key_Right]: "right", [Qt.Key_Up]: "up", [Qt.Key_Down]: "down",
+                    [Qt.Key_Comma]: "comma", [Qt.Key_Period]: "period", [Qt.Key_Slash]: "slash", [Qt.Key_Minus]: "minus",
+                    [Qt.Key_Equal]: "equal", [Qt.Key_BracketLeft]: "bracketleft", [Qt.Key_BracketRight]: "bracketright",
+                    [Qt.Key_Semicolon]: "semicolon", [Qt.Key_Apostrophe]: "apostrophe", [Qt.Key_QuoteLeft]: "grave",
+                    [Qt.Key_Backslash]: "backslash", [Qt.Key_Print]: "Print", [Qt.Key_Delete]: "Delete",
+                    [Qt.Key_Backspace]: "BackSpace", [Qt.Key_Home]: "Home", [Qt.Key_End]: "End",
+                    [Qt.Key_PageUp]: "Prior", [Qt.Key_PageDown]: "Next", [Qt.Key_Insert]: "Insert" }
+    return shifted[k] || named[k] || ""
+  }
+  function combo(e) {
+    const mods = []
+    if (e.modifiers & Qt.MetaModifier) mods.push("SUPER")
+    if (e.modifiers & Qt.ShiftModifier) mods.push("SHIFT")
+    if (e.modifiers & Qt.ControlModifier) mods.push("CTRL")
+    if (e.modifiers & Qt.AltModifier) mods.push("ALT")
+    const k = keyName(e)
+    return k === "" ? "" : mods.concat([k]).join(" + ")
+  }
+  // The same keys, however they're written ("SUPER + space" is "super + Space").
+  function sameKeys(a, b) {
+    const n = s => s.split("+").map(x => x.trim().toLowerCase()).filter(x => x !== "").sort().join("+")
+    return n(a) === n(b)
+  }
+  function took(e) {
+    const c = combo(e)
+    if (c === "") return      // a modifier on its own: keep listening
+    const other = keyActions.find(a => a !== capturing && sameKeys(a.key, c))
+    if (other) { keyMessage = {{ tq "keys.taken" }}.arg(c).arg(other.name); return }
+    if (!c.startsWith("SUPER")) { keyMessage = {{ tq "keys.super" }}; return }
+    const a = capturing
+    endCapture()
+    set(a.plugin, a.key_setting, JSON.stringify(c))
+  }
 
   // Text: the fonts installed (fc-list), the monospace ones apart.
   property var uiFonts: []
@@ -86,7 +145,11 @@ Item {
     open = true
     Qt.callLater(() => card.forceActiveFocus())
   }
-  function close() { open = false }
+  function close() {
+    // Listening for keys: the desktop's own come back.
+    if (capturing) endCapture()
+    open = false
+  }
   function refresh() {
     probe.running = true
     defaults.running = true
@@ -347,7 +410,7 @@ Item {
             model: root.pages
             Choice {
               required property string modelData
-              text: ({ keyboard: {{ tq "p.keyboard" }}, pointer: {{ tq "p.pointer" }}, text: {{ tq "p.text" }}, apps: {{ tq "p.apps" }},
+              text: ({ keyboard: {{ tq "p.keyboard" }}, pointer: {{ tq "p.pointer" }}, text: {{ tq "p.text" }}, keys: {{ tq "p.keys" }}, apps: {{ tq "p.apps" }},
                        region: {{ tq "p.region" }}, display: {{ tq "p.display" }}, security: {{ tq "p.security" }} })[modelData]
               selected: session.page === modelData
               onPicked: { session.page = modelData; root.problem = ""; if (modelData === "text" && root.uiFonts.length === 0) fontsProbe.running = true }
@@ -570,6 +633,60 @@ Item {
                       onPicked: if (!selected) root.apply([fontCol.modelData[3] + modelData])
                     }
                   }
+                }
+              }
+            }
+          }
+
+          // Keys: each keybinding, changed by pressing the new one.
+          ColumnLayout {
+            visible: session.page === "keys"
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            spacing: 8
+            Label { text: {{ tq "p.keys" }}; font.pointSize: 13; font.bold: true }
+            Caption {
+              text: root.capturing ? (root.keyMessage !== "" ? root.keyMessage : {{ tq "keys.press" }}.arg(root.capturing.name)) : {{ tq "keys.d" }}
+              color: root.keyMessage !== "" ? Theme.warning : root.capturing ? Theme.accentText : Theme.fgMuted
+              wrapMode: Text.Wrap
+              Layout.fillWidth: true
+            }
+            // Where the new keys land while listening.
+            Item {
+              id: keysFocus
+              implicitHeight: 0
+              Keys.onPressed: e => {
+                if (!root.capturing) return
+                e.accepted = true
+                if (e.key === Qt.Key_Escape) { root.endCapture(); return }
+                root.took(e)
+              }
+            }
+            ListView {
+              Layout.fillWidth: true
+              Layout.fillHeight: true
+              clip: true
+              spacing: 2
+              model: root.keyActions
+              delegate: RowLayout {
+                id: keyRow
+                required property var modelData
+                width: ListView.view.width
+                spacing: 8
+                Label { text: keyRow.modelData.name; elide: Text.ElideRight; Layout.fillWidth: true }
+                Rectangle {
+                  implicitWidth: keyText.implicitWidth + 12
+                  implicitHeight: keyText.implicitHeight + 6
+                  radius: Theme.radius
+                  color: Theme.bg
+                  border.width: 1
+                  border.color: root.capturing === keyRow.modelData ? Theme.accent : Theme.border
+                  Caption { id: keyText; anchors.centerIn: parent; text: keyRow.modelData.key }
+                }
+                Button {
+                  visible: !!keyRow.modelData.key_setting
+                  text: root.capturing === keyRow.modelData ? {{ tq "keys.cancel" }} : {{ tq "keys.change" }}
+                  onClicked: root.capturing === keyRow.modelData ? root.endCapture() : root.startCapture(keyRow.modelData)
                 }
               }
             }

@@ -119,6 +119,9 @@ public sealed partial class Plugin
     static readonly HashSet<string> KnownToolkits =
         ["terminal", "gtk4", "gtk3", "qt6", "qt5", "electron", "chromium", "firefox", "flatpak", "web"];
 
+    [GeneratedRegex(@"^\{\{\s*settings\.([a-z0-9_]+)\s*\}\}\z")]
+    private static partial Regex KeyFromSetting();
+
     /// <summary>An id names the plugin's folder and its [plugins.&lt;id&gt;] table.</summary>
     [GeneratedRegex(@"^[a-z0-9][a-z0-9-]*\z")]
     public static partial Regex IdPattern();
@@ -308,6 +311,7 @@ public sealed partial class Plugin
                 Glyph = a.String("glyph"),
                 Label = a.String("label"),
                 Confirm = a.Bool("confirm"),
+                KeySetting = KeyFromSetting().Match(a.String("key")) is { Success: true } km ? km.Groups[1].Value : "",
             });
         var cov = r.Sub("coverage");
         p.Coverage.Apps = cov.Strings("apps");
@@ -544,4 +548,9 @@ public sealed class Action
     public string Label = "";
     /// <summary>Confirm: done only when asked twice (power off, reboot): one stray ↵ doesn't.</summary>
     public bool Confirm;
+    /// <summary>
+    /// KeySetting: the setting the key comes from (key = "{{ settings.X }}"),
+    /// so Settings › Keys can change it; "" for a key that's fixed.
+    /// </summary>
+    public string KeySetting = "";
 }
