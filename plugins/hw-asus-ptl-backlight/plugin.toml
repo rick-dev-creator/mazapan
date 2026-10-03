@@ -23,4 +23,5 @@ reload = "mkinitcpio -P"
 
 [[checks]]
 name = "{{ t \"check.option\" }}"
-run = "modprobe -c | grep -q '^options xe .*enable_dpcd_backlight=1'"
+# What xe runs with (the initramfs it started from had it): until the reboot, no.
+run = "[ \"$(cat /sys/module/xe/parameters/enable_dpcd_backlight 2>/dev/null)\" = 1 ]"

@@ -71,7 +71,7 @@ public static partial class Program
         return (profiles, apps);
     }
 
-    static FileStream AppsLock()
+    static FileStream AppsLock(bool say = true)
     {
         Directory.CreateDirectory(AppsState());
         try
@@ -80,7 +80,7 @@ public static partial class Program
         }
         catch (IOException)
         {
-            Console.WriteLine("fail busy");
+            if (say) Console.WriteLine("fail busy");
             throw new MazapanException("another install or removal is running: wait for it");
         }
     }
@@ -286,6 +286,13 @@ public static partial class Program
                 if (now.Found.FirstOrDefault(x => x.Id == id) is { } pl && pl.Hardware == null && (now.Cfg == null || !now.Cfg.IsOn(pl)) && !p.Enable.Contains(id))
                     p.Enable.Add(id);
         p.Targets = p.Targets.Distinct().ToList();
+        // What another package there already gives (nodejs by nodejs-lts-*):
+        // left, not swapped (pacman would ask to remove it, and --noconfirm says no).
+        if (p.Targets.Count > 0 && AppsCapture("pacman", ["-T", "--", .. p.Targets]) is { Code: 0 or 127 } dt)
+        {
+            var missing = dt.Out.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToHashSet();
+            p.Targets = p.Targets.Where(missing.Contains).ToList();
+        }
         // Never synced (installed offline, from the ISO): nothing to plan
         // against yet; the install syncs and upgrades first (AppsInstall).
         if (p.Targets.Count > 0 && NeverSynced())

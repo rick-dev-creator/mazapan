@@ -56,9 +56,11 @@ Singleton {
 
   property var lastState: ({})   // session id -> {state, since}
   property var alerted: ({})     // account|window|resets -> true
+  property bool limitsRead: false // the first read after a (re)load tells nothing: already said
   function notify(title, body, sessionId) {
     const argv = ["notify-send", "-a", {{ tq "title" }}, "-i", "utilities-terminal"]
-    if (sessionId) argv.push("-A", "go=" + {{ tq "go" }}, "-w")
+    // A session's: its button while the banner shows, then gone (no process left waiting).
+    if (sessionId) argv.push("-e", "-A", "go=" + {{ tq "go" }}, "-w")
     argv.push("--", title, body)
     const n = notice.createObject(root, { command: argv, session: sessionId || "" })
     n.running = true
@@ -97,11 +99,13 @@ Singleton {
         const key = a.account.id + "|" + w.name + "|" + w.resets_at
         if (w.percent >= {{ settings.limit_alert }} && !alerted[key]) {
           alerted[key] = true
+          if (!limitsRead) continue
           const when = w.resets_at ? new Date(w.resets_at).toLocaleTimeString(Qt.locale("{{ lang }}"), Locale.ShortFormat) : ""
           root.notify({{ tq "n.limit" }}.arg(a.account.label).arg(Math.round(w.percent)), when ? {{ tq "n.resets" }}.arg(when) : "", "")
         }
       }
     }
+    limitsRead = true
 {{- end }}
   }
 

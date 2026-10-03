@@ -79,7 +79,7 @@ id = "mobile"
 name = "Mobile (Expo)"
 description = "Expo apps on Android from the first try: Node.js, Java 17, Android Studio with its SDK and emulators, phones over USB, Visual Studio Code"
 glyph = 0xF011C
-apps = ["nodejs-lts", "jdk17", "android-studio", "expo", "vscode-microsoft", "git"]
+apps = ["nodejs", "jdk17", "android-studio", "expo", "vscode-microsoft", "git"]
 translations.es.name = "Móvil (Expo)"
 translations.de.name = "Mobil (Expo)"
 translations.fr.name = "Mobile (Expo)"
@@ -780,15 +780,15 @@ translations.fr.description = "La version de Microsoft (le C# Dev Kit ne fonctio
 translations.pt.description = "A versão da Microsoft (o C# Dev Kit só roda nela), direto da Microsoft: verificada, atualizada pelo mazapan update"
 
 [[app]]
-id = "nodejs-lts"
-name = "Node.js (LTS)"
-description = "Node.js, the long-term release, with npm"
+id = "nodejs"
+name = "Node.js"
+description = "Node.js with npm (one already there, an LTS one, is kept)"
 category = "development"
-pacman = ["nodejs-lts-krypton", "npm"]
-translations.es.description = "Node.js, la versión de soporte largo, con npm"
-translations.de.description = "Node.js, die Langzeitversion, mit npm"
-translations.fr.description = "Node.js, la version à support long, avec npm"
-translations.pt.description = "Node.js, a versão de suporte longo, com npm"
+pacman = ["nodejs", "npm"]
+translations.es.description = "Node.js con npm (si ya hay uno, uno LTS, se queda)"
+translations.de.description = "Node.js mit npm (ein vorhandenes, ein LTS, bleibt)"
+translations.fr.description = "Node.js avec npm (celui déjà là, un LTS, reste)"
+translations.pt.description = "Node.js com npm (um já instalado, um LTS, fica)"
 
 [[app]]
 id = "jdk17"

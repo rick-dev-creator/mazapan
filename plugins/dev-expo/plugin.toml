@@ -8,7 +8,7 @@ categories = ["tools"]
 optional = true
 
 [packages]
-pacman = ["nodejs-lts-krypton", "npm", "jdk17-openjdk", "android-udev"]
+pacman = ["nodejs", "npm", "jdk17-openjdk", "android-udev"]
 
 [settings]
 # Where Android's SDK is (Android Studio puts it here the first time).
@@ -40,7 +40,7 @@ run = "test -x /usr/lib/jvm/java-17-openjdk/bin/java"
 
 [[checks]]
 name = "{{ t \"check.sdk\" }}"
-run = "test -x \"$(eval echo {{ shq settings.sdk }})/platform-tools/adb\""
+run = "s={{ shq settings.sdk }}; case $s in '~'*) s=\"$HOME${s#\\~}\" ;; esac; test -x \"$s/platform-tools/adb\""
 
 [[checks]]
 name = "{{ t \"check.kvm\" }}"

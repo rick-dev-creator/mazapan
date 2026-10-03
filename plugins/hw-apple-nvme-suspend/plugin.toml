@@ -9,14 +9,14 @@ categories = ["hardware"]
 [hardware]
 product = ["MacBook8,1", "MacBook9,1", "MacBook10,1", "MacBookPro13,[123]", "MacBookPro14,[123]"]
 
-# The drive at 0000:01:00.0 on these models never allowed into D3cold, at
-# every start (systemd-tmpfiles). Now too; and taken off, allowed again.
+# Apple's NVMe controller (S1X, S3X) never allowed into D3cold: a udev rule,
+# at every start and for the drive there now; taken off, allowed again.
 [[targets]]
-template = "nvme.conf.tmpl"
-output = "/etc/tmpfiles.d/mazapan-apple-nvme-suspend.conf"
+template = "nvme.rules.tmpl"
+output = "/etc/udev/rules.d/mazapan-apple-nvme-suspend.rules"
 system = true
-reload = "f=/sys/bus/pci/devices/0000:01:00.0/d3cold_allowed; if [ -e /etc/tmpfiles.d/mazapan-apple-nvme-suspend.conf ]; then systemd-tmpfiles --create /etc/tmpfiles.d/mazapan-apple-nvme-suspend.conf; elif [ -w $f ]; then echo 1 > $f; fi; true"
+reload = "udevadm control --reload; on=1; [ -e /etc/udev/rules.d/mazapan-apple-nvme-suspend.rules ] && on=0; for d in /sys/bus/pci/devices/*; do [ \"$(cat $d/vendor)\" = 0x106b ] || continue; case $(cat $d/device) in 0x2001|0x2003) [ -w $d/d3cold_allowed ] && echo $on > $d/d3cold_allowed ;; esac; done; true"
 
 [[checks]]
 name = "{{ t \"check.d3cold\" }}"
-run = "f=/sys/bus/pci/devices/0000:01:00.0/d3cold_allowed; [ ! -e $f ] || [ \"$(cat $f)\" = 0 ]"
+run = "for d in /sys/bus/pci/devices/*; do [ \"$(cat $d/vendor)\" = 0x106b ] || continue; case $(cat $d/device) in 0x2001|0x2003) [ \"$(cat $d/d3cold_allowed 2>/dev/null)\" = 0 ] || exit 1 ;; esac; done"

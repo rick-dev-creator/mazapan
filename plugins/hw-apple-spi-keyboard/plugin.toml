@@ -21,8 +21,10 @@ system = true
 reboot = true
 reload = "mkinitcpio -P"
 
-# mkinitcpio fails on a module the kernel doesn't have: looked for first.
+# mkinitcpio fails on a module the kernel doesn't have: looked for first, in
+# every kernel installed (the one running may be gone after an update; in the
+# installer it's the ISO's).
 [[checks]]
 name = "{{ t \"check.modules\" }}"
-run = "for m in applespi intel_lpss_pci spi_pxa2xx_platform spi_pxa2xx_pci; do modinfo -n $m >/dev/null 2>&1 || { echo \"no $m in this kernel\"; exit 1; }; done"
+run = "for d in /usr/lib/modules/*/pkgbase; do k=${d%/pkgbase}; k=${k##*/}; for m in applespi intel_lpss_pci spi_pxa2xx_platform spi_pxa2xx_pci; do modinfo -k \"$k\" -n $m >/dev/null 2>&1 || { echo \"no $m in $k\"; exit 1; }; done; done"
 before_system = true

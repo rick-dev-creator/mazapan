@@ -23,6 +23,8 @@ FloatingWindow {
   implicitWidth: 1180
   implicitHeight: 760
   color: Theme.bg
+  // Closed, gone (Quickshell itself stays without windows).
+  onClosed: Qt.quit()
 
   property int days: 30
   property string metric: "cost"   // cost (API prices) or tokens
@@ -48,11 +50,14 @@ FloatingWindow {
   // The chart's own: tokens in millions (an axis of nine digits reads badly).
   function chartVal(r) { return metric === "cost" ? r.cost_api : tok(r) / 1e6 }
 
+  // Asked again while a read runs (another period): read again when it ends.
+  property bool again: false
   function load() {
     loading = true
+    if (usage.running) { again = true; return }
     usage.command = ["mazapan", "agents", "usage", "--json", "--days", String(days)]
     usage.running = true
-    limitsProc.running = true
+    if (!limitsProc.running) limitsProc.running = true
   }
   Component.onCompleted: load()
 
@@ -62,6 +67,7 @@ FloatingWindow {
       onStreamFinished: {
         try { win.usageData = JSON.parse(text) } catch (e) { win.usageData = null }
         win.loading = false
+        if (win.again) { win.again = false; Qt.callLater(win.load) }
       }
     }
   }
@@ -83,7 +89,8 @@ FloatingWindow {
     d.setHours(12, 0, 0, 0)
     for (let i = days - 1; i >= 0; i--) {
       const x = new Date(d.getTime() - i * 86400000)
-      out.push(x.toISOString().slice(0, 10))
+      // The local day (an ISO string is UTC's: a day off east of +12).
+      out.push(x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0") + "-" + String(x.getDate()).padStart(2, "0"))
     }
     return out
   }
@@ -112,7 +119,8 @@ FloatingWindow {
   // Day labels: every one for a week, fewer as the period grows.
   function dayLabel(day, i) {
     const step = days <= 7 ? 1 : days <= 30 ? 5 : 15
-    if (i % step !== 0 && i !== dayList.length - 1) return " "
+    // Each one its own (an axis drops a category it has already): blank, by its count of invisible spaces.
+    if (i % step !== 0 && i !== dayList.length - 1) return "\u200b".repeat(i + 1)
     return new Date(day + "T12:00:00").toLocaleDateString(Qt.locale("{{ lang }}"), days <= 7 ? "ddd" : "d MMM")
   }
   readonly property real dayMax: {

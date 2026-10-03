@@ -13,8 +13,11 @@ namespace Mazapan.Agents;
 /// </summary>
 public static class Hooks
 {
-    public const string Command = "/usr/bin/mazapan agents event claude";
-    static readonly string[] Events = ["SessionStart", "UserPromptSubmit", "PreToolUse", "Notification", "Stop", "SessionEnd"];
+    // Never exit 2 (Claude Code takes it as "block this"): a mazapan without
+    // `agents` (rolled back, an older one sharing the file) answers usage, 2.
+    public const string Command = "/usr/bin/mazapan agents event claude 2>/dev/null || true";
+    // PostToolUse: back to work once a permission is given (no other event says it).
+    static readonly string[] Events = ["SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse", "Notification", "Stop", "SessionEnd"];
 
     /// <summary>Every settings.json the Claude configurations use, once each (two configurations can share one through a symlink).</summary>
     public static List<string> SettingsFiles(IEnumerable<Account> accounts)
@@ -33,11 +36,18 @@ public static class Hooks
     public static List<string> Set(IEnumerable<Account> accounts, bool install)
     {
         var changed = new List<string>();
+        // Every file read first: one that doesn't read stops it before any is written.
+        var updates = new List<(string File, string Updated)>();
         foreach (var file in SettingsFiles(accounts))
         {
             var text = File.Exists(file) ? File.ReadAllText(file) : "{}";
-            var updated = Apply(text, install);
-            if (updated == null) continue;
+            string? updated;
+            try { updated = Apply(text, install); }
+            catch (JsonException e) { throw new MazapanException($"{file} isn't valid JSON ({e.Message}): nothing changed"); }
+            if (updated != null) updates.Add((file, updated));
+        }
+        foreach (var (file, updated) in updates)
+        {
             var backup = file + ".mazapan-backup";
             if (File.Exists(file) && !File.Exists(backup)) File.Copy(file, backup);
             Directory.CreateDirectory(Paths.Dir(file));
@@ -72,7 +82,8 @@ public static class Hooks
             else if (list != null && list.Count == 0) hooks.Remove(ev);
         }
         if (!install && hooks.Count == 0) root.Remove("hooks");
-        var after = root.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
+        // The person's characters as they wrote them (no \u0026 for &).
+        var after = root.ToJsonString(new JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
         return root.ToJsonString() == before ? null : after + "\n";
     }
 
@@ -86,7 +97,9 @@ public static class Hooks
     {
         try
         {
-            return JsonNode.Parse(json)?["hooks"] is JsonObject h && Events.All(e => h[e] is JsonArray l && l.Any(Ours));
+            // This command exactly: an older one is put in again.
+            return JsonNode.Parse(json)?["hooks"] is JsonObject h && Events.All(e => h[e] is JsonArray l && l.Any(g => g?["hooks"] is JsonArray hs
+                && hs.Any(x => x?["command"]?.GetValueKind() == JsonValueKind.String && x["command"]!.GetValue<string>() == Command)));
         }
         catch (JsonException) { return false; }
     }

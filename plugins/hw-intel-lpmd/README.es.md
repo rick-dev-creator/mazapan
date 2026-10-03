@@ -7,8 +7,9 @@ núcleos eficientes y los demás descansan, y la batería dura más.
 
 Se ofrece en portátiles con uno de esos procesadores, que se reconocen
 por sus gráficos integrados (Alder Lake-P, -U y -HX, Raptor Lake-P y -U,
-Meteor Lake, Lunar Lake, Panther Lake). No en sobremesas, ni en Alder
-Lake-N, que no es híbrido.
+Meteor Lake, Lunar Lake, Panther Lake). No en Alder Lake-N, que no es
+híbrido. Un mini PC con uno de estos procesadores de portátil también lo
+ve (ahí no hace daño; es para la batería).
 
 Lo que hace, como root: instala `intel-lpmd` y arranca
 `intel_lpmd.service` ya y en cada arranque. El archivo que dice que está

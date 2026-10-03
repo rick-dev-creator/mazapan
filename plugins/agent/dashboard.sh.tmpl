@@ -6,5 +6,7 @@ pid=$(pgrep -u "$(id -u)" -x qs -a 2>/dev/null | awk -v f="$f" 'index($0, f) {pr
 if [ -n "$pid" ]; then
   addr=$(hyprctl clients -j | jq -r --argjson p "$pid" '.[] | select(.pid == $p) | .address' | head -n 1)
   [ -n "$addr" ] && exec hyprctl dispatch "hl.dsp.focus({ window = \"address:$addr\" })"
+  # Running without its window (closed by an older one): ended, then opened anew.
+  kill "$pid" 2>/dev/null
 fi
 exec setsid qs -p "$f" >/dev/null 2>&1

@@ -12,7 +12,7 @@ MacBookPro14,1–3.
 It writes one file, as root: applespi and its SPI controller in the
 initramfs, in `/etc/mkinitcpio.conf.d/mazapan-apple-spi-keyboard.conf`
 (the MacBook8,1's controller is a PCI device; later models reach it
-through Intel's LPSS). A check makes sure the kernel has those modules
+through Intel's LPSS). A check makes sure every installed kernel has those modules
 first. The initramfs is rebuilt, and it takes effect after a reboot.
 No settings.
 

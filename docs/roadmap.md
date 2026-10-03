@@ -103,6 +103,17 @@ person's approval for root) is the foundation that can be.
 Order: 2 and 3 first (the person's problem today, and what sets Mazapán
 apart), then 4, with 5 alongside; 1 whenever the person can.
 
+**Where they stand (2026-10-04, audited):** 2, 3, 4 and 5 done and tried in
+the VM; 1 is the person's. Done in 2: every agent and account found
+(several Claude configurations, opencode, pi, Codex), usage and API-priced
+cost from their own logs, Claude's limits per account, `mazapan agents run
+claude` taking the account with room, the dashboard (QtGraphs), MCP tools.
+Not yet in 2: the OpenTelemetry receiver, the API providers' own spend
+endpoints, API keys moved to the keyring. Not yet in 3: the dot on the
+session's workspace. Untried until real accounts and hardware: Claude's
+limits endpoint with the person's accounts, Rider's first start, Android
+Studio and the emulator, each hardware plugin on its machine.
+
 **After those:** an importer for Omarchy's themes (its 22 at once);
 LocalSend (22); "ask an agent about this" from a capture, a selection, a
 notification, a file, and `? question` in the palette answered in a card;
@@ -1129,7 +1140,7 @@ packages:
   (Microsoft's build from Flathub, `com.visualstudio.code`: C# Dev Kit
   only runs there, not in Code - OSS), or both. A check: a new Aspire app
   builds and its dashboard opens.
-- **Mobile (Expo)**: Node.js LTS and npm (Arch's own), Expo's CLI through
+- **Mobile (Expo)**: Node.js and npm (Arch's own; an LTS one already there is kept), Expo's CLI through
   `npx` (nothing global), a JDK (`jdk17-openjdk`), the Android SDK, its
   platform tools and an emulator image (Android Studio from Flathub,
   `com.google.AndroidStudio`, or the command-line tools in the person's
@@ -1428,6 +1439,13 @@ awake") keep it away; still with the theme's motion off.
   every item above; the `columns` plugin is the place to start.
 
 ## Also pending
+
+- With screen permissions on (privacy's `screen_ask`), now and then in a
+  long session `grim` gets Hyprland's "allow grim to capture?" dialog
+  although `/usr/bin/grim` is allowed; a capture waits on it. Seen twice
+  in the VM (2026-10-04: after installing packages and turning plugins on
+  in a running session), never right after a login, not reproduced with
+  reloads or applies alone. To find what makes Hyprland forget the rule.
 
 - `mazapan update` offering plugin updates; Chromium's accent through its
   policy. (The "updates available" widget is item 20's.)

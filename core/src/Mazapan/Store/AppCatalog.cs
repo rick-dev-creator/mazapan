@@ -137,6 +137,9 @@ public static partial class AppCatalog
             t.Done();
             if (!IdPattern().IsMatch(a.Id)) throw new MazapanException($"{from}: app id \"{a.Id}\": lowercase letters, digits and dashes");
             if (a.Name == "") throw new MazapanException($"{from}: {a.Id}: a name");
+            // On one line each (they go into .desktop files, the panel).
+            if (new[] { a.Name, a.Description }.Concat(a.Translations.Values.SelectMany(t => new[] { t.Name, t.Description })).Any(s => s.Any(char.IsControl)))
+                throw new MazapanException($"{from}: {a.Id}: a name or description on more than one line");
             if (!Categories.Contains(a.Category)) throw new MazapanException($"{from}: {a.Id}: category \"{a.Category}\": one of {string.Join(", ", Categories)}");
             var sources = (a.Pacman.Count > 0 ? 1 : 0) + (a.Flatpak != "" ? 1 : 0) + (a.Webapp != "" ? 1 : 0) + (a.Plugin != "" ? 1 : 0) + (a.Vendor != "" ? 1 : 0);
             if (sources != 1) throw new MazapanException($"{from}: {a.Id}: exactly one of pacman, flatpak, webapp, plugin, vendor");

@@ -13,8 +13,8 @@ It writes one file, as root:
 `/etc/mkinitcpio.conf.d/mazapan-surface-keyboard.conf`, with the
 Surface Aggregator, its HID and keyboard modules, the LPSS serial
 modules, and the GPIO pin controller (which differs between Surface
-generations: the one loaded when the initramfs is built). A check makes
-sure the kernel has those modules first. The initramfs is rebuilt, and
+generations: each of Intel's, optional, and the one that fits binds). A
+check makes sure every installed kernel has those modules first. The initramfs is rebuilt, and
 it takes effect after a reboot. No settings.
 
 Like any hardware plugin it's off until you turn it on: "Turn on" here,

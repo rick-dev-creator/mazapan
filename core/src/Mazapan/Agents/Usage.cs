@@ -204,15 +204,20 @@ public static class Usage
             }
             var ctx = new Context();
             var entries = new List<Entry>();
-            foreach (var line in File.ReadLines(file))
+            try
             {
-                if (line.Length == 0) continue;
-                try
+                foreach (var line in File.ReadLines(file))
                 {
-                    if (parse(line, source, ctx) is { } e) entries.Add(e);
+                    if (line.Length == 0) continue;
+                    try
+                    {
+                        if (parse(line, source, ctx) is { } e) entries.Add(e);
+                    }
+                    // A line half written (the next read has it), or not of the shape known.
+                    catch (Exception x) when (x is JsonException or InvalidOperationException or KeyNotFoundException or FormatException) { }
                 }
-                catch (JsonException) { } // a line half written: the next read has it
             }
+            catch (Exception x) when (x is IOException or UnauthorizedAccessException) { continue; } // gone meanwhile
             // One answer, one entry: Claude Code writes a line per part of it
             // (the fullest one's counts kept).
             entries = entries.Where(e => e.Key == "")

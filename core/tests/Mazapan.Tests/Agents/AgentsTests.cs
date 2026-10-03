@@ -65,18 +65,19 @@ public class AgentsTests
     }
 
     [Fact]
-    public void LimitsReadEitherScaleAndAModelsOwnWindow()
+    public void LimitsAreInPercentAndAModelsOwnWindow()
     {
         var w = AccountLimits.Parse("""
-            {"five_hour":{"utilization":0.42,"resets_at":"2026-10-03T18:00:00Z"},"seven_day":{"utilization":0.9,"resets_at":"2026-10-07T00:00:00Z"},
-             "limits":[{"kind":"weekly_scoped","percent":0.5,"scope":{"model":{"display_name":"Opus 5"}},"resets_at":"2026-10-07T00:00:00Z"}]}
+            {"five_hour":{"utilization":42,"resets_at":"2026-10-03T18:00:00Z"},"seven_day":{"utilization":90,"resets_at":"2026-10-07T00:00:00Z"},
+             "limits":[{"kind":"weekly_scoped","percent":50,"scope":{"model":{"display_name":"Opus 5"}},"resets_at":"2026-10-07T00:00:00Z"}]}
             """);
         Assert.Equal(["session", "week", "week: Opus 5"], w.Select(x => x.Name));
         Assert.Equal(42, w[0].Percent, 6);
         Assert.Equal(90, w[1].Percent, 6);
-        var pct = AccountLimits.Parse("""{"five_hour":{"utilization":42,"resets_at":null},"seven_day":{"utilization":3}}""");
-        Assert.Equal(42, pct[0].Percent, 6);
-        Assert.Null(pct[0].ResetsAt);
+        // Just after a reset: 1 % is 1 %, not full.
+        var low = AccountLimits.Parse("""{"five_hour":{"utilization":1.0,"resets_at":null},"seven_day":{"utilization":0}}""");
+        Assert.Equal(1, low[0].Percent, 6);
+        Assert.Null(low[0].ResetsAt);
     }
 
     [Fact]
@@ -169,6 +170,14 @@ public class AgentsTests
         Assert.Contains("notify-send done", without);           // the person's own stay
         Assert.DoesNotContain("SessionStart", without);
         Assert.Null(Hooks.Apply("{}", install: false));
+        // An older command of ours is replaced, not kept beside; & stays &.
+        var older = with.Replace(Hooks.Command, "/usr/bin/mazapan agents event claude");
+        Assert.False(Hooks.Installed(older));
+        var again = Hooks.Apply(older, install: true)!;
+        Assert.True(Hooks.Installed(again));
+        Assert.Equal(7, again.Split("mazapan agents event").Length - 1);
+        Assert.Contains("|| true", again);
+        Assert.DoesNotContain("\\u0026", Hooks.Apply("""{"x":"a && b"}""", install: true)!);
     }
 
     [Fact]
@@ -187,6 +196,12 @@ public class AgentsTests
             s = Assert.Single(Sessions.List(), x => x.Id == "abc-1");
             Assert.Equal("waiting", s.State);
             Assert.StartsWith("Claude needs", s.Message);
+            Sessions.FromClaudeHook("""{"session_id":"abc-1","hook_event_name":"PostToolUse"}""", [me]);
+            Assert.Equal("working", Assert.Single(Sessions.List(), x => x.Id == "abc-1").State);
+            Sessions.FromClaudeHook("""{"session_id":"abc-1","hook_event_name":"Stop"}""", [me]);
+            // Idle a minute after its answer: still done.
+            Sessions.FromClaudeHook("""{"session_id":"abc-1","hook_event_name":"Notification","notification_type":"idle_prompt","message":"Claude is waiting for your input"}""", [me]);
+            Assert.Equal("done", Assert.Single(Sessions.List(), x => x.Id == "abc-1").State);
             Sessions.FromClaudeHook("""{"session_id":"abc-1","hook_event_name":"SessionEnd"}""", [me]);
             Assert.DoesNotContain(Sessions.List(), x => x.Id == "abc-1");
             // A session whose agent has gone is taken off; a name that could be a path, refused.

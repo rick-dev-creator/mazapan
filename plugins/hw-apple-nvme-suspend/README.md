@@ -9,9 +9,9 @@ Offered on those models, by the name the firmware gives them:
 MacBook8,1, MacBook9,1, MacBook10,1, MacBookPro13,1–3 and
 MacBookPro14,1–3.
 
-It writes one file, as root: `/etc/tmpfiles.d/mazapan-apple-nvme-suspend.conf`,
-which sets `d3cold_allowed` to 0 for the drive (at PCI address
-`0000:01:00.0` on these models) at every start. It's set at once too,
+It writes one file, as root: `/etc/udev/rules.d/mazapan-apple-nvme-suspend.rules`,
+which sets `d3cold_allowed` to 0 for Apple's own NVMe controller (S1X or
+S3X, told by its PCI id, wherever it sits on the bus) at every start. It's set at once too,
 without a reboot; turned off, the drive is allowed into D3cold again.
 No settings.
 

@@ -2,7 +2,10 @@
 local home = os.getenv("HOME") or ""
 hl.env("DOTNET_ROOT", "/usr/share/dotnet")
 -- dotnet's global tools (dotnet tool install -g).
-hl.env("PATH", (os.getenv("PATH") or "/usr/bin") .. ":" .. home .. "/.dotnet/tools")
+-- Once (Hyprland's own PATH is this one again on every reload).
+local path = os.getenv("PATH") or "/usr/bin"
+if not (":" .. path .. ":"):find(":" .. home .. "/.dotnet/tools:", 1, true) then path = path .. ":" .. home .. "/.dotnet/tools" end
+hl.env("PATH", path)
 -- The development certificate, trusted by OpenSSL beside the system's own.
 hl.env("SSL_CERT_DIR", home .. "/.aspnet/dev-certs/trust:/etc/ssl/certs")
 {{- if settings.telemetry_off }}

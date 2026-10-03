@@ -20,8 +20,10 @@ system = true
 reboot = true
 reload = "mkinitcpio -P"
 
-# mkinitcpio fails on a module the kernel doesn't have: looked for first.
+# mkinitcpio fails on a module the kernel doesn't have: looked for first, in
+# every kernel installed (the one running may be gone after an update; in the
+# installer it's the ISO's).
 [[checks]]
 name = "{{ t \"check.modules\" }}"
-run = "for m in surface_aggregator surface_aggregator_registry surface_aggregator_hub surface_hid_core surface_hid surface_kbd intel_lpss_pci 8250_dw; do modinfo -n $m >/dev/null 2>&1 || { echo \"no $m in this kernel\"; exit 1; }; done"
+run = "for d in /usr/lib/modules/*/pkgbase; do k=${d%/pkgbase}; k=${k##*/}; for m in surface_aggregator surface_aggregator_registry surface_aggregator_hub surface_hid_core surface_hid surface_kbd intel_lpss_pci 8250_dw; do modinfo -k \"$k\" -n $m >/dev/null 2>&1 || { echo \"no $m in $k\"; exit 1; }; done; done"
 before_system = true

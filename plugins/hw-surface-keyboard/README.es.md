@@ -13,8 +13,9 @@ Escribe un archivo, como root:
 `/etc/mkinitcpio.conf.d/mazapan-surface-keyboard.conf`, con el Surface
 Aggregator, sus módulos HID y de teclado, los módulos serie del LPSS y
 el controlador de pines GPIO (que cambia entre generaciones de Surface:
-el que esté cargado al generar el initramfs). Antes, una comprobación se
-asegura de que el kernel tiene esos módulos. El initramfs se regenera, y
+todos los de Intel, opcionales, y se engancha el que corresponde). Antes,
+una comprobación se asegura de que cada kernel instalado tiene esos
+módulos. El initramfs se regenera, y
 surte efecto tras reiniciar. Sin ajustes.
 
 Como todo plugin de hardware, está desactivado hasta que lo activas:

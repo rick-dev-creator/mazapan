@@ -71,6 +71,11 @@ public static partial class Program
     {
         if (updates.Count == 0) return true;
         Header("From their makers");
+        // Not while the Apps panel installs or removes one (the same folders).
+        FileStream lk;
+        try { lk = AppsLock(say: false); }
+        catch (MazapanException e) { Console.WriteLine(e.Message); return false; }
+        using var _ = lk;
         var ok = true;
         foreach (var (a, rel) in updates)
         {

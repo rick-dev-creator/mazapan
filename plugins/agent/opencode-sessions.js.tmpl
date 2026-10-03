@@ -2,8 +2,10 @@
 // Each session's state goes to `mazapan agents event` (working, waiting for
 // a permission, done); nothing else is sent anywhere.
 export const MazapanSessions = async ({ directory }) => {
+  // A task's own sessions (a subagent's) aren't the person's: not shown.
+  const children = new Set()
   const say = (session, state) => {
-    if (!session) return
+    if (!session || children.has(session)) return
     try {
       Bun.spawn(["/usr/bin/mazapan", "agents", "event", "opencode", state, session, directory || ""], { stdout: "ignore", stderr: "ignore" })
     } catch {}
@@ -13,8 +15,13 @@ export const MazapanSessions = async ({ directory }) => {
       const p = event.properties || {}
       const id = p.sessionID || (p.info && p.info.id) || ""
       switch (event.type) {
-        case "session.created": say(id, "idle"); break
-        case "session.status": say(id, p.status && p.status.type === "busy" ? "working" : "done"); break
+        case "session.created":
+          if (p.info && p.info.parentID) children.add(id)
+          else say(id, "idle")
+          break
+        // busy and retry (another try coming) are work; idle, done.
+        case "session.status": say(id, p.status && p.status.type !== "idle" ? "working" : "done"); break
+        case "permission.replied": say(id, "working"); break
         case "session.idle": say(id, "done"); break
         case "permission.asked": say(id, "waiting"); break
         case "session.error": say(id, "done"); break

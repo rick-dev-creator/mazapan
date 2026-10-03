@@ -17,7 +17,8 @@ public sealed record Session(string Agent, string Id, string Account, string Pro
 /// </summary>
 public static class Sessions
 {
-    static string Dir => Path.Join(Environment.GetEnvironmentVariable("XDG_RUNTIME_DIR") is { Length: > 0 } r ? r : "/tmp/mazapan-" + Environment.UserName, "mazapan-agents");
+    // The runtime directory only (the person's, 0700): none, no sessions kept.
+    static string Dir => Environment.GetEnvironmentVariable("XDG_RUNTIME_DIR") is { Length: > 0 } r ? Path.Join(r, "mazapan-agents") : "";
 
     static readonly string[] States = ["idle", "working", "waiting", "done"];
 
@@ -43,6 +44,9 @@ public static class Sessions
             _ => "",
         };
         if (state == "") return;
+        // A minute idle after its answer: still done, not a question for you.
+        if (ev == "Notification" && (Discovery.Str(r, "notification_type") == "idle_prompt"
+            || Discovery.Str(r, "message").StartsWith("Claude is waiting for your input", StringComparison.Ordinal))) return;
         // Which account: the configuration directory it runs with.
         var config = Environment.GetEnvironmentVariable("CLAUDE_CONFIG_DIR") is { Length: > 0 } c ? Path.GetFileName(c.TrimEnd('/')).TrimStart('.') : "claude";
         Record("claude", id, config, Discovery.Str(r, "cwd"), state, Discovery.Str(r, "message"), ancestors);
@@ -51,7 +55,7 @@ public static class Sessions
     /// <summary>A state for a session (end: it's gone). An agent's own message (a permission asked) kept, short.</summary>
     public static void Record(string agent, string id, string account, string project, string state, string message, IReadOnlyList<int> pids)
     {
-        if (!SafeName(agent) || !SafeName(id)) return;
+        if (!SafeName(agent) || !SafeName(id) || Dir == "") return;
         Directory.CreateDirectory(Dir);
         File.SetUnixFileMode(Dir, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
         var file = Path.Join(Dir, agent + "-" + id + ".json");
@@ -104,7 +108,7 @@ public static class Sessions
     public static List<Session> List()
     {
         var out_ = new List<Session>();
-        if (Directory.Exists(Dir))
+        if (Dir != "" && Directory.Exists(Dir))
             foreach (var f in Directory.EnumerateFiles(Dir, "*.json"))
                 if (Read(f) is { } s)
                 {

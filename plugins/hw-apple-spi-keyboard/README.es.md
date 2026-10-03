@@ -14,7 +14,7 @@ Escribe un archivo, como root: applespi y su controlador SPI en el
 initramfs, en `/etc/mkinitcpio.conf.d/mazapan-apple-spi-keyboard.conf`
 (el controlador del MacBook8,1 es un dispositivo PCI; los modelos
 posteriores llegan a él por el LPSS de Intel). Antes, una comprobación
-se asegura de que el kernel tiene esos módulos. El initramfs se
+se asegura de que cada kernel instalado tiene esos módulos. El initramfs se
 regenera, y surte efecto tras reiniciar. Sin ajustes.
 
 La Touch Bar no está incluida: necesita un driver de fuera del kernel,

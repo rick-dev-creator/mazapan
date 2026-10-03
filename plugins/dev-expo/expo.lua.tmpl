@@ -4,4 +4,9 @@ local sdk = ({{ lq settings.sdk }}):gsub("^~", home)
 hl.env("ANDROID_HOME", sdk)
 hl.env("ANDROID_SDK_ROOT", sdk)
 hl.env("JAVA_HOME", "/usr/lib/jvm/java-17-openjdk")
-hl.env("PATH", (os.getenv("PATH") or "/usr/bin") .. ":" .. sdk .. "/platform-tools:" .. sdk .. "/emulator")
+-- Once each (Hyprland's own PATH is this one again on every reload).
+local path = os.getenv("PATH") or "/usr/bin"
+for _, d in ipairs({ sdk .. "/platform-tools", sdk .. "/emulator" }) do
+  if not (":" .. path .. ":"):find(":" .. d .. ":", 1, true) then path = path .. ":" .. d end
+end
+hl.env("PATH", path)

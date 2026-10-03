@@ -39,6 +39,7 @@ respuestas. Los límites de Claude vienen de Anthropic con el propio inicio
 de sesión de esa cuenta, que mazapan nunca renueva. Las sesiones las
 cuentan los hooks de Claude Code, que este plugin pone en el
 `settings.json` de cada configuración junto a los tuyos (`claude_hooks`; la
-primera vez se guarda una copia del archivo; apagado los quita), y un
-pequeño plugin de opencode. Desde una terminal: `mazapan agents`, `mazapan
+primera vez se guarda una copia del archivo; apagado los quita; al
+desactivar el plugin entero se quedan, sin hacer daño: `mazapan agents
+hooks remove` los quita), y un pequeño plugin de opencode. Desde una terminal: `mazapan agents`, `mazapan
 agents usage`, `mazapan agents limits`, `mazapan agents run claude`.

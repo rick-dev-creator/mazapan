@@ -105,8 +105,8 @@ public static class AccountLimits
                 if (raw.Any(x => x.Name == $"{window}: {name}")) continue;
                 raw.Add(($"{window}: {name}", p.GetDouble(), Discovery.Str(e, "resets_at")));
             }
-        var percentScale = raw.Any(x => x.Value > 1);
-        return raw.Select(x => new Window(x.Name, Math.Clamp(percentScale ? x.Value : x.Value * 100, 0, 100),
+        // Percent, both (1.0 is 1 %, not full).
+        return raw.Select(x => new Window(x.Name, Math.Clamp(x.Value, 0, 100),
             DateTimeOffset.TryParse(x.Resets, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var t) ? t : null)).ToList();
     }
 

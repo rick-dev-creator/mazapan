@@ -89,7 +89,8 @@ public static class Vendor
         if (!r.Url.StartsWith(prefix, StringComparison.Ordinal) || !r.Url.StartsWith("https://", StringComparison.Ordinal))
             throw new MazapanException($"the maker's address isn't one to trust: {r.Url}");
         if (r.Sha256.Length != 64 || !r.Sha256.All(Uri.IsHexDigit)) throw new MazapanException("the maker's checksum doesn't read");
-        if (r.Version == "" || !r.Version.All(c => char.IsAsciiLetterOrDigit(c) || c is '.' or '-' or '_'))
+        if (r.Version == "" || !char.IsAsciiLetterOrDigit(r.Version[0]) || r.Version is "current" or "version"
+            || !r.Version.All(c => char.IsAsciiLetterOrDigit(c) || c is '.' or '-' or '_'))
             throw new MazapanException($"the maker's version doesn't read: {r.Version}");
         return r;
     }
@@ -117,8 +118,11 @@ public static class Vendor
                 using var sha = SHA256.Create();
                 var buf = new byte[1 << 20];
                 long done = 0, said = 0;
+                // Each app from nothing (the panel shows the last of these).
+                Console.WriteLine($"progress 0 {total}");
                 int n;
-                while ((n = src.Read(buf, 0, buf.Length)) > 0)
+                // A connection that stalls: given up after a minute without a byte.
+                while ((n = ReadSome(src, buf)) > 0)
                 {
                     dst.Write(buf, 0, n);
                     sha.TransformBlock(buf, 0, n, null, 0);
@@ -126,6 +130,7 @@ public static class Vendor
                     if (done - said > 32 << 20) { Console.WriteLine($"progress {done} {total}"); said = done; }
                 }
                 sha.TransformFinalBlock([], 0, 0);
+                Console.WriteLine($"progress {done} {Math.Max(done, total)}");
                 if (!Convert.ToHexStringLower(sha.Hash!).Equals(r.Sha256, StringComparison.OrdinalIgnoreCase))
                     throw new MazapanException($"{name}: the download isn't what its maker published (checksum): not installed");
             }
@@ -148,12 +153,14 @@ public static class Vendor
             // folder, hence libc.
             var current = Path.Join(root, "current");
             var tmpLink = Path.Join(root, ".current");
+            // The one before is kept (it may be open now: its files are read as it runs).
+            var before = new FileInfo(current).LinkTarget is { } lt ? Path.GetFileName(lt.TrimEnd('/')) : "";
             Unlink(tmpLink);
             File.CreateSymbolicLink(tmpLink, r.Version);
             if (Rename(tmpLink, current) != 0) throw new MazapanException($"{name}: couldn't make the new version current");
             Files.WriteAtomic(Path.Join(root, "version"), r.Version + "\n");
-            // The versions before go ("current" is a link to one: left).
-            foreach (var old in Directory.GetDirectories(root).Where(d => Path.GetFileName(d) is var n && !n.StartsWith('.') && n != r.Version && n != "current"
+            // The versions older than that go ("current" is a link to one: left).
+            foreach (var old in Directory.GetDirectories(root).Where(d => Path.GetFileName(d) is var n && !n.StartsWith('.') && n != r.Version && n != before && n != "current"
                 && new DirectoryInfo(d).LinkTarget == null))
                 Directory.Delete(old, true);
         }
@@ -162,6 +169,13 @@ public static class Vendor
             File.Delete(tarball);
         }
         Launcher(id, maker, name);
+    }
+
+    static int ReadSome(Stream src, byte[] buf)
+    {
+        using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+        try { return src.ReadAsync(buf, cts.Token).AsTask().GetAwaiter().GetResult(); }
+        catch (OperationCanceledException) { throw new MazapanException("the download stalled: try again"); }
     }
 
     /// <summary>Its launcher (the menu, the palette) and its command in ~/.local/bin (when nothing else has the name).</summary>
@@ -173,7 +187,7 @@ public static class Vendor
         Files.WriteAtomic(desktop, string.Join("\n",
             "[Desktop Entry]",
             "Type=Application",
-            $"Name={name}",
+            $"Name={new string([.. name.Where(c => !char.IsControl(c))])}",
             $"Exec=\"{Path.Join(current, maker.Executable)}\" %F",
             $"Icon={Path.Join(current, maker.Icon)}",
             $"StartupWMClass={maker.WmClass}",
@@ -213,7 +227,7 @@ public static class Vendor
     [System.Runtime.InteropServices.DllImport("libc", EntryPoint = "unlink", SetLastError = true)]
     static extern int Unlink([System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPUTF8Str)] string path);
 
-        public static Maker MakerOf(string spec) => Makers.FirstOrDefault(m => m.Spec == spec) ?? throw new MazapanException($"no maker \"{spec}\"");
+    public static Maker MakerOf(string spec) => Makers.FirstOrDefault(m => m.Spec == spec) ?? throw new MazapanException($"no maker \"{spec}\"");
 
     /// <summary>"2.4 GB".</summary>
     public static string Size(long b) => b <= 0 ? "" : b >= 1L << 30 ? (b / (double)(1L << 30)).ToString("0.0", CultureInfo.InvariantCulture) + " GB" : (b >> 20) + " MB";

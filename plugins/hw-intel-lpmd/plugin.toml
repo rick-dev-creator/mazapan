@@ -12,7 +12,7 @@ categories = ["hardware"]
 # CPU model isn't a rule: the laptop dies only (P, U, HX; Meteor, Lunar and
 # Panther Lake are laptop-only), as it's for a battery. Not Alder Lake-N,
 # which isn't hybrid.
-gpu = ["Intel*Alder Lake-P*", "Intel*Alder Lake-UP*", "Intel*Alder Lake-HX*", "Intel*Raptor Lake-P*", "Intel*Raptor Lake-U*", "Intel*Meteor Lake*", "Intel*Lunar Lake*", "Intel*Panther Lake*"]
+gpu = ["Intel*Alder Lake-P*", "Intel*Alder Lake-UP*", "Intel*Alder Lake-HX*", "Intel*Raptor Lake-P*", "Intel*Raptor Lake-U*", "Intel*Meteor Lake*", "Intel*Lunar Lake*", "Intel*Arc Graphics 130V/140V*", "Intel*Panther Lake*"]
 
 [packages]
 pacman = ["intel-lpmd"]

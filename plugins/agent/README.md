@@ -37,6 +37,7 @@ sessions); prompts and answers are never read. Claude's limits come from
 Anthropic with that account's own login, never refreshed by mazapan.
 Sessions are told by Claude Code's hooks, which this plugin puts in each
 configuration's `settings.json` beside your own (`claude_hooks`; a copy of
-the file is kept the first time; off takes them out), and by a small
-opencode plugin. From a terminal: `mazapan agents`, `mazapan agents usage`,
+the file is kept the first time; off takes them out; turning the whole
+plugin off leaves them, harmless: `mazapan agents hooks remove` takes them
+out), and by a small opencode plugin. From a terminal: `mazapan agents`, `mazapan agents usage`,
 `mazapan agents limits`, `mazapan agents run claude`.

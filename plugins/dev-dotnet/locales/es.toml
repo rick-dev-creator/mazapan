@@ -8,6 +8,7 @@
 "check.sdk" = "El SDK de .NET está instalado"
 "check.aspire" = "Las plantillas de Aspire están instaladas"
 "check.cert" = "El certificado HTTPS de desarrollo es de confianza"
+"check.containers" = "El motor de contenedores de Aspire está instalado"
 "setting.containers" = "Contenedores de Aspire"
 "setting.containers.help" = "\"podman\": sin root ni servicio; \"docker\": el de Docker (la app Docker)."
 "setting.telemetry_off" = "Telemetría apagada"

@@ -1,7 +1,7 @@
 # Expo, set up
 
 Expo apps on Android from the first try. The Mobile (Expo) profile in Apps
-installs Node.js (LTS), Java 17, Android Studio and the udev rules for
+installs Node.js (Arch's, or the LTS one already there), Java 17, Android Studio and the udev rules for
 phones over USB, and turns this on; it then sets, for everything started
 from the desktop, `ANDROID_HOME` (`sdk`, `~/Android/Sdk`), `JAVA_HOME`
 (Java 17, what Android's Gradle builds with) and adb and the emulator on

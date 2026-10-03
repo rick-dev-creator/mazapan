@@ -1,7 +1,7 @@
 # Expo, configurado
 
 Apps de Expo en Android a la primera. El perfil Móvil (Expo) de Apps
-instala Node.js (LTS), Java 17, Android Studio y las reglas udev para
+instala Node.js (el de Arch, o el LTS que ya haya), Java 17, Android Studio y las reglas udev para
 teléfonos por USB, y enciende esto; entonces define, para todo lo que se
 abre desde el escritorio, `ANDROID_HOME` (`sdk`, `~/Android/Sdk`),
 `JAVA_HOME` (Java 17, con lo que compila el Gradle de Android) y pone adb y

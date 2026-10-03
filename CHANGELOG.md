@@ -6,6 +6,20 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- Agents: Claude Code's hooks can't block a prompt even with an older
+  Mazapán (they never fail), and say when work goes on after a permission;
+  a minute idle after an answer no longer reads as "waiting for you".
+  Limits at 1 % no longer read as full. The dashboard ends when closed,
+  keeps a day's bar on its day in any time zone and shows 30 and 90 days
+  right. Limit alerts aren't repeated after the shell reloads.
+- Apps from their makers: the version before is kept while an open IDE may
+  use it; an update and the Apps panel never install or remove the same one
+  at once; a stalled download gives up.
+- Node.js already installed (an LTS one) is kept by the Mobile profile.
+- Hardware: kernel updates are no longer rolled back on Surface, older
+  MacBooks and Broadcom wl machines (their checks look at every installed
+  kernel), and the installer no longer stops there.
+
 - Mazapán updates itself: its own signed repository, in two channels
   (stable, and edge with every release first): `mazapan channel` says which
   one and switches, `mazapan version` says the version.

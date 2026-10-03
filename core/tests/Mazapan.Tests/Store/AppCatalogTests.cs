@@ -25,6 +25,7 @@ public class AppCatalogTests
     [InlineData("webapp = \"https://a.com/ x\"")]
     [InlineData("flatpak = \"notreverse\"")]
     [InlineData("pacman = [\"ok\"]\ndesktop = \"../x.desktop\"")]
+    [InlineData("vendor = \"jetbrains:RD\"\ndescription = \"a\\nExec=sh\"")]
     public void WhatWouldReachACommandIsChecked(string source)
     {
         var text = $"[[app]]\nid = \"x\"\nname = \"X\"\ncategory = \"utilities\"\n{source}\n";

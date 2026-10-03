@@ -10,9 +10,9 @@ MacBook8,1, MacBook9,1, MacBook10,1, MacBookPro13,1–3 y
 MacBookPro14,1–3.
 
 Escribe un archivo, como root:
-`/etc/tmpfiles.d/mazapan-apple-nvme-suspend.conf`, que pone a 0 el
-`d3cold_allowed` del disco (en la dirección PCI `0000:01:00.0` en estos
-modelos) en cada arranque. También se pone al momento, sin reiniciar;
+`/etc/udev/rules.d/mazapan-apple-nvme-suspend.rules`, que pone a 0 el
+`d3cold_allowed` del controlador NVMe de Apple (S1X o S3X, reconocido por
+su id PCI, esté donde esté en el bus) en cada arranque. También se pone al momento, sin reiniciar;
 al desactivarlo, el disco vuelve a poder entrar en D3cold. Sin ajustes.
 
 Como todo plugin de hardware, está desactivado hasta que lo activas:

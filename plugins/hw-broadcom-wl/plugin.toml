@@ -23,4 +23,6 @@ before_system = true
 
 [[checks]]
 name = "{{ t \"check.module\" }}"
-run = "modinfo -n wl >/dev/null 2>&1"
+# Built for every kernel installed (DKMS after a kernel update: if it
+# failed, the machine would come back without Wi-Fi).
+run = "for d in /usr/lib/modules/*/pkgbase; do k=${d%/pkgbase}; k=${k##*/}; for m in wl; do modinfo -k \"$k\" -n $m >/dev/null 2>&1 || { echo \"no $m in $k\"; exit 1; }; done; done"

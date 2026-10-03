@@ -8,8 +8,9 @@ longer.
 
 Offered on laptops with one of those processors, told by their built-in
 graphics (Alder Lake-P, -U and -HX, Raptor Lake-P and -U, Meteor Lake,
-Lunar Lake, Panther Lake). Not on desktops, nor on Alder Lake-N, which
-isn't hybrid.
+Lunar Lake, Panther Lake). Not on Alder Lake-N, which isn't hybrid. A
+mini PC with one of these laptop processors is offered it too (it does
+no harm there; the battery is what it's for).
 
 What it does, as root: installs `intel-lpmd`, and starts
 `intel_lpmd.service` now and at every start. The file that says it's on
