@@ -28,7 +28,35 @@ public static class SystemState
         }
     }
 
-    public static void Save(Dictionary<string, string> reloads) =>
-        Files.WriteAtomic(Path(), GoJson.Marshal(new SortedDictionary<string, object?>(
+    public static void Save(Dictionary<string, string> reloads) => Write(Path(), reloads);
+
+    static void Write(string path, Dictionary<string, string> reloads) =>
+        Files.WriteAtomic(path, GoJson.Marshal(new SortedDictionary<string, object?>(
             reloads.ToDictionary(kv => kv.Key, kv => (object?)kv.Value), StringComparer.Ordinal)) + "\n");
+
+    // --- the person's own files: the same, for what a reload undoes ----------------------
+
+    static string UserPath() => Paths.ExpandHome("~/.local/state/mazapan/reloads.json");
+
+    /// <summary>
+    /// For each file of the person's that mazapan writes, the command that
+    /// makes it count (a service enabled while its unit is there): a file
+    /// removed (its plugin off or gone) runs it too, so what it started stops.
+    /// </summary>
+    public static Dictionary<string, string> UserReloads()
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(File.ReadAllText(UserPath()));
+            return doc.RootElement.EnumerateObject()
+                .Where(p => !AsRoot.IsSystem(p.Name) && p.Value.ValueKind == JsonValueKind.String)
+                .ToDictionary(p => p.Name, p => p.Value.GetString()!);
+        }
+        catch (Exception e) when (e is IOException or JsonException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            return [];
+        }
+    }
+
+    public static void SaveUser(Dictionary<string, string> reloads) => Write(UserPath(), reloads);
 }

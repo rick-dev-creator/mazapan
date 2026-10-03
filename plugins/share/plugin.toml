@@ -1,0 +1,37 @@
+[plugin]
+id = "share"
+name = "Share"
+version = "0.1.0"
+api = 1
+description = "Files, a picture or text from the clipboard to a device nearby (LocalSend) or one of your devices on your tailnet (Taildrop), from the palette or Files' right click"
+categories = ["tools"]
+requires = ["shell-bar"]
+
+[packages]
+pacman = ["quickshell", "jq", "wl-clipboard", "libnotify"]
+
+[[targets]]
+template = "Share.qml.tmpl"
+output = "~/.config/quickshell/mazapan/panels/share.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
+template = "share.sh.tmpl"
+output = "~/.local/share/mazapan/bin/share"
+
+# Files (Nautilus): right click, Scripts, Share.
+[[targets]]
+template = "nautilus.sh.tmpl"
+output = "~/.local/share/nautilus/scripts/Share"
+reload = "chmod +x ~/.local/share/nautilus/scripts/Share 2>/dev/null; true"
+
+[[actions]]
+name = "{{ t \"act.clipboard\" }}"
+run = "sh ~/.local/share/mazapan/bin/share --clipboard"
+keywords = "{{ t \"act.clipboard.kw\" }}"
+glyph = "󰒖"
+
+[[actions]]
+name = "{{ t \"act.open\" }}"
+run = "sh ~/.local/share/mazapan/bin/share"
+keywords = "{{ t \"act.open.kw\" }}"

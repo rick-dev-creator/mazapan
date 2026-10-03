@@ -1,0 +1,56 @@
+[plugin]
+id = "tailscale"
+name = "Tailscale"
+version = "0.1.0"
+api = 1
+description = "Tailscale ready to use: its service started, you its operator (no sudo to sign in or send files), signing in from the palette, and files sent to you with Taildrop in Downloads with a notification. Installing Tailscale in Apps turns it on"
+categories = ["tools"]
+# Off until turned on (Apps does it with Tailscale): it starts a service as root.
+optional = true
+
+[packages]
+pacman = ["tailscale", "libnotify", "xdg-user-dirs", "xdg-utils"]
+
+[settings]
+# Files sent to you with Taildrop received into Downloads, with a notification.
+receive = true
+
+# tailscaled at every start, you its operator (Omarchy does `tailscale up
+# --operator` once; this keeps it so).
+[[targets]]
+template = "tailscaled.conf.tmpl"
+output = "/etc/systemd/system/tailscaled.service.d/mazapan.conf"
+system = true
+reload = "systemctl daemon-reload; if [ -e /etc/systemd/system/tailscaled.service.d/mazapan.conf ]; then systemctl enable -q tailscaled.service; systemctl restart tailscaled.service; else systemctl disable -q --now tailscaled.service 2>/dev/null; fi; true"
+
+[[targets]]
+template = "taildrop.sh.tmpl"
+output = "~/.local/share/mazapan/bin/taildrop"
+
+# Off or gone: stopped first (a unit whose file has gone can still be
+# stopped, not disabled), then its link taken out.
+[[targets]]
+template = "taildrop.service.tmpl"
+output = "~/.config/systemd/user/mazapan-taildrop.service"
+reload = "s=mazapan-taildrop; d=~/.config/systemd/user; if [ -e $d/$s.service ] && {{ if settings.receive }}true{{ else }}false{{ end }}; then systemctl --user daemon-reload; systemctl --user enable -q $s.service; systemctl --user restart $s.service; else systemctl --user stop $s.service 2>/dev/null; systemctl --user disable -q $s.service 2>/dev/null; rm -f $d/default.target.wants/$s.service; systemctl --user daemon-reload; fi; true"
+
+[[actions]]
+name = "{{ t \"act.up\" }}"
+# Prints the address to sign in at (no sudo: you're its operator).
+run = "tailscale up; echo; tailscale status; read -r _"
+terminal = true
+keywords = "{{ t \"act.up.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.status\" }}"
+run = "tailscale status; read -r _"
+terminal = true
+keywords = "{{ t \"act.status.kw\" }}"
+
+[[checks]]
+name = "{{ t \"check.daemon\" }}"
+run = "systemctl is-active -q tailscaled.service"
+
+[[checks]]
+name = "{{ t \"check.receive\" }}"
+run = "{{ if settings.receive }}systemctl --user is-active -q mazapan-taildrop.service{{ else }}true{{ end }}"

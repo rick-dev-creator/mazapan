@@ -1386,6 +1386,16 @@ Downloads (good); Wi-Fi shared as a QR on screen; a speed test.
 - Wi-Fi as a QR from the network card in the bar; the speed test there
   too, without a hardcoded token.
 
+*Done (2026-10-04).* The Wi-Fi QR and the speed test (Cloudflare's, no
+token) in the network card; the Share panel (the share plugin): what you
+copied (a picture, files, text) or files from Files' right click, to a
+device nearby (LocalSend, opened with them) or one of yours on the
+tailnet (Taildrop, sent at once); the tailscale plugin (Apps' Tailscale
+turns it on): its service, you its operator (no sudo), signing in from
+the palette, Taildrop received into Downloads with a notification; the
+firewall lets LocalSend in (53317), as Omarchy does. Not yet: sharing from
+a capture's notification and from the clipboard history.
+
 ## 23. More capture
 
 **Omarchy today.** Text from a region (OCR, English unless an

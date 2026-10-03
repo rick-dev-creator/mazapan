@@ -1,3 +1,5 @@
 "check.on" = "The firewall is on"
 "setting.ssh" = "Let SSH in"
 "setting.ssh.help" = "Port 22 open, rate-limited: only for a computer meant to be reached from another one. The installer turns it on when it was given SSH keys."
+"setting.localsend" = "Let LocalSend in"
+"setting.localsend.help" = "Port 53317 open (TCP and UDP): phones and computers nearby find this one and send to it with LocalSend. Nothing listens there unless LocalSend runs."

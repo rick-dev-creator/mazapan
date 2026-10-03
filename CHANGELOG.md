@@ -6,6 +6,14 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- Share: what you copied, or files from Files (right click, Scripts,
+  Share), to a device nearby with LocalSend or to one of yours with
+  Tailscale. Tailscale from Apps comes ready: no sudo, sign in from the
+  palette, files sent to you land in Downloads with a notification. The
+  firewall lets LocalSend in, as Omarchy does.
+- A plugin turned off now undoes what its files' reloads did (a service it
+  started is stopped), for your own files as for system ones.
+
 - Omarchy's themes, all 22 at once ("Themes: import Omarchy's"): the ones
   on this computer, or fetched from Omarchy, or any Omarchy theme's
   repository; each with its palette and wallpaper, every contrast checked.

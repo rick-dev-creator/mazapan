@@ -208,7 +208,8 @@ written as root, with sudo, only in a drop-in folder (`/etc/modprobe.d`,
 `/etc/X11/xorg.conf.d`, browsers' `policies/managed`,
 `/etc/systemd/system/grub-btrfsd.service.d`, and for the login screen
 `/etc/greetd`, `/etc/systemd/system/greetd.service.d` and `/etc/pam.d`,
-a service of its own) and named `mazapan*`:
+`/etc/systemd/system/ufw.service.d` and `tailscaled.service.d`, a service
+of its own) and named `mazapan*`:
 never a file the system or another package owns. Its `reload` runs as
 root; `reboot = true` says it takes effect after a reboot. `[packages]
 pacman` are installed too.
@@ -412,6 +413,10 @@ That gives three guarantees:
 
 After writing, each distinct `reload` command of plugins whose files changed
 runs once. A failing reload is a warning: the files are already in place.
+A file that's removed (its plugin turned off or gone) runs the `reload` it
+was last written with, once, after it's gone: a reload that checks whether
+its file is there undoes what it did (a service enabled while its unit
+exists is stopped), as system files' reloads do.
 
 ## Templates
 

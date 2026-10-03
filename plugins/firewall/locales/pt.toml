@@ -3,3 +3,5 @@
 "check.on" = "O firewall está ligado"
 "setting.ssh" = "Deixar o SSH entrar"
 "setting.ssh.help" = "A porta 22 aberta, com limite de tentativas: só para um computador acessado a partir de outro. O instalador a liga quando recebeu chaves SSH."
+"setting.localsend" = "Deixar o LocalSend entrar"
+"setting.localsend.help" = "Porta 53317 aberta (TCP e UDP): celulares e computadores por perto encontram este e enviam para ele com o LocalSend. Nada escuta ali se o LocalSend não estiver aberto."

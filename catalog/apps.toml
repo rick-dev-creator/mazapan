@@ -193,6 +193,18 @@ translations.fr.description = "Le navigateur web de Mozilla"
 translations.pt.description = "O navegador web da Mozilla"
 
 [[app]]
+id = "tailscale"
+name = "Tailscale"
+description = "Your devices on one private network, anywhere: reach them, send them files (Taildrop)"
+category = "internet"
+pacman = ["tailscale"]
+plugins = ["tailscale"]
+translations.es.description = "Tus dispositivos en una red privada, estén donde estén: llega a ellos y envíales archivos (Taildrop)"
+translations.de.description = "Deine Geräte in einem privaten Netz, wo auch immer: erreiche sie und sende ihnen Dateien (Taildrop)"
+translations.fr.description = "Vos appareils sur un réseau privé, où qu'ils soient : joignez-les, envoyez-leur des fichiers (Taildrop)"
+translations.pt.description = "Seus dispositivos numa rede privada, onde estiverem: acesse-os e envie arquivos a eles (Taildrop)"
+
+[[app]]
 id = "localsend"
 name = "LocalSend"
 description = "Send files to phones and computers nearby, no cable or account"

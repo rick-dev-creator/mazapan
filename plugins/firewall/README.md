@@ -3,8 +3,10 @@
 A firewall that's simply on, as on macOS: nothing comes in that this
 computer didn't ask for, and everything it asks for goes out. Printers
 and other devices on the network are still found (ufw's own rules let
-mDNS and SSDP in). No port is open, SSH's neither, unless "Let SSH in"
-is on (the installer turns it on when it was given SSH keys).
+mDNS and SSDP in). One port is open: LocalSend's (53317), so phones and
+computers nearby can send to this one, as on Omarchy ("Let LocalSend in";
+nothing listens there unless LocalSend runs). SSH's isn't, unless "Let SSH
+in" is on (the installer turns it on when it was given SSH keys).
 
 The installer turns it on. Taking the plugin off turns the firewall off.
 What it does is ufw's: `sudo ufw status verbose` shows it.

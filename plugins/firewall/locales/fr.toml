@@ -3,3 +3,5 @@
 "check.on" = "Le pare-feu est activé"
 "setting.ssh" = "Laisser entrer SSH"
 "setting.ssh.help" = "Le port 22 ouvert, avec limite de tentatives : seulement pour un ordinateur auquel on se connecte depuis un autre. L'installateur l'active quand il a reçu des clés SSH."
+"setting.localsend" = "Laisser entrer LocalSend"
+"setting.localsend.help" = "Port 53317 ouvert (TCP et UDP) : les téléphones et ordinateurs à proximité trouvent celui-ci et lui envoient avec LocalSend. Rien n'y écoute sans LocalSend lancé."

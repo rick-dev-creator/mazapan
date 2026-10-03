@@ -117,6 +117,8 @@ public sealed partial class Plugin
         "/etc/greetd", "/etc/systemd/system/greetd.service.d", "/etc/pam.d",
         // The firewall: ufw started at every start, while mazapan's drop-in is there.
         "/etc/systemd/system/ufw.service.d",
+        // Tailscale: its daemon started at every start, the person made its operator.
+        "/etc/systemd/system/tailscaled.service.d",
         // Hibernation: what a battery about to die does.
         "/etc/UPower/UPower.conf.d",
         // The boot menu in the theme: a script grub-mkconfig runs.

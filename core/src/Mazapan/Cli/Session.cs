@@ -72,10 +72,22 @@ public static partial class Program
             foreach (var (p, bak) in res.Backups.OrderBy(kv => kv.Key, StringComparer.Ordinal))
                 Console.WriteLine($"backed up {Tilde(p)} -> {Paths.Base(bak)}");
             foreach (var p in res.Removed) Console.WriteLine($"removed {Tilde(p)} (no plugin generates it anymore)");
+            // Each file's reload remembered (those already there too); a removed
+            // one's run now, once, as when it was written: it undoes what it did.
+            var remembered = SystemState.UserReloads();
+            var undo = res.Removed.Where(remembered.ContainsKey).Select(p => remembered[p]).Distinct()
+                .Where(cmd => !res.Written.Any(c => c.Reload == cmd)).ToList();
+            foreach (var p in res.Removed.Concat(orphans)) remembered.Remove(p);
+            foreach (var c in changes.Where(c => c.Reload != "" && File.Exists(c.Path))) remembered[c.Path] = c.Reload;
+            try { SystemState.SaveUser(remembered); }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
             foreach (var p in res.Kept) Console.WriteLine($"left {Tilde(p)} in place: it was edited, no longer managed");
             foreach (var p in res.Shared) Console.WriteLine($"left {Tilde(p)} in place: it's its app's file too, no longer managed");
             foreach (var (cmd, e) in Apply.Reload(res.Written))
                 Console.Error.WriteLine($"warning: reload {GoFormat.Quote(cmd)} failed: {e}");
+            foreach (var cmd in undo)
+                if (Apply.RunShell(cmd, Apply.ReloadTimeout, TimeSpan.FromSeconds(2)) is { } err)
+                    Console.Error.WriteLine($"warning: reload {GoFormat.Quote(cmd)} failed: {err}");
             Console.WriteLine($"{res.Written.Count} written");
         }
     }
