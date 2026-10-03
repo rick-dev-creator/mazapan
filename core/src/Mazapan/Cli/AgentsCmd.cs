@@ -104,6 +104,18 @@ public static partial class Program
             else r.Unpriced++;
         }
         var list = rows.Values.OrderBy(r => r.Day, StringComparer.Ordinal).ThenBy(r => r.Agent, StringComparer.Ordinal).ToList();
+        // For the dashboard: sessions a day (distinct), and when answers come
+        // (weekday × hour, local time; Monday first).
+        var sessions = entries.Where(e => e.Session != "")
+            .GroupBy(e => (Day: e.Time.ToLocalTime().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), e.Agent))
+            .ToDictionary(g => g.Key, g => g.Select(e => e.Session).Distinct().Count());
+        var hours = new long[7][];
+        for (var i = 0; i < 7; i++) hours[i] = new long[24];
+        foreach (var e in entries)
+        {
+            var t = e.Time.ToLocalTime();
+            hours[((int)t.DayOfWeek + 6) % 7][t.Hour]++;
+        }
         if (json)
         {
             Console.WriteLine(GoJson.Marshal(new Fields
@@ -122,6 +134,11 @@ public static partial class Program
                         { "cost_reported", Math.Round(r.Reported, 6) }, { "cost_api", Math.Round(r.Estimated, 6) }, { "unpriced", r.Unpriced },
                     }).ToList()
                 },
+                {
+                    "sessions", sessions.OrderBy(kv => kv.Key.Day, StringComparer.Ordinal)
+                        .Select(kv => new Fields { { "day", kv.Key.Day }, { "agent", kv.Key.Agent }, { "count", kv.Value } }).ToList()
+                },
+                { "hours", hours.Select(h => h.ToList()).ToList() },
             }));
             return 0;
         }

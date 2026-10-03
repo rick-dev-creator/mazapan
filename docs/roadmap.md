@@ -269,7 +269,7 @@ Hyprland, the shell restarted on its own). Better than it:
 | — | Toward 1.0, C7: unattended installs, the release gate | **Done** (2026-10-03): `cidata` + mazapan.json installs by itself; `vm/gate` passes encrypted and plain. C8 (the live USB on real hardware) needs the person |
 | — | Toward 1.0, B: safe to install | **Done** (2026-10-03): encrypted by default with a recovery key, one password (keyring included), locked before sleep, firewall on |
 | — | Toward 1.0, A: it updates itself | **Done** (2026-10-03): its own signed repository with channels, versions and releases, the updater after Omarchy's. Pending, the person's: the release key, hosting, uploading |
-| — | Next: the must-haves (agents and accounts with observability, live sessions, .NET and Expo profiles, hardware fixes from Omarchy) | Decided (2026-10-03); see "Next: what matters most" |
+| — | Next: the must-haves (agents and accounts with observability, live sessions, .NET and Expo profiles, hardware fixes from Omarchy) | In progress: agents and accounts, their use, limits and the next account taken, live sessions in the bar, the dashboard (2026-10-04); the profiles and the hardware fixes to do |
 | 1 | Updates you can trust | **Done** (2026-09-28); follow-ups listed below |
 | 2 | Monitors | **Done** (2026-09-28); follow-ups listed below |
 | 3 | One command palette | **Done** (2026-09-28): first version; follow-ups listed below |

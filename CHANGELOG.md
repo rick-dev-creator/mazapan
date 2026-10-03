@@ -54,6 +54,12 @@ release (a tag `vX.Y.Z`) names them.
 - Every built-in plugin has its page in the Plugins panel.
 - Installing an app works before a repository was ever fetched (installed
   offline, or Mazapán's repository newly added).
+- Agents: every coding agent and account found by itself (Claude Code with
+  each of its accounts, opencode, pi, Codex); in the bar, which session
+  works and which waits for you (a click goes to its window), each
+  account's limits and when they reset, what they used today; a
+  dashboard with cost and tokens by day, model and project; Claude
+  launched with the account that has room.
 - Fixed after an audit: the privacy dots no longer keep a processor busy,
   and no app name can hide them; changing the password checks the current
   one first; a plugin that can't be read keeps its files; hibernation only

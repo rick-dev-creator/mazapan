@@ -8,7 +8,7 @@ categories = ["agent", "tools", "bar"]
 requires = ["shell-bar"]
 
 [packages]
-pacman = ["quickshell", "libnotify", "sqlite"]
+pacman = ["quickshell", "libnotify", "sqlite", "qt6-graphs", "jq"]
 
 [settings]
 # The agent to open, as its command: it gets the report as its first
@@ -43,6 +43,16 @@ template = "Agents.qml.tmpl"
 output = "~/.config/quickshell/mazapan/widgets/right/01-agents.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
+# The dashboard: its own Quickshell process, beside the shell's files (the
+# same theme and kit), opened by its launcher.
+[[targets]]
+template = "Dashboard.qml.tmpl"
+output = "~/.config/quickshell/mazapan/agents-dashboard.qml"
+
+[[targets]]
+template = "dashboard.sh.tmpl"
+output = "~/.local/share/mazapan/bin/agents-dashboard"
+
 # opencode tells its sessions' state through a plugin of its own.
 [[targets]]
 template = "opencode-sessions.js.tmpl"
@@ -70,3 +80,9 @@ keywords = "{{ t \"report.kw\" }}"
 name = "{{ t \"act.open\" }}"
 run = "qs ipc -c mazapan call agents open"
 keywords = "{{ t \"act.open.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.dashboard\" }}"
+run = "sh ~/.local/share/mazapan/bin/agents-dashboard"
+keywords = "{{ t \"act.dashboard.kw\" }}"
+glyph = "󰕮"

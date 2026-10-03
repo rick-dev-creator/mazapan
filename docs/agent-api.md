@@ -27,6 +27,8 @@ the CLI does, and nothing else:
 | `preview_change` | what a change would do: the plan and a unified diff of every file | no |
 | `apply_change`   | apply a change and write the files; says its undo id        | yes, undoable |
 | `undo`           | put back what the last apply changed; with `id`, only if that one is still the last | yes |
+| `agents_usage`   | what every coding agent here used, by day, account, provider, model and project; cost reported and at API prices | no |
+| `agents_limits`  | each Claude account's windows (5-hour, weekly, per model): used and when each resets | no |
 
 A change is `{ "theme": "paper", "accent": "#4fa35f", "set": {"bar-clock.font_size": 11},
 "reset": ["bar-clock.format"], "enable": ["agent"], "disable": ["bar-weather"] }`,
@@ -125,3 +127,43 @@ output, generated files that differ, the last update, crashes in the last
 day (coredumpctl), and the errors Hyprland and the shell logged, repeated
 lines counted once. "Copy a report of what's wrong" puts it on the
 clipboard, for pasting anywhere.
+
+## The agents themselves: `mazapan agents`
+
+What the bar, the dashboard and an agent read about the coding agents
+here. Numbers only, read locally; no prompt or answer is read or kept.
+
+```sh
+mazapan agents [list] [--json]        # the agents and every account (Claude configurations, opencode/pi providers, Codex)
+mazapan agents usage [--days N] [--json]
+mazapan agents limits [--json]        # each Claude account's windows
+mazapan agents sessions [--json]      # open sessions: working / waiting / done / running
+mazapan agents run AGENT [ARGS…]      # claude: with the first account that has room
+mazapan agents hooks install|remove   # Claude Code's hooks for the sessions (the agent plugin does it)
+```
+
+- *Accounts.* Each `~/.claude*` directory with a login (and
+  `CLAUDE_CONFIG_DIR`'s) is a Claude account: its plan from the login, its
+  e-mail from its profile. opencode's and pi's providers come from their
+  `auth.json` (names and kinds only: a key's value is never read).
+- *Use.* Claude Code's `projects/*.jsonl` (one entry per answer: a line per
+  part of it is merged; two configurations sharing a projects directory
+  through a symlink are counted once, as theirs together), pi's and Codex's
+  sessions, opencode's database (read only, with `sqlite3`). Files are
+  cached by size and time in `~/.cache/mazapan/agents`, readable by their
+  owner alone. `usage --json`, version 1: `rows` (day, agent, source,
+  provider, model, project, requests, input, output, cache_read,
+  cache_write, reasoning, `cost_reported` — what the agent said it cost —,
+  `cost_api` — the same tokens at the model's API prices —, `unpriced`),
+  `sessions` (distinct sessions a day per agent), `hours` (answers by
+  weekday × hour, Monday first, local time), `problems`.
+- *Prices.* LiteLLM's table, fetched at most once a day; a model it
+  doesn't list has no price (`unpriced`), never a guess.
+- *Limits.* Anthropic's usage endpoint with the account's own token, read
+  only: an expired token is never refreshed (that would change it under
+  Claude Code); the last values read are shown instead, `stale`.
+- *Sessions.* Claude Code's hooks (`SessionStart`, `UserPromptSubmit`,
+  `PreToolUse`, `Notification`, `Stop`, `SessionEnd`) and opencode's plugin
+  call `mazapan agents event`, which records the state in the runtime
+  directory; agents that tell nothing show as running while their process
+  is. A session's processes lead to its window.

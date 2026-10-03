@@ -164,5 +164,13 @@ BarItem {
       wrapMode: Text.Wrap
       Layout.fillWidth: true
     }
+    RowLayout {
+      Layout.fillWidth: true
+      Item { Layout.fillWidth: true }
+      Button {
+        text: {{ tq "dash.open" }}
+        onClicked: { Quickshell.execDetached(["sh", Quickshell.env("HOME") + "/.local/share/mazapan/bin/agents-dashboard"]); popup.toggle() }
+      }
+    }
   }
 }
