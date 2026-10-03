@@ -134,6 +134,20 @@ public static class Archinstall
     /// </summary>
     public static bool TypesCjk(Answers a) => a.Language.Split('_')[0] is "zh" or "ja" or "ko";
 
+    /// <summary>
+    /// The OCR data for a language (tesseract-data-spa for Spanish), or
+    /// null: English, or one tesseract doesn't read.
+    /// </summary>
+    public static string? OcrData(string language) => language.Split('_')[0] switch
+    {
+        "es" => "spa", "pt" => "por", "fr" => "fra", "de" => "deu", "it" => "ita", "nl" => "nld",
+        "pl" => "pol", "ru" => "rus", "uk" => "ukr", "tr" => "tur", "ar" => "ara", "he" => "heb",
+        "fa" => "fas", "hi" => "hin", "bn" => "ben", "id" => "ind", "ms" => "msa", "vi" => "vie",
+        "th" => "tha", "zh" => "chi_sim", "ja" => "jpn", "ko" => "kor", "sv" => "swe", "nb" => "nor",
+        "da" => "dan", "fi" => "fin", "cs" => "ces", "el" => "ell", "ro" => "ron", "hu" => "hun", "ca" => "cat",
+        _ => null,
+    } is { } code ? "tesseract-data-" + code : null;
+
     /// <summary>The secrets, in their own file (archinstall's --creds).</summary>
     public static string Creds(Answers a)
     {
@@ -246,7 +260,10 @@ public static class Archinstall
         }
         // Online: the repositories, and what's newer than the ISO, now (the
         // first start is then up to date). Offline, the first app install does it.
-        s.Append("if curl -fsS --max-time 5 -o /dev/null https://geo.mirror.pkgbuild.com/; then pacman -Syu --noconfirm > /var/log/mazapan-first-update.log 2>&1 || echo \"pacman -Syu failed: /var/log/mazapan-first-update.log\"; fi\n");
+        // Online too: text in pictures read in the language (capture's OCR;
+        // English is on the ISO, the others aren't).
+        var ocr = OcrData(a.Language) is { } data ? $" && pacman -S --needed --noconfirm {data} >> /var/log/mazapan-first-update.log 2>&1" : "";
+        s.Append($"if curl -fsS --max-time 5 -o /dev/null https://geo.mirror.pkgbuild.com/; then {{ pacman -Syu --noconfirm > /var/log/mazapan-first-update.log 2>&1{ocr}; }} || echo \"the first update failed: /var/log/mazapan-first-update.log\"; fi\n");
         // Its desktop, now (reloads fail here, nothing runs yet: warnings only).
         s.Append($"HOME={home} USER={a.User} mazapan apply --system -y > /var/log/mazapan-first-apply.log 2>&1 || echo \"mazapan apply failed: /var/log/mazapan-first-apply.log\"\n");
         s.Append($"chown -R {a.User}:{a.User} {home}\n");

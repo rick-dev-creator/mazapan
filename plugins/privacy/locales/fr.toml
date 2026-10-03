@@ -6,3 +6,5 @@
 "unknown" = "une app"
 "setting.every" = "Fréquence de vérification (secondes)"
 "setting.every.help" = "À quelle fréquence il regarde ce qui utilise le micro, la caméra et l'écran."
+"setting.screen_ask" = "Les apps demandent à voir l'écran"
+"setting.screen_ask.help" = "Une app qui veut voir l'écran demande d'abord, comme sur macOS. Les outils du bureau et le partage d'écran par le portail, qui a son propre sélecteur, non. À la prochaine connexion."

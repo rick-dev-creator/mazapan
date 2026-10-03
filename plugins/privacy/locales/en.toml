@@ -4,3 +4,5 @@
 "unknown" = "an app"
 "setting.every" = "How often to look (seconds)"
 "setting.every.help" = "How often it looks at what uses the microphone, the camera and the screen."
+"setting.screen_ask" = "Apps ask to see the screen"
+"setting.screen_ask.help" = "An app that wants to see the screen asks first, as on macOS. The desktop's own tools and screen sharing through the portal, which has its own picker, don't. From the next login."

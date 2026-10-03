@@ -9,7 +9,7 @@ requires = ["shell-bar", "hypr-base"]
 
 [packages]
 # OCR in another language needs its data too: tesseract-data-spa, -fra…
-pacman = ["grim", "wl-clipboard", "tesseract", "tesseract-data-eng", "wf-recorder"]
+pacman = ["grim", "wl-clipboard", "tesseract", "tesseract-data-eng", "wf-recorder", "zbar"]
 
 [settings]
 # Opens the capture overlay; while recording, stops the recording.

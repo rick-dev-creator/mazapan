@@ -116,6 +116,15 @@ Item {
   property var perms: null
   property var permsNow: []
   property bool permsChanged: false
+  // What it asked for through a portal (the camera, the location…), and
+  // what was answered.
+  property var permsGrants: []
+  readonly property var grantNames: ({
+    "devices/camera": {{ tq "grant.camera" }}, "devices/microphone": {{ tq "grant.microphone" }},
+    "devices/speakers": {{ tq "grant.speakers" }}, "location/location": {{ tq "grant.location" }},
+    "screenshot/screenshot": {{ tq "grant.screenshot" }}, "background/background": {{ tq "grant.background" }},
+    "notifications/notification": {{ tq "grant.notifications" }}, "wallpaper/wallpaper": {{ tq "grant.wallpaper" }},
+  })
   readonly property var permNames: ({
     network: [{{ tq "perm.network" }}, {{ tq "perm.network.help" }}],
     sound: [{{ tq "perm.sound" }}, {{ tq "perm.sound.help" }}],
@@ -132,10 +141,11 @@ Item {
     permsReader.command = ["mazapan", "apps", "permissions", a.id, "--json"]
     permsReader.running = true
   }
+  // on: true, false, or "ask" (a portal's answer forgotten: asked again).
   function permit(key, on) {
     if (!perms || permsWriter.running) return
     permsWriter.command = key === "reset" ? ["mazapan", "apps", "permit", perms.id, "reset"]
-      : ["mazapan", "apps", "permit", perms.id, key, on ? "on" : "off"]
+      : ["mazapan", "apps", "permit", perms.id, key, on === "ask" ? "ask" : on ? "on" : "off"]
     permsWriter.running = true
   }
   Process {
@@ -146,6 +156,7 @@ Item {
           const o = JSON.parse(text)
           root.permsNow = o.permissions || []
           root.permsChanged = !!o.changed
+          root.permsGrants = o.grants || []
         } catch (e) {
           root.permsNow = []
         }
@@ -729,6 +740,31 @@ Item {
                     enabled: !permsWriter.running
                     onToggled: on => root.permit(modelData.key, on)
                   }
+                }
+              }
+            }
+            // Asked for while it ran, through the system's dialogs.
+            Caption {
+              visible: root.permsGrants.length > 0
+              text: {{ tq "grant.title" }}
+              Layout.topMargin: 4
+            }
+            Repeater {
+              model: root.permsGrants
+              RowLayout {
+                required property var modelData
+                Layout.fillWidth: true
+                spacing: 10
+                Label { text: root.grantNames[modelData.key] || modelData.key; Layout.fillWidth: true }
+                Button {
+                  text: {{ tq "grant.ask" }}
+                  enabled: !permsWriter.running
+                  onClicked: root.permit(modelData.key, "ask")
+                }
+                Toggle {
+                  checked: modelData.on
+                  enabled: !permsWriter.running
+                  onToggled: on => root.permit(modelData.key, on)
                 }
               }
             }

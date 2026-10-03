@@ -6,3 +6,5 @@
 "unknown" = "eine App"
 "setting.every" = "Wie oft nachsehen (Sekunden)"
 "setting.every.help" = "Wie oft nachgesehen wird, was Mikrofon, Kamera und Bildschirm benutzt."
+"setting.screen_ask" = "Apps fragen, bevor sie den Bildschirm sehen"
+"setting.screen_ask.help" = "Eine App, die den Bildschirm sehen will, fragt zuerst, wie unter macOS. Die eigenen Werkzeuge des Desktops und die Bildschirmfreigabe über das Portal, das eine eigene Auswahl zeigt, nicht. Ab der nächsten Anmeldung."

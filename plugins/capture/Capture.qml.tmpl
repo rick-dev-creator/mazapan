@@ -2,7 +2,8 @@
 //
 // {{ inline settings.key }} freezes every screen (grim) and shows them under a dim
 // veil. Drag a region, or click a window (or empty screen) to take it all.
-// Then: copy, save, copy its text (OCR), annotate it, or record it; each
+// Then: copy, save, copy its text (OCR) or what a QR code in it holds
+// (as a secret: never shown nor kept), annotate it, or record it; each
 // shows the command it runs. ↵ copies and saves; c s t a r for the rest;
 // esc leaves. While a recording runs, {{ inline settings.key }} stops it.
 
@@ -44,12 +45,15 @@ Item {
   readonly property string videos: {{ json settings.videos }}.replace(/^~/, home)
   // The system's language first, English after; the ones installed are
   // used (tesseract-data-<lang>), the others skipped.
-  readonly property string ocrWant: "{{ if lang_code == "es" }}spa eng{{ else if lang_code == "fr" }}fra eng{{ else if lang_code == "de" }}deu eng{{ else if lang_code == "pt" }}por eng{{ else if lang_code == "it" }}ita eng{{ else }}eng{{ end }}"
+  readonly property var ocrCodes: ({ es: "spa", pt: "por", fr: "fra", de: "deu", it: "ita", nl: "nld", pl: "pol", ru: "rus",
+    uk: "ukr", tr: "tur", ar: "ara", he: "heb", fa: "fas", hi: "hin", bn: "ben", id: "ind", ms: "msa", vi: "vie", th: "tha",
+    zh: "chi_sim", ja: "jpn", ko: "kor", sv: "swe", nb: "nor", da: "dan", fi: "fin", cs: "ces", el: "ell", ro: "ron", hu: "hun", ca: "cat" })
+  readonly property string ocrWant: (ocrCodes["{{ lang_code }}".split("_")[0]] ? ocrCodes["{{ lang_code }}".split("_")[0]] + " " : "") + "eng"
   readonly property string ocrLangs: ocrWant.replace(" ", "+")
   readonly property string shot: dir + "/shot.png"
   readonly property string state: dir + "/recording" // "<pid> <start>" while recording
   // The action keys, in the system's language (English ones work too).
-  readonly property var keysFor: ({ copy: {{ tq "key.copy" }}, save: {{ tq "key.save" }}, text: {{ tq "key.text" }}, annotate: {{ tq "key.annotate" }}, record: {{ tq "key.record" }} })
+  readonly property var keysFor: ({ copy: {{ tq "key.copy" }}, save: {{ tq "key.save" }}, text: {{ tq "key.text" }}, qr: {{ tq "key.qr" }}, annotate: {{ tq "key.annotate" }}, record: {{ tq "key.record" }} })
 
   function q(s) { return "'" + String(s).replace(/'/g, "'\\''") + "'" }
   function tilde(p) { return p.startsWith(home) ? "~" + p.slice(home.length) : p }
@@ -146,6 +150,7 @@ Item {
     const shown = { copy: `wl-copy -t image/png < shot.png`,
       save: `cp shot.png ${tilde(pictures)}/…`,
       text: `tesseract shot.png - -l ${ocrLangs} | wl-copy`,
+      qr: `zbarimg -q --raw shot.png | wl-copy`,
       record: command("record", "…").replace(q(videos + "/Recording ….mp4"), tilde(videos) + "/…") }
     hint = shown[action] ?? ""
   }
@@ -167,7 +172,13 @@ Item {
       }
       const stamp = Qt.formatDateTime(new Date(), "yyyy-MM-dd HH-mm-ss")
       let script
-      if (actions.includes("text")) {
+      if (actions.includes("qr")) {
+        // What a QR holds can be a password or a Wi-Fi key: copied, never
+        // shown, and marked secret so the clipboard history doesn't keep it.
+        script = `command -v zbarimg >/dev/null || { ${say({{ tq "missing" }}.arg("zbarimg"), true)}; exit; }; `
+          + `t=$(zbarimg -q --raw ${q(shot)} 2>/dev/null); if [ -n "$t" ]; then printf %s "$t" | wl-copy --sensitive 2>/dev/null || printf %s "$t" | wl-copy; `
+          + `${say({{ tq "qr_copied" }}, false, "edit-paste")}; else ${say({{ tq "no_qr" }}, false)}; fi`
+      } else if (actions.includes("text")) {
         script = `command -v tesseract >/dev/null || { ${say({{ tq "missing" }}.arg("tesseract"), true)}; exit; }; ${ocrScript}; `
           + `t=$(tesseract ${q(shot)} - -l "\${l:-eng}" 2>/dev/null); if [ -n "$(printf %s "$t" | tr -d '[:space:]')" ]; then printf %s "$t" | wl-copy; `
           + `${say({{ tq "text_copied" }}, false, "edit-paste")}; else ${say({{ tq "no_text" }}, false)}; fi`
@@ -227,6 +238,7 @@ Item {
     } else if (is("copy", Qt.Key_C)) act(["copy"])
     else if (is("save", Qt.Key_S)) act(["save"])
     else if (is("text", Qt.Key_T)) act(["text"])
+    else if (is("qr", Qt.Key_Q)) act(["qr"])
     else if (is("annotate", Qt.Key_A)) annotating = true
     else if (is("record", Qt.Key_R)) record()
     else return
@@ -545,6 +557,7 @@ Item {
             Action { action: "copy"; text: "󰆏 " + {{ tq "copy" }}; primary: true; onClicked: root.act(["copy"]) }
             Action { action: "save"; text: "󰆓 " + {{ tq "save" }}; onClicked: root.act(["save"]) }
             Action { action: "text"; text: "󰈙 " + {{ tq "text" }}; onClicked: root.act(["text"]) }
+            Action { action: "qr"; text: "󰐲 " + {{ tq "qr" }}; onClicked: root.act(["qr"]) }
             Button { text: "󰏫 " + {{ tq "annotate" }}; onClicked: root.annotating = true }
             Action { action: "record"; text: "󰑋 " + {{ tq "record" }}; onClicked: root.record() }
           }
@@ -585,7 +598,7 @@ Item {
             Layout.maximumWidth: 520
             elide: Text.ElideMiddle
             text: root.hint !== "" ? "$ " + root.hint
-              : "↵ " + {{ tq "copy" }} + " + " + {{ tq "save" }} + "   " + ["copy", "save", "text", "annotate", "record"].map(a => root.keysFor[a]).join(" ") + "   esc"
+              : "↵ " + {{ tq "copy" }} + " + " + {{ tq "save" }} + "   " + ["copy", "save", "text", "qr", "annotate", "record"].map(a => root.keysFor[a]).join(" ") + "   esc"
             color: root.hint !== "" ? Theme.accentText : Theme.fgMuted
           }
         }

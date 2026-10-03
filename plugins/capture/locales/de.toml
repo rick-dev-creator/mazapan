@@ -40,3 +40,7 @@
 "key.record" = "r"
 "app" = "Bildschirmaufnahme"
 "home" = "Aufnahme"
+"qr" = "QR-Code"
+"key.qr" = "q"
+"qr_copied" = "Der Inhalt des QR-Codes ist kopiert (nicht angezeigt: es kann ein Passwort sein)"
+"no_qr" = "Kein QR-Code gefunden"

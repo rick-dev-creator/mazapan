@@ -1,0 +1,40 @@
+[plugin]
+id = "dictation"
+name = "Dictation"
+version = "0.1.0"
+api = 1
+description = "Speak instead of typing: a key starts listening, the same key stops, and what you said is typed where you are. Worked out on this computer (whisper.cpp): nothing you say leaves it"
+categories = ["tools"]
+requires = ["hypr-base"]
+optional = true
+
+[packages]
+pacman = ["whisper-cpp", "wtype", "wl-clipboard", "pipewire", "libnotify", "curl"]
+
+[settings]
+# Starts listening; pressed again, stops and writes it down.
+key = "SUPER + CTRL + D"
+# How well it understands, against how big it is and how long it takes:
+# tiny (75 MB, fastest), base (148 MB), small (488 MB, best). Downloaded
+# the first time, from whisper.cpp's own (Hugging Face), checked.
+model = { default = "base", choices = ["tiny", "base", "small"] }
+# The language you speak: the desktop's when empty, "auto" to guess it each
+# time, or a code (en, es, pt, fr, de…).
+language = ""
+# Typed where you are; off: copied, to paste.
+type = true
+
+[[targets]]
+template = "dictate.sh.tmpl"
+output = "~/.local/share/mazapan/bin/dictate"
+
+[[targets]]
+template = "dictation.lua.tmpl"
+output = "~/.config/hypr/mazapan/dictation.lua"
+reload = "hyprctl reload >/dev/null"
+
+[[actions]]
+name = "{{ t \"act.dictate\" }}"
+run = "sh ~/.local/share/mazapan/bin/dictate"
+key = "{{ settings.key }}"
+keywords = "{{ t \"act.dictate.kw\" }}"

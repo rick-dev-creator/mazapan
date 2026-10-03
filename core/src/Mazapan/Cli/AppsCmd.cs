@@ -460,7 +460,17 @@ public static partial class Program
     }
 
     /// <summary>No repository database yet: a system installed offline, from the ISO.</summary>
-    static bool NeverSynced() => !File.Exists("/var/lib/pacman/sync/core.db");
+    /// <summary>
+    /// A repository whose database pacman never fetched (installed offline,
+    /// or Mazapán's added since): pacman -S refuses every package until a
+    /// -Sy, so the install is a -Syu then.
+    /// </summary>
+    static bool NeverSynced()
+    {
+        var (code, out_, _) = AppsCapture("pacman-conf", "--repo-list");
+        var repos = code == 0 ? out_.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) : ["core"];
+        return repos.Any(r => !File.Exists($"/var/lib/pacman/sync/{r}.db"));
+    }
 
     /// <summary>pacman as root; a password refused or the dialog closed is "cancelled", not a failure.</summary>
     static void Pacman(bool gui, string[] args, string what)

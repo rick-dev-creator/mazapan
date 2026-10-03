@@ -45,5 +45,14 @@ release (a tag `vX.Y.Z`) names them.
 - What each Flatpak app may reach (the internet, sound and microphone,
   devices, your files, Bluetooth), switched in Apps › Permissions or with
   `mazapan apps permit`.
+- What a Flatpak app asked for through the system (the camera, the
+  location…), answered again or forgotten, in Apps › Permissions.
+- An app asks before it sees the screen; the desktop's own tools don't.
+- Dictation, on the computer itself: speak, and it's typed where you are.
+- Capture: what a QR code holds, copied as a secret (never shown nor kept
+  in the clipboard history); text read in your language.
+- Every built-in plugin has its page in the Plugins panel.
+- Installing an app works before a repository was ever fetched (installed
+  offline, or Mazapán's repository newly added).
 - A plugin that can't be read is left out and said; the rest of the
   desktop still applies.

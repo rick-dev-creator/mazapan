@@ -8,11 +8,15 @@ categories = ["bar"]
 requires = ["shell-bar"]
 
 [packages]
-pacman = ["quickshell", "pipewire", "jq"]
+pacman = ["quickshell", "pipewire", "jq", "hyprland-guiutils"]
 
 [settings]
 # How often to look (seconds).
 every = { default = 2, min = 1, max = 10 }
+# An app that wants to see the screen asks first (Hyprland's permissions;
+# from the next login). The desktop's own tools and the screen-sharing
+# portal, which has its own picker, don't.
+screen_ask = true
 
 # What's in use: PipeWire's running nodes by what they are (as Waybar's
 # privacy module), and the cameras opened past PipeWire (some browsers).
@@ -24,3 +28,8 @@ output = "~/.local/share/mazapan/bin/privacy"
 template = "Privacy.qml.tmpl"
 output = "~/.config/quickshell/mazapan/widgets/right/02-privacy.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
+template = "screen.lua.tmpl"
+output = "~/.config/hypr/mazapan/privacy.lua"
+reload = "hyprctl reload >/dev/null"

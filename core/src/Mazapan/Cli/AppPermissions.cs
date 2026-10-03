@@ -47,6 +47,43 @@ public static class FlatpakPermissions
         return Kinds.ToDictionary(k => k.Key, k => context.TryGetValue(k.Group, out var vs) && vs.Contains(k.Value) && !vs.Contains("!" + k.Value));
     }
 
+    /// <summary>
+    /// What the app was allowed or refused when it asked through a portal
+    /// (the camera, the location, a screenshot, running in the background):
+    /// `flatpak permission-show` rows, table TAB object TAB app TAB answer.
+    /// </summary>
+    public sealed record Grant(string Table, string Object, bool Allowed)
+    {
+        public string Key => Table + "/" + Object;
+    }
+
+    public static List<Grant> ParseGrants(string show, string app)
+    {
+        var out_ = new List<Grant>();
+        foreach (var line in show.Split('\n'))
+            if (line.Split('\t') is [var table, var obj, var who, var answer, ..] && who == app && IsName(table) && IsName(obj))
+                out_.Add(new(table, obj, answer.Split(',').Contains("yes")));
+        return out_;
+    }
+
+    /// <summary>A portal table's or object's name: nothing a command could take for an option.</summary>
+    public static bool IsName(string s) => s.Length is > 0 and < 64 && char.IsAsciiLetterOrDigit(s[0])
+        && s.All(c => char.IsAsciiLetterOrDigit(c) || c is '-' or '_' or '.');
+
+    /// <summary>`flatpak permission-set|remove` for one portal grant: on, off, or ask (forgotten: asked again).</summary>
+    public static string[] Portal(string app, string key, string to)
+    {
+        if (key.Split('/') is not [var table, var obj] || !IsName(table) || !IsName(obj))
+            throw new MazapanException($"no permission \"{key}\"");
+        return to switch
+        {
+            "on" => ["permission-set", table, obj, app, "yes"],
+            "off" => ["permission-set", table, obj, app, "no"],
+            "ask" => ["permission-remove", table, obj, app],
+            _ => throw new MazapanException("on, off or ask"),
+        };
+    }
+
     /// <summary>`flatpak override --user` for one switch.</summary>
     public static string[] Override(string app, string key, bool on)
     {
@@ -77,6 +114,8 @@ public static partial class Program
         var now = FlatpakPermissions.Parse(out_);
         var (oc, overrides, _) = AppsCapture("flatpak", "override", "--user", "--show", app);
         var changed = oc == 0 && overrides.Contains('=');
+        var (gc, shown, _) = AppsCapture("flatpak", "permission-show", app);
+        var grants = gc == 0 ? FlatpakPermissions.ParseGrants(shown, app) : [];
         if (json)
         {
             Console.WriteLine(GoJson.Marshal(new Fields
@@ -84,26 +123,39 @@ public static partial class Program
                 { "app", app },
                 { "permissions", FlatpakPermissions.Kinds.Select(k => new Fields { { "key", k.Key }, { "on", now[k.Key] } }).ToList() },
                 { "changed", changed },
+                { "grants", grants.Select(g => new Fields { { "key", g.Key }, { "table", g.Table }, { "object", g.Object }, { "on", g.Allowed } }).ToList() },
             }));
             return 0;
         }
         foreach (var k in FlatpakPermissions.Kinds)
             Console.WriteLine($"  {(now[k.Key] ? Style.Green + "on " : Style.Dim + "off")}{Style.Reset} {k.Key}");
+        if (grants.Count > 0) Console.WriteLine("\nAsked for, through a portal:");
+        foreach (var g in grants)
+            Console.WriteLine($"  {(g.Allowed ? Style.Green + "on " : Style.Dim + "off")}{Style.Reset} {g.Key}");
         if (changed) Console.WriteLine($"\nChanged by you: mazapan apps permit {ids[0]} reset puts the app's own back.");
         return 0;
     }
 
-    /// <summary>mazapan apps permit ID KEY on|off, or ID reset.</summary>
+    /// <summary>
+    /// mazapan apps permit ID KEY on|off, ID TABLE/OBJECT on|off|ask (what
+    /// it asked for through a portal; ask: forgotten, asked again), or ID
+    /// reset.
+    /// </summary>
     static int AppsPermit(List<App> apps, List<string> args)
     {
-        if (args is not ([_, "reset"] or [_, _, "on" or "off"]))
-            throw new MazapanException($"usage: mazapan apps permit ID {string.Join("|", FlatpakPermissions.Kinds.Select(k => k.Key))} on|off, or ID reset");
+        var portal = args.Count == 3 && args[1].Contains('/');
+        if (args is not ([_, "reset"] or [_, _, "on" or "off"]) && !(portal && args[2] == "ask"))
+            throw new MazapanException($"usage: mazapan apps permit ID {string.Join("|", FlatpakPermissions.Kinds.Select(k => k.Key))} on|off, ID TABLE/OBJECT on|off|ask, or ID reset");
         var app = FlatpakOf(args[0], apps);
-        string[] cmd = args[1] == "reset" ? ["override", "--user", "--reset", app] : FlatpakPermissions.Override(app, args[1], args[2] == "on");
+        string[] cmd = args[1] == "reset" ? ["override", "--user", "--reset", app]
+            : portal ? FlatpakPermissions.Portal(app, args[1], args[2])
+            : FlatpakPermissions.Override(app, args[1], args[2] == "on");
         var (code, _, err) = AppsCapture("flatpak", cmd);
         if (code != 0) throw new MazapanException($"flatpak: {err.Trim()}");
         // Running now, it keeps what it had until it starts again.
-        Console.WriteLine(args[1] == "reset" ? $"{app}: its own permissions again." : $"{app}: {args[1]} {args[2]} (from its next start).");
+        Console.WriteLine(args[1] == "reset" ? $"{app}: its own permissions again."
+            : portal ? $"{app}: {args[1]} {(args[2] == "ask" ? "asked again next time" : args[2])}."
+            : $"{app}: {args[1]} {args[2]} (from its next start).");
         return 0;
     }
 }

@@ -24,7 +24,9 @@ depends=(
   noto-fonts noto-fonts-emoji ttf-jetbrains-mono-nerd
   git jq curl flatpak power-profiles-daemon gnome-keyring
   $(for f in "$_repo"/plugins/*/plugin.toml; do
+      # Hardware and optional plugins' packages come when they're turned on.
       grep -q '^\[hardware' "$f" && continue
+      grep -q '^optional *= *true' "$f" && continue
       sed -n '/^\[packages\]/,/^\[/{s/^pacman *= *\[\(.*\)\]/\1/p}' "$f"
     done | tr -d '",' | tr ' ' '\n' | sed '/^$/d' | sort -u)
 )

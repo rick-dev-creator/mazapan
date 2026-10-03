@@ -103,7 +103,8 @@ configuration rolled back on its own, the next one went through.
 9. The ISO published, with its checksum and signature, and an install
    guide.
 10. A license (the package says `unknown`).
-11. The 34 built-in plugins without a README.
+11. ~~The 34 built-in plugins without a README.~~ Done (2026-10-03): every
+    built-in plugin has its page, in English and Spanish.
 
 Then 1.0. After it, in this order: the rest of 18 (fonts, keybindings),
 21 (the boot splash and menu in the theme), the rest of 19 (fingerprint,
@@ -191,14 +192,14 @@ Hyprland, the shell restarted on its own). Better than it:
 | 14 | Workspace sessions | Dropped (2026-09-30): Hyprland's workspaces are enough |
 | 15 | The CLI in your language | Dropped (2026-09-30): the CLI stays in English; everything graphical is localized |
 | 16 | Installation and first boot | **Done** (2026-09-30): catalog (17), welcome, the ISO with its graphical installer (any language, time zone, keyboard), snapshots from the install on; what any machine needs (its hardware's drivers chosen live and installed offline, touchpad, keyring, default apps, printing, input methods); audited. Its own signed repository and unattended installs since (1.0's A and C7). Right-to-left names aligned in the language list (2026-10-03). Pending: publishing the ISO (hosting), real hardware |
-| 17 | Apps: install and remove | **Done** (2026-09-29): catalog, `mazapan apps`, the Apps menu with profiles (several at once); Flatpak apps show without a new login (2026-09-30); audited; catalogs from others (`app_catalogs` in config.toml, their apps saying whose they are, 2026-10-03) |
+| 17 | Apps: install and remove | **Done** (2026-09-29), next: .NET (ASP.NET Core + Aspire, Rider and/or VS Code) and Mobile (Expo, Android emulator) profiles that work out of the box; catalog, `mazapan apps`, the Apps menu with profiles (several at once); Flatpak apps show without a new login (2026-09-30); audited; catalogs from others (`app_catalogs` in config.toml, their apps saying whose they are, 2026-10-03) |
 | 18 | Settings with a face | **Done**: the Settings panel (keyboard, touchpad and mouse, default apps, language and time zone) done (2026-09-30); Text (the fonts, each shown in itself, and the size; `font_ui`, `font_mono`, `font_size` over the theme's, on the timeline), Keys (every keybinding, changed by pressing the new keys, the desktop's own resting in a submap meanwhile, a key already taken said) and Security (the password) done (2026-10-03). A keyboard picked is tried: the one before comes back after 20 s unless kept (2026-10-03) |
-| 19 | Security | In progress: researched (2026-09-30); the disk encrypted with a recovery key and one password, locked before sleep, the firewall (1.0's B), the password changed in one place, the privacy dots, hibernation, what each Flatpak app may reach (2026-10-03). To do: the portal's grants (camera, location) and screen capture through Hyprland; fingerprint and FIDO2 need the hardware; TPM later |
+| 19 | Security | In progress: researched (2026-09-30); the disk encrypted with a recovery key and one password, locked before sleep, the firewall (1.0's B), the password changed in one place, the privacy dots, hibernation, what each Flatpak app may reach and what it asked for through a portal, an app asking before it sees the screen (2026-10-03). To do: fingerprint and FIDO2 need the hardware; TPM later |
 | 20 | Updates, visible | **Done** (2026-09-30): the bar says when there are, a panel shows them (news, restart), updated with a click (pkexec), Flatpak apps too; the updater redone after Omarchy's; firmware (fwupd) and plugin updates in the same panel, downloaded ahead on power and unmetered (`update-ahead`) (2026-10-03) |
 | 21 | Boot and login in the theme | **Done** (2026-10-03): the login screen (plugin `login`, greetd); the boot menu (`theme-grub`) and the boot splash with the disk's password (`theme-plymouth`) in the theme's colors, turned on by the installer |
 | 22 | Sharing | In progress: Wi-Fi as a QR and a speed test in the network card (2026-10-03). To do: sending to a device nearby (LocalSend) or on the tailnet (needs a second device) |
-| 23 | More capture | Planned |
-| 24 | Extras | In progress: optional plugins (`optional = true`: off until turned on); reminders, the crash watcher (to the agent) and the screensaver in the theme (2026-10-03). Dictation later; the niche ones (Windows VM, converter) as community plugins |
+| 23 | More capture | In progress: text read in the desktop's language (its OCR data installed with the system when online), a QR code's content copied as a secret, never shown nor kept (2026-10-03). To do: the webcam in a corner while recording (needs a camera to try) |
+| 24 | Extras | In progress: optional plugins (`optional = true`: off until turned on); reminders, the crash watcher (to the agent) and the screensaver in the theme, dictation on the computer itself (whisper.cpp) (2026-10-03). The niche ones (Windows VM, converter) as community plugins |
 
 Part two (items 9–15, 2026-09-29): what's still missing next to Omarchy,
 and what would set this apart from it. 9–12 done; 13 left; 14 and 15
@@ -986,6 +987,30 @@ offers, from the same catalog as the installer's profiles:
 - Every install and removal on the timeline (12), with its undo; only
   what the catalog installed is offered for removal, never the system.
 
+*Next: two profiles that work out of the box* (asked for 2026-10-03; the
+person's own stack). Each installed, set up and checked, not just its
+packages:
+- **.NET** (ASP.NET Core + Aspire): `dotnet-sdk`, `aspnet-runtime` and
+  `aspnet-targeting-pack` (Arch's own), the Aspire templates (`dotnet new
+  install Aspire.ProjectTemplates`, per user), Docker or Podman for
+  Aspire's containers (the account in the `docker` group, the service
+  on), the dev certificate trusted (`dotnet dev-certs https`, into the
+  system's and the browsers' stores); the editor chosen: JetBrains Rider
+  (Flathub, `com.jetbrains.Rider`; or JetBrains Toolbox), VS Code
+  (Microsoft's build from Flathub, `com.visualstudio.code`: C# Dev Kit
+  only runs there, not in Code - OSS), or both. A check: a new Aspire app
+  builds and its dashboard opens.
+- **Mobile (Expo)**: Node.js LTS and npm (Arch's own), Expo's CLI through
+  `npx` (nothing global), a JDK (`jdk17-openjdk`), the Android SDK, its
+  platform tools and an emulator image (Android Studio from Flathub,
+  `com.google.AndroidStudio`, or the command-line tools in the person's
+  home), `ANDROID_HOME` and the PATH set, the emulator on KVM (the
+  account in the `kvm` group), `adb` able to see a phone over USB
+  (`android-udev`); watchman is AUR-only, so not installed (Expo works
+  without it). A check: a new Expo app starts in the emulator.
+- What isn't in Arch's repositories comes from Flathub, never the AUR;
+  each profile's README says what it set up and how to undo it.
+
 ## 18. Settings with a face
 
 **Omarchy today.** Font (monospace, sed into each terminal's config) and
@@ -1119,8 +1144,16 @@ Order: 1, then 2, 3, 4, 5.
   internet, sound and microphone, devices, home, all files, Downloads,
   Bluetooth, each the person's own `flatpak override --user`, from the
   app's next start; "Its own again" resets them. Said plainly to hold for
-  Flatpak apps only. Still to do: the portal's grants (camera, location,
-  screenshots) and screen capture asked for any app through Hyprland.
+  Flatpak apps only. What it asked for through a portal (the camera, the
+  location, screenshots, the background) listed beside, each answered
+  again with a switch or forgotten ("Ask again": asked next time).
+- An app asks before it sees the screen (plugin `privacy`, `screen_ask`):
+  Hyprland's permissions enforced, its own dialog (deny, allow once,
+  allow and remember); the desktop's own tools (grim, wf-recorder,
+  hyprpicker, the shell, hyprlock) and the screen-sharing portal (which
+  has its own picker) allowed. Decided as Hyprland starts and kept to
+  until it ends: switched on half way through a session, Hyprland left
+  captures waiting with no dialog (seen in the VM).
 
 Not now: AppArmor (no Arch-based distro turns it on; CachyOS warns it
 breaks things); time-boxed passwordless sudo for agents (sudo stays per
@@ -1236,10 +1269,15 @@ time on the theme's background with its colors drifting, moved each
 minute against burn-in; the idle inhibitors (a video, a call, "keep
 awake") keep it away; still with the theme's motion off.
 
+## Later, nice to have
+
+- Ideas from Niri's scrolling tiling (the person found it striking): an
+  endless strip of columns per workspace, windows opened to the right
+  without resizing the rest, the view scrolling to the focused one. After
+  every item above; the `columns` plugin is the place to start.
+
 ## Also pending
 
-- 34 of the 57 built-in plugins have no README: their page in the
-  Plugins panel is empty (`mazapan plugins check` says so).
 - `mazapan update` offering plugin updates; Chromium's accent through its
   policy. (The "updates available" widget is item 20's.)
 

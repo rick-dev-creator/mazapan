@@ -334,4 +334,12 @@ public class InstallProgressTests
         Assert.Contains("PasswordAuthentication no", SetupTests.Decoded(post));
         Assert.True(post.IndexOf("authorized_keys") < post.IndexOf("chown -R"));
     }
+
+    [Theory]
+    [InlineData("es_MX", "tesseract-data-spa")]
+    [InlineData("ja", "tesseract-data-jpn")]
+    [InlineData("en", null)]
+    [InlineData("xx", null)]
+    public void TextInPicturesIsReadInTheLanguage(string lang, string? data) =>
+        Assert.Equal(data, Mazapan.Setup.Archinstall.OcrData(lang));
 }

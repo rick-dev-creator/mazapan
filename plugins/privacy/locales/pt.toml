@@ -6,3 +6,5 @@
 "unknown" = "um app"
 "setting.every" = "Com que frequência olhar (segundos)"
 "setting.every.help" = "Com que frequência olha o que usa o microfone, a câmera e a tela."
+"setting.screen_ask" = "Os apps pedem para ver a tela"
+"setting.screen_ask.help" = "Um app que quer ver a tela pergunta antes, como no macOS. As ferramentas do próprio desktop e o compartilhamento de tela pelo portal, que tem seu próprio seletor, não. A partir do próximo login."

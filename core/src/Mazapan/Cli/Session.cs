@@ -390,10 +390,11 @@ public static partial class Program
         // What needs root: system files, and packages plugins need.
         var sysChanges = changes.Where(c => c.File.System && c.State is State.New or State.Changed or State.Conflict).ToList();
         var sysOrphans = orphans.Where(AsRoot.IsSystem).ToList();
-        // Hardware plugins' packages are installed (the person turned them on);
-        // the others' are only said, as they always were.
-        var packages = AsRoot.Missing(s.Plugins.Where(p => p.Hardware != null).SelectMany(p => p.Pacman));
-        foreach (var p in s.Plugins.Where(p => p.Hardware == null))
+        // Hardware and optional plugins' packages are installed (the person
+        // turned them on; mazapan's package doesn't bring them); the others'
+        // are only said, as they always were (the package depends on them).
+        var packages = AsRoot.Missing(s.Plugins.Where(p => p.OffByDefault).SelectMany(p => p.Pacman));
+        foreach (var p in s.Plugins.Where(p => !p.OffByDefault))
             foreach (var pkg in AsRoot.Missing(p.Pacman))
                 Console.Error.WriteLine($"warning: plugin {p.Id} needs package {pkg} (not installed)");
         foreach (var pkg in packages)

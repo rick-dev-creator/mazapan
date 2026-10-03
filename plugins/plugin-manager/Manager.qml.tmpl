@@ -190,7 +190,8 @@ Item {
 
   // A hardware plugin writes system files: with sudo, so in a terminal.
   function applying(args) {
-    const hw = detail && detail.hardware !== ""
+    // So does one whose packages come when it's turned on (optional ones).
+    const hw = detail && (detail.hardware !== "" || (detail.packages_missing || []).length > 0)
     run(args.label, "mazapan apply " + args.flags + (hw ? " --system" : ""), hw)
   }
 

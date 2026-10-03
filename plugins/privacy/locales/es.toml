@@ -6,3 +6,5 @@
 "unknown" = "una app"
 "setting.every" = "Cada cuánto mirar (segundos)"
 "setting.every.help" = "Cada cuánto mira qué usa el micrófono, la cámara y la pantalla."
+"setting.screen_ask" = "Las apps piden ver la pantalla"
+"setting.screen_ask.help" = "Una app que quiere ver la pantalla pregunta antes, como en macOS. Las herramientas del propio escritorio y compartir pantalla por el portal, que tiene su propio selector, no. Desde el próximo inicio de sesión."
