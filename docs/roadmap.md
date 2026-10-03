@@ -63,13 +63,18 @@ person's approval for root) is the foundation that can be.
    - *The bar and a panel* (Quickshell): each account's limits, today, the
      alerts ("account 2 reaches 80 % in about 40 min", "12 USD on the API
      today"), simple charts drawn in QML.
-   - *The dashboard* (the first Avalonia app, with a charting library,
-     LiveCharts2 or ScottPlot, in the theme): tokens and cost by day,
-     agent, account, model and project; each limit over time with when
-     it runs out at this pace; sessions, their length, active time, the
-     busy hours as a heat map; cache use; lines and commits per project
-     where OpenTelemetry gives them. Quickshell only, simpler, if Avalonia
-     waits.
+   - *The dashboard*, a native app of the desktop (decided 2026-10-03:
+     Quickshell, not Avalonia): its own Quickshell instance (`qs -c
+     mazapan-dashboard`, apart from the bar: a heavy view never slows or
+     takes down the shell), charts from Qt's QtGraphs (`qt6-graphs`, in
+     the official repositories), the kit, the theme live and the
+     translations as everywhere else, native on Wayland (sharp at any
+     scale); the data from the core (`mazapan agents --json`), so the
+     logic stays in C#. Tokens and cost by day, agent, account, model and
+     project; each limit over time with when it runs out at this pace;
+     sessions, their length, active time, the busy hours as a heat map;
+     cache use; lines and commits per project where OpenTelemetry gives
+     them.
 3. **Agent sessions, live in the bar**: every agent running, in any
    terminal, working, waiting for you or done (Claude Code hooks,
    opencode's events, the rest by their process); a notification when
@@ -91,8 +96,9 @@ notification, a file, and `? question` in the palette answered in a card;
 an agent's changes approved with their diff, marked on the timeline, all
 undone at once, and permissions per agent; recent projects in the palette
 reopening the editor and the agent's session; dictation into an agent;
-graphical plugins in .NET (Avalonia: whole windows, not the bar, which is
-layer-shell; a small library giving them the theme and the translations);
+graphical plugins in .NET for others to write (Avalonia: whole windows,
+not the bar, which is layer-shell; a small library giving them the theme
+and the translations; once its Wayland backend is out of preview);
 Niri's scrolling tiling.
 
 ## Toward 1.0: a stable version anyone can install
@@ -1381,9 +1387,11 @@ awake") keep it away; still with the theme's motion off.
 
 ## Later, nice to have
 
-- Graphical plugins in .NET (Avalonia): whole windows (a dashboard for
-  Aspire projects, a container manager), not the bar or overlays, which
-  are layer-shell and stay Quickshell; built at install or shipped built;
+- Graphical plugins in .NET (Avalonia), for others to write in C#: whole
+  windows (a dashboard for Aspire projects, a container manager), not the
+  bar or overlays, which are layer-shell and stay Quickshell. Mazapán's
+  own apps stay Quickshell (one interface, native on Wayland; the agents
+  dashboard included). Built at install or shipped built;
   a small Mazapan.Avalonia library giving them the theme (colors, fonts,
   live on a change) and the translations from locales/*.toml. Avalonia 11
   runs through XWayland until its Wayland backend is out of preview.
