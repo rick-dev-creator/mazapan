@@ -5,6 +5,70 @@ ships most of these in some form, including a plugin system and an AI
 agent for crashes; each item says what it does today and what "much better"
 means here. Ordered by impact.
 
+## Next: what matters most (decided 2026-10-03)
+
+An evaluation against Omarchy (read from its installed code, 2026-10-03)
+and what it takes to say Mazapán is technically better, before it's been
+tried on real hardware.
+
+**Ahead already:** the foundation. Installs encrypted with one password
+and a recovery key; updates in steps that roll back; every change on a
+timeline that undoes it; settings with a face (keyboard, mouse, fonts,
+keys, monitors) where Omarchy edits files; plugins that say what they
+can do and are approved; five languages throughout; the firewall,
+privacy dots, per-app permissions; an unattended release gate.
+
+**Behind:** breadth and miles. Omarchy has 22 themes (Mazapán 4), about
+40 fixes for specific hardware (Framework, ASUS ROG and Zenbook, Surface,
+Mac T2, Dell XPS, Intel lpmd/thermald/IPU7/Wi-Fi 7…; Mazapán 8 hardware
+plugins), launchers for 13 coding agents, Tailscale and LocalSend, and
+thousands of machines running it.
+
+**Its "agentic" side, as it is:** `omarchy agent` opens the chosen agent
+in a terminal with a prompt (13 known); a skill tells the agent to edit
+`~/.config/hypr/` and the rest directly, with no preview and no undo; a
+crash offers a diagnosis prompt; usage widgets read one
+`~/.claude/.credentials.json` (one Claude subscription, however many the
+person has), Codex and Fireworks. Opencode, pi through an API, a second
+Claude account: not seen. A launcher and instructions, not an agentic
+desktop. Mazapán's MCP server (state, exact previews, apply, undo, the
+person's approval for root) is the foundation that can be.
+
+**The must-haves, by impact:**
+1. **Tried on the person's PC** (1.0's C8, a live USB): the one thing that
+   turns "better by design" into "better". The person's to schedule.
+2. **Agents and accounts, found by themselves** (item 6): every agent
+   installed (claude, opencode, pi, codex, gemini…) and every account:
+   several Claude configurations (`CLAUDE_CONFIG_DIR`), the providers
+   opencode is set up with, API keys (kept in the keyring, never a plain
+   `.env`). Each account's limits (Claude's 5-hour and weekly use, an
+   API's spend), and when one runs out, launching the agent takes the
+   next and says when the first comes back.
+3. **Agent sessions, live in the bar**: every agent running, in any
+   terminal, working, waiting for you or done (Claude Code hooks,
+   opencode's events, the rest by their process); a notification when
+   one waits, a click to its window, a dot on its workspace. With agents
+   in parallel, the biggest daily saving.
+4. **The .NET and Mobile (Expo) profiles** (item 17): from install to ASP.NET
+   Core + Aspire with Rider or VS Code, and to an Expo app in the
+   emulator, with nothing done by hand.
+5. **Omarchy's hardware fixes as hardware plugins** (item 5): its ~40, each
+   offered only on the machine that needs it, said and undoable (Omarchy
+   runs them once at install).
+
+Order: 2 and 3 first (the person's problem today, and what sets Mazapán
+apart), then 4, with 5 alongside; 1 whenever the person can.
+
+**After those:** an importer for Omarchy's themes (its 22 at once);
+LocalSend (22); "ask an agent about this" from a capture, a selection, a
+notification, a file, and `? question` in the palette answered in a card;
+an agent's changes approved with their diff, marked on the timeline, all
+undone at once, and permissions per agent; recent projects in the palette
+reopening the editor and the agent's session; dictation into an agent;
+graphical plugins in .NET (Avalonia: whole windows, not the bar, which is
+layer-shell; a small library giving them the theme and the translations);
+Niri's scrolling tiling.
+
 ## Toward 1.0: a stable version anyone can install
 
 Decided on 2026-10-03. Most of what a desktop needs is done (the
@@ -173,6 +237,7 @@ Hyprland, the shell restarted on its own). Better than it:
 | — | Toward 1.0, C7: unattended installs, the release gate | **Done** (2026-10-03): `cidata` + mazapan.json installs by itself; `vm/gate` passes encrypted and plain. C8 (the live USB on real hardware) needs the person |
 | — | Toward 1.0, B: safe to install | **Done** (2026-10-03): encrypted by default with a recovery key, one password (keyring included), locked before sleep, firewall on |
 | — | Toward 1.0, A: it updates itself | **Done** (2026-10-03): its own signed repository with channels, versions and releases, the updater after Omarchy's. Pending, the person's: the release key, hosting, uploading |
+| — | Next: the must-haves (agents and accounts, live sessions, .NET and Expo profiles, hardware fixes from Omarchy) | Decided (2026-10-03); see "Next: what matters most" |
 | 1 | Updates you can trust | **Done** (2026-09-28); follow-ups listed below |
 | 2 | Monitors | **Done** (2026-09-28); follow-ups listed below |
 | 3 | One command palette | **Done** (2026-09-28): first version; follow-ups listed below |
@@ -536,6 +601,21 @@ on a crash.
 **Follow-ups.** Offer "ask an agent" on its own when a check fails after an
 update or the shell crashes; edit config.toml in place (today it's rewritten
 whole, as before, so comments in it don't survive a change).
+
+**Next (2026-10-03, the must-haves above).** What Omarchy calls agentic is
+a launcher and a skill that edits files directly (see "Next: what matters
+most"). Mazapán's:
+- *Agents and accounts:* an Agents panel that finds every agent and every
+  account by itself (Claude configurations, opencode's providers, pi and
+  other API keys from the keyring), with each one's limits and spend, and
+  the next account taken when one runs out.
+- *Live sessions:* working / waiting for you / done in the bar, from every
+  agent; a notification when one waits; a click to its window.
+- Then: context without copy and paste (a capture, a selection, a
+  notification, a file, `? question` in the palette); an agent's changes
+  approved with their diff, marked on the timeline, undone together;
+  permissions per agent (read only, or may apply); recent projects that
+  reopen the editor and the agent's session.
 
 ## 7. Plugins
 
@@ -1270,6 +1350,13 @@ minute against burn-in; the idle inhibitors (a video, a call, "keep
 awake") keep it away; still with the theme's motion off.
 
 ## Later, nice to have
+
+- Graphical plugins in .NET (Avalonia): whole windows (a dashboard for
+  Aspire projects, a container manager), not the bar or overlays, which
+  are layer-shell and stay Quickshell; built at install or shipped built;
+  a small Mazapan.Avalonia library giving them the theme (colors, fonts,
+  live on a change) and the translations from locales/*.toml. Avalonia 11
+  runs through XWayland until its Wayland backend is out of preview.
 
 - Ideas from Niri's scrolling tiling (the person found it striking): an
   endless strip of columns per workspace, windows opened to the right
