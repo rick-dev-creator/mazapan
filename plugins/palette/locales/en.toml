@@ -28,3 +28,4 @@
 "ask.empty" = "Ask an agent: type a question after ?"
 "kind.ask" = "agent"
 "hints.ask" = "? ask an agent"
+"kind.project" = "project"

@@ -1,7 +1,7 @@
 [plugin]
 id = "palette"
 name = "Command palette"
-version = "0.2.0"
+version = "0.3.0"
 api = 1
 description = "One palette for apps, open windows, every plugin's actions and keybindings, each showing the command it runs"
 categories = ["panel", "tools"]

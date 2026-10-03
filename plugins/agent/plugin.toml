@@ -1,7 +1,7 @@
 [plugin]
 id = "agent"
 name = "Agents"
-version = "0.6.0"
+version = "0.7.0"
 api = 1
 description = "Your coding agents: in the bar, which is working and which waits for you (a click goes to its window), each account's limits and when they reset, and what they've used today, for Claude Code, opencode, pi, Codex… every account found by itself; and from the palette, ask one about this desktop with mazapan's report"
 categories = ["agent", "tools", "bar"]
@@ -38,6 +38,9 @@ otel_port = { default = 47318, min = 1025, max = 65535 }
 # you: a card shows who asks and the exact diff, Allow or Don't allow. Off:
 # allowed at once, as its own client already asked.
 approve_changes = true
+# The editor a project opens in from the palette, as its command, the
+# folder after it ("code", "rider", "zed"…; "": none, only the agent).
+editor = { default = "", kind = "command" }
 
 [[targets]]
 template = "qmldir.tmpl"
@@ -68,6 +71,11 @@ reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 template = "Approve.qml.tmpl"
 output = "~/.config/quickshell/mazapan/panels/approve.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+# The palette's recent projects: the editor and the agent's last conversation.
+[[targets]]
+template = "agent-open.sh.tmpl"
+output = "~/.local/share/mazapan/bin/agent-open"
 
 [[targets]]
 template = "agent-ask.sh.tmpl"

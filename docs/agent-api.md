@@ -144,6 +144,7 @@ mazapan agents keys [set|remove PROVIDER] # API keys in the keyring (set: the ke
 mazapan agents telemetry on|off [PORT]    # Claude Code's metrics to the receiver here (the agent plugin does it)
 mazapan agents otel [--port N] [--idle M] # the receiver itself (systemd starts it through its socket)
 mazapan agents sessions [--json]      # open sessions: working / waiting / done / running
+mazapan agents projects [--days N] [--json]  # folders agents worked in lately, newest first, with the agent
 mazapan agents run AGENT [ARGS…]      # claude: with the first account that has room
 mazapan agents ask [--agent ID] [--json] QUESTION  # one answer, no interface (the palette's "?")
 mazapan agents hooks install|remove   # Claude Code's hooks for the sessions (the agent plugin does it)

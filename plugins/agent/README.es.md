@@ -53,6 +53,13 @@ escritorio, nunca cambiarlo); si no, opencode, Codex, Gemini CLI o pi. La
 respuesta se puede copiar, o seguir la conversación de Claude en una
 terminal.
 
+**Proyectos recientes en la paleta**: las carpetas en las que trabajaron
+tus agentes últimamente (según sus propios registros) se encuentran
+escribiendo su nombre; al elegir una, el proyecto se abre en tu editor
+(`editor`: `code`, `rider`…) y una terminal en él continúa la última
+conversación ahí, con el agente que se usó (Claude Code con la cuenta que
+tenga margen, opencode, Codex, pi).
+
 **Sobre esto**: una captura ("Preguntar" en la barra de la captura, o su
 tecla), el texto seleccionado («Preguntar a un agente sobre el texto
 seleccionado» en la paleta) o archivos (Archivos: clic derecho, Scripts,

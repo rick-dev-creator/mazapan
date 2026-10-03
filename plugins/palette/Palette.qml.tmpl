@@ -54,6 +54,7 @@ Item {
   function show() {
     // The catalog's apps not installed yet: found by typing, as "Install …".
     if (actions.some(a => a.plugin === "apps")) catalogProbe.running = true
+    if (canProjects && !projectsProbe.running) projectsProbe.running = true
     updatesSeen.reload()
     // Windows opened since the bar started may lack their class until
     // Quickshell asks Hyprland again.
@@ -175,6 +176,24 @@ Item {
       }
     }
   }
+  // Projects agents worked in lately (the agent plugin's): its editor and
+  // the agent's last conversation there, again.
+  readonly property bool canProjects: {{ if (under "~/.local/share/mazapan/bin/agent-open").size > 0 }}true{{ else }}false{{ end }}
+  property var projects: []
+  Process {
+    id: projectsProbe
+    command: ["mazapan", "agents", "projects", "--json", "--days", "60"]
+    stdout: StdioCollector {
+      onStreamFinished: { try { root.projects = JSON.parse(text).projects || [] } catch (e) {} }
+    }
+  }
+  readonly property var projectItems: projects.map(p => ({
+    kind: "project", glyph: "󰉋", title: p.name,
+    detail: p.path.replace(Quickshell.env("HOME"), "~") + " · " + p.agent + " · " + new Date(p.last).toLocaleDateString(Qt.locale("{{ lang }}"), "d MMM"),
+    command: "", searchable: false, key: "", words: p.path + " " + p.agent,
+    argv: ["sh", Quickshell.env("HOME") + "/.local/share/mazapan/bin/agent-open", p.path, p.agent],
+  }))
+
   readonly property var installItems: catalog.map(a => ({
     kind: "install", glyph: "󰏔", title: {{ tq "install" }}.arg(a.name), detail: a.description,
     command: `qs ipc -c mazapan call mazapan open apps ${a.id}`, searchable: false, key: "",
@@ -251,7 +270,7 @@ Item {
     const onlyActions = query.startsWith(">")
     // Nothing typed: the first screen, in the order it's shown.
     if (home) return tiles.concat(systemItems, homeWindows)
-    let list = snapshot.concat(installItems)
+    let list = snapshot.concat(projectItems, installItems)
     if (onlyActions) list = list.filter(c => c.kind === "action" || c.kind === "key")
     const q = onlyActions ? query.slice(1).trim() : query.trim()
     if (q === "") {
@@ -645,6 +664,7 @@ Item {
                   case "key": return {{ tq "kind.key" }}
                   case "install": return {{ tq "kind.install" }}
                   case "ask": return {{ tq "kind.ask" }}
+                  case "project": return {{ tq "kind.project" }}
                   }
                   return {{ tq "kind.action" }}
                 }

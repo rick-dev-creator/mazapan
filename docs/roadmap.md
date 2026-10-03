@@ -125,8 +125,8 @@ contrast)*; ~~LocalSend (22)~~ *done*; ~~"ask an agent about this" from a captur
 selection, a file~~ *done* (a notification: not yet), and ~~`? question` in the palette
 answered in a card~~ *done 2026-10-04 (`mazapan agents ask`)*;
 ~~an agent's changes approved with their diff, marked on the timeline, all
-undone at once~~ *done 2026-10-04*, and permissions per agent; recent projects in the palette
-reopening the editor and the agent's session; dictation into an agent;
+undone at once~~ *done 2026-10-04*, and permissions per agent; ~~recent projects in the palette
+reopening the editor and the agent's session~~ *done*; dictation into an agent;
 graphical plugins in .NET for others to write (Avalonia: whole windows,
 not the bar, which is layer-shell; a small library giving them the theme
 and the translations; once its Wayland backend is out of preview);

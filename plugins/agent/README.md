@@ -51,6 +51,12 @@ Mazapán's read-only tools (it can look at this desktop's state, never
 change it), else opencode, Codex, Gemini CLI or pi. The answer can be
 copied, or Claude's conversation continued in a terminal.
 
+**Recent projects in the palette**: the folders your agents worked in
+lately (from their own logs) are found by typing their name; picked, the
+project opens in your editor (`editor`: `code`, `rider`…) and a terminal
+in it continues the last conversation there, with the agent used last
+(Claude Code with the account that has room, opencode, Codex, pi).
+
 **About this**: a capture ("Ask" in the capture's bar, or its key), the
 selected text ("Ask an agent about the selected text" in the palette) or
 files (Files: right click, Scripts, Ask an agent) open the same card, to

@@ -41,3 +41,4 @@
 "ask.empty" = "Perguntar a um agente: digite uma pergunta depois do ?"
 "kind.ask" = "agente"
 "hints.ask" = "? perguntar a um agente"
+"kind.project" = "projeto"

@@ -40,9 +40,10 @@ public static partial class Program
             "usage" => AgentsUsage(agents, days, fs.IsSet("refresh"), json),
             "limits" => AgentsLimits(agents, json),
             "sessions" => AgentsSessions(json),
+            "projects" => AgentsProjects(agents, days, json),
             "hooks" => AgentsHooks(agents, fs.Rest, json),
             "telemetry" => AgentsTelemetry(agents, fs.Rest),
-            _ => throw new MazapanException("usage: mazapan agents [list|usage|limits|spend|sessions|hooks install|remove|telemetry on|off [PORT]|keys [set|remove PROVIDER]|run AGENT [ARGS…]] [--json] [--days N]"),
+            _ => throw new MazapanException("usage: mazapan agents [list|usage|limits|spend|sessions|projects|hooks install|remove|telemetry on|off [PORT]|keys [set|remove PROVIDER]|run AGENT [ARGS…]] [--json] [--days N]"),
         };
     }
 
@@ -494,6 +495,45 @@ public static partial class Program
             default:
                 throw new MazapanException("usage: mazapan agents keys [set|remove PROVIDER] [--json]");
         }
+    }
+
+    /// <summary>
+    /// mazapan agents projects: the folders agents worked in lately, newest
+    /// first (from their own logs: Claude Code's, opencode's, pi's, Codex's),
+    /// each with the agent used there last; only those still there, never
+    /// home itself. For the palette: a project reopened with its editor and
+    /// that agent's last conversation.
+    /// </summary>
+    static int AgentsProjects(List<Agent> agents, int days, bool json)
+    {
+        if (days is < 1 or > 3650) throw new MazapanException("--days: 1 to 3650");
+        var since = new DateTimeOffset(DateTime.Today.AddDays(-(days - 1)));
+        var (entries, _) = Mazapan.Agents.Usage.Collect(agents, since);
+        var home = (Environment.GetEnvironmentVariable("HOME") ?? "").TrimEnd('/');
+        var list = entries.Where(e => e.Project.StartsWith('/') && e.Project.TrimEnd('/') != home)
+            .GroupBy(e => e.Project.TrimEnd('/'))
+            .Select(g => (Path: g.Key, Last: g.Max(e => e.Time), Agent: g.MaxBy(e => e.Time)!.Agent,
+                Answers: g.Count(), Sessions: g.Select(e => e.Session).Where(s => s != "").Distinct().Count()))
+            .Where(p => Directory.Exists(p.Path))
+            .OrderByDescending(p => p.Last).Take(30).ToList();
+        if (json)
+        {
+            Console.WriteLine(GoJson.Marshal(new Fields
+            {
+                { "version", AgentsVersion },
+                {
+                    "projects", list.Select(p => new Fields
+                    {
+                        { "path", p.Path }, { "name", Paths.Base(p.Path) }, { "last", p.Last.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture) },
+                        { "agent", p.Agent }, { "answers", p.Answers }, { "sessions", p.Sessions },
+                    }).ToList()
+                },
+            }));
+            return 0;
+        }
+        foreach (var p in list)
+            Console.WriteLine($"{Paths.Base(p.Path),-24} {Style.Dim}{Tilde(p.Path)} · {p.Agent} · {p.Last.ToLocalTime():ddd d MMM HH:mm}{Style.Reset}");
+        return 0;
     }
 
     /// <summary>mazapan agents spend: what the providers say was spent, with the keys in the keyring.</summary>

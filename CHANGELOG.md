@@ -6,6 +6,9 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- Recent projects in the palette: type a project's name to reopen it in
+  your editor with the agent's last conversation there.
+
 - An agent's change to the desktop (through mazapan's MCP server) waits
   for you: a card with who asks and the exact diff, Allow or Don't allow.
   History marks its changes with the agent's name and undoes a day's of
