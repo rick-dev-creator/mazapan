@@ -112,8 +112,9 @@ Since then (2026-10-04): API keys in the keyring (`mazapan agents keys`,
 given to the agents that take them by `agents run`, never to Claude Code
 or Codex), the spend the providers report (OpenRouter's key, Anthropic's
 and OpenAI's cost reports with an admin key) in the card and the
-dashboard, and the dot on the session's workspace. Not yet in 2: the
-OpenTelemetry receiver. Untried until real accounts and hardware: Claude's
+dashboard, and the dot on the session's workspace. Then the OpenTelemetry
+receiver (a systemd socket on 127.0.0.1; Claude Code's lines, commits,
+pull requests and active time in the dashboard). Item 2 is complete. Untried until real accounts and hardware: Claude's
 limits endpoint with the person's accounts, Rider's first start, Android
 Studio and the emulator, each hardware plugin on its machine.
 

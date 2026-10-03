@@ -124,6 +124,16 @@ FloatingWindow {
     for (const s of (usageData && usageData.sessions) || []) t.sessions += s.count
     return t
   }
+  // OpenTelemetry's (Claude Code): lines, commits, pull requests, active time over the period.
+  readonly property var otel: {
+    const t = { added: 0, removed: 0, commits: 0, prs: 0, user: 0, cli: 0, any: false }
+    for (const d of (usageData && usageData.otel) || []) {
+      t.added += d.lines_added; t.removed += d.lines_removed; t.commits += d.commits; t.prs += d.pull_requests
+      t.user += d.active_user_s; t.cli += d.active_cli_s; t.any = true
+    }
+    return t
+  }
+  function hm(s) { const m = Math.round(s / 60); return m < 60 ? {{ tq "min" }}.arg(m) : {{ tq "hours" }}.arg(Math.floor(m / 60)).arg(m % 60) }
   readonly property real cacheShare: totals.cacheRead / Math.max(1, totals.cacheRead + totals.input + totals.cacheWrite)
   // Day labels: every one for a week, fewer as the period grows.
   function dayLabel(day, i) {
@@ -229,6 +239,34 @@ FloatingWindow {
             [{{ tq "dash.answers" }}, win.whole(win.totals.answers)],
             [{{ tq "dash.sessions" }}, win.whole(win.totals.sessions)],
             [{{ tq "dash.cache" }}, Math.round(win.cacheShare * 100) + "%"],
+          ]
+          Rectangle {
+            required property var modelData
+            Layout.fillWidth: true
+            implicitHeight: 64
+            radius: Theme.radius
+            color: Theme.bgAlt
+            ColumnLayout {
+              anchors.fill: parent
+              anchors.margins: 10
+              spacing: 2
+              Caption { text: modelData[0].toUpperCase() }
+              Label { text: modelData[1]; font.pointSize: 14; font.bold: true }
+            }
+          }
+        }
+      }
+      // What Claude Code's OpenTelemetry adds: the work itself.
+      RowLayout {
+        visible: win.otel.any
+        Layout.fillWidth: true
+        spacing: 12
+        Repeater {
+          model: [
+            [{{ tq "dash.lines" }}, "+" + win.whole(win.otel.added) + "  −" + win.whole(win.otel.removed)],
+            [{{ tq "dash.commits" }}, win.whole(win.otel.commits) + (win.otel.prs > 0 ? "  · " + {{ tq "dash.prs" }}.arg(win.whole(win.otel.prs)) : "")],
+            [{{ tq "dash.active_you" }}, win.hm(win.otel.user)],
+            [{{ tq "dash.active_agent" }}, win.hm(win.otel.cli)],
           ]
           Rectangle {
             required property var modelData

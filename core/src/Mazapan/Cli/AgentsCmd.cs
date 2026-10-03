@@ -23,6 +23,7 @@ public static partial class Program
         if (sub == "run") return AgentsRun(rest);
         if (sub == "event") return AgentsEvent(rest);
         if (sub == "keys") return AgentsKeys(rest);
+        if (sub == "otel") return AgentsOtel(rest);
         var fs = new Flags("agents " + sub)
             .Bool("json", "as JSON, for the bar, the dashboard and agents")
             .String("days", "how far back, in days (usage; 30)")
@@ -39,7 +40,8 @@ public static partial class Program
             "limits" => AgentsLimits(agents, json),
             "sessions" => AgentsSessions(json),
             "hooks" => AgentsHooks(agents, fs.Rest, json),
-            _ => throw new MazapanException("usage: mazapan agents [list|usage|limits|spend|sessions|hooks install|remove|keys [set|remove PROVIDER]|run AGENT [ARGS…]] [--json] [--days N]"),
+            "telemetry" => AgentsTelemetry(agents, fs.Rest),
+            _ => throw new MazapanException("usage: mazapan agents [list|usage|limits|spend|sessions|hooks install|remove|telemetry on|off [PORT]|keys [set|remove PROVIDER]|run AGENT [ARGS…]] [--json] [--days N]"),
         };
     }
 
@@ -142,6 +144,8 @@ public static partial class Program
                         .Select(kv => new Fields { { "day", kv.Key.Day }, { "agent", kv.Key.Agent }, { "count", kv.Value } }).ToList()
                 },
                 { "hours", hours.Select(h => h.ToList()).ToList() },
+                // What OpenTelemetry brought (Claude Code): lines, commits, active time, by day.
+                { "otel", Otel.Days(Otel.Load(), since).Select(Otel.Json).ToList() },
             }));
             return 0;
         }
@@ -247,6 +251,32 @@ public static partial class Program
         var changed = Hooks.Set(accounts, rest[0] == "install");
         if (json) Console.WriteLine(GoJson.Marshal(new Fields { { "changed", changed } }));
         else Console.WriteLine(changed.Count == 0 ? "Nothing to change." : string.Join("\n", changed.Select(c => (rest[0] == "install" ? "hooks in " : "hooks out of ") + Tilde(c))));
+        return 0;
+    }
+
+    /// <summary>mazapan agents telemetry on|off [PORT]: Claude Code's metrics to the receiver here, in each configuration's settings.json.</summary>
+    static int AgentsTelemetry(List<Agent> agents, List<string> rest)
+    {
+        if (rest is not (["on" or "off"] or ["on" or "off", _])) throw new MazapanException("usage: mazapan agents telemetry on|off [PORT]");
+        var port = rest.Count > 1 && int.TryParse(rest[1], out var p) && p is > 1024 and < 65536 ? p : Otel.DefaultPort;
+        var theirs = new List<string>();
+        var changed = Hooks.SetTelemetry(agents.FirstOrDefault(a => a.Id == "claude")?.Accounts ?? [], rest[0] == "on", port, theirs);
+        foreach (var c in changed) Console.WriteLine($"telemetry {rest[0]} in {Tilde(c)}");
+        foreach (var t in theirs) Console.WriteLine($"{Tilde(t)}: telemetry of your own there, left as it is");
+        if (changed.Count == 0 && theirs.Count == 0) Console.WriteLine("Nothing to change.");
+        return 0;
+    }
+
+    /// <summary>mazapan agents otel [--port N] [--idle MINUTES]: the receiver (systemd starts it, through its socket).</summary>
+    static int AgentsOtel(string[] args)
+    {
+        var fs = new Flags("agents otel")
+            .String("port", $"the port on 127.0.0.1 without systemd's socket ({Otel.DefaultPort})")
+            .String("idle", "minutes without a request before it ends (10)")
+            .Parse(args);
+        var port = int.TryParse(fs.Get("port"), out var p) ? p : Otel.DefaultPort;
+        var idle = int.TryParse(fs.Get("idle"), out var m) && m > 0 ? m : 10;
+        Otel.Serve(port, TimeSpan.FromMinutes(idle));
         return 0;
     }
 

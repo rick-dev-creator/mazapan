@@ -33,7 +33,10 @@ public static class Hooks
     }
 
     /// <summary>Puts them in (install) or takes them out; says each file that changed.</summary>
-    public static List<string> Set(IEnumerable<Account> accounts, bool install)
+    public static List<string> Set(IEnumerable<Account> accounts, bool install) => Change(accounts, (_, json) => Apply(json, install));
+
+    /// <summary>Each settings.json changed by that (null: as it is); says each file that changed.</summary>
+    static List<string> Change(IEnumerable<Account> accounts, Func<string, string, string?> apply)
     {
         var changed = new List<string>();
         // Every file read first: one that doesn't read stops it before any is written.
@@ -42,7 +45,7 @@ public static class Hooks
         {
             var text = File.Exists(file) ? File.ReadAllText(file) : "{}";
             string? updated;
-            try { updated = Apply(text, install); }
+            try { updated = apply(file, text); }
             catch (JsonException e) { throw new MazapanException($"{file} isn't valid JSON ({e.Message}): nothing changed"); }
             if (updated != null) updates.Add((file, updated));
         }
@@ -85,6 +88,61 @@ public static class Hooks
         // The person's characters as they wrote them (no \u0026 for &).
         var after = root.ToJsonString(new JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
         return root.ToJsonString() == before ? null : after + "\n";
+    }
+
+    // --- OpenTelemetry: Claude Code's metrics to Mazapán's receiver ---------------------
+
+    // The general variables, not the metrics' own: a program Claude runs
+    // inherits them, and one Aspire starts gets its own endpoint, which
+    // only a metrics-specific one would override.
+    static Dictionary<string, string> TelemetryEnv(int port) => new()
+    {
+        ["CLAUDE_CODE_ENABLE_TELEMETRY"] = "1",
+        ["OTEL_METRICS_EXPORTER"] = "otlp",
+        ["OTEL_EXPORTER_OTLP_PROTOCOL"] = "http/json",
+        ["OTEL_EXPORTER_OTLP_ENDPOINT"] = $"http://127.0.0.1:{port}",
+        ["OTEL_METRICS_INCLUDE_REPOSITORY"] = "1",
+    };
+
+    static bool OurEndpoint(string? v) => v != null && v.StartsWith("http://127.0.0.1:", StringComparison.Ordinal)
+        && int.TryParse(v["http://127.0.0.1:".Length..], out _);
+
+    /// <summary>Claude Code's metrics sent here (on) or not; a telemetry of the person's own is left alone (null, and why).</summary>
+    public static List<string> SetTelemetry(IEnumerable<Account> accounts, bool on, int port, List<string> theirs) =>
+        Change(accounts, (file, json) =>
+        {
+            var r = ApplyTelemetry(json, on, port, out var own);
+            if (own) theirs.Add(file);
+            return r;
+        });
+
+    public static string? ApplyTelemetry(string json, bool on, int port, out bool theirOwn)
+    {
+        theirOwn = false;
+        var root = JsonNode.Parse(json, documentOptions: new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true }) as JsonObject
+            ?? throw new MazapanException("settings.json isn't a JSON object");
+        var before = root.ToJsonString();
+        var env = root["env"] as JsonObject;
+        string? Get(string k) => env?[k] is JsonValue v && v.TryGetValue<string>(out var s) ? s : null;
+        var ours = OurEndpoint(Get("OTEL_EXPORTER_OTLP_ENDPOINT"));
+        // Telemetry set up by the person (their own collector): theirs.
+        if (!ours && (Get("CLAUDE_CODE_ENABLE_TELEMETRY") != null || Get("OTEL_EXPORTER_OTLP_ENDPOINT") != null || Get("OTEL_METRICS_EXPORTER") != null))
+        {
+            theirOwn = true;
+            return null;
+        }
+        if (on)
+        {
+            if (env == null) root["env"] = env = new JsonObject();
+            foreach (var (k, v) in TelemetryEnv(port)) env[k] = v;
+        }
+        else if (ours && env != null)
+        {
+            foreach (var k in TelemetryEnv(port).Keys) env.Remove(k);
+            if (env.Count == 0) root.Remove("env");
+        }
+        if (root.ToJsonString() == before) return null;
+        return root.ToJsonString(new JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping }) + "\n";
     }
 
     /// <summary>A group of hooks that is this one (by its command).</summary>

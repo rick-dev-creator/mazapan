@@ -32,6 +32,14 @@ them as its variables; Claude Code and Codex sign in and get none. An
 OpenRouter key, or an admin key for Anthropic or OpenAI, also shows what
 they bill, today and over the period, and an OpenRouter key's limit.
 
+**What Claude Code did**, from its own OpenTelemetry metrics: lines
+written and taken out (by repository), commits, pull requests, your time
+and the agent's, in the dashboard. Claude Code sends them to a receiver on
+this computer (127.0.0.1, `otel_port`), started by systemd when the first
+arrives and gone when idle; metrics only, never a prompt, kept in
+`~/.local/state/mazapan/agents`. Its settings.json gets the variables for
+it (`otel`); telemetry of your own already there is left alone.
+
 **A dot on the workspace** where a session's window is (with the
 Workspaces plugin): amber while it waits for you, the text's color while it
 works, green when it's done.
@@ -50,6 +58,6 @@ Anthropic with that account's own login, never refreshed by mazapan.
 Sessions are told by Claude Code's hooks, which this plugin puts in each
 configuration's `settings.json` beside your own (`claude_hooks`; a copy of
 the file is kept the first time; off takes them out; turning the whole
-plugin off leaves them, harmless: `mazapan agents hooks remove` takes them
-out), and by a small opencode plugin. From a terminal: `mazapan agents`, `mazapan agents usage`,
+plugin off leaves them, harmless: `mazapan agents hooks remove` and
+`mazapan agents telemetry off` take them out), and by a small opencode plugin. From a terminal: `mazapan agents`, `mazapan agents usage`,
 `mazapan agents limits`, `mazapan agents run claude`.

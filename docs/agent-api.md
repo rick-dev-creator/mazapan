@@ -140,6 +140,8 @@ mazapan agents usage [--days N] [--json]
 mazapan agents limits [--json]        # each Claude account's windows
 mazapan agents spend [--days N] [--json]  # what the providers report was spent (keys in the keyring)
 mazapan agents keys [set|remove PROVIDER] # API keys in the keyring (set: the key on stdin)
+mazapan agents telemetry on|off [PORT]    # Claude Code's metrics to the receiver here (the agent plugin does it)
+mazapan agents otel [--port N] [--idle M] # the receiver itself (systemd starts it through its socket)
 mazapan agents sessions [--json]      # open sessions: working / waiting / done / running
 mazapan agents run AGENT [ARGS…]      # claude: with the first account that has room
 mazapan agents hooks install|remove   # Claude Code's hooks for the sessions (the agent plugin does it)
@@ -178,6 +180,17 @@ mazapan agents hooks install|remove   # Claude Code's hooks for the sessions (th
   admin key each). Kept 15 minutes in `~/.cache/mazapan/agents/spend.json`,
   numbers only. `spend --json`, version 1: `days`, `providers` (provider,
   name, days [{day, usd}], today, period, limit, remaining, problem).
+- *OpenTelemetry.* A receiver on 127.0.0.1 (port 47318; OTLP over HTTP,
+  JSON), started by a systemd user socket. Claude Code is set up for it
+  in each configuration's settings.json `env` (the general OTLP variables:
+  a program Aspire starts keeps the endpoint Aspire gives it; telemetry of
+  the person's own is left alone). Metrics only, never logs or events:
+  lines of code (added, removed, by repository), commits, pull requests,
+  active time (yours and the agent's), sessions; traces and logs sent there
+  are dropped. Kept in `~/.local/state/mazapan/agents/otel.jsonl`, the
+  person's alone. `usage --json` gives them as `otel` (day, lines_added,
+  lines_removed, commits, pull_requests, active_user_s, active_cli_s,
+  sessions, lines_by_repo).
 - *Sessions.* Claude Code's hooks (`SessionStart`, `UserPromptSubmit`,
   `PreToolUse`, `PostToolUse`, `Notification`, `Stop`, `SessionEnd`) and opencode's plugin
   call `mazapan agents event`, which records the state in the runtime

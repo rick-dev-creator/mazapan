@@ -258,4 +258,81 @@ public class AgentsTests
         Assert.Throws<Mazapan.Util.MazapanException>(() => Keys.Of("nope"));
         Assert.All(Keys.Providers.Where(p => !p.Admin), p => Assert.EndsWith("_API_KEY", p.Env));
     }
+
+    const string OtlpExport = """
+        {"resourceMetrics":[{"resource":{"attributes":[{"key":"service.name","value":{"stringValue":"claude-code"}},{"key":"user.email","value":{"stringValue":"a@b.c"}}]},
+          "scopeMetrics":[{"metrics":[
+            {"name":"claude_code.lines_of_code.count","sum":{"aggregationTemporality":1,"dataPoints":[
+              {"attributes":[{"key":"type","value":{"stringValue":"added"}},{"key":"session.id","value":{"stringValue":"s1"}},{"key":"vcs.repository.url.full","value":{"stringValue":"git@github.com:me/shop-api.git"}}],"timeUnixNano":"1759500000000000000","asInt":"40"},
+              {"attributes":[{"key":"type","value":{"stringValue":"removed"}},{"key":"session.id","value":{"stringValue":"s1"}}],"timeUnixNano":"1759500000000000000","asInt":"12"}]}},
+            {"name":"claude_code.commit.count","sum":{"aggregationTemporality":2,"dataPoints":[
+              {"attributes":[{"key":"session.id","value":{"stringValue":"s1"}}],"startTimeUnixNano":"1759490000000000000","timeUnixNano":"1759500000000000000","asInt":"1"},
+              {"attributes":[{"key":"session.id","value":{"stringValue":"s1"}}],"startTimeUnixNano":"1759490000000000000","timeUnixNano":"1759500060000000000","asInt":"2"}]}},
+            {"name":"claude_code.active_time.total","sum":{"aggregationTemporality":1,"dataPoints":[
+              {"attributes":[{"key":"type","value":{"stringValue":"cli"}}],"timeUnixNano":"1759500000000000000","asDouble":95.5}]}},
+            {"name":"claude_code.token.usage","sum":{"dataPoints":[{"asInt":"999"}]}}]}]}]}
+        """;
+
+    [Fact]
+    public void OpenTelemetryMetricsAreKeptByDayAndRepository()
+    {
+        using var doc = System.Text.Json.JsonDocument.Parse(OtlpExport);
+        var points = Otel.Parse(doc.RootElement);
+        Assert.Equal(5, points.Count);                         // tokens: from the logs, not kept twice
+        Assert.All(points, p => Assert.Equal("a@b.c", p.Email)); // the resource's attributes
+        Assert.Equal("shop-api", points[0].Repo);
+        var day = Assert.Single(Otel.Days(points, DateTimeOffset.FromUnixTimeSeconds(1759400000)));
+        Assert.Equal((40.0, 12.0), (day.LinesAdded, day.LinesRemoved));
+        Assert.Equal(2, day.Commits);                          // cumulative: its last value, not 1 + 2
+        Assert.Equal(95.5, day.ActiveCliSeconds);
+        Assert.Equal(40, day.LinesByRepo["shop-api"]);
+    }
+
+    [Fact]
+    public void TheReceiverTakesAnExportOverHttp()
+    {
+        using var d = new Mazapan.Tests.Foundation.TempDir();
+        var old = Environment.GetEnvironmentVariable("XDG_STATE_HOME");
+        try
+        {
+            Environment.SetEnvironmentVariable("XDG_STATE_HOME", d.Path);
+            var l = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
+            l.Start();
+            var port = ((System.Net.IPEndPoint)l.LocalEndpoint).Port;
+            l.Stop();
+            var server = Task.Run(() => Otel.Serve(port, TimeSpan.FromSeconds(2)));
+            using var http = new HttpClient();
+            HttpResponseMessage? res = null;
+            for (var i = 0; i < 50 && res == null; i++)
+            {
+                try { res = http.PostAsync($"http://127.0.0.1:{port}/v1/metrics", new StringContent(OtlpExport, System.Text.Encoding.UTF8, "application/json")).GetAwaiter().GetResult(); }
+                catch (HttpRequestException) { Thread.Sleep(50); }
+            }
+            Assert.Equal(System.Net.HttpStatusCode.OK, res!.StatusCode);
+            Assert.Equal(System.Net.HttpStatusCode.OK, http.PostAsync($"http://127.0.0.1:{port}/v1/traces", new StringContent("{}", System.Text.Encoding.UTF8, "application/json")).GetAwaiter().GetResult().StatusCode);
+            Assert.Equal(System.Net.HttpStatusCode.UnsupportedMediaType, http.PostAsync($"http://127.0.0.1:{port}/v1/metrics", new ByteArrayContent([1, 2]) { Headers = { ContentType = new("application/x-protobuf") } }).GetAwaiter().GetResult().StatusCode);
+            Assert.True(server.Wait(TimeSpan.FromSeconds(10)));   // idle: it ends
+            Assert.Equal(5, Otel.Load().Count);
+            Assert.Equal(UnixFileMode.UserRead | UnixFileMode.UserWrite, File.GetUnixFileMode(Otel.StoreFile));
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("XDG_STATE_HOME", old);
+        }
+    }
+
+    [Fact]
+    public void ClaudesTelemetryGoesInUnlessThePersonHasTheirOwn()
+    {
+        var on = Hooks.ApplyTelemetry("""{"model":"opus","env":{"FOO":"1"}}""", true, 47318, out var theirs)!;
+        Assert.False(theirs);
+        Assert.Contains("\"OTEL_EXPORTER_OTLP_ENDPOINT\": \"http://127.0.0.1:47318\"", on);
+        Assert.DoesNotContain("OTEL_EXPORTER_OTLP_METRICS_ENDPOINT", on);  // would override what Aspire gives its programs
+        Assert.Null(Hooks.ApplyTelemetry(on, true, 47318, out _));
+        var off = Hooks.ApplyTelemetry(on, false, 47318, out _)!;
+        Assert.DoesNotContain("OTEL", off);
+        Assert.Contains("\"FOO\": \"1\"", off);
+        Assert.Null(Hooks.ApplyTelemetry("""{"env":{"OTEL_EXPORTER_OTLP_ENDPOINT":"https://collector.example:4318"}}""", true, 47318, out theirs));
+        Assert.True(theirs);
+    }
 }

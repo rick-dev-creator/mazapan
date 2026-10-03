@@ -27,6 +27,13 @@ claude_hooks = true
 notify_after = { default = 30, min = 0, max = 3600 }
 # A notification when an account's limit passes this percentage (0: never).
 limit_alert = { default = 80, min = 0, max = 100 }
+# Claude Code's metrics (lines written and taken out, commits, pull
+# requests, active time) to a receiver on this computer, for the dashboard:
+# OpenTelemetry, metrics only (never a prompt), kept here. Your own
+# telemetry setup, if there is one, is left as it is.
+otel = true
+# The receiver's port, on 127.0.0.1 only.
+otel_port = { default = 47318, min = 1025, max = 65535 }
 
 [[targets]]
 template = "qmldir.tmpl"
@@ -64,6 +71,18 @@ template = "claude-hooks.sh.tmpl"
 output = "~/.local/share/mazapan/bin/agent-claude-hooks"
 reload = "sh ~/.local/share/mazapan/bin/agent-claude-hooks >/dev/null 2>&1; true"
 
+# The receiver, through a socket: nothing runs until an agent sends.
+[[targets]]
+template = "otel.service.tmpl"
+output = "~/.config/systemd/user/mazapan-agents-otel.service"
+
+[[targets]]
+template = "otel.socket.tmpl"
+output = "~/.config/systemd/user/mazapan-agents-otel.socket"
+# Off or gone: stopped first (a unit whose file has gone can still be
+# stopped, not disabled), then its link taken out.
+reload = "s=mazapan-agents-otel; d=~/.config/systemd/user; if [ -e $d/$s.socket ] && {{ if settings.otel }}true{{ else }}false{{ end }}; then systemctl --user daemon-reload; systemctl --user stop $s.service 2>/dev/null; systemctl --user enable -q $s.socket; systemctl --user restart $s.socket; else systemctl --user stop $s.socket $s.service 2>/dev/null; systemctl --user disable -q $s.socket 2>/dev/null; rm -f $d/sockets.target.wants/$s.socket; systemctl --user daemon-reload; fi; true"
+
 # The palette's "API key" action: one provider's key into the keyring.
 [[targets]]
 template = "agent-keys.sh.tmpl"
@@ -97,3 +116,7 @@ name = "{{ t \"act.dashboard\" }}"
 run = "sh ~/.local/share/mazapan/bin/agents-dashboard"
 keywords = "{{ t \"act.dashboard.kw\" }}"
 glyph = "󰕮"
+
+[[checks]]
+name = "{{ t \"check.otel\" }}"
+run = "{{ if settings.otel }}systemctl --user is-active -q mazapan-agents-otel.socket{{ else }}true{{ end }}"

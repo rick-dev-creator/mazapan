@@ -12,6 +12,9 @@ release (a tag `vX.Y.Z`) names them.
   and OpenAI bill shows in the card and the dashboard, with an OpenRouter
   key's limit. A dot on the workspace where an agent waits for you, works
   or is done.
+- Agents: what Claude Code did, from its own OpenTelemetry metrics sent to
+  this computer only: lines written and taken out, commits, pull requests,
+  your time and the agent's, in the dashboard.
 
 - Agents: Claude Code's hooks can't block a prompt even with an older
   Mazapán (they never fail), and say when work goes on after a permission;

@@ -32,6 +32,15 @@ y no reciben ninguna. Una clave de OpenRouter, o una de administrador de
 Anthropic u OpenAI, muestra además lo que facturan, hoy y en el periodo, y
 el límite de la clave de OpenRouter.
 
+**Lo que hizo Claude Code**, desde sus propias métricas de OpenTelemetry:
+líneas escritas y quitadas (por repositorio), commits, pull requests, tu
+tiempo y el del agente, en el panel. Claude Code las envía a un receptor
+en este equipo (127.0.0.1, `otel_port`), que systemd arranca cuando llega
+la primera y que se va cuando está inactivo; solo métricas, nunca un
+prompt, guardadas en `~/.local/state/mazapan/agents`. Su settings.json
+recibe las variables para ello (`otel`); si ya tienes tu propia
+telemetría, se respeta.
+
 **Un punto en el workspace** donde está la ventana de una sesión (con el
 plugin de Workspaces): ámbar mientras te espera, el color del texto
 mientras trabaja, verde cuando termina.
@@ -53,5 +62,5 @@ cuentan los hooks de Claude Code, que este plugin pone en el
 `settings.json` de cada configuración junto a los tuyos (`claude_hooks`; la
 primera vez se guarda una copia del archivo; apagado los quita; al
 desactivar el plugin entero se quedan, sin hacer daño: `mazapan agents
-hooks remove` los quita), y un pequeño plugin de opencode. Desde una terminal: `mazapan agents`, `mazapan
+hooks remove` y `mazapan agents telemetry off` los quitan), y un pequeño plugin de opencode. Desde una terminal: `mazapan agents`, `mazapan
 agents usage`, `mazapan agents limits`, `mazapan agents run claude`.
