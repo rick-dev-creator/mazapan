@@ -44,6 +44,32 @@ person's approval for root) is the foundation that can be.
    `.env`). Each account's limits (Claude's 5-hour and weekly use, an
    API's spend), and when one runs out, launching the agent takes the
    next and says when the first comes back.
+   **And observability for all of them, in one view** (asked for
+   2026-10-03), built on the same collectors, in three phases:
+   - *The data* (`mazapan agents`): a collector per agent, normalized and
+     kept locally, numbers only, never a prompt. Claude Code's
+     `projects/*.jsonl` per configuration (each subscription apart) and its
+     limits per account; Codex's sessions; opencode's sessions (their cost
+     already worked out); pi's (its format to check); the API providers'
+     own usage and spend endpoints (Anthropic's admin key, OpenAI,
+     OpenRouter's balance). A small OpenTelemetry receiver on localhost:
+     agents that speak it (Claude Code, Codex, Gemini CLI) send tokens,
+     cost, sessions, active time, lines changed and commits, and the ones
+     Mazapán launches come set up for it. Cost: tokens by each model's
+     prices (input, output, cache writes and reads; a price table kept
+     current, LiteLLM's), and for a subscription what it would have cost
+     through the API against what it costs: whether each one pays off. The
+     same through MCP, so an agent can look at the spending too.
+   - *The bar and a panel* (Quickshell): each account's limits, today, the
+     alerts ("account 2 reaches 80 % in about 40 min", "12 USD on the API
+     today"), simple charts drawn in QML.
+   - *The dashboard* (the first Avalonia app, with a charting library,
+     LiveCharts2 or ScottPlot, in the theme): tokens and cost by day,
+     agent, account, model and project; each limit over time with when
+     it runs out at this pace; sessions, their length, active time, the
+     busy hours as a heat map; cache use; lines and commits per project
+     where OpenTelemetry gives them. Quickshell only, simpler, if Avalonia
+     waits.
 3. **Agent sessions, live in the bar**: every agent running, in any
    terminal, working, waiting for you or done (Claude Code hooks,
    opencode's events, the rest by their process); a notification when
@@ -237,7 +263,7 @@ Hyprland, the shell restarted on its own). Better than it:
 | — | Toward 1.0, C7: unattended installs, the release gate | **Done** (2026-10-03): `cidata` + mazapan.json installs by itself; `vm/gate` passes encrypted and plain. C8 (the live USB on real hardware) needs the person |
 | — | Toward 1.0, B: safe to install | **Done** (2026-10-03): encrypted by default with a recovery key, one password (keyring included), locked before sleep, firewall on |
 | — | Toward 1.0, A: it updates itself | **Done** (2026-10-03): its own signed repository with channels, versions and releases, the updater after Omarchy's. Pending, the person's: the release key, hosting, uploading |
-| — | Next: the must-haves (agents and accounts, live sessions, .NET and Expo profiles, hardware fixes from Omarchy) | Decided (2026-10-03); see "Next: what matters most" |
+| — | Next: the must-haves (agents and accounts with observability, live sessions, .NET and Expo profiles, hardware fixes from Omarchy) | Decided (2026-10-03); see "Next: what matters most" |
 | 1 | Updates you can trust | **Done** (2026-09-28); follow-ups listed below |
 | 2 | Monitors | **Done** (2026-09-28); follow-ups listed below |
 | 3 | One command palette | **Done** (2026-09-28): first version; follow-ups listed below |
@@ -611,6 +637,10 @@ most"). Mazapán's:
   the next account taken when one runs out.
 - *Live sessions:* working / waiting for you / done in the bar, from every
   agent; a notification when one waits; a click to its window.
+- *Observability:* every agent and provider in one view (tokens, cost,
+  limits and when they run out, sessions, cache, lines and commits),
+  from local collectors and an OpenTelemetry receiver; see "Next: what
+  matters most", item 2.
 - Then: context without copy and paste (a capture, a selection, a
   notification, a file, `? question` in the palette); an agent's changes
   approved with their diff, marked on the timeline, undone together;
