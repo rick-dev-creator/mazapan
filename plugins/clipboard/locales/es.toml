@@ -25,3 +25,4 @@ hints = "↑↓ entrada   ↵ pegar   clic derecho o supr borrar   ctrl+p fijar 
 "hints.copy" = "↑↓ entrada   ↵ copiar   clic derecho o supr borrar   ctrl+p fijar   esc salir"
 "act.open" = "Historial del portapapeles"
 "act.open.kw" = "portapapeles copiar pegar historial"
+"home" = "Portapapeles"

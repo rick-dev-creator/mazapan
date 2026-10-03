@@ -5,10 +5,15 @@
 // list is always right). Each result shows the command it runs: you start
 // by clicking, and end up knowing the command. ↑↓ to pick, ↵ to run,
 // ctrl+c to copy the command; "> " searches only actions and keys.
+// Opened with nothing typed it's the desktop's menu: a tile for each place
+// (the actions plugins mark home: Apps, Updates, Settings…), the computer's
+// power, and the open windows. What isn't installed is found too: the
+// catalog's apps, as "Install …" (the Apps panel on that app).
 
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import qs
@@ -21,6 +26,9 @@ Item {
   property string query: ""
   property int current: 0
   property string message: ""
+  // An action that asks twice: which one is waiting for its second ↵.
+  property string armed: ""
+  property double armedAt: 0
 
   readonly property bool showCommands: {{ settings.show_commands }}
   // Shell commands, the user's own quoting kept; never empty.
@@ -44,6 +52,9 @@ Item {
   }
 
   function show() {
+    // The catalog's apps not installed yet: found by typing, as "Install …".
+    if (actions.some(a => a.plugin === "apps")) catalogProbe.running = true
+    updatesSeen.reload()
     // Windows opened since the bar started may lack their class until
     // Quickshell asks Hyprland again.
     Hyprland.refreshToplevels()
@@ -101,7 +112,7 @@ Item {
     }
     for (const a of actions) {
       out.push({
-        kind: a.run ? "action" : "key", glyph: a.run ? "󰘳" : "󰌌", title: a.name,
+        kind: a.run ? "action" : "key", glyph: a.run ? (a.glyph || "󰘳") : "󰌌", title: a.name, confirm: !!a.confirm,
         detail: a.plugin, command: a.run || "", searchable: true, key: a.key || "", words: a.keywords || "",
         argv: !a.run ? null : a.terminal ? ["sh", "-c", `${terminalHold} sh -c ${word(a.run)}`] : ["sh", "-c", a.run],
       })
@@ -120,6 +131,55 @@ Item {
     }
     return out
   }
+
+  // --- the first screen ------------------------------------------------------
+
+  readonly property bool home: open && query.trim() === ""
+  function actionItem(a, kind) {
+    return {
+      kind: kind, glyph: a.glyph || "󰘳", title: a.label || a.name, detail: a.label ? a.name : a.plugin,
+      command: a.run || "", searchable: true, key: a.key || "", words: a.keywords || "", plugin: a.plugin, confirm: !!a.confirm,
+      argv: !a.run ? null : a.terminal ? ["sh", "-c", `${terminalHold} sh -c ${word(a.run)}`] : ["sh", "-c", a.run],
+    }
+  }
+  // A plugin's way in, in the order they ask for; then the computer's power.
+  readonly property var tiles: actions.filter(a => a.home > 0 && a.run).sort((x, y) => x.home - y.home).map(a => actionItem(a, "home"))
+  readonly property var systemItems: actions.filter(a => a.plugin === "power" && a.run).map(a => actionItem(a, "system"))
+  readonly property var homeWindows: snapshot.filter(c => c.kind === "window")
+  readonly property int homeOffset: tiles.length + systemItems.length
+  readonly property int columns: 4
+
+  // How many updates there are, as the updates panel last saw (on a tile).
+  property int updatesCount: 0
+  FileView {
+    id: updatesSeen
+    path: Quickshell.env("HOME") + "/.local/state/mazapan/updates/last.json"
+    printErrors: false
+    onLoaded: {
+      try {
+        const d = JSON.parse(text())
+        root.updatesCount = (d.packages || []).length + (d.flatpaks || []).length
+      } catch (e) { root.updatesCount = 0 }
+    }
+    onLoadFailed: root.updatesCount = 0
+  }
+
+  // The catalog's apps not installed (mazapan apps list), to install.
+  property var catalog: []
+  Process {
+    id: catalogProbe
+    command: ["mazapan", "apps", "list", "--json"]
+    stdout: StdioCollector {
+      onStreamFinished: {
+        try { root.catalog = (JSON.parse(text).apps || []).filter(a => !a.installed) } catch (e) {}
+      }
+    }
+  }
+  readonly property var installItems: catalog.map(a => ({
+    kind: "install", glyph: "󰏔", title: {{ tq "install" }}.arg(a.name), detail: a.description,
+    command: `qs ipc -c mazapan call mazapan open apps ${a.id}`, searchable: false, key: "",
+    words: a.name + " " + a.category, argv: ["qs", "ipc", "-c", "mazapan", "call", "mazapan", "open", "apps", a.id],
+  }))
 
   // --- finding ---------------------------------------------------------------
 
@@ -178,7 +238,9 @@ Item {
   readonly property var results: {
     if (!open) return []
     const onlyActions = query.startsWith(">")
-    let list = snapshot.slice()
+    // Nothing typed: the first screen, in the order it's shown.
+    if (home) return tiles.concat(systemItems, homeWindows)
+    let list = snapshot.concat(installItems)
     if (onlyActions) list = list.filter(c => c.kind === "action" || c.kind === "key")
     const q = onlyActions ? query.slice(1).trim() : query.trim()
     if (q === "") {
@@ -199,6 +261,14 @@ Item {
       message = {{ tq "key_only" }}.arg(root.pretty(c.key))
       return
     }
+    // Power off, reboot…: ↵ once more on the same one, a moment later.
+    if (c.confirm && (armed !== c.command || Date.now() - armedAt > 4000)) {
+      armed = c.command
+      armedAt = Date.now()
+      message = {{ tq "confirm" }}.arg(c.title)
+      return
+    }
+    armed = ""
     close()
     Quickshell.execDetached(c.cwd ? { command: c.argv, workingDirectory: c.cwd } : c.argv)
   }
@@ -213,7 +283,24 @@ Item {
   function move(by) {
     if (results.length === 0) return
     current = Math.max(0, Math.min(results.length - 1, current + by))
-    list.positionViewAtIndex(current, ListView.Contain)
+    if (!home) list.positionViewAtIndex(current, ListView.Contain)
+    else if (current >= homeOffset) list.positionViewAtIndex(current - homeOffset, ListView.Contain)
+  }
+
+  // On the first screen up and down go by rows of tiles; the power row is
+  // one row; the windows below it, one by one.
+  function vertical(dir) {
+    if (!home || current >= homeOffset) return move(dir)
+    if (current < tiles.length) {
+      const next = current + dir * columns
+      if (next < 0) return
+      current = next < tiles.length ? next : Math.min(tiles.length, results.length - 1)
+    } else {
+      // Up: the start of the tiles' last row; down: the first window.
+      if (dir < 0) current = tiles.length > 0 ? Math.floor((tiles.length - 1) / columns) * columns : current
+      else current = Math.min(homeOffset, results.length - 1)
+    }
+    if (current >= homeOffset) list.positionViewAtIndex(current - homeOffset, ListView.Contain)
   }
 
   PanelWindow {
@@ -278,8 +365,13 @@ Item {
               const ctrl = event.modifiers & Qt.ControlModifier
               if (event.key === Qt.Key_Escape) root.close()
               else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) root.run(root.current)
-              else if (event.key === Qt.Key_Down || event.key === Qt.Key_Tab || (ctrl && (event.key === Qt.Key_J || event.key === Qt.Key_N))) root.move(1)
-              else if (event.key === Qt.Key_Up || event.key === Qt.Key_Backtab || (ctrl && (event.key === Qt.Key_K || event.key === Qt.Key_P))) root.move(-1)
+              else if (event.key === Qt.Key_Down || (ctrl && (event.key === Qt.Key_J || event.key === Qt.Key_N))) root.vertical(1)
+              else if (event.key === Qt.Key_Up || (ctrl && (event.key === Qt.Key_K || event.key === Qt.Key_P))) root.vertical(-1)
+              else if (event.key === Qt.Key_Tab) root.move(1)
+              else if (event.key === Qt.Key_Backtab) root.move(-1)
+              // Nothing typed: left and right go across the tiles.
+              else if (root.home && event.key === Qt.Key_Right) root.move(1)
+              else if (root.home && event.key === Qt.Key_Left) root.move(-1)
               else if (event.key === Qt.Key_PageDown) root.move(8)
               else if (event.key === Qt.Key_PageUp) root.move(-8)
               else if (ctrl && event.key === Qt.Key_C && field.selectedText === "") root.copy(root.current)
@@ -300,19 +392,140 @@ Item {
 
         Rule { Layout.fillWidth: true }
 
+        // Nothing typed: a tile for each place, the computer's power, then
+        // the open windows (the list below).
+        GridLayout {
+          visible: root.home && root.tiles.length > 0
+          Layout.fillWidth: true
+          Layout.margins: 12
+          columns: root.columns
+          rowSpacing: 8
+          columnSpacing: 8
+          Repeater {
+            model: root.home ? root.tiles : []
+            Rectangle {
+              id: tile
+              required property var modelData
+              required property int index
+              readonly property bool chosen: index === root.current
+              Layout.fillWidth: true
+              Layout.preferredWidth: 1
+              implicitHeight: 66
+              radius: Theme.radius
+              color: chosen ? Theme.surface : tileArea.containsMouse ? Qt.darker(Theme.surfaceRaised, 1.08) : Theme.bg
+              border.width: 1
+              border.color: chosen ? Theme.accent : Theme.border
+              ColumnLayout {
+                anchors.centerIn: parent
+                width: parent.width - 12
+                spacing: 4
+                Text {
+                  text: tile.modelData.glyph
+                  Layout.alignment: Qt.AlignHCenter
+                  color: tile.chosen ? Theme.accentText : Theme.fgMuted
+                  font.family: Theme.fontMono
+                  font.pointSize: 16
+                }
+                Text {
+                  text: tile.modelData.title
+                  Layout.fillWidth: true
+                  horizontalAlignment: Text.AlignHCenter
+                  elide: Text.ElideRight
+                  color: Theme.fg
+                  font.family: Theme.fontMono
+                  font.pointSize: 9
+                }
+              }
+              // How many updates there are, on the Updates tile.
+              Rectangle {
+                visible: tile.modelData.plugin === "updates" && root.updatesCount > 0
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.margins: 6
+                implicitWidth: Math.max(18, badge.implicitWidth + 10)
+                implicitHeight: 18
+                radius: 9
+                color: Theme.accent
+                Text {
+                  id: badge
+                  anchors.centerIn: parent
+                  text: root.updatesCount
+                  color: Theme.accentFg
+                  font.family: Theme.fontMono
+                  font.pointSize: 8
+                  font.bold: true
+                }
+              }
+              MouseArea {
+                id: tileArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: { root.current = tile.index; root.run(tile.index) }
+              }
+            }
+          }
+        }
+
+        RowLayout {
+          visible: root.home && root.systemItems.length > 0
+          Layout.fillWidth: true
+          Layout.leftMargin: 12
+          Layout.rightMargin: 12
+          Layout.bottomMargin: 10
+          spacing: 8
+          Repeater {
+            model: root.home ? root.systemItems : []
+            Rectangle {
+              id: power
+              required property var modelData
+              required property int index
+              readonly property int at: root.tiles.length + index
+              readonly property bool chosen: at === root.current
+              Layout.fillWidth: true
+              Layout.preferredWidth: 1
+              implicitHeight: 34
+              radius: Theme.radius
+              color: chosen ? Theme.surface : powerArea.containsMouse ? Qt.darker(Theme.surfaceRaised, 1.08) : "transparent"
+              border.width: 1
+              border.color: chosen ? Theme.accent : Theme.border
+              RowLayout {
+                anchors.centerIn: parent
+                spacing: 6
+                Text { text: power.modelData.glyph; color: power.chosen ? Theme.accentText : Theme.fgMuted; font.family: Theme.fontMono; font.pointSize: 10 }
+                Text { text: power.modelData.title; color: Theme.fg; font.family: Theme.fontMono; font.pointSize: 9 }
+              }
+              MouseArea {
+                id: powerArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: { root.current = power.at; root.run(power.at) }
+              }
+            }
+          }
+        }
+
+        Caption {
+          visible: root.home && root.homeWindows.length > 0
+          Layout.leftMargin: 14
+          Layout.bottomMargin: 4
+          text: {{ tq "windows" }}
+        }
+
         ListView {
           id: list
           Layout.fillWidth: true
-          implicitHeight: Math.min(contentHeight, Math.min(9 * 46, win.screenHeight * 0.5))
+          implicitHeight: Math.min(contentHeight, Math.min((root.home ? 5 : 9) * 46, win.screenHeight * 0.5))
           clip: true
-          model: root.results
+          model: root.home ? root.homeWindows : root.results
           boundsBehavior: Flickable.StopAtBounds
 
           delegate: Rectangle {
             id: row
             required property var modelData
             required property int index
-            readonly property bool chosen: index === root.current
+            // On the first screen the windows come after the tiles and the power row.
+            readonly property int at: index + (root.home ? root.homeOffset : 0)
+            readonly property bool chosen: at === root.current
 
             width: list.width
             height: 46
@@ -407,6 +620,7 @@ Item {
                   case "window": return {{ tq "kind.window" }}
                   case "app": return {{ tq "kind.app" }}
                   case "key": return {{ tq "kind.key" }}
+                  case "install": return {{ tq "kind.install" }}
                   }
                   return {{ tq "kind.action" }}
                 }
@@ -423,8 +637,8 @@ Item {
               anchors.fill: parent
               hoverEnabled: true
               onClicked: {
-                root.current = row.index
-                root.run(row.index)
+                root.current = row.at
+                root.run(row.at)
               }
             }
           }
@@ -451,7 +665,10 @@ Item {
           Caption {
             Layout.fillWidth: true
             elide: Text.ElideRight
-            text: root.message !== "" ? root.message : {{ tq "hints" }}
+            // On a tile, its command: learned as it's picked.
+            text: root.message !== "" ? root.message
+              : root.home && root.showCommands && root.current < root.homeOffset && root.results[root.current] ? "$ " + root.results[root.current].command
+              : {{ tq "hints" }}
             color: root.message !== "" ? Theme.accentText : Theme.fgSubtle
           }
           Caption { text: root.results.length }

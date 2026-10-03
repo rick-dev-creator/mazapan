@@ -77,6 +77,10 @@ session = true
 [[actions]]
 name = "{{ t \"act.open\" }}"
 run = "qs ipc -c mazapan call mazapan panel notifications"
+# On the palette's first screen.
+home = 10
+glyph = "󰂚"
+label = "{{ t \"home\" }}"
 key = "{{ settings.key }}"
 keywords = "{{ t \"act.open.kw\" }}"
 

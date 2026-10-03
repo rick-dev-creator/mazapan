@@ -22,3 +22,4 @@
 "coverage" = "Chega a %1 de %2 apps instalados"
 "missing" = "faltam: %1 (mazapan coverage)"
 "coverage_failed" = "Não foi possível saber a quais apps o tema chega (mazapan coverage)"
+"home" = "Tema"

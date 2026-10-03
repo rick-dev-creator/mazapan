@@ -45,3 +45,4 @@ hints = "←→↑↓ aperçu   ↵ garder   t thème à partir d'elle   esc qui
 "act.theme.kw" = "fond d'écran arrière-plan thème réinitialiser"
 "theme_from_named" = "Thème à partir de “%1”"
 "theme_made_body" = "“%1” : tout le bureau dans ses couleurs, chaque contraste vérifié."
+"home" = "Fond d'écran"

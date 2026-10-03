@@ -302,6 +302,10 @@ public sealed partial class Plugin
                 Key = a.String("key"),
                 Terminal = a.Bool("terminal"),
                 Keywords = a.String("keywords"),
+                Home = a.Int("home"),
+                Glyph = a.String("glyph"),
+                Label = a.String("label"),
+                Confirm = a.Bool("confirm"),
             });
         var cov = r.Sub("coverage");
         p.Coverage.Apps = cov.Strings("apps");
@@ -526,4 +530,16 @@ public sealed class Action
     public bool Terminal;
     /// <summary>Keywords help find it: other words people use for it.</summary>
     public string Keywords = "";
+    /// <summary>
+    /// Home: on the palette's first screen (what opens before anything is
+    /// typed), in this order; 0 isn't. A plugin's way in (its panel), not
+    /// each thing it does: those are found by typing.
+    /// </summary>
+    public long Home;
+    /// <summary>Its icon on that screen: a Nerd Font glyph.</summary>
+    public string Glyph = "";
+    /// <summary>Its name on that screen, short ("Theme"; Name is "Change the theme"); a template, as Name. Empty: Name.</summary>
+    public string Label = "";
+    /// <summary>Confirm: done only when asked twice (power off, reboot): one stray ↵ doesn't.</summary>
+    public bool Confirm;
 }

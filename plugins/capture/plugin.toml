@@ -40,6 +40,10 @@ reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 [[actions]]
 name = "{{ t \"act.capture\" }}"
 run = "qs ipc -c mazapan call mazapan panel capture"
+# On the palette's first screen.
+home = 11
+glyph = "󰄀"
+label = "{{ t \"home\" }}"
 key = "{{ settings.key }}"
 keywords = "{{ t \"act.capture.kw\" }}"
 

@@ -45,3 +45,4 @@ hints = "←→↑↓ Vorschau   ↵ übernehmen   t Theme daraus   esc verlasse
 "act.theme.kw" = "hintergrundbild hintergrund theme zurücksetzen"
 "theme_from_named" = "Theme aus „%1“"
 "theme_made_body" = "„%1“: der ganze Desktop in seinen Farben, jeder Kontrast geprüft."
+"home" = "Hintergrund"

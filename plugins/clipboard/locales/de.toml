@@ -25,3 +25,4 @@ hints = "↑↓ Eintrag   ↵ einfügen   Rechtsklick oder entf löschen   strg+
 "hints.copy" = "↑↓ Eintrag   ↵ kopieren   Rechtsklick oder entf löschen   strg+p anheften   esc verlassen"
 "act.open" = "Zwischenablage-Verlauf"
 "act.open.kw" = "zwischenablage kopieren einfügen verlauf clipboard"
+"home" = "Zwischenablage"

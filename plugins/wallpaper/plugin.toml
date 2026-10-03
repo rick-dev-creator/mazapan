@@ -54,6 +54,10 @@ reload = "hyprctl reload >/dev/null"
 [[actions]]
 name = "{{ t \"act.pick\" }}"
 run = "qs ipc -c mazapan call mazapan panel wallpapers"
+# On the palette's first screen.
+home = 5
+glyph = "󰸉"
+label = "{{ t \"home\" }}"
 key = "{{ settings.key }}"
 keywords = "{{ t \"act.pick.kw\" }}"
 

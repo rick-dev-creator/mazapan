@@ -276,6 +276,17 @@ keybinding a plugin binds should be one of its actions: that's how the
 palette's list of keys stays right. `terminal = true` is for commands that
 ask or print (`mazapan update`); the terminal stays open afterwards.
 
+The palette opened with nothing typed is the desktop's menu: a tile for
+each place, then the power row and the open windows. A plugin puts its way
+in there (its panel, not each thing it does: those are found by typing):
+
+```toml
+home = 4                       # on the first screen, in this order (0: not)
+glyph = "󰸌"                    # its icon there (a Nerd Font glyph)
+label = "{{ t \"home\" }}"     # its name there, short ("Theme"); default: name
+confirm = true                 # done only on a second ↵ (power off, reboot)
+```
+
 ## Coverage
 
 What a plugin themes, so `mazapan coverage` (and the theme picker) can tell

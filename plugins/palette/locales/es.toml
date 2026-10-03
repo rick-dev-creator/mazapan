@@ -11,8 +11,8 @@
 "setting.terminal_hold" = "Terminal que queda abierto"
 "setting.terminal_hold.help" = "El terminal para los comandos que preguntan o imprimen: queda abierto al terminar, para leerlo."
 
-"placeholder" = "Apps, ventanas, acciones…   (> solo acciones y atajos)"
-"hints" = "↵ ejecutar   ctrl+c copiar el comando   esc cerrar"
+"placeholder" = "Apps (instaladas o no), ventanas, acciones…"
+"hints" = "↵ ejecutar   ctrl+c copiar el comando   > acciones y teclas   esc cerrar"
 "copied" = "Copiado: %1"
 "nothing" = "Nada coincide con «%1»"
 "workspace" = "workspace %1"
@@ -33,3 +33,7 @@
 "act.history.kw" = "actualizaciones registro"
 "act.rollback.kw" = "deshacer revertir volver"
 "act.apply.kw" = "configuración regenerar tema"
+"install" = "Instalar %1"
+"kind.install" = "instalar"
+"windows" = "Ventanas abiertas"
+"confirm" = "%1: ↵ otra vez para confirmar"

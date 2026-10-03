@@ -17,3 +17,4 @@
 "coverage" = "Reaches %1 of %2 installed apps"
 "missing" = "not yet: %1 (mazapan coverage)"
 "coverage_failed" = "Couldn't tell which apps the theme reaches (mazapan coverage)"
+"home" = "Theme"

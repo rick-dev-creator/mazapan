@@ -9,7 +9,7 @@ using Scriban.Runtime;
 namespace Mazapan.Rendering;
 
 /// <summary>Action is one plugin action, rendered: what the command palette lists.</summary>
-public sealed record RenderedAction(string Plugin, string Name, string Run, string Key, bool Terminal, string Keywords);
+public sealed record RenderedAction(string Plugin, string Name, string Run, string Key, bool Terminal, string Keywords, long Home = 0, string Glyph = "", string Label = "", bool Confirm = false);
 
 /// <summary>Check is one plugin check, rendered.</summary>
 public sealed record RenderedCheck(string Plugin, string Name, string Run, long Timeout, bool Session, bool Before = false);
@@ -176,11 +176,11 @@ public static class Renderer
             for (var n = 0; n < p.Actions.Count; n++)
             {
                 var a = p.Actions[n];
-                var f = new[] { a.Name, a.Run, a.Key, a.Keywords }.Select(s => scope.String(s, $"actions[{n}]")).ToArray();
+                var f = new[] { a.Name, a.Run, a.Key, a.Keywords, a.Label }.Select(s => scope.String(s, $"actions[{n}]")).ToArray();
                 // A key set to "" in config.toml unbinds it: an action with
                 // neither a command nor a key left has nothing to offer.
                 if (f[1].Trim() == "" && f[2].Trim() == "") continue;
-                output.Actions.Add(new(p.Id, f[0], f[1], f[2], a.Terminal, f[3]));
+                output.Actions.Add(new(p.Id, f[0], f[1], f[2], a.Terminal, f[3], a.Home, a.Glyph, f[4], a.Confirm));
             }
             ready.Add((p, scope));
         }

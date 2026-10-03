@@ -38,5 +38,9 @@ reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 [[actions]]
 name = "{{ t \"open\" }}"
 run = "qs ipc -c mazapan call mazapan panel monitors"
+# On the palette's first screen.
+home = 6
+glyph = "󰍹"
+label = "{{ t \"home\" }}"
 key = "{{ settings.key }}"
 keywords = "{{ t \"open.kw\" }}"

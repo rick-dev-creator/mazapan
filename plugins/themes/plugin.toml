@@ -27,6 +27,10 @@ reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 [[actions]]
 name = "{{ t \"act.pick\" }}"
 run = "qs ipc -c mazapan call mazapan panel themes"
+# On the palette's first screen.
+home = 4
+glyph = "󰸌"
+label = "{{ t \"home\" }}"
 key = "{{ settings.key }}"
 keywords = "{{ t \"act.pick.kw\" }}"
 

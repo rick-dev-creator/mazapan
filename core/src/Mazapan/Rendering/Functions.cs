@@ -329,6 +329,10 @@ static class Model
             if (a.Key != "") o["key"] = a.Key;
             if (a.Terminal) o["terminal"] = true;
             if (a.Keywords != "") o["keywords"] = a.Keywords;
+            if (a.Home > 0) o["home"] = a.Home;
+            if (a.Glyph != "") o["glyph"] = a.Glyph;
+            if (a.Label != "") o["label"] = a.Label;
+            if (a.Confirm) o["confirm"] = true;
             list.Add(Frozen(o));
         }
         return Frozen(list);

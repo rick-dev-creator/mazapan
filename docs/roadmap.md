@@ -189,11 +189,11 @@ Hyprland, the shell restarted on its own). Better than it:
 | 13 | The same desktop anywhere | Planned |
 | 14 | Workspace sessions | Dropped (2026-09-30): Hyprland's workspaces are enough |
 | 15 | The CLI in your language | Dropped (2026-09-30): the CLI stays in English; everything graphical is localized |
-| 16 | Installation and first boot | **Done** (2026-09-30): catalog (17), welcome, the ISO with its graphical installer (any language, time zone, keyboard), snapshots from the install on; what any machine needs (its hardware's drivers chosen live and installed offline, touchpad, keyring, default apps, printing, input methods); audited. Pending: Mazapán's own signed package repository and publishing the ISO (both need a hosting and signing decision), unattended installs (`cidata`), real hardware |
+| 16 | Installation and first boot | **Done** (2026-09-30): catalog (17), welcome, the ISO with its graphical installer (any language, time zone, keyboard), snapshots from the install on; what any machine needs (its hardware's drivers chosen live and installed offline, touchpad, keyring, default apps, printing, input methods); audited. Its own signed repository and unattended installs since (1.0's A and C7). Pending: publishing the ISO (hosting), real hardware, right-to-left languages in the list |
 | 17 | Apps: install and remove | **Done** (2026-09-29): catalog, `mazapan apps`, the Apps menu with profiles (several at once); Flatpak apps show without a new login (2026-09-30); audited. Pending: catalogs from others |
 | 18 | Settings with a face | In progress: the Settings panel (keyboard, touchpad and mouse, default apps, language and time zone) done (2026-09-30); fonts, keybindings, preview to do |
-| 19 | Security | Planned, researched (2026-09-30): what a macOS user expects, each part copied from established practice; order below |
-| 20 | Updates, visible | **Done** (2026-09-30): the bar says when there are, a panel shows them (news, restart), updated with a click (pkexec), Flatpak apps too. Pending: firmware, downloading ahead |
+| 19 | Security | In progress: researched (2026-09-30); the disk encrypted with a recovery key and one password, locked before sleep, the firewall done (2026-10-03, 1.0's B). To do: changing the password in one place, the privacy dots and per-app permissions, fingerprint and FIDO2, hibernation, TPM later |
+| 20 | Updates, visible | **Done** (2026-09-30): the bar says when there are, a panel shows them (news, restart), updated with a click (pkexec), Flatpak apps too; the updater redone after Omarchy's (2026-10-03). Pending: firmware, downloading ahead, plugin updates alongside |
 | 21 | Boot and login in the theme | In progress: the login screen (plugin `login`, greetd) done; the boot splash and menu to do |
 | 22 | Sharing | Planned |
 | 23 | More capture | Planned |
@@ -336,6 +336,20 @@ logo at the start of the bar):
 - Audited once (9 findings, all fixed). Tested in the dev VM: open with
   the key, search, run an action, launch a terminal app, launch
   an app, run a terminal action, copy a command, close with SUPER + Q.
+
+*The menu* (2026-10-03), against Omarchy's: its menu has ten entries and
+some 360 below them, up to four deep (install › development › javascript ›
+node), grouped by verb (the same app in Install and in Remove), most
+opening a terminal, and Update mixing the system's update with the time
+zone, the password and restarting processes. Ours is the palette itself,
+not a second search: opened with nothing typed, a tile for each place
+(Apps, Updates with how many, Settings, Theme, Wallpaper, Screens, Modes,
+History, Plugins, Notifications, Capture, Clipboard; what plugins mark
+`home`), the power row (shut down and the like ask a second ↵), and the
+open windows; typing searches everything, and what isn't installed too:
+the catalog's apps as "Install …", which opens the Apps panel on that app
+with what it brings and its size, one button. One level, no terminal,
+every tile's command shown as it's picked.
 
 **Follow-ups.** Files (plocate/fd) and settings (needs `mazapan set`);
 remembering what you pick often; plugin actions with arguments; a check

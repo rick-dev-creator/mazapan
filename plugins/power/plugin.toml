@@ -34,25 +34,33 @@ reload = "hyprctl reload >/dev/null"
 [[actions]]
 name = "{{ t \"lock\" }}"
 run = "pidof hyprlock || hyprlock"
+glyph = "󰌾"
 key = "{{ settings.lock_key }}"
 keywords = "{{ t \"lock.kw\" }}"
 
 [[actions]]
 name = "{{ t \"suspend\" }}"
 run = "(pidof hyprlock || hyprlock &); sleep 1; systemctl suspend"
+glyph = "󰒲"
 keywords = "{{ t \"suspend.kw\" }}"
 
 [[actions]]
 name = "{{ t \"logout\" }}"
 run = "hyprctl dispatch 'hl.dsp.exit()'"
+glyph = "󰍃"
+confirm = true
 keywords = "{{ t \"logout.kw\" }}"
 
 [[actions]]
 name = "{{ t \"reboot\" }}"
 run = "systemctl reboot"
+glyph = "󰜉"
+confirm = true
 keywords = "{{ t \"reboot.kw\" }}"
 
 [[actions]]
 name = "{{ t \"poweroff\" }}"
 run = "systemctl poweroff"
+glyph = "󰐥"
+confirm = true
 keywords = "{{ t \"poweroff.kw\" }}"

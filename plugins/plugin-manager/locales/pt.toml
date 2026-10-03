@@ -66,3 +66,4 @@
 "allow_install" = "Permitir e instalar"
 "interrupted" = "foi interrompido antes de terminar"
 "in_config" = "(em config.toml)"
+"home" = "Plugins"

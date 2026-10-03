@@ -69,6 +69,18 @@ ShellRoot {
       }
       return `no panel ${name}`
     }
+    // Open a panel (never closes it), on something of its own when it takes
+    // one (showWith: the Apps panel on an app); "" for just open.
+    function open(name: string, arg: string): string {
+      for (const p of panels.instances) {
+        if (p.name === name && p.item) {
+          if (arg !== "" && p.item.showWith) p.item.showWith(arg)
+          else if (!p.item.open) { if (p.item.show) p.item.show(); else p.item.toggle() }
+          return "ok"
+        }
+      }
+      return `no panel ${name}`
+    }
     // Take widgets out of the bar ("markets,weather"; "": all back).
     function hide(names: string): void {
       barState.hidden = names.split(",").map(n => n.trim()).filter(n => n !== "").join(",")

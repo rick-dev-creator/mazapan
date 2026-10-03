@@ -25,3 +25,4 @@ hints = "↑↓ entrada   ↵ colar   clique direito ou del remover   ctrl+p fix
 "hints.copy" = "↑↓ entrada   ↵ copiar   clique direito ou del remover   ctrl+p fixar   esc sair"
 "act.open" = "Histórico da área de transferência"
 "act.open.kw" = "área de transferência copiar colar histórico clipboard"
+"home" = "Área de transferência"

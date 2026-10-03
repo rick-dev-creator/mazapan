@@ -11,8 +11,8 @@
 "setting.terminal_hold" = "Terminal, das offen bleibt"
 "setting.terminal_hold.help" = "Das Terminal für Befehle, die nachfragen oder etwas ausgeben: Es bleibt danach offen, zum Nachlesen."
 
-"placeholder" = "Apps, Fenster, Aktionen…   (> nur Aktionen und Tastenkürzel)"
-"hints" = "↵ ausführen   strg+c Befehl kopieren   esc schließen"
+"placeholder" = "Apps (installiert oder nicht), Fenster, Aktionen…"
+"hints" = "↵ ausführen   Strg+C Befehl kopieren   > Aktionen und Tasten   Esc schließen"
 "copied" = "Kopiert: %1"
 "nothing" = "Nichts passt zu „%1“"
 "workspace" = "Arbeitsfläche %1"
@@ -33,3 +33,7 @@
 "act.history.kw" = "updates aktualisierungen protokoll"
 "act.rollback.kw" = "rückgängig downgrade zurücksetzen"
 "act.apply.kw" = "konfiguration neu erzeugen theme"
+"install" = "%1 installieren"
+"kind.install" = "installieren"
+"windows" = "Offene Fenster"
+"confirm" = "%1: zum Bestätigen noch einmal ↵"

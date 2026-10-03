@@ -65,3 +65,4 @@
 "allow_install" = "Autoriser et installer"
 "interrupted" = "il a été arrêté avant la fin"
 "in_config" = "(dans config.toml)"
+"home" = "Plugins"

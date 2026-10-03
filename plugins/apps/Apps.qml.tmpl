@@ -81,6 +81,13 @@ Item {
     open = true
   }
 
+  // Opened on one app, its install asked for (the palette's "Install …"):
+  // what it brings and its size, then one button.
+  function showWith(id) {
+    show()
+    if (id !== "") ask([id], false)
+  }
+
   function close() { open = false }
 
   function refresh() {

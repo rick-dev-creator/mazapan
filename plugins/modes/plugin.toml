@@ -42,6 +42,9 @@ reload = "hyprctl reload >/dev/null"
 [[actions]]
 name = "{{ t \"act.open\" }}"
 run = "qs ipc -c mazapan call mazapan panel modes"
+# On the palette's first screen.
+home = 7
+glyph = "󰔎"
 key = "{{ settings.key }}"
 keywords = "{{ t \"act.open.kw\" }}"
 

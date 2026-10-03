@@ -20,3 +20,6 @@ release (a tag `vX.Y.Z`) names them.
 - The firewall on: nothing comes in that wasn't asked for.
 - Unattended installs: a drive labeled cidata with the installer's answers
   (mazapan.json) installs by itself.
+- The menu: SUPER + Space with nothing typed shows a tile for each place
+  (Apps, Updates, Settings, Theme…), the power row and the open windows;
+  typing finds apps that aren't installed too, to install them.

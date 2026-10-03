@@ -25,3 +25,4 @@ hints = "↑↓ entrée   ↵ coller   clic droit ou suppr effacer   ctrl+p épi
 "hints.copy" = "↑↓ entrée   ↵ copier   clic droit ou suppr effacer   ctrl+p épingler   esc quitter"
 "act.open" = "Historique du presse-papiers"
 "act.open.kw" = "presse-papiers copier coller historique clipboard"
+"home" = "Presse-papiers"
