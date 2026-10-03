@@ -44,3 +44,13 @@ bundled theme's id takes its place.
 
 A theme can also be made from a picture: "Theme from this picture" in the
 wallpaper picker, or `mazapan themes from-image PICTURE`.
+
+**Omarchy's themes**, all of them at once: "Themes: import Omarchy's" in
+the palette, or `mazapan themes import-omarchy`. It takes the ones on this
+computer (an Omarchy install, `~/.config/omarchy/themes`), else fetches
+Omarchy's own (its `themes/` folder alone); a folder or a theme's git
+repository (https) can be named too: `mazapan themes import-omarchy
+https://github.com/someone/omarchy-dune-theme`. Each becomes
+`omarchy-NAME` among your themes: its palette, its first background as the
+wallpaper, the accent's shades and the status colors adjusted just enough
+to read. Importing again makes them over.

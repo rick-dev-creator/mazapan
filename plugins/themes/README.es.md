@@ -46,3 +46,13 @@ tema incluido ocupa su lugar.
 
 También se puede hacer un tema a partir de una foto: "Tema desde esta
 foto" en el selector de fondos, o `mazapan themes from-image FOTO`.
+
+**Los temas de Omarchy**, todos a la vez: «Temas: importar los de
+Omarchy» en la paleta, o `mazapan themes import-omarchy`. Toma los de
+este equipo (una instalación de Omarchy, `~/.config/omarchy/themes`) o, si
+no hay, descarga los de Omarchy (solo su carpeta `themes/`); también se
+puede indicar una carpeta o el repositorio git de un tema (https):
+`mazapan themes import-omarchy https://github.com/alguien/omarchy-dune-theme`.
+Cada uno queda como `omarchy-NOMBRE` entre tus temas: su paleta, su primer
+fondo como fondo de pantalla, los tonos del acento y los colores de estado
+ajustados lo justo para leerse. Importarlos otra vez los rehace.

@@ -132,6 +132,15 @@ public class PluginTests
     }
 
     [Fact]
+    public void EveryBuiltInPluginLoads()
+    {
+        // One that doesn't is left out with a warning, and those requiring it with it.
+        var (all, problems) = Plugin.Discover([Path.Join(Repo.Root, "plugins")]);
+        Assert.Empty(problems);
+        Assert.Equal(Directory.GetDirectories(Path.Join(Repo.Root, "plugins")).Count(d => File.Exists(Path.Join(d, "plugin.toml"))), all.Count);
+    }
+
+    [Fact]
     public void BuiltInPluginsHaveTheirNameInSpanish()
     {
         // The Plugins panel shows each plugin's name and description in the

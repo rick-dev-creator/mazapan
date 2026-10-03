@@ -23,3 +23,5 @@
 "missing" = "faltan: %1 (mazapan coverage)"
 "coverage_failed" = "No se pudo saber a qué apps llega el tema (mazapan coverage)"
 "home" = "Tema"
+"act.omarchy" = "Temas: importar los de Omarchy"
+"act.omarchy.kw" = "omarchy temas importar catppuccin tokyo night nord gruvbox rose pine kanagawa everforest"

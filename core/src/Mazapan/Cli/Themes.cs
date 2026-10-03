@@ -9,6 +9,7 @@ public static partial class Program
     static int CmdThemes(string[] args)
     {
         if (args.Length > 0 && args[0] == "from-image") return CmdThemesFromImage(args[1..]);
+        if (args.Length > 0 && args[0] == "import-omarchy") return CmdThemesImportOmarchy(args[1..]);
         if (args.Length > 0 && args[0] == "remove") return CmdThemesRemove(args[1..]);
         var fs = new Flags("themes").Bool("json", "everything about every theme, for the theme picker").Parse(args);
         var asJson = fs.IsSet("json");
@@ -203,28 +204,7 @@ public static partial class Program
         var name = fs.Get("name") != "" ? fs.Get("name") : Readable(stem);
         var text = FromImage.Toml(name, mode, $"Colors from {Path.GetFileName(path)}", picture, colors, ansi, accents, like);
 
-        // Written aside (a folder of its own: two at once don't meet),
-        // checked, then swapped in: the old one goes only once the new one
-        // is in place, so a theme that loaded is never lost halfway.
-        var staging = Paths.Join(UserThemes(), ".staging");
-        var tag = $"{Environment.ProcessId}-{DateTime.UtcNow.Ticks}";
-        var tmp = Paths.Join(staging, tag, id);
-        var old = Paths.Join(staging, tag + ".old");
-        try
-        {
-            Files.CreateDirectory(tmp);
-            if (FromImage.Shown(path)) File.Copy(path, Paths.Join(tmp, picture));
-            else FromImage.ToPng(path, Paths.Join(tmp, picture));
-            File.WriteAllText(Paths.Join(tmp, "theme.toml"), text);
-            Theme.Load([Paths.Dir(tmp)], id);
-            if (Directory.Exists(dir)) Directory.Move(dir, old);
-            Directory.Move(tmp, dir);
-        }
-        finally
-        {
-            if (Directory.Exists(Paths.Dir(tmp))) Directory.Delete(Paths.Dir(tmp), true);
-            if (Directory.Exists(old)) Directory.Delete(old, true);
-        }
+        PutTheme(id, text, path, picture);
         var made = Theme.Load(ThemeDirs(), id);
         var problems = Problems(made);
 
@@ -271,6 +251,194 @@ public static partial class Program
         if (fs.IsSet("apply")) return CmdApply(["--theme", id, "--accent", "theme"]);
         Console.WriteLine($"  use it: mazapan apply --theme {id}");
         return 0;
+    }
+
+    /// <summary>
+    /// A theme of the person's own, put in place: written aside (a folder of
+    /// its own: two at once don't meet), checked, then swapped in; the old one
+    /// goes only once the new one is in place, so a theme that loaded is never
+    /// lost halfway. Its picture (if any) beside it, as it is when Qt shows
+    /// it, else as a PNG.
+    /// </summary>
+    static void PutTheme(string id, string text, string? picturePath, string picture)
+    {
+        var dir = Paths.Join(UserThemes(), id);
+        var staging = Paths.Join(UserThemes(), ".staging");
+        var tag = $"{Environment.ProcessId}-{DateTime.UtcNow.Ticks}";
+        var tmp = Paths.Join(staging, tag, id);
+        var old = Paths.Join(staging, tag + ".old");
+        try
+        {
+            Files.CreateDirectory(tmp);
+            if (picturePath != null)
+            {
+                if (FromImage.Shown(picturePath)) File.Copy(picturePath, Paths.Join(tmp, picture));
+                else FromImage.ToPng(picturePath, Paths.Join(tmp, picture));
+            }
+            File.WriteAllText(Paths.Join(tmp, "theme.toml"), text);
+            Theme.Load([Paths.Dir(tmp)], id);
+            if (Directory.Exists(dir)) Directory.Move(dir, old);
+            Directory.Move(tmp, dir);
+        }
+        finally
+        {
+            if (Directory.Exists(Paths.Dir(tmp))) Directory.Delete(Paths.Dir(tmp), true);
+            if (Directory.Exists(old)) Directory.Delete(old, true);
+        }
+    }
+
+    /// <summary>The theme in use (for the font, shape, motion and effects a new one takes), or else the first that loads.</summary>
+    static Theme LikeTheme()
+    {
+        Settings cfg;
+        try { cfg = Settings.Load(); }
+        catch (MazapanException) { cfg = new Settings(); }
+        foreach (var candidate in new[] { cfg.Theme }.Concat(Theme.List(ThemeDirs())).Where(x => x != ""))
+        {
+            try { return Theme.Load(ThemeDirs(), candidate); }
+            catch (MazapanException) { }
+        }
+        throw new MazapanException("no theme loads to take the font and shape from");
+    }
+
+    const string OmarchyRepo = "https://github.com/basecamp/omarchy";
+
+    /// <summary>
+    /// themes import-omarchy [DIR|URL]…: Omarchy's themes made Mazapán's
+    /// (omarchy-NAME), from a folder of them, one theme's folder, or a git
+    /// repository over https (a theme's, or Omarchy's own, whose themes/
+    /// alone is fetched). With nothing named: the Omarchy themes on this
+    /// computer, else Omarchy's repository. Imported again, a theme is made
+    /// over.
+    /// </summary>
+    static int CmdThemesImportOmarchy(string[] args)
+    {
+        var fs = new Flags("themes import-omarchy")
+            .Bool("apply", "switch to it (when one is imported)")
+            .Bool("json", "what was imported: id, name, mode, problems")
+            .Parse(args);
+        var sources = fs.Rest.ToList();
+        var temps = new Dictionary<string, string>(); // a clone's folder -> its address
+        try
+        {
+            var dirs = new List<string>();
+            if (sources.Count == 0)
+            {
+                foreach (var d in new[] { "/usr/share/omarchy/themes", Paths.ExpandHome("~/.config/omarchy/themes") })
+                    if (Directory.Exists(d)) dirs.Add(d);
+                if (dirs.Count == 0) sources.Add(OmarchyRepo);
+            }
+            foreach (var s in sources)
+            {
+                if (s.Contains("://", StringComparison.Ordinal) || s.StartsWith("git@", StringComparison.Ordinal))
+                {
+                    var tmp = Clone(s);
+                    temps[tmp] = s;
+                    dirs.Add(tmp);
+                }
+                else
+                {
+                    var d = Path.GetFullPath(Paths.ExpandHome(s));
+                    if (!Directory.Exists(d)) throw new MazapanException($"{s}: no such folder");
+                    dirs.Add(d);
+                }
+            }
+            // A theme's folder, or a folder of them (a repository's themes/ too).
+            var found = new List<(string Dir, string Name)>();
+            foreach (var d in dirs)
+            {
+                var name = temps.TryGetValue(d, out var url) ? RepoName(url) : Path.GetFileName(d.TrimEnd('/'));
+                if (Mazapan.Themes.Omarchy.Palette(d) != null) { found.Add((d, name)); continue; }
+                var under = Directory.Exists(Path.Join(d, "themes")) ? Path.Join(d, "themes") : d;
+                foreach (var sub in Directory.GetDirectories(under).Order(StringComparer.Ordinal))
+                    if (File.Exists(Path.Join(sub, "colors.toml")) || File.Exists(Path.Join(sub, "alacritty.toml")))
+                        found.Add((sub, Path.GetFileName(sub)));
+            }
+            if (found.Count == 0) throw new MazapanException("no Omarchy theme there (a folder with colors.toml or alacritty.toml)");
+            if (fs.IsSet("apply") && found.Count != 1) throw new MazapanException($"--apply: {found.Count} themes found; apply one with mazapan apply --theme ID");
+
+            var like = LikeTheme();
+            var made = new List<(string Id, string Name, string Mode, List<Pair> Problems)>();
+            var failed = new List<string>();
+            foreach (var (dir, raw) in found)
+            {
+                try
+                {
+                    var palette = Mazapan.Themes.Omarchy.Palette(dir)!;
+                    var (colors, ansi, accents, mode) = Mazapan.Themes.Omarchy.Convert(palette);
+                    var id = Mazapan.Themes.Omarchy.Id(raw);
+                    var name = Mazapan.Themes.Omarchy.Readable(id["omarchy-".Length..]);
+                    var bg = Mazapan.Themes.Omarchy.Wallpaper(dir);
+                    var picture = bg == null ? "grid" : FromImage.Shown(bg) ? "wallpaper" + Path.GetExtension(bg).ToLowerInvariant() : "wallpaper.png";
+                    var text = FromImage.Toml(name, mode, $"Omarchy's {name}", picture, colors, ansi, accents, like)
+                        .Replace("# Made by mazapan from a picture (mazapan themes from-image): its colors,\n# every contrast checked. Edit it as any theme.\n",
+                            "# Imported from Omarchy (mazapan themes import-omarchy): its palette, the\n# accent's tokens and the status colors made to read. Edit it as any theme.\n", StringComparison.Ordinal);
+                    PutTheme(id, text, bg, picture);
+                    made.Add((id, name, mode, Problems(Theme.Load(ThemeDirs(), id))));
+                }
+                catch (Exception e) when (e is MazapanException or FormatException or KeyNotFoundException or IOException)
+                {
+                    failed.Add($"{raw}: {e.Message}");
+                }
+            }
+            if (fs.IsSet("json"))
+            {
+                Console.WriteLine(GoJson.Marshal(new Fields
+                {
+                    { "imported", made.Select(m => new Fields { { "id", m.Id }, { "name", m.Name }, { "mode", m.Mode }, { "problems", Json(m.Problems) } }).ToList() },
+                    { "failed", failed },
+                }));
+            }
+            else
+            {
+                foreach (var m in made)
+                    Console.WriteLine($"  {m.Id,-28} {m.Name} ({m.Mode})" + (m.Problems.Count == 0 ? "" : $"  {Style.Dim}contrast: {string.Join(", ", m.Problems.Select(p => $"{p.Fg} on {p.Bg} {p.Ratio}"))}{Style.Reset}"));
+                foreach (var f in failed) Console.WriteLine($"  {Style.Dim}not imported: {f}{Style.Reset}");
+                Console.WriteLine($"{made.Count} theme{(made.Count == 1 ? "" : "s")} from Omarchy" + (made.Count > 0 && !fs.IsSet("apply") ? $": mazapan apply --theme {made[0].Id}" : ""));
+            }
+            if (fs.IsSet("apply") && made.Count == 1)
+            {
+                if (fs.IsSet("json")) Console.SetOut(TextWriter.Null);
+                return CmdApply(["--theme", made[0].Id, "--accent", "theme"]);
+            }
+            return made.Count > 0 ? 0 : 1;
+        }
+        finally
+        {
+            foreach (var t in temps.Keys) try { Directory.Delete(t, true); } catch (IOException) { }
+        }
+    }
+
+    /// <summary>"https://github.com/me/omarchy-dune-theme.git" → "omarchy-dune-theme".</summary>
+    static string RepoName(string url) => Path.GetFileName(url.TrimEnd('/')).Replace(".git", "", StringComparison.Ordinal);
+
+    /// <summary>A repository, shallow, in a folder of its own (Omarchy's: its themes/ alone). Over https only: never a command through git's other transports.</summary>
+    static string Clone(string url)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var u) || u.Scheme != "https" || u.Host == "")
+            throw new MazapanException($"{url}: a repository over https");
+        var tmp = Paths.Join(Path.GetTempPath(), $"mazapan-omarchy-{Environment.ProcessId}-{DateTime.UtcNow.Ticks}");
+        var omarchy = url.TrimEnd('/').Replace(".git", "", StringComparison.Ordinal) == OmarchyRepo;
+        string[] clone = omarchy
+            ? ["clone", "--quiet", "--depth", "1", "--filter=blob:none", "--sparse", "--", url, tmp]
+            : ["clone", "--quiet", "--depth", "1", "--", url, tmp];
+        Console.Error.WriteLine($"fetching {url}…");
+        if (ThemeGit(clone) != 0) throw new MazapanException($"{url}: couldn't be fetched");
+        if (omarchy && ThemeGit(["-C", tmp, "sparse-checkout", "set", "themes"]) != 0) throw new MazapanException($"{url}: its themes couldn't be fetched");
+        return tmp;
+    }
+
+    static int ThemeGit(string[] args)
+    {
+        var psi = new System.Diagnostics.ProcessStartInfo("git") { UseShellExecute = false, RedirectStandardError = true, RedirectStandardOutput = true };
+        foreach (var a in args) psi.ArgumentList.Add(a);
+        psi.Environment["GIT_TERMINAL_PROMPT"] = "0";
+        using var p = System.Diagnostics.Process.Start(psi)!;
+        p.StandardOutput.ReadToEndAsync();
+        var err = p.StandardError.ReadToEndAsync();
+        if (!p.WaitForExit(300_000)) { try { p.Kill(true); } catch (InvalidOperationException) { } return -1; }
+        if (p.ExitCode != 0) Console.Error.WriteLine(err.GetAwaiter().GetResult().Trim());
+        return p.ExitCode;
     }
 
     /// <summary>

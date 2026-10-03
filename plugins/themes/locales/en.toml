@@ -18,3 +18,5 @@
 "missing" = "not yet: %1 (mazapan coverage)"
 "coverage_failed" = "Couldn't tell which apps the theme reaches (mazapan coverage)"
 "home" = "Theme"
+"act.omarchy" = "Themes: import Omarchy's"
+"act.omarchy.kw" = "omarchy themes import catppuccin tokyo night nord gruvbox rose pine kanagawa everforest"

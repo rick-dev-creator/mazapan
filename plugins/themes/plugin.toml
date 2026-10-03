@@ -35,6 +35,13 @@ key = "{{ settings.key }}"
 keywords = "{{ t \"act.pick.kw\" }}"
 
 [[actions]]
+name = "{{ t \"act.omarchy\" }}"
+# The terminal stays until Enter: what was imported, and how to use one.
+run = "mazapan themes import-omarchy; read -r _"
+terminal = true
+keywords = "{{ t \"act.omarchy.kw\" }}"
+
+[[actions]]
 name = "{{ t \"act.list\" }}"
 run = "mazapan themes"
 terminal = true

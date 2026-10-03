@@ -6,6 +6,10 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- Omarchy's themes, all 22 at once ("Themes: import Omarchy's"): the ones
+  on this computer, or fetched from Omarchy, or any Omarchy theme's
+  repository; each with its palette and wallpaper, every contrast checked.
+
 - Agents: API keys kept in the keyring, not in plain files ("Agents: an
   API key" in the palette); `mazapan agents run` gives them to opencode, pi
   and the others, never to Claude Code or Codex. What OpenRouter, Anthropic

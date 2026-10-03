@@ -118,8 +118,10 @@ pull requests and active time in the dashboard). Item 2 is complete. Untried unt
 limits endpoint with the person's accounts, Rider's first start, Android
 Studio and the emulator, each hardware plugin on its machine.
 
-**After those:** an importer for Omarchy's themes (its 22 at once);
-LocalSend (22); "ask an agent about this" from a capture, a selection, a
+**After those:** ~~an importer for Omarchy's themes (its 22 at once)~~
+*done 2026-10-04: `mazapan themes import-omarchy` (the ones installed,
+Omarchy's repository, or any theme's git repository; all 22 pass every
+contrast)*; LocalSend (22); "ask an agent about this" from a capture, a selection, a
 notification, a file, and `? question` in the palette answered in a card;
 an agent's changes approved with their diff, marked on the timeline, all
 undone at once, and permissions per agent; recent projects in the palette
