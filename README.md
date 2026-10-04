@@ -24,15 +24,13 @@
 
 <p align="center">
   <a href="#why-i-made-mazapan">Why</a> ·
+  <a href="#at-a-glance">At a glance</a> ·
   <a href="#agentic-os">Agentic OS</a> ·
   <a href="#made-for-developers">Developers</a> ·
-  <a href="#tiling-borrowed-from-niri">Tiling</a> ·
+  <a href="#a-tour">Tour</a> ·
   <a href="#plugins-and-extensibility">Plugins</a> ·
-  <a href="#the-desktop">The desktop</a> ·
-  <a href="#features">Features</a> ·
-  <a href="#screenshots">Screenshots</a> ·
+  <a href="#every-feature">Every feature</a> ·
   <a href="#install">Install</a> ·
-  <a href="docs/agent-api.md">Agent API</a> ·
   <a href="docs/roadmap.md">Roadmap</a>
 </p>
 
@@ -75,6 +73,20 @@ the computer for, and installs the apps for it, my .NET stack included.
 If it's useful to you too, that's the best that could happen to it.
 
 — rickdev
+
+## At a glance
+
+| | |
+|---|---|
+| 🤖 **Agentic OS** | Every agent's live sessions in the bar · each account's limits · a dashboard of cost and tokens · a built-in MCP server · an approval card with the exact diff · ask from anywhere · diagnosis from crashes, checks and checkpoints |
+| 💿 **Install** | Graphical and text installers in 5 languages · full-disk encryption · a recovery key as text and QR · hardware fixes picked for your machine |
+| 🛟 **Updates and safety** | Arch news before updating · automatic rollback when a check fails · checkpoints you boot into from the menu · a signed repository · a firewall that denies everything in |
+| 🪟 **Desktop** | Niri-style scrolling columns · overview of every workspace · command palette · settings · monitors with profiles · notifications and Do Not Disturb · night light · modes · idle and hibernate |
+| 🎨 **Look** | One theme for the whole OS (16 targets, GRUB to VS Code) · a live theme picker · a theme from any picture · 7 screensavers |
+| 🧰 **Everyday tools** | Capture with OCR, annotations, QR and recording · clipboard history · emoji and color pickers · offline dictation · reminders · web apps · LocalSend and Taildrop |
+| 👩‍💻 **Developers** | Profiles for Development, .NET, Mobile (Expo) · containers without root · one-click databases · every language's versions with mise |
+| 🎮 **Gaming** | Steam, Heroic, Lutris, gamescope, GameMode, MangoHud · games on the discrete GPU · emulators for 20+ systems |
+| 🧩 **Extensible** | 100 plugins, the bar and the installer included · a Plugins panel · write your own in minutes · every change previewed and undoable |
 
 ## Agentic OS
 
@@ -161,15 +173,17 @@ it will do, undoable.
   Streaming, Trading. Profiles can be mixed, and changed any time
   (`SUPER + ALT + A`).
 
-## The desktop
+## A tour
 
-<p align="center"><img src="docs/media/themes.gif" alt="Changing the theme of the whole desktop, then the overview"></p>
+### One theme, everywhere, previewed live
 
-<p align="center"><sub>One command changes everything: bar, terminals, editors, GTK and Qt apps, browsers, the lock and login screens, GRUB.</sub></p>
+<p align="center"><img src="docs/media/theme-picker.gif" alt="The theme picker: each theme previewed live on the whole desktop, then an accent, then applied"></p>
 
-<p align="center"><img src="docs/media/desktop.webp" alt="The desktop: btop and Neovim side by side in columns"></p>
+`SUPER + SHIFT + T`: move through the themes and the whole desktop follows
+as you go (bar, terminals, editors, apps); `tab` picks an accent, `↵`
+applies it. A theme can also be made from any picture, its contrast checked.
 
-## Tiling, borrowed from Niri
+### Tiling, borrowed from Niri
 
 <p align="center"><img src="docs/media/tiling.gif" alt="Columns on a scrolling strip: windows open to the right, widths cycle, two windows share a column, a window maximized, the overview"></p>
 
@@ -189,81 +203,78 @@ Hyprland underneath, Niri's ideas on top (the `columns` and
   strip in the bar.
 - Or the classic layouts: equal widths, a phone-width column, a focus layout.
 
-## Features
+### Everything from one palette, and apps by what you do
 
-Arch owns the critical parts (kernel, packages, updates); Mazapan is the
-layer on top, written as 100 plugins over one small core, `mazapan`, a single
-native binary. Every change it makes, yours or an agent's, is previewed,
-written only where it may, and undoable.
+<table>
+  <tr>
+    <td width="50%"><img src="docs/media/palette.gif" alt="The command palette searching apps, actions and windows, each with its command"></td>
+    <td width="50%"><img src="docs/media/apps.gif" alt="The Apps panel: profiles, every app, search, what's installed"></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>Command palette</b> (<code>SUPER + Space</code>): apps, windows and every plugin's actions, each showing the command it runs, so you learn the terminal as you go. <code>&gt;</code> for actions only.</td>
+    <td valign="top"><b>Apps</b> (<code>SUPER + ALT + A</code>): profiles for what you'll do, every app one by one, search, and what's installed. Each says what it will do first, and is undoable.</td>
+  </tr>
+</table>
 
-### Install and security
-- A **graphical installer** from a live desktop (and a text one for when
-  graphics fail), in English, Spanish, Portuguese, French and German.
-- **Full-disk encryption** by default (LUKS2, argon2id), one password for the
-  disk, the account and the keyring, plus a **recovery key** shown once as
-  text and QR.
-- Firewall denying everything in, SSH only with keys, polkit asking every
-  time; what's protected and what isn't is written down in
-  [docs/security.md](docs/security.md).
-- **Hardware fixes** chosen for the machine it runs on (27 `hw-*` plugins):
-  NVIDIA (hybrid laptops included), AMD and Intel graphics, ASUS ROG, Framework,
-  Surface, Apple, fingerprint readers, Wi-Fi quirks.
+### Capture, read, annotate
 
-### Updates and checkpoints
-- `mazapan update`: Arch news first, then each step with its ✓, then the
-  health checks; **rolled back on its own** when a check fails.
-- **Checkpoints**: a snapshot before every package change, listed in the
-  boot menu. Boot into one, and if it works, keep it with one click; if it
-  doesn't, "What broke?" hands the diagnosis to an agent.
-- Your own signed repository for Mazapan, stable and edge channels,
-  downloads ahead of time while plugged in.
+<p align="center"><img src="docs/media/capture.gif" alt="Capture: a window annotated with a box and an arrow, then a region whose text is copied"></p>
 
-### Desktop
-- **Columns tiling** borrowed from Niri: a scrolling strip per workspace,
-  widths that cycle, touchpad gestures, and an **overview** of every
-  workspace (`SUPER + Tab`).
-- A **command palette** (`SUPER + Space`) for apps, windows and every
-  plugin's actions, each showing the command it runs.
-- **Settings** (`SUPER + ,`), monitors with live thumbnails and profiles
-  (`SUPER + SHIFT + M`), notifications with Do Not Disturb, an OSD, night
-  light, idle and hibernate, modes (the whole desktop switched at once, by
-  hand, schedule or screen).
-- Capture (`Print`): region or window, copy, save, OCR, annotate, record.
-- Clipboard history, emoji picker, color picker, offline dictation
-  (whisper.cpp), reminders, Chinese/Japanese/Korean input, privacy dots.
-- **History** of every change to the desktop, in words, each with its undo.
+`Print` freezes the screen: click a window or drag a region, then copy,
+save, copy its **text** (OCR), read a **QR** code, **annotate** it, share it,
+ask an agent about it, or **record** it.
 
-### Themes
-- **One theme for the whole OS**: 16 theme targets, from Hyprland and the
-  bar to Firefox, Chromium, VS Code, Neovim, Obsidian, GTK, Qt, Plymouth
-  and GRUB.
-- A picker (`SUPER + SHIFT + T`) that previews each theme live on your
-  desktop; any accent color; **a whole theme from a picture**, with its
-  contrast checked.
+### A plugin ecosystem
 
-### Apps
-- **Apps by what you'll do** (`SUPER + ALT + A`): Development, .NET, Mobile
-  (Expo), Gaming, Retro, Creative, Office, Streaming… one button, said
-  first, undoable.
-- Web apps as apps of their own, default apps, Podman (or Docker) and
-  one-click databases for development.
+<p align="center"><img src="docs/media/plugins.gif" alt="The Plugins panel: a plugin's page, what it can do, its settings, a search"></p>
 
-### Gaming and retro
-- Steam, Heroic, Lutris, GameMode, MangoHud and gamescope, with the right
-  Vulkan drivers for NVIDIA, AMD or Intel; tearing allowed and idle held
-  while a game runs, games on the discrete GPU of a hybrid laptop.
-- **Emulators** (RetroArch, DuckStation, PCSX2, Dolphin…), a ROMs folder per
-  console, a game mode for the bar and notifications.
-- Seven **screensavers** of Mazapan's own: Mazapan, CRT, rain, stars, life,
-  pipes, glow.
+`SUPER + SHIFT + P`, like an editor's extensions view: every plugin with its
+page, **what it can do** (every file it writes and command it runs) and its
+**settings** as controls. More in [Plugins and extensibility](#plugins-and-extensibility).
 
-### Sharing
-- LocalSend to devices nearby, Taildrop to yours over Tailscale, from the
-  palette or the file manager.
+### A first start that asks, and notifications that don't nag
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/media/welcome.gif" alt="The welcome: language, keyboard, time zone, the look, what you'll use it for, the keys that matter"></td>
+    <td width="50%"><img src="docs/media/notifications.gif" alt="Notifications: banners that go after their time, the center, Do Not Disturb"></td>
+  </tr>
+  <tr>
+    <td valign="top"><b>Welcome</b>: language, keyboard, time zone, Wi-Fi, the look, and what you'll use the computer for, which installs its apps. Again any time from the palette.</td>
+    <td valign="top"><b>Notifications</b> in the theme, with their actions; a quiet center by app (<code>SUPER + N</code>), Do Not Disturb (<code>SUPER + SHIFT + N</code>), by schedule or in full screen.</td>
+  </tr>
+</table>
+
+### Screensavers of its own
+
+<p align="center"><img src="docs/media/screensavers.gif" alt="Seven screensavers: the bitten mazapan, an 80s terminal, code rain, stars, the Game of Life, pipes, glow"></p>
+
+The bitten mazapan, an 80s terminal, code rain, stars, the Game of Life,
+pipes and glow, in the theme's colors; or one at random. A video or a call
+keeps them away.
+
+### And more
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/media/desktop.webp" alt="The desktop: btop and Neovim side by side"><p align="center">The desktop, in Phosphor</p></td>
+    <td width="50%"><img src="docs/media/overview.webp" alt="Overview"><p align="center"><b>Overview</b> of every workspace</p></td>
+  </tr>
+  <tr>
+    <td><img src="docs/media/checkpoint.webp" alt="Booted into a checkpoint"><p align="center">Booted into a <b>checkpoint</b>: keep it, or ask what broke</p></td>
+    <td><img src="docs/media/installer.webp" alt="Recovery key at the end of the install"><p align="center">The <b>installer</b>'s recovery key</p></td>
+  </tr>
+  <tr>
+    <td><img src="docs/media/monitors.webp" alt="Monitors"><p align="center"><b>Monitors</b>, with live thumbnails and profiles</p></td>
+    <td><img src="docs/media/settings.webp" alt="Settings"><p align="center"><b>Settings</b></p></td>
+  </tr>
+  <tr>
+    <td><img src="docs/media/retro.webp" alt="A homebrew NES game in RetroArch"><p align="center"><b>Retro</b>: a homebrew NES game in RetroArch</p></td>
+    <td><img src="docs/media/theme-picker.webp" alt="Theme picker"><p align="center">Each theme drawn as a small desktop</p></td>
+  </tr>
+</table>
 
 ## Plugins and extensibility
-
-<p align="center"><img src="docs/media/plugins.webp" alt="The Plugins panel: each plugin with its page, what it can do and its settings" width="85%"></p>
 
 **Everything is a plugin**, the bar and the installer included, and yours
 use the same API as the built-in ones: a `plugin.toml` (what it needs, its
@@ -425,30 +436,77 @@ Each with its full description: [docs/plugins.md](docs/plugins.md).
 
 How to write one: [docs/plugin-api.md](docs/plugin-api.md).
 
-## Screenshots
+## Every feature
 
-<table>
-  <tr>
-    <td width="50%"><img src="docs/media/palette.webp" alt="Command palette"><p align="center"><b>Command palette</b></p></td>
-    <td width="50%"><img src="docs/media/overview.webp" alt="Overview"><p align="center"><b>Overview</b> of every workspace</p></td>
-  </tr>
-  <tr>
-    <td><img src="docs/media/theme-picker.webp" alt="Theme picker"><p align="center"><b>Theme picker</b>, previewed live</p></td>
-    <td><img src="docs/media/apps.webp" alt="Apps by profile"><p align="center"><b>Apps</b> by what you'll do</p></td>
-  </tr>
-  <tr>
-    <td><img src="docs/media/checkpoint.webp" alt="Booted into a checkpoint"><p align="center">Booted into a <b>checkpoint</b></p></td>
-    <td><img src="docs/media/installer.webp" alt="Recovery key at the end of the install"><p align="center">The <b>installer</b>'s recovery key</p></td>
-  </tr>
-  <tr>
-    <td><img src="docs/media/retro.webp" alt="A homebrew NES game in RetroArch"><p align="center"><b>Retro</b>: a homebrew NES game in RetroArch</p></td>
-    <td><img src="docs/media/screensavers.webp" alt="Screensavers"><p align="center"><b>Screensavers</b>: Mazapan, CRT, pipes, rain</p></td>
-  </tr>
-  <tr>
-    <td><img src="docs/media/monitors.webp" alt="Monitors"><p align="center"><b>Monitors</b>, with live thumbnails and profiles</p></td>
-    <td><img src="docs/media/settings.webp" alt="Settings"><p align="center"><b>Settings</b></p></td>
-  </tr>
-</table>
+Arch owns the critical parts (kernel, packages, updates); Mazapan is the
+layer on top, written as 100 plugins over one small core, `mazapan`, a single
+native binary. Every change it makes, yours or an agent's, is previewed,
+written only where it may, and undoable.
+
+### Install and security
+- A **graphical installer** from a live desktop (and a text one for when
+  graphics fail), in English, Spanish, Portuguese, French and German.
+- **Full-disk encryption** by default (LUKS2, argon2id), one password for the
+  disk, the account and the keyring, plus a **recovery key** shown once as
+  text and QR.
+- Firewall denying everything in, SSH only with keys, polkit asking every
+  time; what's protected and what isn't is written down in
+  [docs/security.md](docs/security.md).
+- **Hardware fixes** chosen for the machine it runs on (27 `hw-*` plugins):
+  NVIDIA (hybrid laptops included), AMD and Intel graphics, ASUS ROG, Framework,
+  Surface, Apple, fingerprint readers, Wi-Fi quirks.
+
+### Updates and checkpoints
+- `mazapan update`: Arch news first, then each step with its ✓, then the
+  health checks; **rolled back on its own** when a check fails.
+- **Checkpoints**: a snapshot before every package change, listed in the
+  boot menu. Boot into one, and if it works, keep it with one click; if it
+  doesn't, "What broke?" hands the diagnosis to an agent.
+- Your own signed repository for Mazapan, stable and edge channels,
+  downloads ahead of time while plugged in.
+
+### Desktop
+- **Columns tiling** borrowed from Niri: a scrolling strip per workspace,
+  widths that cycle, touchpad gestures, and an **overview** of every
+  workspace (`SUPER + Tab`).
+- A **command palette** (`SUPER + Space`) for apps, windows and every
+  plugin's actions, each showing the command it runs.
+- **Settings** (`SUPER + ,`), monitors with live thumbnails and profiles
+  (`SUPER + SHIFT + M`), notifications with Do Not Disturb, an OSD, night
+  light, idle and hibernate, modes (the whole desktop switched at once, by
+  hand, schedule or screen).
+- Capture (`Print`): region or window, copy, save, OCR, annotate, record.
+- Clipboard history, emoji picker, color picker, offline dictation
+  (whisper.cpp), reminders, Chinese/Japanese/Korean input, privacy dots.
+- **History** of every change to the desktop, in words, each with its undo.
+
+### Themes
+- **One theme for the whole OS**: 16 theme targets, from Hyprland and the
+  bar to Firefox, Chromium, VS Code, Neovim, Obsidian, GTK, Qt, Plymouth
+  and GRUB.
+- A picker (`SUPER + SHIFT + T`) that previews each theme live on your
+  desktop; any accent color; **a whole theme from a picture**, with its
+  contrast checked.
+
+### Apps
+- **Apps by what you'll do** (`SUPER + ALT + A`): Development, .NET, Mobile
+  (Expo), Gaming, Retro, Creative, Office, Streaming… one button, said
+  first, undoable.
+- Web apps as apps of their own, default apps, Podman (or Docker) and
+  one-click databases for development.
+
+### Gaming and retro
+- Steam, Heroic, Lutris, GameMode, MangoHud and gamescope, with the right
+  Vulkan drivers for NVIDIA, AMD or Intel; tearing allowed and idle held
+  while a game runs, games on the discrete GPU of a hybrid laptop.
+- **Emulators** (RetroArch, DuckStation, PCSX2, Dolphin…), a ROMs folder per
+  console, a game mode for the bar and notifications.
+- Seven **screensavers** of Mazapan's own: Mazapan, CRT, rain, stars, life,
+  pipes, glow.
+
+### Sharing
+- LocalSend to devices nearby, Taildrop to yours over Tailscale, from the
+  palette or the file manager.
 
 ## Install
 
