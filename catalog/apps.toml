@@ -834,6 +834,116 @@ translations.fr.description = "La version de Microsoft (le C# Dev Kit ne fonctio
 translations.pt.description = "A versão da Microsoft (o C# Dev Kit só roda nela), direto da Microsoft: verificada, atualizada pelo mazapan update"
 
 [[app]]
+id = "python"
+name = "Python"
+description = "Python with uv, which makes each project's environment and installs packages fast; pyright for editors"
+category = "development"
+pacman = ["python", "uv", "pyright"]
+translations.es.description = "Python con uv, que crea el entorno de cada proyecto e instala paquetes rápido; pyright para los editores"
+translations.de.description = "Python mit uv, das jedem Projekt seine Umgebung macht und Pakete schnell installiert; pyright für Editoren"
+translations.fr.description = "Python avec uv, qui crée l'environnement de chaque projet et installe les paquets vite ; pyright pour les éditeurs"
+translations.pt.description = "Python com uv, que cria o ambiente de cada projeto e instala pacotes rápido; pyright para os editores"
+
+[[app]]
+id = "go"
+name = "Go"
+description = "Go with its language server (gopls) and debugger (delve)"
+category = "development"
+pacman = ["go", "gopls", "delve"]
+translations.es.description = "Go con su servidor de lenguaje (gopls) y su depurador (delve)"
+translations.de.description = "Go mit Sprachserver (gopls) und Debugger (delve)"
+translations.fr.description = "Go avec son serveur de langage (gopls) et son débogueur (delve)"
+translations.pt.description = "Go com o servidor de linguagem (gopls) e o depurador (delve)"
+
+[[app]]
+id = "rust"
+name = "Rust"
+description = "Rust with cargo and its language server (rust-analyzer)"
+category = "development"
+pacman = ["rust", "rust-analyzer"]
+translations.es.description = "Rust con cargo y su servidor de lenguaje (rust-analyzer)"
+translations.de.description = "Rust mit cargo und Sprachserver (rust-analyzer)"
+translations.fr.description = "Rust avec cargo et son serveur de langage (rust-analyzer)"
+translations.pt.description = "Rust com cargo e o servidor de linguagem (rust-analyzer)"
+
+[[app]]
+id = "ruby"
+name = "Ruby"
+description = "Ruby with Bundler"
+category = "development"
+pacman = ["ruby", "ruby-bundler"]
+translations.es.description = "Ruby con Bundler"
+translations.de.description = "Ruby mit Bundler"
+translations.fr.description = "Ruby avec Bundler"
+translations.pt.description = "Ruby com Bundler"
+
+[[app]]
+id = "php"
+name = "PHP"
+description = "PHP with Composer"
+category = "development"
+pacman = ["php", "composer"]
+translations.es.description = "PHP con Composer"
+translations.de.description = "PHP mit Composer"
+translations.fr.description = "PHP avec Composer"
+translations.pt.description = "PHP com Composer"
+
+[[app]]
+id = "java"
+name = "Java"
+description = "Java (the latest OpenJDK) with Maven and Gradle"
+category = "development"
+pacman = ["jdk-openjdk", "maven", "gradle"]
+translations.es.description = "Java (el último OpenJDK) con Maven y Gradle"
+translations.de.description = "Java (das neueste OpenJDK) mit Maven und Gradle"
+translations.fr.description = "Java (le dernier OpenJDK) avec Maven et Gradle"
+translations.pt.description = "Java (o OpenJDK mais recente) com Maven e Gradle"
+
+[[app]]
+id = "bun"
+name = "Bun"
+description = "Bun: JavaScript and TypeScript, a runtime, package manager and bundler in one"
+category = "development"
+pacman = ["bun", "typescript-language-server"]
+translations.es.description = "Bun: JavaScript y TypeScript, runtime, gestor de paquetes y bundler en uno"
+translations.de.description = "Bun: JavaScript und TypeScript, Runtime, Paketmanager und Bundler in einem"
+translations.fr.description = "Bun : JavaScript et TypeScript, runtime, gestionnaire de paquets et bundler en un"
+translations.pt.description = "Bun: JavaScript e TypeScript, runtime, gerenciador de pacotes e bundler num só"
+
+[[app]]
+id = "deno"
+name = "Deno"
+description = "Deno: JavaScript and TypeScript with security and tools built in"
+category = "development"
+pacman = ["deno"]
+translations.es.description = "Deno: JavaScript y TypeScript con seguridad y herramientas incluidas"
+translations.de.description = "Deno: JavaScript und TypeScript mit eingebauter Sicherheit und Werkzeugen"
+translations.fr.description = "Deno : JavaScript et TypeScript avec sécurité et outils intégrés"
+translations.pt.description = "Deno: JavaScript e TypeScript com segurança e ferramentas embutidas"
+
+[[app]]
+id = "zig"
+name = "Zig"
+description = "Zig"
+category = "development"
+pacman = ["zig"]
+translations.es.description = "Zig"
+translations.de.description = "Zig"
+translations.fr.description = "Zig"
+translations.pt.description = "Zig"
+
+[[app]]
+id = "elixir"
+name = "Elixir"
+description = "Elixir with Erlang/OTP"
+category = "development"
+pacman = ["elixir"]
+translations.es.description = "Elixir con Erlang/OTP"
+translations.de.description = "Elixir mit Erlang/OTP"
+translations.fr.description = "Elixir avec Erlang/OTP"
+translations.pt.description = "Elixir com Erlang/OTP"
+
+[[app]]
 id = "nodejs"
 name = "Node.js"
 description = "Node.js with npm (one already there, an LTS one, is kept)"

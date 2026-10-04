@@ -6,6 +6,9 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- Languages in one click in Apps: Python (with uv), Go, Rust, Ruby, PHP,
+  Java, Bun, Deno, Zig, Elixir, each with its language server.
+
 - Databases for development in one click (PostgreSQL, MySQL, Redis, SQL
   Server, MongoDB): start, stop, copy the .NET connection string or a URL.
 - SUPER + B goes to the browser (opening it if it isn't), SUPER + E to the

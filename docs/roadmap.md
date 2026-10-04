@@ -1444,8 +1444,10 @@ awake") keep it away; still with the theme's motion off.
 From Omarchy's 441 commands, only what's worth having (games, branding,
 tmux/herdr menus and niche tools left out):
 
-1. A development environment per language in one click (mise: Node,
-   Python, Go, Rust, Ruby, PHP, Java), beside .NET and Expo.
+1. ~~A development environment per language in one click (mise: Node,
+   Python, Go, Rust, Ruby, PHP, Java), beside .NET and Expo~~ *done: Python
+   (uv), Go, Rust, Ruby, PHP, Java, Bun, Deno, Zig, Elixir in Apps, each
+   with its language server; mise for versions per project*.
 2. ~~Development databases in one click on Podman (Postgres, MySQL, Redis,
    SQL Server), with their connection strings at hand~~ *done: the
    dev-databases panel, MongoDB too*.
