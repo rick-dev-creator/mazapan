@@ -133,6 +133,7 @@ BarItem {
               text: modelData.resets_at ? AgentsService.span(new Date(modelData.resets_at).getTime() - AgentsService.now) : ""
               color: Theme.fgSubtle
               Layout.preferredWidth: 70
+              Layout.minimumWidth: implicitWidth
               horizontalAlignment: Text.AlignRight
             }
           }

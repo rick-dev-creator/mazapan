@@ -442,12 +442,16 @@ public static partial class Program
         // Nor by turning off what asks (the Agents plugin, the bar the card is drawn by).
         if (fs.IsSet("agent") && Approval.Wanted() && orphans.Any(o => o.EndsWith("/quickshell/mazapan/panels/approve.qml", StringComparison.Ordinal)))
             throw new MazapanException("that would turn off the card that asks you about agents' changes: it's the person's to do");
-        if (fs.IsSet("agent") && Approval.Wanted() && !Approval.Trusted().Contains(by) && (configChanged || changes.Any(c => c.State != State.Unchanged) || orphans.Count > 0))
+        // What the card shows is what this apply writes: never the system's
+        // files (an agent can't apply --system; those wait for the person).
+        var userChanges = changes.Where(c => !c.File.System).ToList();
+        var userOrphans = orphans.Where(o => !AsRoot.IsSystem(o)).ToList();
+        if (fs.IsSet("agent") && Approval.Wanted() && !Approval.Trusted().Contains(by) && (configChanged || userChanges.Any(c => c.State != State.Unchanged) || userOrphans.Count > 0))
         {
             var diff = new StringWriter { NewLine = "\n" };
             var was = Console.Out;
             Console.SetOut(diff);
-            try { PrintDiffs(changes, orphans, owned, fs.IsSet("adopt")); }
+            try { PrintDiffs(userChanges, userOrphans, owned, fs.IsSet("adopt")); }
             finally { Console.SetOut(was); }
             if (!Approval.Ask(by, what, Style.Strip(diff.ToString()), TimeSpan.FromMinutes(2)))
                 throw new MazapanException("the person didn't allow it: nothing changed");

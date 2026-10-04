@@ -56,7 +56,8 @@ static class Approval
             Files.WriteAtomic(request, GoJson.Marshal(new Fields { { "by", by }, { "what", what }, { "diff", diff } }) + "\n");
             File.SetUnixFileMode(request, UnixFileMode.UserRead | UnixFileMode.UserWrite);
             var psi = new ProcessStartInfo("qs") { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true };
-            foreach (var a in new[] { "ipc", "-c", "mazapan", "call", "mazapan", "open", "approve", request }) psi.ArgumentList.Add(a);
+            // Any display: an agent in tmux or over SSH has no WAYLAND_DISPLAY, and would never be asked.
+            foreach (var a in new[] { "ipc", "--any-display", "-c", "mazapan", "call", "mazapan", "open", "approve", request }) psi.ArgumentList.Add(a);
             try
             {
                 using var p = Process.Start(psi)!;

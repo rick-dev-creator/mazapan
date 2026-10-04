@@ -42,7 +42,9 @@ Singleton {
   // "3 min", "2 h 5 min".
   function span(ms) {
     const m = Math.max(0, Math.round(ms / 60000))
-    return m < 60 ? {{ tq "min" }}.arg(m) : {{ tq "hours" }}.arg(Math.floor(m / 60)).arg(m % 60)
+    // A day or more (a weekly limit's reset): days and hours, short enough for its column.
+    return m < 60 ? {{ tq "min" }}.arg(m) : m < 1440 ? {{ tq "hours" }}.arg(Math.floor(m / 60)).arg(m % 60)
+      : {{ tq "days" }}.arg(Math.floor(m / 1440)).arg(Math.floor(m % 1440 / 60))
   }
 
   function run(proc, args) {

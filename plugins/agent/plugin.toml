@@ -90,6 +90,8 @@ reload = "chmod +x ~/.local/share/nautilus/scripts/'Ask an agent' 2>/dev/null; t
 [[targets]]
 template = "Dashboard.qml.tmpl"
 output = "~/.config/quickshell/mazapan/agents-dashboard.qml"
+# Open, it's reloaded (not open: nothing to do).
+reload = "qs ipc --any-display -p ~/.config/quickshell/mazapan/agents-dashboard.qml call dashboard reload >/dev/null 2>&1 || true"
 
 [[targets]]
 template = "dashboard.sh.tmpl"

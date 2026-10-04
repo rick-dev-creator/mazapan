@@ -7,6 +7,10 @@
 // agent, account, model and project used, by day; the cost as each model's
 // API prices it (and what an API key was charged); when the answers come
 // (weekday × hour); each account's limits. Numbers only.
+//
+// Drawn in {{ theme.id }} ({{ theme.colors.accent }}): a new theme or accent
+// rewrites this file, and its reload brings an open dashboard along (the
+// shell's reload doesn't reach this process).
 
 import QtQuick
 import QtQuick.Layouts
@@ -25,6 +29,19 @@ FloatingWindow {
   color: Theme.bg
   // Closed, gone (Quickshell itself stays without windows).
   onClosed: Qt.quit()
+
+  IpcHandler {
+    target: "dashboard"
+    function reload(): void {
+      Quickshell.reload(false)
+    }
+  }
+  Connections {
+    target: Quickshell
+    function onReloadCompleted() {
+      Quickshell.inhibitReloadPopup()
+    }
+  }
 
   property int days: 30
   property string metric: "cost"   // cost (API prices) or tokens
