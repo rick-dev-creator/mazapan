@@ -127,7 +127,16 @@ Item {
       root.selW = root.selH = 0
       root.strokes = []
       root.open = true
+      camProbe.running = true
     }
+  }
+
+  // A camera here (for "Record with camera"): the first video device.
+  property string camera: ""
+  Process {
+    id: camProbe
+    command: ["sh", "-c", "for d in /dev/video*; do [ -c \"$d\" ] && { echo \"$d\"; exit 0; }; done; true"]
+    stdout: StdioCollector { onStreamFinished: root.camera = text.trim() }
   }
 
   // --- doing -----------------------------------------------------------------
@@ -214,8 +223,16 @@ Item {
   // Recording: the overlay goes first (it mustn't be in the video), and no
   // notice either (it'd be in it): the red dot in the bar says so. The
   // state file holds the recorder's pid, so a dead one never blocks the key.
-  function record() {
+  // With the camera: a small window of it at the screen's bottom right corner
+  // (a rule of capture.lua's: floating, pinned, unfocused), recorded with the
+  // rest when the region holds that corner; gone when the recording ends.
+  function record(withCamera) {
     if (!chosen) return
+    const cam = withCamera && camera !== ""
+      ? `mpv ${q("av://v4l2:" + camera)} --profile=low-latency --untimed --no-cache --no-audio --no-osc --osd-level=0 --no-border `
+        + `'--vf=lavfi=[crop=ih*8/9:ih]' --wayland-app-id=mazapan-camera --title=mazapan-camera --really-quiet >/dev/null 2>&1 & cam=$!; `
+        + `i=0; while [ $i -lt 40 ] && ! hyprctl clients -j | grep -q '"class": "mazapan-camera"'; do sleep 0.05; i=$((i+1)); done; sleep 0.4; `
+      : ""
     const stamp = Qt.formatDateTime(new Date(), "yyyy-MM-dd HH-mm-ss")
     const file = videos + "/Recording " + stamp + ".mp4"
     const script = `command -v wf-recorder >/dev/null || { ${say({{ tq "missing" }}.arg("wf-recorder"), true)}; exit; }; `
@@ -223,7 +240,8 @@ Item {
       // No banners in the video; they come back when it's done.
       // (after the overlay's close has let them go).
       + `hold() { qs ipc -c mazapan call notifications hold "$1" >/dev/null 2>&1; }; `
-      + `trap 'rm -f "$st"; hold false' EXIT HUP TERM; sleep 0.3; hold true; `
+      + `cam=; trap 'rm -f "$st"; hold false; [ -n "$cam" ] && kill $cam 2>/dev/null' EXIT HUP TERM; sleep 0.3; hold true; `
+      + cam
       + `${command("record", stamp)} >/dev/null 2>&1 & p=$!; echo "$p $(date +%s)" > "$st"; `
       + `trap 'kill -INT $p' INT; wait $p; wait $p 2>/dev/null; rm -f "$st"; `
       + `if [ -s ${q(file)} ]; then ${say({{ tq "recorded" }}.arg(tilde(file)), false, "video-x-generic")}; `
@@ -254,7 +272,7 @@ Item {
     else if (is("qr", Qt.Key_Q)) act(["qr"])
     else if (canAsk && is("ask", Qt.Key_K)) act(["ask"])
     else if (is("annotate", Qt.Key_A)) annotating = true
-    else if (is("record", Qt.Key_R)) record()
+    else if (is("record", Qt.Key_R)) record(false)
     else return
     event.accepted = true
   }
@@ -575,7 +593,8 @@ Item {
             Action { visible: root.canShare; action: "share"; text: "󰒖 " + {{ tq "share" }}; onClicked: root.act(["share"]) }
             Action { visible: root.canAsk; action: "ask"; text: "󰚩 " + {{ tq "ask" }}; onClicked: root.act(["ask"]) }
             Button { text: "󰏫 " + {{ tq "annotate" }}; onClicked: root.annotating = true }
-            Action { action: "record"; text: "󰑋 " + {{ tq "record" }}; onClicked: root.record() }
+            Action { action: "record"; text: "󰑋 " + {{ tq "record" }}; onClicked: root.record(false) }
+            Action { visible: root.camera !== ""; action: "record"; text: "󰄀 " + {{ tq "record_camera" }}; onClicked: root.record(true) }
           }
 
           RowLayout {

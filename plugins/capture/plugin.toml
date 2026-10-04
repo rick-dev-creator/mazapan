@@ -1,7 +1,7 @@
 [plugin]
 id = "capture"
 name = "Capture"
-version = "0.3.0"
+version = "0.4.0"
 api = 1
 description = "One capture overlay: pick a region or a window on a frozen screen, then copy, save, copy its text (OCR), annotate or record it"
 categories = ["tools"]
@@ -9,7 +9,7 @@ requires = ["shell-bar", "hypr-base"]
 
 [packages]
 # OCR in another language needs its data too: tesseract-data-spa, -fra…
-pacman = ["grim", "wl-clipboard", "tesseract", "tesseract-data-eng", "wf-recorder", "zbar"]
+pacman = ["grim", "wl-clipboard", "tesseract", "tesseract-data-eng", "wf-recorder", "zbar", "mpv"]
 
 [settings]
 # Opens the capture overlay; while recording, stops the recording.

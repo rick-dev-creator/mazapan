@@ -15,7 +15,10 @@ vacía para tomarla entera. Luego:
 - **Anotar** (`a`): lápiz, flecha, recuadro o marcador, en unos cuantos
   colores; Deshacer (o Ctrl+Z) quita el último trazo, Listo (o ↵) vuelve a
   las acciones. Lo que dibujas va en lo que copias o guardas.
-- **Grabar** (`r`) graba esa región como video.
+- **Grabar** (`r`) graba esa región como video. **Grabar con cámara**
+  (si hay una) pone antes tu cámara en una ventanita en la esquina inferior
+  derecha de la pantalla, en todos los workspaces, y la quita al terminar:
+  elige una región que incluya esa esquina (o toda la pantalla).
 
 ↵ copia y guarda a la vez; Esc sale. Las teclas en inglés también sirven
 (`s` para guardar). Al señalar una acción se ve el comando que ejecuta.

@@ -6,6 +6,8 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- Record the screen with your camera in a corner ("Record with camera").
+
 - The theme in kitty, Ghostty and Alacritty (installed from Apps: open
   windows follow at once) and in Obsidian (a Mazapan theme in every vault).
 - Apps sets up an app you already had when you ask to install it (its

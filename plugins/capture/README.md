@@ -14,7 +14,11 @@ window, or empty screen to take it all. Then:
 - **Annotate** (`a`): pen, arrow, box or marker, in a few colors; Undo
   (or Ctrl+Z) takes back the last one, Done (or ↵) goes back to the
   actions. What you draw is in what you copy or save.
-- **Record** (`r`) records that region as a video.
+- **Record** (`r`) records that region as a video. **Record with camera**
+  (when there's one) puts your camera in a small window at the screen's
+  bottom right corner first, on every workspace, and takes it away when the
+  recording ends: choose a region that holds that corner (or the whole
+  screen).
 
 ↵ copies and saves at once; Esc leaves. Pointing at an action shows the
 command it runs. A notification says what happened (with the picture,

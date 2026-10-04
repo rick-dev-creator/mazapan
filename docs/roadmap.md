@@ -1464,7 +1464,8 @@ tmux/herdr menus and niche tools left out):
    the person's choice and stop applies)*.
 7. A Windows virtual machine for what only exists there (Office, Adobe,
    Visual Studio), its apps as windows of their own.
-8. Screen recording with the webcam over it.
+8. ~~Screen recording with the webcam over it~~ *done: "Record with
+   camera" in the capture's bar*.
 
 And what neither has, for people at work: backups of your files (Time
 Machine-like), printers and scanners working when plugged in, files found
