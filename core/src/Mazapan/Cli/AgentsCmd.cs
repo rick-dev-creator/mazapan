@@ -25,6 +25,7 @@ public static partial class Program
         if (sub == "event") return AgentsEvent(rest);
         if (sub == "keys") return AgentsKeys(rest);
         if (sub == "otel") return AgentsOtel(rest);
+        if (sub == "trust") return AgentsTrust(rest);
         var fs = new Flags("agents " + sub)
             .Bool("json", "as JSON, for the bar, the dashboard and agents")
             .String("days", "how far back, in days (usage; 30)")
@@ -254,6 +255,32 @@ public static partial class Program
         if (json) Console.WriteLine(GoJson.Marshal(new Fields { { "changed", changed } }));
         else Console.WriteLine(changed.Count == 0 ? "Nothing to change." : string.Join("\n", changed.Select(c => (rest[0] == "install" ? "hooks in " : "hooks out of ") + Tilde(c))));
         return 0;
+    }
+
+    /// <summary>
+    /// mazapan agents trust [NAME on|off]: the agents whose changes apply
+    /// without asking (the Approve card's "Always allow"); listed, or one
+    /// added or taken off ("all off": every one).
+    /// </summary>
+    static int AgentsTrust(string[] args)
+    {
+        switch (args)
+        {
+            case []:
+                var list = Approval.Trusted();
+                Console.WriteLine(list.Count == 0 ? "Every agent's change asks first." : "Applied without asking: " + string.Join(", ", list));
+                return 0;
+            case ["all", "off"]:
+                foreach (var n in Approval.Trusted()) Approval.Trust(n, false);
+                Console.WriteLine("Every agent's change asks first again.");
+                return 0;
+            case [var name, "on" or "off"]:
+                Approval.Trust(name, args[1] == "on");
+                Console.WriteLine(args[1] == "on" ? $"{name}'s changes apply without asking." : $"{name}'s changes ask first again.");
+                return 0;
+            default:
+                throw new MazapanException("usage: mazapan agents trust [NAME on|off | all off]");
+        }
     }
 
     /// <summary>mazapan agents telemetry on|off [PORT]: Claude Code's metrics to the receiver here, in each configuration's settings.json.</summary>

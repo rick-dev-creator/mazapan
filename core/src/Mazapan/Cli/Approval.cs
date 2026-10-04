@@ -18,6 +18,28 @@ static class Approval
 
     public static bool Wanted() => File.Exists(Panel);
 
+    // Agents the person always allows ("Always allow" on the card): by name, in
+    // the state folder (not config.toml: a list no agent writes through apply).
+    static string TrustedFile => Paths.ExpandHome("~/.local/state/mazapan/agents-trusted.json");
+
+    public static List<string> Trusted()
+    {
+        try
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(TrustedFile));
+            return [.. doc.RootElement.EnumerateArray().Where(e => e.ValueKind == System.Text.Json.JsonValueKind.String).Select(e => e.GetString()!)];
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or System.Text.Json.JsonException or InvalidOperationException) { return []; }
+    }
+
+    public static void Trust(string by, bool on)
+    {
+        var list = Trusted();
+        list.Remove(by);
+        if (on) list.Add(by);
+        Files.WriteAtomic(TrustedFile, GoJson.Marshal(list) + "\n");
+    }
+
     public static string Readable(string client) => ApprovalNames.Readable(client);
 
     public static bool Ask(string by, string what, string diff, TimeSpan wait)
@@ -45,7 +67,13 @@ static class Approval
             var until = DateTime.UtcNow + wait;
             while (DateTime.UtcNow < until)
             {
-                if (File.Exists(answer)) return File.ReadAllText(answer).Trim() == "allow";
+                if (File.Exists(answer))
+                {
+                    var a = File.ReadAllText(answer).Trim();
+                    // "always": this one, and from now on every one of this agent's.
+                    if (a == "always" && by != "an agent") Trust(by, true);
+                    return a is "allow" or "always";
+                }
                 Thread.Sleep(200);
             }
             throw new MazapanException("the person didn't answer in time: nothing changed");
@@ -61,6 +89,9 @@ static class Approval
 /// <summary>An MCP client's name ("claude-code"), as people know it; anything else, cleaned (it's shown, and kept).</summary>
 public static class ApprovalNames
 {
+    public static List<string> TrustedForTests() => Approval.Trusted();
+    public static void TrustForTests(string by, bool on) => Approval.Trust(by, on);
+
     public static string Readable(string client)
     {
         var known = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)

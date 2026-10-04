@@ -16,6 +16,7 @@ release (a tag `vX.Y.Z`) names them.
   for you: a card with who asks and the exact diff, Allow or Don't allow.
   History marks its changes with the agent's name and undoes a day's of
   them at once.
+  "Always allow" trusts an agent from then on (revoked from the palette).
 
 - `? question` in the palette: a coding agent answers in a card (Claude
   with the account that has room and a look at this desktop's state, never

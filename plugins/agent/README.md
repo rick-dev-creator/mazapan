@@ -67,6 +67,8 @@ or another file by its path, which Claude may read (and nothing else).
 changes this desktop through mazapan's MCP server (a theme, a setting, a
 plugin), a card shows who asks and the exact diff of every file first;
 nothing is written until you click Allow (no answer in two minutes is no).
+"Always allow" trusts that agent from then on (`mazapan agents trust`
+lists them; "Agents: ask before every change again" in the palette).
 History marks each of its changes with the agent's name, and "Undo all of
 its that day" takes them back together.
 

@@ -71,7 +71,9 @@ que Claude puede leer (y nada más).
 cuando un agente cambia este escritorio por el servidor MCP de mazapan (un
 tema, un ajuste, un plugin), antes aparece una tarjeta con quién lo pide y
 el diff exacto de cada archivo; no se escribe nada hasta que pulsas
-Permitir (sin respuesta en dos minutos, es que no). El Historial marca
+Permitir (sin respuesta en dos minutos, es que no). «Permitir siempre»
+confía en ese agente desde entonces (`mazapan agents trust` los lista;
+«Agentes: volver a preguntar antes de cada cambio» en la paleta). El Historial marca
 cada cambio suyo con el nombre del agente, y «Deshacer todos los de ese
 día» los revierte juntos.
 

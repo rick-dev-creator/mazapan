@@ -141,6 +141,7 @@ mazapan agents usage [--days N] [--json]
 mazapan agents limits [--json]        # each Claude account's windows
 mazapan agents spend [--days N] [--json]  # what the providers report was spent (keys in the keyring)
 mazapan agents keys [set|remove PROVIDER] # API keys in the keyring (set: the key on stdin)
+mazapan agents trust [NAME on|off | all off] # agents whose changes apply without asking
 mazapan agents telemetry on|off [PORT]    # Claude Code's metrics to the receiver here (the agent plugin does it)
 mazapan agents otel [--port N] [--idle M] # the receiver itself (systemd starts it through its socket)
 mazapan agents sessions [--json]      # open sessions: working / waiting / done / running

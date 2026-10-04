@@ -428,7 +428,7 @@ public static partial class Program
         // An agent's change: the person allows it first, seeing the diff (when
         // the desktop has the card to ask on). Nothing to write: nothing to ask.
         var by = fs.IsSet("agent") ? (AgentClient != "" ? AgentClient : "an agent") : "";
-        if (fs.IsSet("agent") && Approval.Wanted() && (configChanged || changes.Any(c => c.State != State.Unchanged) || orphans.Count > 0))
+        if (fs.IsSet("agent") && Approval.Wanted() && !Approval.Trusted().Contains(by) && (configChanged || changes.Any(c => c.State != State.Unchanged) || orphans.Count > 0))
         {
             var diff = new StringWriter { NewLine = "\n" };
             var was = Console.Out;

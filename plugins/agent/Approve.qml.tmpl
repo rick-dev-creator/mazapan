@@ -173,6 +173,8 @@ Item {
           spacing: 8
           Caption { text: {{ tq "approve.undo" }}; color: Theme.fgSubtle; Layout.fillWidth: true; wrapMode: Text.Wrap }
           Button { text: {{ tq "approve.deny" }}; onClicked: root.answer("deny") }
+          // This one, and from now on every one of this agent's (mazapan agents trust NAME off undoes it).
+          Button { visible: root.by !== "" && root.by !== "an agent"; text: {{ tq "approve.always" }}.arg(root.by); onClicked: root.answer("always") }
           Button { text: {{ tq "approve.allow" }}; primary: true; onClicked: root.answer("allow") }
         }
       }

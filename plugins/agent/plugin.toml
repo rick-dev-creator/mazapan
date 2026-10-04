@@ -1,7 +1,7 @@
 [plugin]
 id = "agent"
 name = "Agents"
-version = "0.7.0"
+version = "0.8.0"
 api = 1
 description = "Your coding agents: in the bar, which is working and which waits for you (a click goes to its window), each account's limits and when they reset, and what they've used today, for Claude Code, opencode, pi, Codex… every account found by itself; and from the palette, ask one about this desktop with mazapan's report"
 categories = ["agent", "tools", "bar"]
@@ -134,6 +134,11 @@ keywords = "{{ t \"ask.kw\" }}"
 name = "{{ t \"act.ask_selection\" }}"
 run = "sh ~/.local/share/mazapan/bin/agent-ask --selection"
 keywords = "{{ t \"act.ask_selection.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.trust_off\" }}"
+run = "mazapan agents trust all off"
+keywords = "{{ t \"act.trust_off.kw\" }}"
 
 [[actions]]
 name = "{{ t \"report\" }}"

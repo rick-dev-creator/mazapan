@@ -99,6 +99,17 @@ public sealed class UndoTests : IDisposable
     }
 
     [Fact]
+    public void AnAgentTrustedOnceIsTrustedUntilTakenOff()
+    {
+        Assert.Empty(Mazapan.Cli.ApprovalNames.TrustedForTests());
+        Mazapan.Cli.ApprovalNames.TrustForTests("Claude Code", true);
+        Mazapan.Cli.ApprovalNames.TrustForTests("Claude Code", true);
+        Assert.Equal(["Claude Code"], Mazapan.Cli.ApprovalNames.TrustedForTests());
+        Mazapan.Cli.ApprovalNames.TrustForTests("Claude Code", false);
+        Assert.Empty(Mazapan.Cli.ApprovalNames.TrustedForTests());
+    }
+
+    [Fact]
     public void UndoPutsBackFilesOwnershipAndConfig()
     {
         var path = Path.Join(home.Path, ".config", "x.conf");
