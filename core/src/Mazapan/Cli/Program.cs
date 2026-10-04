@@ -43,6 +43,10 @@ public static partial class Program
                          plugin on or off), even if others came after it
           rollback [ID]  put back the packages and files from before an update
                          (the last one by default)
+          checkpoint [status|list|diagnose|keep|restore N] [--json]
+                         the system as it was before a change: which one this
+                         start is, which there are, what changed since, and
+                         making one the main system
           plugins [list]  plugins, where they come from, and their state
           plugins show ID
                          what a plugin needs and does: requirements, settings,
@@ -110,6 +114,7 @@ public static partial class Program
                 "apps" => CmdApps(rest),
                 "install" => CmdInstall(rest),
                 "rollback" => CmdRollback(rest),
+                "checkpoint" => CmdCheckpoint(rest),
                 "coverage" => CmdCoverage(rest),
                 "channel" => CmdChannel(rest),
                 "password" => CmdPassword(rest),

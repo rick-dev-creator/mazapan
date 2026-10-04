@@ -206,7 +206,9 @@ written as root, with sudo, only in a drop-in folder (`/etc/modprobe.d`,
 `/etc/udev/hwdb.d`, `/etc/sysctl.d`, `/etc/tmpfiles.d`,
 `/etc/systemd/logind.conf.d`, `/etc/systemd/sleep.conf.d`,
 `/etc/X11/xorg.conf.d`, browsers' `policies/managed`,
-`/etc/systemd/system/grub-btrfsd.service.d`, and for the login screen
+pacman's hooks (`/etc/pacman.d/hooks`), mkinitcpio's (`/etc/initcpio/post`),
+`snapper-cleanup.service.d`,
+`/etc/grub.d`, and for the login screen
 `/etc/greetd`, `/etc/systemd/system/greetd.service.d` and `/etc/pam.d`,
 `/etc/systemd/system/ufw.service.d`, `tailscaled.service.d` and
 `docker.socket.d`, a service

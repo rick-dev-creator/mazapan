@@ -110,7 +110,11 @@ public sealed partial class Plugin
         "/etc/tmpfiles.d", "/etc/systemd/logind.conf.d", "/etc/systemd/sleep.conf.d", "/etc/X11/xorg.conf.d",
         "/etc/chromium/policies/managed", "/etc/opt/chrome/policies/managed", "/etc/brave/policies/managed",
         "/etc/opt/edge/policies/managed",
-        // grub-btrfs's daemon (snapshots in the boot menu): what it passes a snapshot's kernel.
+        // Checkpoints in the boot menu: written after every package change and
+        // snapper's cleanup.
+        "/etc/pacman.d/hooks", "/etc/systemd/system/snapper-cleanup.service.d", "/etc/initcpio/post",
+        // grub-btrfs's daemon, as hw-snapshots-grub had it: still known, so a
+        // system that had that plugin gets its file taken out as root.
         "/etc/systemd/system/grub-btrfsd.service.d",
         // The login screen: greetd's configuration (its own is left alone), how it's
         // started, and its own PAM service (a new one: the system's aren't touched).

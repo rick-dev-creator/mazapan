@@ -1,0 +1,100 @@
+[plugin]
+id = "hw-checkpoints"
+name = "Checkpoints"
+version = "0.2.0"
+api = 1
+description = "The system as it was before every change, in the boot menu (encrypted disks too): started from one, it says so, and it can become your system; an agent can tell what broke"
+categories = ["hardware"]
+
+# btrfs (the snapshots are hw-snapshots') and GRUB. Mazapán's layout, the
+# system in a subvolume of its own (@), is what `mazapan checkpoint` works
+# on; anything else, it says so and leaves the menu alone.
+[hardware]
+filesystem = ["btrfs"]
+bootloader = ["grub"]
+
+[packages]
+pacman = ["snapper", "snap-pac"]
+
+[settings]
+# How many checkpoints the boot menu has, newest first.
+entries = { default = 5, min = 1, max = 15 }
+# How many days the system a checkpoint replaced is kept (in the boot menu
+# too), in case; then it's deleted.
+keep_days = { default = 7, min = 1, max = 60 }
+
+# A checkpoint is read-only: started from the menu, it runs on an overlay
+# in memory (systemd.volatile=overlay), which the initramfs needs to carry.
+[[targets]]
+template = "initramfs.conf.tmpl"
+output = "/etc/mkinitcpio.conf.d/mazapan-checkpoints.conf"
+system = true
+reload = "mkinitcpio -P"
+
+# grub.cfg reads the checkpoints' entries from a file of their own
+# (/boot/grub/mazapan-checkpoints.cfg), written without grub-mkconfig.
+[[targets]]
+template = "grub.sh.tmpl"
+output = "/etc/grub.d/mazapan_checkpoints"
+system = true
+reload = "[ -e /etc/grub.d/mazapan_checkpoints ] && chmod 755 /etc/grub.d/mazapan_checkpoints || rm -f /boot/grub/mazapan-checkpoints.cfg; grub-mkconfig -o /boot/grub/grub.cfg >/dev/null 2>&1; [ -e /etc/grub.d/mazapan_checkpoints ] || exit 0; mazapan checkpoint save >/dev/null; mazapan checkpoint menu --entries {{ settings.entries }} --keep-days {{ settings.keep_days }}"
+
+# After every package change (after mkinitcpio's hook): the kernels the
+# checkpoint taken before it started with kept, and the menu written.
+[[targets]]
+template = "pacman.hook.tmpl"
+output = "/etc/pacman.d/hooks/mazapan-checkpoints.hook"
+system = true
+
+# And after every initramfs mkinitcpio makes outside pacman (an apply's).
+[[targets]]
+template = "initcpio-post.sh.tmpl"
+output = "/etc/initcpio/post/mazapan-checkpoints"
+system = true
+reload = "[ -e /etc/initcpio/post/mazapan-checkpoints ] && chmod 755 /etc/initcpio/post/mazapan-checkpoints; true"
+
+# And after snapper's cleanup, which deletes the oldest.
+[[targets]]
+template = "cleanup.conf.tmpl"
+output = "/etc/systemd/system/snapper-cleanup.service.d/mazapan-checkpoints.conf"
+system = true
+reload = "systemctl daemon-reload"
+
+# At every start: on a checkpoint, the desktop told which one, the main
+# system mounted read only to compare; on the main system, the menu.
+[[targets]]
+template = "boot.service.tmpl"
+output = "/etc/systemd/system/mazapan-checkpoints.service"
+system = true
+reload = "systemctl daemon-reload; if [ -e /etc/systemd/system/mazapan-checkpoints.service ]; then systemctl enable mazapan-checkpoints.service; else systemctl disable mazapan-checkpoints.service 2>/dev/null; true; fi"
+
+# On a checkpoint: a card as the desktop starts, and a mark in the bar.
+[[targets]]
+template = "Checkpoint.qml.tmpl"
+output = "~/.config/quickshell/mazapan/panels/checkpoint.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
+template = "Mark.qml.tmpl"
+output = "~/.config/quickshell/mazapan/widgets/center/10-checkpoint.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[actions]]
+name = "{{ t \"act.status\" }}"
+run = "qs ipc -c mazapan call mazapan panel checkpoint"
+keywords = "{{ t \"act.kw\" }}"
+
+# The initramfs is made by mkinitcpio, reading /etc/mkinitcpio.conf.d
+# (a preset with its own _config= skips it; dracut isn't covered).
+[[checks]]
+name = "{{ t \"check.mkinitcpio\" }}"
+run = "command -v mkinitcpio >/dev/null && ! grep -qsE '^[^#]*_config=' /etc/mkinitcpio.d/*.preset"
+before_system = true
+
+[[checks]]
+name = "{{ t \"check.layout\" }}"
+run = "mazapan checkpoint status --json | grep -q '\"supported\":true'"
+
+[[checks]]
+name = "{{ t \"check.menu\" }}"
+run = "mazapan checkpoint status --json | grep -q '\"in_menu\":[1-9]' || { [ -z \"$(ls /.snapshots 2>/dev/null)\" ] && echo 'no checkpoints yet'; } || { echo 'checkpoints taken, none in the boot menu: sudo mazapan checkpoint menu'; exit 1; }"

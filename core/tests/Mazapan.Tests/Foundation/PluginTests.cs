@@ -132,6 +132,24 @@ public class PluginTests
     }
 
     [Fact]
+    public void NoTwoBuiltInPluginsShareAKey()
+    {
+        // Hyprland runs every bind on a key: two plugins' defaults on one key
+        // would both happen at once (SUPER + comma was settings and dismiss).
+        // Hardware plugins are left out: only where their machine is.
+        var (all, _) = Plugin.Discover([Path.Join(Repo.Root, "plugins")]);
+        var seen = new Dictionary<string, string>();
+        foreach (var p in all.Where(p => p.Hardware == null))
+            foreach (var (k, v) in p.Settings)
+            {
+                if (!(k == "key" || k.EndsWith("_key")) || v is not string key || key == "") continue;
+                var norm = string.Join("+", key.Split('+', StringSplitOptions.TrimEntries).Select(x => x.ToUpperInvariant()).Order());
+                Assert.False(seen.TryGetValue(norm, out var other), $"{key}: {p.Id}.{k} and {other}");
+                seen[norm] = $"{p.Id}.{k}";
+            }
+    }
+
+    [Fact]
     public void EveryBuiltInPluginLoads()
     {
         // One that doesn't is left out with a warning, and those requiring it with it.

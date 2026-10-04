@@ -3,7 +3,7 @@
 Where the system is on btrfs: a snapshot of `/` before and after every
 package change (an update, an install, a removal), by snap-pac, with
 snapper. The last `keep` changes are kept (10). They show in the
-desktop's History with what changed; with `hw-snapshots-grub` they're in
+desktop's History with what changed; with `hw-checkpoints` they're in
 the boot menu too, to start the system as it was.
 
 Like any hardware plugin it's off until you turn it on:

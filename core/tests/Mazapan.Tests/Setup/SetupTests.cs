@@ -144,12 +144,14 @@ public class SetupTests
         // systemd's initramfs: the password stays in the kernel keyring for the login.
         Assert.Contains("s/\\bencrypt\\b/sd-encrypt/", Archinstall.Post(a));
         Assert.Contains("rd.luks.name=", Archinstall.Post(a));
-        Assert.DoesNotContain("sd-encrypt", Archinstall.Post(Answers.Parse(Good)));
+        // systemd's initramfs either way (checkpoints start on an overlay through it).
+        Assert.Contains("s/\\budev\\b/systemd/", Archinstall.Post(Answers.Parse(Good)));
+        Assert.DoesNotContain("rd.luks.name=", Archinstall.Post(Answers.Parse(Good)));
         Assert.DoesNotContain("lock-on-idle=false", Decoded(Archinstall.Post(a)));
         Assert.Contains("autologin = true", Archinstall.UserConfig(a));
         Assert.Contains("pam-fde-boot-pw", doc.RootElement.GetProperty("packages").GetRawText());
-        // Snapshots still (not in the boot menu: /boot isn't on btrfs).
-        Assert.Contains("enabled_plugins = [\"hw-snapshots\", \"theme-grub\", \"theme-plymouth\", \"update-ahead\", \"firewall\", \"login\"]", Archinstall.UserConfig(a));
+        // Checkpoints in the boot menu too (their kernels kept on the EFI partition).
+        Assert.Contains("enabled_plugins = [\"hw-snapshots\", \"hw-checkpoints\", \"theme-grub\", \"theme-plymouth\", \"update-ahead\", \"firewall\", \"login\"]", Archinstall.UserConfig(a));
         Assert.DoesNotContain("grub-btrfs", doc.RootElement.GetProperty("packages").GetRawText());
         Assert.Contains("greetd", doc.RootElement.GetProperty("packages").GetRawText());
     }
@@ -237,7 +239,7 @@ public class SetupTests
         Assert.Contains("start-hyprland", files);
         Assert.DoesNotContain("--autologin", files);
         Assert.DoesNotContain("Default_keyring", files); // PAM opens the login keyring
-        Assert.Contains("enabled_plugins = [\"hw-snapshots\", \"hw-snapshots-grub\", \"theme-grub\", \"theme-plymouth\", \"update-ahead\", \"firewall\", \"login\"]", files);
+        Assert.Contains("enabled_plugins = [\"hw-snapshots\", \"hw-checkpoints\", \"theme-grub\", \"theme-plymouth\", \"update-ahead\", \"firewall\", \"login\"]", files);
         Assert.DoesNotContain("autologin", files); // not encrypted: the login screen, always
         Assert.Contains("snapper --no-dbus -c root create", post);
         Assert.True(post.IndexOf("mazapan apply") < post.IndexOf("snapper --no-dbus -c root create"));

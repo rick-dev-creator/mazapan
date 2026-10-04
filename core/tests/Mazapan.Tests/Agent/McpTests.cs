@@ -34,6 +34,10 @@ public class McpTests
         Assert.True(tools["preview_change"].GetProperty("annotations").GetProperty("readOnlyHint").GetBoolean());
         Assert.False(tools["apply_change"].GetProperty("annotations").GetProperty("readOnlyHint").GetBoolean());
         Assert.Equal("object", tools["apply_change"].GetProperty("inputSchema").GetProperty("type").GetString());
+        // Checkpoints: read, never restored by an agent (that's the person's, as root).
+        Assert.True(tools["checkpoints"].GetProperty("annotations").GetProperty("readOnlyHint").GetBoolean());
+        Assert.True(tools["checkpoint_diagnose"].GetProperty("annotations").GetProperty("readOnlyHint").GetBoolean());
+        Assert.DoesNotContain(tools.Keys, k => k.Contains("restore") || k.Contains("keep"));
         // Installing plugins or updating the system is the person's call, never an agent's.
         Assert.DoesNotContain(tools.Keys, k => k.Contains("install") || k.Contains("update") || k.Contains("add"));
     }

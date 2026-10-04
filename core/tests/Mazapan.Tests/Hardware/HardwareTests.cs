@@ -110,7 +110,7 @@ public class HardwareTests
 
     [Theory]
     [InlineData("output = \"/etc/modprobe.d/mazapan-x.conf\"\nsystem = true", true)]
-    [InlineData("output = \"/etc/systemd/system/grub-btrfsd.service.d/mazapan-x.conf\"\nsystem = true", null)]
+    [InlineData("output = \"/etc/pacman.d/hooks/mazapan-x.hook\"\nsystem = true", null)]
     [InlineData("output = \"/etc/systemd/system/sshd.service.d/mazapan-x.conf\"\nsystem = true", false)]
     [InlineData("output = \"/etc/passwd\"\nsystem = true", false)]
     [InlineData("output = \"/etc/modprobe.d/x.conf\"\nsystem = true", false)]

@@ -71,11 +71,9 @@ fcitx5-mozc
 fcitx5-chinese-addons
 fcitx5-hangul
 
-# Snapshots that boot (the hw-snapshots plugins)
+# Checkpoints in the boot menu (hw-snapshots, hw-checkpoints)
 snapper
 snap-pac
-grub-btrfs
-inotify-tools
 
 # What hardware plugins install (mazapan hardware --enable, while
 # installing): offline too, a GPU's drivers can't wait for a connection.

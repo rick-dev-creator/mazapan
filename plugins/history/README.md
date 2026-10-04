@@ -9,7 +9,7 @@ What changed on the desktop, in words, newest first, grouped by day
   version), by plugin;
 - an update (`mazapan update`), and how it went;
 - a system snapshot, with `hw-snapshots`: the system before and after a
-  package change, bootable from the boot menu with `hw-snapshots-grub`.
+  package change, bootable from the boot menu with `hw-checkpoints`.
 
 Each one has its own undo. An older change is undone on its own: what it
 changed and is still as it left it goes back (a setting from this

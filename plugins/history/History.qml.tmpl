@@ -143,6 +143,29 @@ Item {
   // --- undo --------------------------------------------------------------------------
 
 
+  // A checkpoint: the system as it was, from the next start (as root,
+  // through polkit); restarting is offered right after.
+  property bool restored: false
+  function restoreCheckpoint(e) {
+    if (!e || restorer.running) return
+    restored = false
+    message = {{ tq "restoring" }}
+    failed = false
+    restorer.command = ["pkexec", "mazapan", "checkpoint", "restore", String(e.pre), "-y"]
+    restorer.running = true
+  }
+  Process {
+    id: restorer
+    stderr: StdioCollector { id: restorerErr }
+    onExited: code => {
+      root.restored = code === 0
+      root.failed = code !== 0
+      root.message = code === 0 ? {{ tq "restored" }}
+        : code === 126 || code === 127 ? {{ tq "restore_not_allowed" }}
+        : (restorerErr.text.trim().split("\n").pop().replace(/^mazapan: /, "") || {{ tq "restore_failed" }})
+    }
+  }
+
   function undo(e) {
     if (!e) return
     // Apps: removed again (or installed again), the password through polkit.
@@ -481,6 +504,17 @@ Item {
 
           RowLayout {
             Layout.fillWidth: true
+            Button {
+              visible: !!root.sel && root.sel.kind === "snapshot" && root.sel.bootable && !root.restored
+              text: {{ tq "restore" }}
+              onClicked: root.restoreCheckpoint(root.sel)
+            }
+            Button {
+              visible: root.restored
+              primary: true
+              text: {{ tq "restart" }}
+              onClicked: Quickshell.execDetached(["systemctl", "reboot"])
+            }
             Button {
               visible: !!root.sel && root.sel.undo !== "none"
               primary: true

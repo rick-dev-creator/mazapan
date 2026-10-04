@@ -1,3 +1,0 @@
-"check.mkinitcpio" = "mkinitcpio makes the initramfs, with its drop-ins"
-"check.daemon" = "grub-btrfsd keeps the boot menu's snapshots up to date"
-"check.overlay" = "Every snapshot in the boot menu starts on an overlay"

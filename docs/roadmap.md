@@ -13,7 +13,16 @@ main one; "it should be easy to understand, and agents should diagnose and
 repair it". And Niri's tiling, which they liked: its workspaces, taken
 where they fit Hyprland.
 
-1. **Checkpoints anyone understands.** The word is "checkpoint" (never
+1. ~~**Checkpoints anyone understands.**~~ *done 2026-10-04 (plugin
+   hw-checkpoints, replacing hw-snapshots-grub; `mazapan checkpoint`).
+   Tried on an encrypted install from the ISO: a package change made a
+   checkpoint, started from the boot menu (on an overlay, the main system
+   mounted read only), the card and the bar's mark, the report for an
+   agent, "keep this one" (the old system kept as @-previous-DATE, in the
+   menu, and started from it too), the next start on the kept one with
+   its one-time notice. After it: kernels also recorded after any
+   initramfs (mkinitcpio's post hook), systemd-remount-fs masked on a
+   checkpoint's start. Spanish says "punto de restauración".* The word is "checkpoint" (never
    "snapshot 127"), each named for what it was before ("before updating
    12 packages, 4 Oct").
    - In the boot menu on every install, encrypted ones too: today only an
@@ -48,7 +57,11 @@ where they fit Hyprland.
    it). An update replacing the screen-sharing portal restarts it (the
    bar's check already restarts the bar), so neither asks as "an unknown
    app".
-3. **Niri's workspaces, on Hyprland's scrolling layout.** Hyprland 0.56's
+3. ~~**Niri's workspaces, on Hyprland's scrolling layout.**~~ *done
+   2026-10-04 (columns 0.6, bar-workspaces 0.5), tried in the VM: windows
+   open at half the screen, SUPER + R / F / [ ] / Page Up-Down, the wheel
+   and three fingers, the strip in the bar, the overview on SUPER + Tab.
+   `auto` (equal widths on every change) now off by default.* Hyprland 0.56's
    scrolling layout already has Niri's mechanics (preset column widths,
    consume and expel, centering, following the focus); what's missing is
    the way of working:
@@ -65,7 +78,25 @@ where they fit Hyprland.
    - Touchpad: three fingers sideways scroll the strip, up and down change
      workspace.
 
-Order: 2 (done), 1, then 3.
+4. **Then an audit, and the install from the ISO, before a real machine.**
+   The person's next steps: when the audit says it can be tried on real
+   hardware, the GitHub repository, then a laptop: an **MSI Vector A16 HX
+   A8W** (Ryzen 9 HX with its Radeon, and an NVIDIA GeForce: hybrid
+   graphics; Omarchy's installer didn't draw properly on it). Noted for
+   it so far:
+   - The live session on that hardware: Hyprland on the AMD side (or
+     nouveau), and a way to install from text if it doesn't start.
+   - hw-nvidia with the hybrid laptop: offload, which GPU drives the
+     panel, suspend.
+   - ~~SUPER + comma was two plugins' key (notifications' dismiss and
+     settings)~~ *done: dismiss is SUPER + SHIFT + comma, and a test keeps
+     built-in plugins' default keys apart.*
+   - A panel changed by an apply was seen keeping its old version until
+     the shell restarted (the overview, 2026-10-04).
+   - A THIRD_PARTY_NOTICES crediting Omarchy (MIT) for the hardware
+     fixes taken from it, with the repository.
+
+Order: 2 (done), 1, then 3, then 4.
 
 ## Next: what matters most (decided 2026-10-03)
 

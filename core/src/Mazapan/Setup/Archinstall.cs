@@ -9,7 +9,8 @@ namespace Mazapan.Setup;
 /// /, /home, the logs and pacman's cache), GRUB, NetworkManager, PipeWire,
 /// swap in zram, and mazapan. Without encryption /boot is on btrfs, inside
 /// the root subvolume, so a snapshot boots with its own kernel; encrypted,
-/// /boot is the EFI partition (GRUB can't open the LUKS2 archinstall makes).
+/// /boot is the EFI partition (GRUB can't open the LUKS2 archinstall makes),
+/// where each checkpoint's kernel is kept (hw-checkpoints).
 /// Then, in the new system (its custom_commands): the account's mazapan
 /// configuration, and its desktop on tty1.
 /// </summary>
@@ -28,12 +29,11 @@ public static class Archinstall
     ];
 
     /// <summary>
-    /// Snapshots from day one (plugins hw-snapshots and, with /boot on
-    /// btrfs, hw-snapshots-grub: bootable from the menu): what they need,
-    /// so turning them on while installing downloads nothing.
+    /// Checkpoints from day one (plugins hw-snapshots and hw-checkpoints:
+    /// in the boot menu): what they need, so turning them on while
+    /// installing downloads nothing.
     /// </summary>
-    static string[] Snapshots(Answers a) =>
-        a.Encrypt ? ["snapper", "snap-pac"] : ["snapper", "snap-pac", "grub-btrfs", "inotify-tools"];
+    static string[] Snapshots(Answers a) => ["snapper", "snap-pac"];
 
     /// <summary>The main partition's size on a disk (whole MiBs, after the EFI partition, one MiB left for GPT's backup table).</summary>
     static long MainSize(long diskBytes, bool encrypt) => diskBytes / MiB * MiB - (MiB + (encrypt ? 2048 * MiB : 512 * MiB)) - MiB;
@@ -193,6 +193,13 @@ public static class Archinstall
             s.Append("sed -i -E \"s|^(GRUB_CMDLINE_LINUX_DEFAULT=\\\"[^\\\"]*)|\\1 resume=UUID=$(findmnt -no UUID /) resume_offset=$(btrfs inspect-internal map-swapfile -r /swap/swapfile)|\" /etc/default/grub\n");
             s.Append("else rm -f /swap/swapfile; hibernate=0; echo \"hibernation left off: no room for its swap file\"; fi\n");
         }
+        // systemd's initramfs (systemd, sd-vconsole, sd-encrypt), as the Arch
+        // Wiki and every systemd distro: archinstall makes the older one
+        // (udev, keymap, encrypt) unless there's a security key. Checkpoints
+        // start on an overlay through it (systemd.volatile=overlay).
+        s.Append("sed -i -E '/^HOOKS=/{s/\\budev\\b/systemd/; s/\\bkeymap consolefont\\b/sd-vconsole/; s/\\bencrypt\\b/sd-encrypt/}' /etc/mkinitcpio.conf\n");
+        s.Append("grep -q '^HOOKS=.*\\bsystemd\\b' /etc/mkinitcpio.conf\n");
+        s.Append("mkinitcpio -P\n");
         if (!a.Encrypt)
         {
             // GRUB's own files on btrfs, next to the kernels: the EFI
@@ -205,17 +212,13 @@ public static class Archinstall
         }
         else
         {
-            // systemd's initramfs (sd-encrypt, sd-vconsole), as the Arch Wiki
-            // and every systemd distro: archinstall makes the older one
-            // (encrypt, keymap) unless there's a security key. With systemd's,
-            // the password typed as it starts stays in the kernel keyring,
-            // where the login takes it (pam_fde_boot_pw: one password), and
-            // the installer's keyboard is in it (sd-vconsole: the password is
-            // typed in the layout it was chosen in).
-            s.Append("sed -i -E '/^HOOKS=/{s/\\budev\\b/systemd/; s/\\bkeymap consolefont\\b/sd-vconsole/; s/\\bencrypt\\b/sd-encrypt/}' /etc/mkinitcpio.conf\n");
+            // Encrypted, with systemd's initramfs (below): the password typed
+            // as it starts stays in the kernel keyring, where the login takes
+            // it (pam_fde_boot_pw: one password), and the installer's keyboard
+            // is in it (sd-vconsole: the password is typed in the layout it was
+            // chosen in).
             s.Append("sed -i -E 's/cryptdevice=UUID=([^: ]+):root/rd.luks.name=\\1=root/' /etc/default/grub\n");
             s.Append("grep -q '^HOOKS=.*sd-encrypt' /etc/mkinitcpio.conf && grep -q 'rd.luks.name=' /etc/default/grub\n");
-            s.Append("mkinitcpio -P\n");
             s.Append("grub-mkconfig -o /boot/grub/grub.cfg\n");
             s.Append("grub-install --target=x86_64-efi --efi-directory=/boot --boot-directory=/boot --removable\n");
         }
@@ -281,8 +284,8 @@ public static class Archinstall
         s.Append($"chown -R {a.User}:{a.User} {home}\n");
         // The first one: the system as installed, to go back to.
         s.Append("if grep -qE '^SNAPPER_CONFIGS=.*[\" ]root[\" ]' /etc/conf.d/snapper 2>/dev/null; then snapper --no-dbus -c root create -c number -d 'mazapan installed' --userdata important=yes || true; fi\n");
-        // In the boot menu already (its daemon only sees the ones that come later).
-        s.Append("if [ -x /etc/grub.d/41_snapshots-btrfs ] && [ -e /etc/systemd/system/grub-btrfsd.service.d/mazapan-snapshots.conf ]; then GRUB_BTRFS_SNAPSHOT_KERNEL_PARAMETERS=systemd.volatile=overlay /etc/grub.d/41_snapshots-btrfs >/dev/null 2>&1 || true; fi\n");
+        // In the boot menu already, as a checkpoint.
+        s.Append("if [ -x /etc/grub.d/mazapan_checkpoints ]; then mazapan checkpoint menu >> /var/log/mazapan-first-apply.log 2>&1 || echo \"the checkpoints' menu failed: /var/log/mazapan-first-apply.log\"; fi\n");
         return s.ToString();
     }
 
@@ -292,10 +295,10 @@ public static class Archinstall
     public static string UserConfig(Answers a)
     {
         var c = new Config.Settings { Theme = a.Theme, Language = a.Language };
-        // Snapshots before and after every package change, from the start;
-        // in the boot menu when /boot is on btrfs (each has its kernel).
+        // Checkpoints before every package change, from the start, in the
+        // boot menu (encrypted too: their kernels kept on the EFI partition).
         c.Enabled.Add("hw-snapshots");
-        if (!a.Encrypt) c.Enabled.Add("hw-snapshots-grub");
+        c.Enabled.Add("hw-checkpoints");
         // The boot menu and the boot screen in the theme (GRUB, which every
         // install has; Plymouth, which also asks for the disk's password).
         c.Enabled.Add("theme-grub");

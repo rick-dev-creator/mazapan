@@ -16,7 +16,7 @@ key = "SUPER + N"
 # Turns Do Not Disturb on or off.
 quiet_key = "SUPER + SHIFT + N"
 # Puts the banners away (they stay in the center).
-dismiss_key = "SUPER + comma"
+dismiss_key = "SUPER + SHIFT + comma"
 # Where banners show: on the focused screen, or always on the first.
 screen = { default = "focused", choices = ["focused", "primary"] }
 # Seconds a banner stays when its app doesn't say (low urgency: less; an

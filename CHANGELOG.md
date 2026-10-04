@@ -6,6 +6,20 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- Checkpoints anyone understands: the system as it was before every
+  package change, in the boot menu ("Checkpoints"), encrypted disks too.
+  Started from one, a card and a mark in the bar say so, with three
+  answers: keep this one (it becomes your system; the one it replaces is
+  kept a week), back to my system, or ask an agent what broke (what
+  changed, read only). History restores one from the running system.
+  `mazapan checkpoint`, and `checkpoints` / `checkpoint_diagnose` for
+  agents.
+- Niri's way of tiling: a new window opens to the right at half the
+  screen and the others keep their width; SUPER + R cycles a column's
+  width, SUPER + F gives it all, SUPER + [ ] put windows in a column and
+  out, SUPER + Page Up/Down go through workspaces (a new one after the
+  last), SUPER + the wheel and three fingers scroll the strip. The bar
+  shows where you are on it, and SUPER + Tab shows every workspace at once.
 - Capture never hangs: a screen that isn't drawing (turned off) no longer
   keeps it from opening again; it's woken and tried once more, or it says
   which screen. Screen permissions no longer ask about the desktop's own

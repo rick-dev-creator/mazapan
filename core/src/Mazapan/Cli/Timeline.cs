@@ -187,10 +187,11 @@ public static partial class Program
             }));
 
         // System snapshots (snapper, btrfs): a package change's before and
-        // after as one entry; bootable from the boot menu with grub-btrfs.
+        // after as one entry; the "before" a checkpoint, in the boot menu
+        // with hw-checkpoints, and restorable from here.
         var machine = Hardware.ThisMachine.Get();
-        var bootable = File.Exists("/etc/systemd/system/grub-btrfsd.service.d/mazapan-snapshots.conf");
-        var bootPossible = machine.Bootloader == "grub" && machine.BootOnRoot;
+        var inMenu = CheckpointsInMenu();
+        var bootPossible = machine.Bootloader == "grub";
         foreach (var (pre, post, when, what) in SystemSnapshots())
             out_.Add((when, new Fields
             {
@@ -201,15 +202,29 @@ public static partial class Program
                 { "title", $"system snapshot: {what}" },
                 { "pre", pre },
                 { "post", post },
-                { "bootable", bootable },
-                // The boot menu could have them (hw-snapshots-grub), and undoing
-                // their files in place keeps kernel and modules together.
+                { "bootable", inMenu.Contains(pre.ToString(CultureInfo.InvariantCulture)) },
+                // The boot menu could have them (hw-checkpoints).
                 { "boot_possible", bootPossible },
                 { "boot_on_root", machine.BootOnRoot },
                 { "changes", new List<Fields>() },
                 { "undo", "none" },
             }));
         return out_.OrderByDescending(x => x.Item1).Select(x => x.Item2).ToList();
+    }
+
+    /// <summary>The checkpoints in the boot menu (hw-checkpoints writes which), by snapshot number.</summary>
+    static HashSet<string> CheckpointsInMenu()
+    {
+        try
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(Checkpoints.Checkpoints.MenuState));
+            return doc.RootElement.GetProperty("entries").EnumerateArray()
+                .Select(e => e.TryGetProperty("id", out var id) ? id.GetString() ?? "" : "").ToHashSet();
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or System.Text.Json.JsonException or KeyNotFoundException or InvalidOperationException)
+        {
+            return [];
+        }
     }
 
     /// <summary>

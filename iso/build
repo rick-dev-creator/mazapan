@@ -98,6 +98,7 @@ file_permissions+=(
   ["/etc/sudoers.d"]="0:0:750"
   ["/etc/sudoers.d/mazapan-live"]="0:0:440"
   ["/usr/local/bin/mazapan-unattended"]="0:0:755"
+  ["/usr/local/bin/mazapan-install-text"]="0:0:755"
 )
 CONF
 # The boot menus say what this is.
