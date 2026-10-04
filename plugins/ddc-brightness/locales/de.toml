@@ -1,0 +1,3 @@
+"plugin.name" = "Helligkeit externer Bildschirme"
+"plugin.description" = "Die Helligkeitstasten (und Heller und Dunkler in der Palette) ändern auch externe Bildschirme, über das Kabel (DDC/CI), wie den des Laptops; am Desktop sind es die einzigen. Ab dem nächsten Start"
+"check.bus" = "Die Busse der Bildschirme sind erreichbar"

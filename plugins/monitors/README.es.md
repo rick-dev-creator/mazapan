@@ -35,3 +35,9 @@ de su base nunca te quedas sin pantalla.
 
 Los perfiles se guardan en `~/.config/mazapan/monitors.json`; el gestor lo
 escribe, y tú también puedes editarlo.
+
+**Un portátil en el escritorio** (`clamshell`, activado): cierra la tapa
+con otra pantalla conectada y la pantalla del portátil se apaga, y sus
+workspaces pasan a la otra; ábrela y vuelve como la tiene tu perfil. El
+equipo no se suspende entonces (logind no toca la tapa mientras haya otra
+pantalla conectada).

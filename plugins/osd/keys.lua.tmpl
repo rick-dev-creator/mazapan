@@ -16,14 +16,11 @@ hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO
 hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), once)
 hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), once)
 
--- The screen's backlight only (-c backlight: never a keyboard's LED where
--- there's none), on brightnessctl's curve (-e4, as the battery's slider).
-local function light(change)
-  return hl.dsp.exec_cmd("p=$(brightnessctl -c backlight -m -e4 -n2 set " .. change .. " | cut -d, -f4 | tr -d %); "
-    .. "[ -n \"$p\" ] && qs ipc -c mazapan call osd brightness \"$p\"")
-end
-hl.bind("XF86MonBrightnessUp", light("{{ settings.brightness_step }}%+"), opt)
-hl.bind("XF86MonBrightnessDown", light("{{ settings.brightness_step }}%-"), opt)
+-- The screen's backlight (-c backlight: never a keyboard's LED), on
+-- brightnessctl's curve, and external screens over DDC where they answer
+-- (bin/brightness).
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("sh ~/.local/share/mazapan/bin/brightness up {{ settings.brightness_step }}"), opt)
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("sh ~/.local/share/mazapan/bin/brightness down {{ settings.brightness_step }}"), opt)
 
 hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("qs ipc -c mazapan call osd playPause"), once)
 hl.bind("XF86AudioPause", hl.dsp.exec_cmd("qs ipc -c mazapan call osd playPause"), once)

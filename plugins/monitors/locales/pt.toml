@@ -38,3 +38,5 @@
 "open" = "Organizar monitores"
 "open.kw" = "telas monitores resolução escala organizar"
 "home" = "Telas"
+"setting.clamshell" = "Tampa fechada com tela"
+"setting.clamshell.help" = "Tampa do notebook fechada com outra tela conectada: a tela dele desliga e você continua na outra; aberta, ela volta."

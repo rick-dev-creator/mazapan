@@ -1453,8 +1453,9 @@ tmux/herdr menus and niche tools left out):
    dev-databases panel, MongoDB too*.
 3. Fingerprint and security keys (FIDO2) for sudo, unlocking and the
    keyring.
-4. Docking: the lid closed with an external screen, working on; external
-   screens' brightness (DDC) with the brightness keys.
+4. ~~Docking: the lid closed with an external screen, working on; external
+   screens' brightness (DDC) with the brightness keys~~ *done: monitors'
+   clamshell (on), the ddc-brightness plugin; to try on a laptop*.
 5. ~~Launch or focus: SUPER + B goes to the browser when it's open~~
    *done: SUPER + B the browser, SUPER + E the files*.
 6. ~~The theme in more apps: Ghostty, kitty, Alacritty, Obsidian, Claude

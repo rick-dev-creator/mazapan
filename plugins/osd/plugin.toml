@@ -1,7 +1,7 @@
 [plugin]
 id = "osd"
 name = "Media keys"
-version = "0.1.0"
+version = "0.2.0"
 api = 1
 description = "The volume, microphone, brightness and media keys, and what they did shown for a moment on screen"
 categories = ["tools"]
@@ -21,6 +21,11 @@ brightness_step = { default = 5, min = 1, max = 25 }
 position = { default = "bottom", choices = ["bottom", "top", "center"] }
 # Seconds it stays.
 seconds = { default = 1.5, min = 0.5, max = 5, step = 0.5 }
+
+# The brightness keys: the laptop's screen, and external ones over DDC.
+[[targets]]
+template = "brightness.sh.tmpl"
+output = "~/.local/share/mazapan/bin/brightness"
 
 [[targets]]
 template = "Osd.qml.tmpl"
@@ -78,12 +83,12 @@ keywords = "{{ t \"act.play.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.brighter\" }}"
-run = 'p=$(brightnessctl -c backlight -m -e4 -n2 set {{ settings.brightness_step }}%+ | cut -d, -f4 | tr -d %); [ -n "$p" ] && qs ipc -c mazapan call osd brightness "$p"'
+run = "sh ~/.local/share/mazapan/bin/brightness up {{ settings.brightness_step }}"
 key = "XF86MonBrightnessUp"
 keywords = "{{ t \"act.light.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.dimmer\" }}"
-run = 'p=$(brightnessctl -c backlight -m -e4 -n2 set {{ settings.brightness_step }}%- | cut -d, -f4 | tr -d %); [ -n "$p" ] && qs ipc -c mazapan call osd brightness "$p"'
+run = "sh ~/.local/share/mazapan/bin/brightness down {{ settings.brightness_step }}"
 key = "XF86MonBrightnessDown"
 keywords = "{{ t \"act.light.kw\" }}"

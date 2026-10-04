@@ -33,3 +33,9 @@ comes back on: undocking never leaves you without a screen.
 
 Profiles are kept in `~/.config/mazapan/monitors.json`; the manager writes
 it, and you can edit it too.
+
+**A laptop at a desk** (`clamshell`, on): close the lid with another
+screen connected and the laptop's own screen turns off, its workspaces
+moving to the other; open it and it's back as your profile has it. The
+computer doesn't sleep then (logind leaves a lid alone while another
+screen is connected).

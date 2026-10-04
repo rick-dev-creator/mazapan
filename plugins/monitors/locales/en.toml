@@ -30,3 +30,5 @@
 "open" = "Arrange monitors"
 "open.kw" = "displays screens resolution scale arrange"
 "home" = "Screens"
+"setting.clamshell" = "Closed lid with a screen"
+"setting.clamshell.help" = "A laptop's lid closed with another screen connected: its own screen turns off and you keep working on the other; opened, it comes back."

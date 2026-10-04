@@ -1,0 +1,3 @@
+"plugin.name" = "Luminosité des écrans externes"
+"plugin.description" = "Les touches de luminosité (et Plus lumineux et Moins lumineux de la palette) changent aussi les écrans externes, par le câble (DDC/CI), comme celui du portable ; sur un fixe, ce sont les seuls. Au prochain démarrage"
+"check.bus" = "Les bus des écrans sont joignables"

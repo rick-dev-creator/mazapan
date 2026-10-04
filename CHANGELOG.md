@@ -6,6 +6,10 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- Close the laptop's lid with another screen connected and keep working on
+  it; the brightness keys change external screens too ("External
+  screens' brightness" in Plugins).
+
 - Record the screen with your camera in a corner ("Record with camera").
 
 - The theme in kitty, Ghostty and Alacritty (installed from Apps: open

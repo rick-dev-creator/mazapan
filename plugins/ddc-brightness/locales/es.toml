@@ -1,0 +1,3 @@
+"plugin.name" = "Brillo de las pantallas externas"
+"plugin.description" = "Las teclas de brillo (y Más brillo y Menos brillo de la paleta) cambian también las pantallas externas, por el cable (DDC/CI), como la del portátil; en un sobremesa, son las únicas. Desde el próximo arranque"
+"check.bus" = "Se llega a los buses de las pantallas"

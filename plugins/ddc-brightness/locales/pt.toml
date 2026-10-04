@@ -1,0 +1,3 @@
+"plugin.name" = "Brilho das telas externas"
+"plugin.description" = "As teclas de brilho (e Mais brilho e Menos brilho da paleta) mudam também as telas externas, pelo cabo (DDC/CI), como a do notebook; num desktop, são as únicas. A partir da próxima vez que ligar"
+"check.bus" = "Os barramentos das telas são acessíveis"

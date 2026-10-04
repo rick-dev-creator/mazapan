@@ -211,6 +211,36 @@ local function apply(profile, list)
   save_hidden()
 end
 
+-- The lid (ACPI's own word for it), and the laptop's own screen by its
+-- connector: closed with another screen there, it's turned off (clamshell),
+-- whatever a profile says; opened, the profile has it again.
+local function lid_closed()
+  for _, n in ipairs({ "LID", "LID0", "LID1", "LID2", "LID3" }) do
+    local f = io.open("/proc/acpi/button/lid/" .. n .. "/state", "r")
+    if f then
+      local s = f:read("a") or ""
+      f:close()
+      return s:find("closed", 1, true) ~= nil
+    end
+  end
+  return false
+end
+local function builtin(name) return name:match("^eDP") ~= nil or name:match("^LVDS") ~= nil or name:match("^DSI") ~= nil end
+
+local function clamshell(list)
+{{- if settings.clamshell }}
+  if not lid_closed() then return end
+  local inner, others = nil, false
+  for _, m in ipairs(list) do
+    if builtin(m.name) then inner = m.name else others = true end
+  end
+  if inner and others then
+    hl.monitor({ output = inner, disabled = true })
+    hidden[inner] = hidden[inner] or ""
+  end
+{{- end }}
+end
+
 local last = nil -- the profile applied last, so repeats don't re-apply
 
 -- While the manager tries a layout it's in charge: no profile gets in the
@@ -225,6 +255,7 @@ local function refresh(force)
     if matches(profile, list) then
       if last ~= profile.name then apply(profile, list) end
       last = profile.name
+      clamshell(list)
       return
     end
   end
@@ -238,6 +269,7 @@ local function refresh(force)
   hidden = {}
   save_hidden()
   last = nil
+  clamshell(list)
 {{- if settings.notify_unknown }}
   if #list > 1 then
     hl.notification.create({ text = ({{ tq "unknown" }}):gsub("%%1", {{ lq settings.key }}), duration = 6000 })
@@ -277,3 +309,10 @@ hl.on("monitor.removed", function(m)
 end)
 
 hl.bind({{ lq settings.key }}, hl.dsp.exec_cmd("qs ipc -c mazapan call mazapan panel monitors"))
+{{- if settings.clamshell }}
+-- The lid closing or opening: the screens looked at again (a closed lid
+-- with another screen keeps you working there; logind doesn't suspend
+-- when another screen is connected).
+hl.bind("switch:on:Lid Switch", function() refresh(true) end, { locked = true })
+hl.bind("switch:off:Lid Switch", function() refresh(true) end, { locked = true })
+{{- end }}

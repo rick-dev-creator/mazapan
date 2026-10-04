@@ -1,7 +1,7 @@
 [plugin]
 id = "monitors"
 name = "Monitors"
-version = "0.1.0"
+version = "0.2.0"
 api = 1
 description = "Monitor profiles matched by EDID, applied on their own when screens come and go; a visual manager to arrange them"
 categories = ["panel", "tools"]
@@ -17,6 +17,9 @@ key = "SUPER + SHIFT + M"
 notify_unknown = true
 # An icon in the bar (right side) that opens the manager.
 bar = true
+# A laptop's lid closed with another screen connected: its own screen off
+# and you working on the other (clamshell); opened, it's back.
+clamshell = true
 
 # The engine: reads ~/.config/mazapan/monitors.json (your profiles; the
 # manager writes it, you can too) and applies the one that matches.

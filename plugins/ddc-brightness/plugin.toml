@@ -1,0 +1,19 @@
+[plugin]
+id = "ddc-brightness"
+name = "External screens' brightness"
+version = "0.1.0"
+api = 1
+description = "The brightness keys (and the palette's Brighter and Dimmer) change external screens too, over the cable (DDC/CI), as the laptop's own; on a desktop, they're the only ones. From the next start"
+categories = ["tools"]
+# Off until turned on: it lets your session talk to the screens' controllers.
+optional = true
+
+# ddcutil brings its own udev rule (your session may reach the screens'
+# I2C buses) and loads i2c-dev at every start; the osd plugin's
+# bin/brightness uses it when it's there.
+[packages]
+pacman = ["ddcutil"]
+
+[[checks]]
+name = "{{ t \"check.bus\" }}"
+run = "[ -n \"$(find /dev -maxdepth 1 -name 'i2c-*' -readable 2>/dev/null | head -n 1)\" ] || { echo 'no I2C bus to reach: it counts from the next start'; exit 1; }"

@@ -1,0 +1,3 @@
+"plugin.name" = "External screens' brightness"
+"plugin.description" = "The brightness keys (and the palette's Brighter and Dimmer) change external screens too, over the cable (DDC/CI), as the laptop's own; on a desktop, they're the only ones. From the next start"
+"check.bus" = "The screens' buses can be reached"

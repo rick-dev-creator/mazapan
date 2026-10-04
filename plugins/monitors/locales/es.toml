@@ -38,3 +38,5 @@
 "open" = "Acomodar monitores"
 "open.kw" = "pantallas monitores resolución escala acomodar"
 "home" = "Pantallas"
+"setting.clamshell" = "Tapa cerrada con pantalla"
+"setting.clamshell.help" = "Con la tapa del portátil cerrada y otra pantalla conectada: su pantalla se apaga y sigues trabajando en la otra; al abrirla, vuelve."

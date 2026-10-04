@@ -37,3 +37,5 @@
 "open" = "Disposer les écrans"
 "open.kw" = "écrans moniteurs affichage résolution échelle disposer displays"
 "home" = "Écrans"
+"setting.clamshell" = "Capot fermé avec un écran"
+"setting.clamshell.help" = "Le capot du portable fermé avec un autre écran branché : son écran s'éteint et vous continuez sur l'autre ; ouvert, il revient."
