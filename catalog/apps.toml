@@ -94,7 +94,7 @@ id = "gaming"
 name = "Gaming"
 description = "Steam, other stores and launchers, and what makes games run better"
 glyph = 0xF0297
-apps = ["steam", "heroic", "lutris", "gamemode", "mangohud", "discord"]
+apps = ["steam", "heroic", "lutris", "gamemode", "mangohud", "gamescope", "protonplus", "discord"]
 translations.es.name = "Juegos"
 translations.de.name = "Gaming"
 translations.fr.name = "Jeux"
@@ -103,6 +103,21 @@ translations.es.description = "Steam, otras tiendas y lanzadores, y lo que hace 
 translations.de.description = "Steam, weitere Stores und Launcher und alles, was Spiele besser laufen lässt"
 translations.fr.description = "Steam, d'autres boutiques et lanceurs, et ce qui fait mieux tourner les jeux"
 translations.pt.description = "Steam, outras lojas e launchers, e o que faz os jogos rodarem melhor"
+
+[[profile]]
+id = "retro"
+name = "Retro and emulators"
+description = "Classic consoles and arcades, and the newer ones: GameCube, Wii, PlayStation 1 to 3, PSP, DS, 3DS, Wii U, Xbox. Your games and BIOS go in ~/Games"
+glyph = 0xF0B5E
+apps = ["retroarch", "duckstation", "pcsx2", "dolphin", "ppsspp", "melonds", "azahar", "cemu", "rpcs3", "xemu", "scummvm", "dosbox-staging"]
+translations.es.name = "Retro y emuladores"
+translations.de.name = "Retro und Emulatoren"
+translations.fr.name = "Rétro et émulateurs"
+translations.pt.name = "Retrô e emuladores"
+translations.es.description = "Consolas clásicas y arcades, y las más nuevas: GameCube, Wii, PlayStation 1 a 3, PSP, DS, 3DS, Wii U, Xbox. Tus juegos y BIOS van en ~/Games"
+translations.de.description = "Klassische Konsolen und Arcades, und neuere: GameCube, Wii, PlayStation 1 bis 3, PSP, DS, 3DS, Wii U, Xbox. Deine Spiele und BIOS gehören in ~/Games"
+translations.fr.description = "Les consoles classiques et les arcades, et les plus récentes : GameCube, Wii, PlayStation 1 à 3, PSP, DS, 3DS, Wii U, Xbox. Vos jeux et BIOS vont dans ~/Games"
+translations.pt.description = "Consoles clássicos e fliperamas, e os mais novos: GameCube, Wii, PlayStation 1 a 3, PSP, DS, 3DS, Wii U, Xbox. Seus jogos e BIOS vão em ~/Games"
 
 [[profile]]
 id = "creative"
@@ -606,8 +621,11 @@ id = "steam"
 name = "Steam"
 description = "Valve's store and your Steam library, Windows games included (Proton)"
 category = "games"
-flatpak = "com.valvesoftware.Steam"
-desktop = "com.valvesoftware.Steam.desktop"
+# Arch's own (multilib): on the system's drivers, with MangoHud, GameMode and
+# gamescope as they are, on the NVIDIA card where there's one (gaming).
+pacman = ["steam"]
+desktop = "steam.desktop"
+plugins = ["gaming"]
 translations.es.description = "La tienda de Valve y tu biblioteca de Steam, también juegos de Windows (Proton)"
 translations.de.description = "Der Store von Valve und deine Steam-Bibliothek, auch Windows-Spiele (Proton)"
 translations.fr.description = "La boutique de Valve et votre bibliothèque Steam, jeux Windows compris (Proton)"
@@ -620,6 +638,7 @@ description = "Epic Games, GOG and Amazon games"
 category = "games"
 flatpak = "com.heroicgameslauncher.hgl"
 desktop = "com.heroicgameslauncher.hgl.desktop"
+plugins = ["gaming"]
 translations.es.description = "Juegos de Epic Games, GOG y Amazon"
 translations.de.description = "Spiele von Epic Games, GOG und Amazon"
 translations.fr.description = "Les jeux Epic Games, GOG et Amazon"
@@ -632,6 +651,7 @@ description = "Every other game: emulators, Battle.net, installers"
 category = "games"
 pacman = ["lutris"]
 desktop = "net.lutris.Lutris.desktop"
+plugins = ["gaming"]
 translations.es.description = "Todos los demás juegos: emuladores, Battle.net, instaladores"
 translations.de.description = "Alle anderen Spiele: Emulatoren, Battle.net, Installer"
 translations.fr.description = "Tous les autres jeux : émulateurs, Battle.net, installateurs"
@@ -642,7 +662,7 @@ id = "gamemode"
 name = "GameMode"
 description = "The computer at full speed while a game runs"
 category = "games"
-pacman = ["gamemode"]
+pacman = ["gamemode", "lib32-gamemode"]
 translations.es.description = "El equipo a toda velocidad mientras juegas"
 translations.de.description = "Der Computer auf voller Leistung, während ein Spiel läuft"
 translations.fr.description = "L'ordinateur à pleine vitesse pendant que vous jouez"
@@ -653,11 +673,204 @@ id = "mangohud"
 name = "MangoHud"
 description = "Frame rate and temperatures over the game"
 category = "games"
-pacman = ["mangohud"]
+pacman = ["mangohud", "lib32-mangohud"]
 translations.es.description = "FPS y temperaturas sobre el juego"
 translations.de.description = "Bildrate und Temperaturen über dem Spiel"
 translations.fr.description = "Images par seconde et températures par-dessus le jeu"
 translations.pt.description = "FPS e temperaturas sobre o jogo"
+
+[[app]]
+id = "gamescope"
+name = "gamescope"
+description = "Valve's compositor for one game: its own resolution scaled up, a frame cap, HDR"
+category = "games"
+pacman = ["gamescope"]
+translations.es.description = "El compositor de Valve para un juego: su propia resolución escalada, límite de FPS, HDR"
+translations.de.description = "Valves Compositor für ein Spiel: eigene Auflösung hochskaliert, FPS-Grenze, HDR"
+translations.fr.description = "Le compositeur de Valve pour un jeu : sa propre résolution mise à l'échelle, limite d'images, HDR"
+translations.pt.description = "O compositor da Valve para um jogo: resolução própria escalada, limite de FPS, HDR"
+
+[[app]]
+id = "protonplus"
+name = "ProtonPlus"
+description = "Other Proton and Wine versions (Proton-GE) for games that need them, in a click"
+category = "games"
+flatpak = "com.vysp3r.ProtonPlus"
+desktop = "com.vysp3r.ProtonPlus.desktop"
+translations.es.description = "Otras versiones de Proton y Wine (Proton-GE) para los juegos que las piden, en un clic"
+translations.de.description = "Weitere Proton- und Wine-Versionen (Proton-GE) für Spiele, die sie brauchen, mit einem Klick"
+translations.fr.description = "D'autres versions de Proton et Wine (Proton-GE) pour les jeux qui en ont besoin, en un clic"
+translations.pt.description = "Outras versões de Proton e Wine (Proton-GE) para os jogos que pedem, em um clique"
+
+[[app]]
+id = "lact"
+name = "LACT"
+description = "Your graphics card's fans, power and clocks (AMD, NVIDIA, Intel)"
+category = "utilities"
+pacman = ["lact"]
+desktop = "io.github.ilya_zlobintsev.LACT.desktop"
+translations.es.description = "Ventiladores, consumo y frecuencias de tu tarjeta gráfica (AMD, NVIDIA, Intel)"
+translations.de.description = "Lüfter, Leistung und Takt deiner Grafikkarte (AMD, NVIDIA, Intel)"
+translations.fr.description = "Ventilateurs, consommation et fréquences de votre carte graphique (AMD, NVIDIA, Intel)"
+translations.pt.description = "Ventoinhas, consumo e frequências da sua placa de vídeo (AMD, NVIDIA, Intel)"
+
+# --- retro and emulators ---------------------------------------------------------------
+# The emulators only: games (ROMs) and consoles' BIOS are yours, from what
+# you own (~/Games/ROMs and ~/Games/BIOS, the emulation plugin).
+
+[[app]]
+id = "retroarch"
+name = "RetroArch"
+description = "Every classic console in one: NES, SNES, Mega Drive, Game Boy, GBA, PlayStation, N64, Dreamcast, arcade"
+category = "games"
+pacman = ["retroarch", "retroarch-assets-ozone", "libretro-core-info", "libretro-nestopia", "libretro-snes9x", "libretro-genesis-plus-gx", "libretro-picodrive", "libretro-gambatte", "libretro-mgba", "libretro-beetle-psx-hw", "libretro-mupen64plus-next", "libretro-flycast", "libretro-beetle-pce-fast", "libretro-mame", "libretro-shaders-slang"]
+desktop = "com.libretro.RetroArch.desktop"
+plugins = ["emulation"]
+translations.es.description = "Todas las consolas clásicas en una: NES, SNES, Mega Drive, Game Boy, GBA, PlayStation, N64, Dreamcast, arcade"
+translations.de.description = "Alle klassischen Konsolen in einer: NES, SNES, Mega Drive, Game Boy, GBA, PlayStation, N64, Dreamcast, Arcade"
+translations.fr.description = "Toutes les consoles classiques en une : NES, SNES, Mega Drive, Game Boy, GBA, PlayStation, N64, Dreamcast, arcade"
+translations.pt.description = "Todos os consoles clássicos em um: NES, SNES, Mega Drive, Game Boy, GBA, PlayStation, N64, Dreamcast, arcade"
+
+[[app]]
+id = "dolphin"
+name = "Dolphin"
+description = "GameCube and Wii"
+category = "games"
+pacman = ["dolphin-emu"]
+desktop = "dolphin-emu.desktop"
+plugins = ["emulation"]
+translations.es.description = "GameCube y Wii"
+translations.de.description = "GameCube und Wii"
+translations.fr.description = "GameCube et Wii"
+translations.pt.description = "GameCube e Wii"
+
+[[app]]
+id = "pcsx2"
+name = "PCSX2"
+description = "PlayStation 2"
+category = "games"
+flatpak = "net.pcsx2.PCSX2"
+desktop = "net.pcsx2.PCSX2.desktop"
+plugins = ["emulation"]
+translations.es.description = "PlayStation 2"
+translations.de.description = "PlayStation 2"
+translations.fr.description = "PlayStation 2"
+translations.pt.description = "PlayStation 2"
+
+[[app]]
+id = "duckstation"
+name = "DuckStation"
+description = "PlayStation, at its best"
+category = "games"
+flatpak = "org.duckstation.DuckStation"
+desktop = "org.duckstation.DuckStation.desktop"
+plugins = ["emulation"]
+translations.es.description = "PlayStation, en su mejor versión"
+translations.de.description = "PlayStation, in Bestform"
+translations.fr.description = "La PlayStation, au mieux"
+translations.pt.description = "PlayStation, no seu melhor"
+
+[[app]]
+id = "ppsspp"
+name = "PPSSPP"
+description = "PlayStation Portable"
+category = "games"
+pacman = ["ppsspp"]
+desktop = "PPSSPPSDL.desktop"
+plugins = ["emulation"]
+translations.es.description = "PlayStation Portable"
+translations.de.description = "PlayStation Portable"
+translations.fr.description = "PlayStation Portable"
+translations.pt.description = "PlayStation Portable"
+
+[[app]]
+id = "rpcs3"
+name = "RPCS3"
+description = "PlayStation 3"
+category = "games"
+flatpak = "net.rpcs3.RPCS3"
+desktop = "net.rpcs3.RPCS3.desktop"
+plugins = ["emulation"]
+translations.es.description = "PlayStation 3"
+translations.de.description = "PlayStation 3"
+translations.fr.description = "PlayStation 3"
+translations.pt.description = "PlayStation 3"
+
+[[app]]
+id = "melonds"
+name = "melonDS"
+description = "Nintendo DS"
+category = "games"
+flatpak = "net.kuribo64.melonDS"
+desktop = "net.kuribo64.melonDS.desktop"
+plugins = ["emulation"]
+translations.es.description = "Nintendo DS"
+translations.de.description = "Nintendo DS"
+translations.fr.description = "Nintendo DS"
+translations.pt.description = "Nintendo DS"
+
+[[app]]
+id = "azahar"
+name = "Azahar"
+description = "Nintendo 3DS (Citra, continued)"
+category = "games"
+flatpak = "org.azahar_emu.Azahar"
+desktop = "org.azahar_emu.Azahar.desktop"
+plugins = ["emulation"]
+translations.es.description = "Nintendo 3DS (la continuación de Citra)"
+translations.de.description = "Nintendo 3DS (Citras Nachfolger)"
+translations.fr.description = "Nintendo 3DS (la suite de Citra)"
+translations.pt.description = "Nintendo 3DS (a continuação do Citra)"
+
+[[app]]
+id = "cemu"
+name = "Cemu"
+description = "Wii U"
+category = "games"
+flatpak = "info.cemu.Cemu"
+desktop = "info.cemu.Cemu.desktop"
+plugins = ["emulation"]
+translations.es.description = "Wii U"
+translations.de.description = "Wii U"
+translations.fr.description = "Wii U"
+translations.pt.description = "Wii U"
+
+[[app]]
+id = "xemu"
+name = "xemu"
+description = "The original Xbox"
+category = "games"
+flatpak = "app.xemu.xemu"
+desktop = "app.xemu.xemu.desktop"
+plugins = ["emulation"]
+translations.es.description = "La Xbox original"
+translations.de.description = "Die erste Xbox"
+translations.fr.description = "La première Xbox"
+translations.pt.description = "O Xbox original"
+
+[[app]]
+id = "scummvm"
+name = "ScummVM"
+description = "Classic adventure games (LucasArts, Sierra) on today's computers"
+category = "games"
+pacman = ["scummvm"]
+desktop = "org.scummvm.scummvm.desktop"
+translations.es.description = "Aventuras gráficas clásicas (LucasArts, Sierra) en equipos de hoy"
+translations.de.description = "Klassische Adventures (LucasArts, Sierra) auf heutigen Computern"
+translations.fr.description = "Les jeux d'aventure classiques (LucasArts, Sierra) sur les ordinateurs d'aujourd'hui"
+translations.pt.description = "Aventuras clássicas (LucasArts, Sierra) nos computadores de hoje"
+
+[[app]]
+id = "dosbox-staging"
+name = "DOSBox Staging"
+description = "DOS games and programs"
+category = "games"
+flatpak = "io.github.dosbox-staging"
+desktop = "io.github.dosbox-staging.desktop"
+translations.es.description = "Juegos y programas de DOS"
+translations.de.description = "DOS-Spiele und -Programme"
+translations.fr.description = "Les jeux et programmes DOS"
+translations.pt.description = "Jogos e programas de DOS"
 
 # --- utilities ------------------------------------------------------------------------
 

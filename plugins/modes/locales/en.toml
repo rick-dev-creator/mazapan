@@ -64,3 +64,5 @@ theme_failed = "The mode's theme couldn't be applied: see ~/.local/state/mazapan
 "act.open" = "Modes"
 "act.open.kw" = "mode focus work presentation night game do not disturb"
 "act.off" = "Turn the mode off"
+"when.game" = "While a game is open"
+"when.game_text" = "On while a game is open"

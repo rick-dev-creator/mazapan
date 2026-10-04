@@ -1,0 +1,7 @@
+"plugin.name" = "Jogos"
+"plugin.description" = "Os jogos no seu melhor: na NVIDIA em notebooks híbridos, os drivers de 32 bits que os jogos de Windows pedem, desenhados com o menor atraso e sem a tela escurecer no meio da partida (com Modos, o modo Jogo liga enquanto houver um aberto)"
+"setting.low_latency" = "Menor atraso"
+"setting.low_latency.help" = "Os jogos desenham assim que podem (tearing permitido só para eles): menos atraso, nos jogos que pedem isso em tela cheia."
+"setting.discrete_gpu" = "Jogos na NVIDIA"
+"setting.discrete_gpu.help" = "Num notebook com NVIDIA ao lado da GPU integrada: Steam, Lutris e Heroic (e seus jogos) na NVIDIA."
+"check.lib32" = "Os drivers de 32 bits para as GPUs deste computador estão instalados"

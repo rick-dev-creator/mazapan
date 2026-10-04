@@ -1,0 +1,7 @@
+"plugin.name" = "Jeux"
+"plugin.description" = "Les jeux au mieux : sur la NVIDIA des portables hybrides, les pilotes 32 bits que demandent les jeux Windows, affichés avec le moins de délai, et l'écran qui ne s'assombrit jamais en pleine partie (avec Modes, le mode Jeu s'active tant qu'un jeu est ouvert)"
+"setting.low_latency" = "Le moins de délai"
+"setting.low_latency.help" = "Les jeux affichent dès qu'ils peuvent (le tearing leur est permis) : moins de délai, pour les jeux qui le demandent en plein écran."
+"setting.discrete_gpu" = "Jeux sur la NVIDIA"
+"setting.discrete_gpu.help" = "Sur un portable avec une NVIDIA à côté du GPU intégré : Steam, Lutris et Heroic (et leurs jeux) sur la NVIDIA."
+"check.lib32" = "Les pilotes 32 bits des GPU de cet ordinateur sont là"

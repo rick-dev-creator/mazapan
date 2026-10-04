@@ -139,6 +139,8 @@ optional = false           # true: off until turned on (an extra, not everyone's
 
 [packages]
 pacman = ["foot"]          # checked on apply, warned about if missing
+pacman_nvidia = []         # only where there's such a GPU (also pacman_amd,
+                           # pacman_intel): a game's 32-bit driver, say
 
 [settings]                 # knobs with their defaults (string, int, float, bool)
 key = "SUPER + equal"

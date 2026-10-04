@@ -37,6 +37,27 @@ public sealed partial class Plugin
     public List<string> Pacman { get; set; } = [];
 
     /// <summary>
+    /// Packages only for a GPU this computer has: [packages] pacman_nvidia,
+    /// pacman_amd, pacman_intel (a game's 32-bit driver, say).
+    /// </summary>
+    public Dictionary<string, List<string>> PacmanForGpu { get; set; } = [];
+
+    /// <summary>The PCI vendors those keys stand for.</summary>
+    public static readonly Dictionary<string, string> GpuVendors = new() { ["nvidia"] = "10de", ["amd"] = "1002", ["intel"] = "8086" };
+
+    /// <summary>What it needs here: its packages, and those for the GPUs this computer has.</summary>
+    public List<string> PacmanHere
+    {
+        get
+        {
+            if (PacmanForGpu.Count == 0) return Pacman;
+            var vendors = Mazapan.Hardware.ThisMachine.Get().Gpus.Select(g => g.Vendor.ToLowerInvariant()).ToHashSet();
+            return Pacman.Concat(PacmanForGpu.Where(kv => GpuVendors.TryGetValue(kv.Key, out var v) && vendors.Contains(v)).SelectMany(kv => kv.Value))
+                .Distinct().ToList();
+        }
+    }
+
+    /// <summary>
     /// Settings are the plugin's knobs with their defaults. People override
     /// them in config.toml under [plugins.&lt;id&gt;]; templates read the
     /// result as settings.
@@ -291,7 +312,10 @@ public sealed partial class Plugin
         foreach (var c in p.Meta.Categories)
             if (!Install.CatalogIndex.KnownCategories.Contains(c))
                 throw new MazapanException($"{path}: [plugin] category \"{c}\": one of {string.Join(", ", Install.CatalogIndex.KnownCategories)}");
-        p.Pacman = r.Sub("packages").Strings("pacman");
+        var packages = r.Sub("packages");
+        p.Pacman = packages.Strings("pacman");
+        foreach (var gpu in GpuVendors.Keys)
+            if (packages.Strings("pacman_" + gpu) is { Count: > 0 } list) p.PacmanForGpu[gpu] = list;
         if (r.Raw("settings") is { } settings)
         {
             var comments = SettingInfo.Comments(File.ReadAllText(path));

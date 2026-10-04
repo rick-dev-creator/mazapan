@@ -423,12 +423,12 @@ public static partial class Program
         // Hardware and optional plugins' packages are installed (the person
         // turned them on; mazapan's package doesn't bring them); the others'
         // are only said, as they always were (the package depends on them).
-        var packages = AsRoot.Missing(s.Plugins.Where(p => p.OffByDefault).SelectMany(p => p.Pacman));
+        var packages = AsRoot.Missing(s.Plugins.Where(p => p.OffByDefault).SelectMany(p => p.PacmanHere));
         foreach (var p in s.Plugins.Where(p => !p.OffByDefault))
-            foreach (var pkg in AsRoot.Missing(p.Pacman))
+            foreach (var pkg in AsRoot.Missing(p.PacmanHere))
                 Console.Error.WriteLine($"warning: plugin {p.Id} needs package {pkg} (not installed)");
         foreach (var pkg in packages)
-            Console.WriteLine($"  {"install",-10} {string.Join(",", s.Plugins.Where(p => p.Pacman.Contains(pkg)).Select(p => p.Id)),-16} {pkg}");
+            Console.WriteLine($"  {"install",-10} {string.Join(",", s.Plugins.Where(p => p.PacmanHere.Contains(pkg)).Select(p => p.Id)),-16} {pkg}");
         var rootWork = sysChanges.Count + sysOrphans.Count + packages.Count;
         if (fs.IsSet("dry-run")) return 0;
         // Every apply can be undone: what it touches is kept first.

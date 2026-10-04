@@ -1,0 +1,7 @@
+"plugin.name" = "Gaming"
+"plugin.description" = "Games at their best: on the NVIDIA card on hybrid laptops, the 32-bit drivers Windows games need, drawn with the least delay, and the screen never dimming mid-game (with Modes, the Game mode comes on while one is open)"
+"setting.low_latency" = "Least delay"
+"setting.low_latency.help" = "Games draw as soon as they can (tearing allowed for them): less delay, for games that ask for it in fullscreen."
+"setting.discrete_gpu" = "Games on the NVIDIA card"
+"setting.discrete_gpu.help" = "On a laptop with an NVIDIA card beside the integrated GPU: Steam, Lutris and Heroic (and their games) on the NVIDIA card."
+"check.lib32" = "The 32-bit drivers for this computer's GPUs are there"

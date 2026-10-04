@@ -25,7 +25,7 @@ Singleton {
   readonly property string idle: home + "/.local/share/mazapan/bin/idle"
 
   // [{id, preset, name, glyph, quiet, allow, theme, power, night, awake,
-  //   hide, when: {kind: "hand" | "schedule" | "screens", days, from, to}}]
+  //   hide, when: {kind: "hand" | "schedule" | "screens" | "game", days, from, to}}]
   property var modes: []
   // The one on: {id, how: "hand" | "auto", since}; null when none.
   property var active: null
@@ -79,9 +79,10 @@ Singleton {
     { id: "night", preset: "night", name: "", glyph: 0xF0594, quiet: true,
       allow: "", theme: "", power: "power-saver", night: "on", awake: false, hide: [],
       when: { kind: "hand", days: [1, 2, 3, 4, 5, 6, 7], from: "22:00", to: "07:00" } },
+    // On by itself while a game is open (Steam's, gamescope, one that says so).
     { id: "game", preset: "game", name: "", glyph: 0xF0297, quiet: true,
       allow: "", theme: "", power: "performance", night: "", awake: false, hide: [],
-      when: { kind: "hand", days: [1, 2, 3, 4, 5, 6, 7], from: "20:00", to: "23:00" } },
+      when: { kind: "game", days: [1, 2, 3, 4, 5, 6, 7], from: "20:00", to: "23:00" } },
   ]
 
   // Every mode in its full shape (a hand edit may leave things out).
@@ -92,7 +93,7 @@ Singleton {
       glyph: Number(m.glyph) || 0xF00BE, quiet: m.quiet === true, allow: String(m.allow || ""),
       theme: String(m.theme || ""), power: String(m.power || ""), night: m.night === "on" || m.night === "off" ? m.night : "",
       awake: m.awake === true, hide: Array.isArray(m.hide) ? m.hide.map(String) : [],
-      when: { kind: ["schedule", "screens"].includes(w.kind) ? w.kind : "hand",
+      when: { kind: ["schedule", "screens", "game"].includes(w.kind) ? w.kind : "hand",
         days: Array.isArray(w.days) ? w.days.map(Number).filter(d => d >= 1 && d <= 7) : [],
         from: String(w.from || ""), to: String(w.to || "") },
     }
@@ -290,6 +291,7 @@ Singleton {
   function due(m) {
     const w = m.when
     if (w.kind === "screens") return screens > 1
+    if (w.kind === "game") return games.length > 0
     if (w.kind !== "schedule") return false
     const from = minutes(w.from), to = minutes(w.to)
     if (from < 0 || to < 0 || from === to) return false
@@ -341,6 +343,29 @@ Singleton {
     target: Hyprland
     function onRawEvent(event) {
       if (["monitoradded", "monitorremoved", "monitoraddedv2", "monitorremovedv2"].includes(event.name)) screensSettle.restart()
+      // A game opened or closed ("ADDRESS,WORKSPACE,CLASS,TITLE" / "ADDRESS").
+      if (event.name === "openwindow") {
+        const f = event.data.split(",")
+        if (f.length >= 3 && root.isGame(f[2]) && !root.games.includes(f[0])) { root.games = root.games.concat([f[0]]); root.check() }
+      } else if (event.name === "closewindow" && root.games.includes(event.data)) {
+        root.games = root.games.filter(a => a !== event.data)
+        gameSettle.restart()
+      }
+    }
+  }
+  // The windows that are games, by address. Closing one and opening the
+  // next (a launcher, then the game) doesn't turn the mode off between.
+  property var games: []
+  function isGame(cls) { return /^steam_app_\d+$|^gamescope$/.test(cls) }
+  Timer { id: gameSettle; interval: 5000; onTriggered: root.check() }
+  Timer {
+    id: gamesAtStart
+    interval: 1500
+    onTriggered: {
+      root.games = Hyprland.toplevels.values
+        .filter(t => t.lastIpcObject && (root.isGame(t.lastIpcObject.class || "") || t.lastIpcObject.contentType === "game"))
+        .map(t => String(t.address).replace(/^0x/, ""))
+      root.check()
     }
   }
   // Edits settle before their times are looked at (a time half typed
@@ -464,5 +489,10 @@ Singleton {
     onTriggered: store.reload()
   }
 
-  Component.onCompleted: Quickshell.execDetached(["mkdir", "-p", root.dir])
+  Component.onCompleted: {
+    Quickshell.execDetached(["mkdir", "-p", root.dir])
+    // The games already open (a shell restarted mid-game).
+    Hyprland.refreshToplevels()
+    gamesAtStart.start()
+  }
 }

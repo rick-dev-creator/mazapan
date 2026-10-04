@@ -1591,6 +1591,13 @@ its telemetry), Docker itself as an app done right (its socket, you in its
 group as said, taken out when it's off); Mission Center for how the
 computer is doing; `~/.local/bin` on the session's PATH.
 
+*Done (2026-10-04), asked for:* gaming (plugin `gaming`: hybrid laptops'
+games on the NVIDIA card, 32-bit drivers per GPU through `pacman_<gpu>`,
+low latency, Game mode while a game is open), the Retro and emulators
+profile (plugin `emulation`), seven screensavers. Next from Niri, proposed:
+workspaces that go back to their screen, tabs in a column, widths per app
+(the `scrolling_width` window rule), the overview by keyboard and gestures.
+
 ## Later, nice to have
 
 - Graphical plugins in .NET (Avalonia), for others to write in C#: whole

@@ -1,0 +1,7 @@
+"plugin.name" = "Emulation"
+"plugin.description" = "Retro- und Konsolenspiele, bereit: ~/Games mit einem Ordner pro Konsole für deine Spiele und einem für BIOS, RetroArch beim ersten Mal darauf eingestellt, und die Fenster der Emulatoren nie abgedunkelt und mit geringster Verzögerung gezeichnet"
+"setting.games" = "Spieleordner"
+"setting.games.help" = "Wo deine Spiele und die BIOS der Konsolen liegen."
+"act.games" = "Meinen Spieleordner öffnen"
+"act.games.kw" = "roms spiele emulatoren retro bios"
+"bios.readme" = "Hierher gehören die BIOS deiner Konsolen (Kopien von Konsolen, die du\nbesitzt: Mazapán lädt sie nicht herunter). RetroArch und die anderen\nEmulatoren suchen hier.\n\n  PlayStation (RetroArch, DuckStation)  scph5500.bin, scph5501.bin, scph5502.bin\n  PlayStation 2 (PCSX2)                 das BIOS deiner PS2 (beliebiger Name; PCSX2 fragt danach)\n  PlayStation 3 (RPCS3)                 PS3UPDAT.PUP, Sonys Firmware (kostenlos bei Sony)\n  Sega CD / Mega CD                     bios_CD_U.bin, bios_CD_E.bin, bios_CD_J.bin\n  Dreamcast (Flycast)                   dc/dc_boot.bin, dc/dc_flash.bin\n  Nintendo DS (melonDS)                 bios7.bin, bios9.bin, firmware.bin (optional)\n  Game Boy Advance                      gba_bios.bin (optional)\n  PC Engine CD                          syscard3.pce\n\nDie Spiele: ~/Games/ROMs, ein Ordner pro Konsole."

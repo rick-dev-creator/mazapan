@@ -1,0 +1,7 @@
+"plugin.name" = "Juegos"
+"plugin.description" = "Los juegos en su mejor versión: en la NVIDIA en laptops híbridas, los drivers de 32 bits que piden los juegos de Windows, dibujados con el menor retraso y sin que la pantalla se atenúe a mitad de partida (con Modos, el modo Juego se activa mientras hay uno abierto)"
+"setting.low_latency" = "Menor retraso"
+"setting.low_latency.help" = "Los juegos dibujan en cuanto pueden (se permite el tearing solo para ellos): menos retraso, en los juegos que lo piden a pantalla completa."
+"setting.discrete_gpu" = "Juegos en la NVIDIA"
+"setting.discrete_gpu.help" = "En una laptop con NVIDIA junto a la GPU integrada: Steam, Lutris y Heroic (y sus juegos) en la NVIDIA."
+"check.lib32" = "Están los drivers de 32 bits para las GPU de este equipo"

@@ -137,7 +137,7 @@ public static partial class Program
             n.OwnedVendor = AppsLedger.OwnedVendor(ledger);
             // Never removed: the system's, and what an enabled plugin needs.
             n.Protected = [.. AppsLedger.Protected];
-            foreach (var p in n.Found.Where(p => n.Cfg != null && n.Cfg.IsOn(p))) n.Protected.UnionWith(p.Pacman);
+            foreach (var p in n.Found.Where(p => n.Cfg != null && n.Cfg.IsOn(p))) n.Protected.UnionWith(p.PacmanHere);
             n.ChromiumBrowser = new[] { "chromium", "google-chrome", "brave-browser", "brave-bin", "vivaldi", "microsoft-edge-stable-bin", "helium-browser-bin" }.Any(n.Packages.Contains);
             return n;
         }

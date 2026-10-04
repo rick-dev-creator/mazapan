@@ -380,7 +380,7 @@ public static partial class Program
             { "hardware", p.Hardware?.Describe() ?? "" },
             // Off until turned on (hardware, optional): their packages come
             // when they are, as root (mazapan apply --system).
-            { "packages_missing", p.OffByDefault ? Applying.AsRoot.Missing(p.Pacman) : [] },
+            { "packages_missing", p.OffByDefault ? Applying.AsRoot.Missing(p.PacmanHere) : [] },
             { "requires", p.Meta.Requires },
             { "required_by", installed ? Dependencies.Dependents(p.Id, c.All) : [] },
             { "readme", readme != null ? File.ReadAllText(readme) : "" },

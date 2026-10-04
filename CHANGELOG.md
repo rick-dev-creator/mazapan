@@ -6,6 +6,19 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- Gaming: Steam from Arch (on the system's drivers), and on hybrid laptops
+  Steam, Lutris and Heroic on the NVIDIA card by themselves; the 32-bit
+  drivers for this computer's GPUs (AMD, Intel, NVIDIA); games drawn with
+  the least delay and the screen never dimming mid-game; the Game mode on
+  while a game is open; gamescope, ProtonPlus and LACT in Apps.
+- Retro and emulators: a profile with RetroArch (the classic consoles and
+  arcades), DuckStation, PCSX2, Dolphin, PPSSPP, melonDS, Azahar, Cemu,
+  RPCS3, xemu, ScummVM and DOSBox, and ~/Games ready for your games and
+  BIOS.
+- Seven screensavers: the mazapán bouncing about, an 80s terminal, code
+  rain, stars, the Game of Life, pipes and the glow, or one at random; each
+  tried from the palette.
+- `mazapan apply` from a console or SSH reloads the bar too.
 - Checkpoints anyone understands: the system as it was before every
   package change, in the boot menu ("Checkpoints"), encrypted disks too.
   Started from one, a card and a mark in the bar say so, with three

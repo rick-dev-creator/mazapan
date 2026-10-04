@@ -68,3 +68,5 @@ theme_failed = "Le thème du mode n'a pas pu être appliqué : voir ~/.local/sta
 "act.open" = "Modes"
 "act.open.kw" = "mode concentration focus travail présentation nuit jeu ne pas déranger"
 "act.off" = "Désactiver le mode"
+"when.game" = "Pendant qu'un jeu est ouvert"
+"when.game_text" = "Actif pendant qu'un jeu est ouvert"

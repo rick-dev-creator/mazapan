@@ -68,3 +68,5 @@ theme_failed = "No se pudo aplicar el tema del modo: mira ~/.local/state/mazapan
 "act.open" = "Modos"
 "act.open.kw" = "modo concentración trabajo presentación noche juego no molestar"
 "act.off" = "Desactivar el modo"
+"when.game" = "Mientras hay un juego abierto"
+"when.game_text" = "Activo mientras hay un juego abierto"

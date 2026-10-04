@@ -105,9 +105,9 @@ run = '''
 set -u
 cfg=mazapan
 
-pid() { qs list -c "$cfg" 2>/dev/null | awk '/Process ID/ { print $3; exit }'; }
+pid() { qs list --any-display -c "$cfg" 2>/dev/null | awk '/Process ID/ { print $3; exit }'; }
 start() { hyprctl dispatch 'hl.dsp.exec_cmd("qs -c mazapan --no-duplicate")' >/dev/null; }
-answers() { qs ipc -c "$cfg" call mazapan ping >/dev/null 2>&1; }
+answers() { qs ipc --any-display -c "$cfg" call mazapan ping >/dev/null 2>&1; }
 
 p=$(pid)
 if [ -z "$p" ]; then
@@ -115,7 +115,7 @@ if [ -z "$p" ]; then
   start
 elif readlink "/proc/$p/exe" | grep -q "(deleted)"; then
   echo "Quickshell was updated: restarting the bar on the new version"
-  qs kill -c "$cfg" >/dev/null 2>&1
+  qs kill --any-display -c "$cfg" >/dev/null 2>&1
   for _ in $(seq 20); do [ -z "$(pid)" ] && break; sleep 0.25; done
   start
 fi
@@ -124,8 +124,8 @@ for _ in $(seq 40); do answers && break; sleep 0.25; done
 answers || { echo "the bar doesn't answer"; exit 1; }
 
 sleep 1
-if qs log -c "$cfg" 2>/dev/null | tail -n 30 | grep -q "Failed to load configuration"; then
-  qs log -c "$cfg" | grep -A2 "Failed to load configuration" | tail -n 3
+if qs log --any-display -c "$cfg" 2>/dev/null | tail -n 30 | grep -q "Failed to load configuration"; then
+  qs log --any-display -c "$cfg" | grep -A2 "Failed to load configuration" | tail -n 3
   exit 1
 fi
 '''

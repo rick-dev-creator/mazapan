@@ -1,9 +1,9 @@
 [plugin]
 id = "screensaver"
 name = "Screensaver"
-version = "0.1.0"
+version = "0.2.0"
 api = 1
-description = "After a while without use, every screen shows the time in the theme's colors, drifting slowly so nothing stays burnt in; a key or the mouse and it's gone. A video or a call keeps it away"
+description = "After a while without use, every screen shows the time over one of seven scenes in the theme's colors (the mazapán bouncing about, an 80s terminal, code rain, stars, the Game of Life, pipes, a glow), moving so nothing stays burnt in; a key or the mouse and it's gone. A video or a call keeps it away"
 categories = ["theme", "tools"]
 requires = ["shell-bar", "idle"]
 optional = true
@@ -16,6 +16,10 @@ pacman = ["quickshell"]
 after = { default = 2, min = 1, max = 60 }
 # The date under the time.
 date = true
+# What it shows: "mazapan" (the mazapán bouncing about), "crt" (an 80s
+# terminal), "rain" (code falling), "stars", "life" (the Game of Life),
+# "pipes", "glow" (the theme's colors drifting), or "random".
+style = { default = "mazapan", choices = ["mazapan", "crt", "rain", "stars", "life", "pipes", "glow", "random"] }
 
 [[targets]]
 template = "Screensaver.qml.tmpl"
@@ -25,4 +29,39 @@ reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 [[actions]]
 name = "{{ t \"act.show\" }}"
 run = "sleep 0.4; qs ipc -c mazapan call screensaver start"
+keywords = "{{ t \"act.show.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.try.mazapan\" }}"
+run = "sleep 0.4; qs ipc -c mazapan call screensaver preview mazapan"
+keywords = "{{ t \"act.show.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.try.crt\" }}"
+run = "sleep 0.4; qs ipc -c mazapan call screensaver preview crt"
+keywords = "{{ t \"act.show.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.try.rain\" }}"
+run = "sleep 0.4; qs ipc -c mazapan call screensaver preview rain"
+keywords = "{{ t \"act.show.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.try.stars\" }}"
+run = "sleep 0.4; qs ipc -c mazapan call screensaver preview stars"
+keywords = "{{ t \"act.show.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.try.life\" }}"
+run = "sleep 0.4; qs ipc -c mazapan call screensaver preview life"
+keywords = "{{ t \"act.show.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.try.pipes\" }}"
+run = "sleep 0.4; qs ipc -c mazapan call screensaver preview pipes"
+keywords = "{{ t \"act.show.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.try.glow\" }}"
+run = "sleep 0.4; qs ipc -c mazapan call screensaver preview glow"
 keywords = "{{ t \"act.show.kw\" }}"

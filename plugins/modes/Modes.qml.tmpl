@@ -90,6 +90,7 @@ Item {
     const w = m.when || {}
     if (w.kind === "schedule") return {{ tq "when.schedule_text" }}.arg(dayRuns(w.days || [])).arg(w.from).arg(w.to)
     if (w.kind === "screens") return {{ tq "when.screens_text" }}
+    if (w.kind === "game") return {{ tq "when.game_text" }}
     return {{ tq "when.hand_text" }}
   }
 
@@ -440,7 +441,7 @@ Item {
             // When.
             Section { text: {{ tq "when" }}.toUpperCase() }
             Choices {
-              options: [["hand", {{ tq "when.hand" }}], ["schedule", {{ tq "when.schedule" }}], ["screens", {{ tq "when.screens" }}]]
+              options: [["hand", {{ tq "when.hand" }}], ["schedule", {{ tq "when.schedule" }}], ["screens", {{ tq "when.screens" }}], ["game", {{ tq "when.game" }}]]
               value: root.sel && root.sel.when ? root.sel.when.kind : "hand"
               onPicked: v => ModesService.change(root.selected, "when", Object.assign({}, root.sel.when, { kind: v }))
             }

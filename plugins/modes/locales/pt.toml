@@ -68,3 +68,5 @@ theme_failed = "Não foi possível aplicar o tema do modo: veja ~/.local/state/m
 "act.open" = "Modos"
 "act.open.kw" = "modo foco concentração trabalho apresentação noite jogo não perturbe"
 "act.off" = "Desativar o modo"
+"when.game" = "Enquanto um jogo está aberto"
+"when.game_text" = "Ativo enquanto um jogo está aberto"

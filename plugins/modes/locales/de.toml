@@ -68,3 +68,5 @@ theme_failed = "Das Theme des Modus konnte nicht angewendet werden: siehe ~/.loc
 "act.open" = "Modi"
 "act.open.kw" = "modus fokus arbeit präsentation nacht spielen nicht stören"
 "act.off" = "Modus ausschalten"
+"when.game" = "Während ein Spiel offen ist"
+"when.game_text" = "An, während ein Spiel offen ist"

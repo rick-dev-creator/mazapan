@@ -1,0 +1,51 @@
+[plugin]
+id = "gaming"
+name = "Gaming"
+version = "0.1.0"
+api = 1
+description = "Games at their best: on the NVIDIA card on hybrid laptops, the 32-bit drivers Windows games need, drawn with the least delay, and the screen never dimming mid-game (with Modes, the Game mode comes on while one is open)"
+categories = ["tools"]
+requires = ["hypr-base"]
+optional = true
+
+# The 32-bit drivers for this computer's GPUs: Windows games through Wine
+# and Proton are often 32-bit.
+[packages]
+pacman = ["gamemode", "lib32-gamemode", "lib32-mesa", "lib32-vulkan-icd-loader"]
+pacman_nvidia = ["lib32-nvidia-utils"]
+pacman_amd = ["lib32-vulkan-radeon"]
+pacman_intel = ["lib32-vulkan-intel"]
+
+[settings]
+# Games draw as soon as they can (tearing allowed for them): less delay,
+# for games that ask for it in fullscreen.
+low_latency = true
+# On a laptop with an NVIDIA card beside the integrated GPU: Steam, Lutris
+# and Heroic (and their games) on the NVIDIA card.
+discrete_gpu = true
+
+[[targets]]
+template = "gaming.lua.tmpl"
+output = "~/.config/hypr/mazapan/gaming.lua"
+reload = "hyprctl reload >/dev/null"
+
+# Hybrid laptops: launchers that start on the NVIDIA card, made from the
+# apps' own as they're installed (a path unit watches for them).
+[[targets]]
+template = "game-gpu.sh.tmpl"
+output = "~/.local/share/mazapan/bin/game-gpu"
+reload = "sh ~/.local/share/mazapan/bin/game-gpu"
+
+[[targets]]
+template = "game-gpu.path.tmpl"
+output = "~/.config/systemd/user/mazapan-game-gpu.path"
+reload = "systemctl --user daemon-reload; systemctl --user enable --now mazapan-game-gpu.path >/dev/null 2>&1; true"
+
+[[targets]]
+template = "game-gpu.service.tmpl"
+output = "~/.config/systemd/user/mazapan-game-gpu.service"
+reload = "systemctl --user daemon-reload"
+
+[[checks]]
+name = "{{ t \"check.lib32\" }}"
+run = "for d in vulkan-radeon vulkan-intel nvidia-utils; do pacman -Q $d >/dev/null 2>&1 && { pacman -Q lib32-$d >/dev/null 2>&1 || { echo \"lib32-$d missing: mazapan apply --system\"; exit 1; }; }; done; true"

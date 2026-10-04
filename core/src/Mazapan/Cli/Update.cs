@@ -24,7 +24,7 @@ public static partial class Program
     static HashSet<string> Critical(Session s)
     {
         var m = new HashSet<string> { "mesa", "systemd", "glibc" };
-        foreach (var p in s.Plugins) m.UnionWith(p.Pacman);
+        foreach (var p in s.Plugins) m.UnionWith(p.PacmanHere);
         return m;
     }
 

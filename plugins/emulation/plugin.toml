@@ -1,0 +1,30 @@
+[plugin]
+id = "emulation"
+name = "Emulation"
+version = "0.1.0"
+api = 1
+description = "Retro and console games, ready: ~/Games with a folder per console for your games and one for BIOS, RetroArch set up on them the first time, and emulators' windows never dimmed and drawn with the least delay"
+categories = ["tools"]
+requires = ["hypr-base"]
+optional = true
+
+[settings]
+# Where your games and the consoles' BIOS go.
+games = { default = "~/Games", kind = "path" }
+
+# A folder per console in ~/Games/ROMs, ~/Games/BIOS, and RetroArch's
+# settings the first time only (it keeps its own after).
+[[targets]]
+template = "setup.sh.tmpl"
+output = "~/.local/share/mazapan/bin/emulation-setup"
+reload = "sh ~/.local/share/mazapan/bin/emulation-setup"
+
+[[targets]]
+template = "emulation.lua.tmpl"
+output = "~/.config/hypr/mazapan/emulation.lua"
+reload = "hyprctl reload >/dev/null"
+
+[[actions]]
+name = "{{ t \"act.games\" }}"
+run = '''sh -c 'd=$1; case $d in "~"*) d="$HOME${d#\~}" ;; esac; xdg-open "$d/ROMs"' _ {{ shq settings.games }}'''
+keywords = "{{ t \"act.games.kw\" }}"

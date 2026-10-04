@@ -1,0 +1,7 @@
+"plugin.name" = "Spiele"
+"plugin.description" = "Spiele in Bestform: auf der NVIDIA-Karte hybrider Laptops, mit den 32-Bit-Treibern, die Windows-Spiele brauchen, mit der geringsten Verzögerung und ohne dass der Bildschirm mitten im Spiel dunkel wird (mit Modi schaltet sich der Spielmodus ein, solange eines offen ist)"
+"setting.low_latency" = "Geringste Verzögerung"
+"setting.low_latency.help" = "Spiele zeichnen, sobald sie können (Tearing nur für sie erlaubt): weniger Verzögerung bei Spielen, die es im Vollbild verlangen."
+"setting.discrete_gpu" = "Spiele auf der NVIDIA"
+"setting.discrete_gpu.help" = "Auf einem Laptop mit NVIDIA-Karte neben der integrierten GPU: Steam, Lutris und Heroic (und ihre Spiele) auf der NVIDIA."
+"check.lib32" = "Die 32-Bit-Treiber für die GPUs dieses Computers sind da"
