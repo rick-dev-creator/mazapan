@@ -155,7 +155,9 @@ Item {
     switch (action) {
     case "copy": return `wl-copy -t image/png < ${q(shot)}`
     case "save": return `mkdir -p ${q(pictures)} && cp ${q(shot)} ${q(pictures + "/Screenshot " + stamp + ".png")}`
-    case "text": return `tesseract ${q(shot)} - -l ${ocrLangs} | wl-copy`
+    // One thread: tesseract's own (OpenMP) take many times longer on a
+    // screenshot-sized picture, and seconds more with the desktop busy.
+    case "text": return `OMP_THREAD_LIMIT=1 tesseract ${q(shot)} - -l ${ocrLangs} | wl-copy`
     case "record": {
       const s = Quickshell.screens.find(s => s.name === selScreen)
       const g = `${Math.round(s.x + selX)},${Math.round(s.y + selY)} ${Math.round(selW)}x${Math.round(selH)}`
@@ -171,7 +173,7 @@ Item {
   function showHint(action) {
     const shown = { copy: `wl-copy -t image/png < shot.png`,
       save: `cp shot.png ${tilde(pictures)}/…`,
-      text: `tesseract shot.png - -l ${ocrLangs} | wl-copy`,
+      text: `OMP_THREAD_LIMIT=1 tesseract shot.png - -l ${ocrLangs} | wl-copy`,
       qr: `zbarimg -q --raw shot.png | wl-copy`,
       ask: `mazapan agents ask --file shot.png …`,
       share: `share shot.png`,
@@ -211,7 +213,7 @@ Item {
           + `${say({{ tq "qr_copied" }}, false, "edit-paste")}; else ${say({{ tq "no_qr" }}, false)}; fi`
       } else if (actions.includes("text")) {
         script = `command -v tesseract >/dev/null || { ${say({{ tq "missing" }}.arg("tesseract"), true)}; exit; }; ${ocrScript}; `
-          + `t=$(tesseract ${q(shot)} - -l "\${l:-eng}" 2>/dev/null); if [ -n "$(printf %s "$t" | tr -d '[:space:]')" ]; then printf %s "$t" | wl-copy; `
+          + `t=$(OMP_THREAD_LIMIT=1 tesseract ${q(shot)} - -l "\${l:-eng}" 2>/dev/null); if [ -n "$(printf %s "$t" | tr -d '[:space:]')" ]; then printf %s "$t" | wl-copy; `
           + `${say({{ tq "text_copied" }}, false, "edit-paste")}; else ${say({{ tq "no_text" }}, false)}; fi`
       } else {
         const said = []
