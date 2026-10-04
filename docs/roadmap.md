@@ -1451,8 +1451,9 @@ tmux/herdr menus and niche tools left out):
 2. ~~Development databases in one click on Podman (Postgres, MySQL, Redis,
    SQL Server), with their connection strings at hand~~ *done: the
    dev-databases panel, MongoDB too*.
-3. Fingerprint and security keys (FIDO2) for sudo, unlocking and the
-   keyring.
+3. ~~Fingerprint~~ *done: hw-fingerprint (unlock, polkit; sudo keeps the
+   password: its PAM file is the sudo package's)*; security keys (FIDO2):
+   not yet.
 4. ~~Docking: the lid closed with an external screen, working on; external
    screens' brightness (DDC) with the brightness keys~~ *done: monitors'
    clamshell (on), the ddc-brightness plugin; to try on a laptop*.

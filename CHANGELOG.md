@@ -6,6 +6,9 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- A fingerprint reader unlocks the screen and allows system changes
+  (offered where there's one; fingers added from the palette).
+
 - Close the laptop's lid with another screen connected and keep working on
   it; the brightness keys change external screens too ("External
   screens' brightness" in Plugins).

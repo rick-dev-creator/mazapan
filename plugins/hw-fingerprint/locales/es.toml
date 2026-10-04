@@ -1,0 +1,6 @@
+"plugin.name" = "Lector de huellas"
+"plugin.description" = "Un dedo desbloquea la pantalla y permite cambios del sistema (la contraseña sigue sirviendo); los dedos se añaden y quitan desde la paleta. Con la tapa cerrada, la contraseña. Se ofrece donde hay un lector que fprintd soporta"
+"act.enroll" = "Huella: añadir un dedo"
+"act.delete" = "Huella: quitar tus dedos"
+"act.kw" = "huella dactilar dedo lector desbloquear biometría fprintd"
+"check.reader" = "fprintd ve el lector"

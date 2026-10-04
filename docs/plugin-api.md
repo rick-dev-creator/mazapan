@@ -210,7 +210,8 @@ written as root, with sudo, only in a drop-in folder (`/etc/modprobe.d`,
 `/etc/greetd`, `/etc/systemd/system/greetd.service.d` and `/etc/pam.d`,
 `/etc/systemd/system/ufw.service.d`, `tailscaled.service.d` and
 `docker.socket.d`, a service
-of its own) and named `mazapan*`:
+of its own) and named `mazapan*`, or one of a short list of overrides of a
+package's file kept in /usr/lib (`/etc/pam.d/polkit-1`, Plugin.SystemOverrides):
 never a file the system or another package owns. Its `reload` runs as
 root; `reboot = true` says it takes effect after a reboot. `[packages]
 pacman` are installed too.

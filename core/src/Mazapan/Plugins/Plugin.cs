@@ -131,6 +131,18 @@ public sealed partial class Plugin
         "/etc/systemd/system",
     ];
 
+    /// <summary>
+    /// System files a plugin may write by their own name: each overrides a
+    /// package's file kept in /usr/lib (which nobody edits), never one in
+    /// /etc. Gone, the package's own counts again. One there already (a
+    /// person's, a package's) is a conflict, as any file mazapan didn't write.
+    /// </summary>
+    public static readonly string[] SystemOverrides =
+    [
+        // polkit's PAM service (its own in /usr/lib/pam.d): the fingerprint as well.
+        "/etc/pam.d/polkit-1",
+    ];
+
     static readonly HashSet<string> KnownToolkits =
         ["terminal", "gtk4", "gtk3", "qt6", "qt5", "electron", "chromium", "firefox", "flatpak", "web"];
 
@@ -432,8 +444,10 @@ public sealed partial class Plugin
             if (t.System)
             {
                 // A system file is mazapan's by its name, in a folder made for
-                // drop-ins: never a file the system or another package owns.
-                if (!SystemDirs.Contains(Paths.Dir(t.Output)) || !Paths.Base(t.Output).StartsWith("mazapan") || t.Each.Count > 0 || t.Merge != ""
+                // drop-ins: never a file the system or another package owns
+                // (or one of the few overrides of a package's /usr/lib file).
+                if (SystemOverrides.Contains(t.Output) ? t.Each.Count > 0 || t.Merge != "" :
+                    !SystemDirs.Contains(Paths.Dir(t.Output)) || !Paths.Base(t.Output).StartsWith("mazapan") || t.Each.Count > 0 || t.Merge != ""
                     || (Paths.Dir(t.Output) == "/etc/pam.d" && Paths.Base(t.Output) != "mazapan-greetd"))
                     throw new MazapanException($"{path}: targets[{i}]: a system file is /etc/…/mazapan*, in one of: {string.Join(", ", SystemDirs)}");
             }

@@ -1,0 +1,6 @@
+"plugin.name" = "Leitor de digitais"
+"plugin.description" = "Um dedo desbloqueia a tela e permite mudanças no sistema (a senha continua valendo); dedos adicionados e removidos pela paleta. Com a tampa fechada, a senha. Oferecido onde há um leitor que o fprintd suporta"
+"act.enroll" = "Digital: adicionar um dedo"
+"act.delete" = "Digital: remover seus dedos"
+"act.kw" = "digital impressão dedo leitor desbloquear biometria fprintd"
+"check.reader" = "O fprintd vê o leitor"

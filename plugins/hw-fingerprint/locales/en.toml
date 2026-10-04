@@ -1,0 +1,6 @@
+"plugin.name" = "Fingerprint reader"
+"plugin.description" = "A finger unlocks the screen and allows system changes (the password still works); fingers added and removed from the palette. With the lid closed, the password. Offered where there's a reader fprintd supports"
+"act.enroll" = "Fingerprint: add a finger"
+"act.delete" = "Fingerprint: remove your fingers"
+"act.kw" = "fingerprint finger reader unlock biometric fprintd"
+"check.reader" = "fprintd sees the reader"

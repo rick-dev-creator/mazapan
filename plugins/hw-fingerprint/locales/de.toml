@@ -1,0 +1,6 @@
+"plugin.name" = "Fingerabdruckleser"
+"plugin.description" = "Ein Finger entsperrt den Bildschirm und erlaubt Systemänderungen (das Passwort geht weiter); Finger in der Palette hinzufügen und entfernen. Mit geschlossenem Deckel das Passwort. Angeboten, wo ein von fprintd unterstützter Leser ist"
+"act.enroll" = "Fingerabdruck: einen Finger hinzufügen"
+"act.delete" = "Fingerabdruck: deine Finger entfernen"
+"act.kw" = "fingerabdruck finger leser entsperren biometrie fprintd"
+"check.reader" = "fprintd sieht den Leser"

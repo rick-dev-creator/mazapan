@@ -1,0 +1,40 @@
+[plugin]
+id = "hw-fingerprint"
+name = "Fingerprint reader"
+version = "0.1.0"
+api = 1
+description = "A finger unlocks the screen and allows system changes (the password still works); fingers added and removed from the palette. With the lid closed, the password. Offered where there's a reader fprintd supports"
+categories = ["hardware"]
+
+# The readers fprintd supports, by their makers' USB ids (Goodix, Synaptics,
+# Elan's fingerprint range, Validity, Egis, FocalTech, FPC, AuthenTec, Upek).
+[hardware]
+usb = ["27c6:*", "06cb:00*", "04f3:0c*", "138a:*", "1c7a:*", "2808:*", "10a5:*", "08ff:*", "147e:*"]
+
+[packages]
+pacman = ["fprintd"]
+
+# polkit's PAM service with the finger first: a file of polkit's own
+# overridden (it keeps its in /usr/lib/pam.d), taken out with the plugin.
+# sudo in a terminal still asks the password (its PAM file is the sudo
+# package's).
+[[targets]]
+template = "polkit-1.tmpl"
+output = "/etc/pam.d/polkit-1"
+system = true
+
+[[actions]]
+name = "{{ t \"act.enroll\" }}"
+run = "fprintd-enroll; echo; fprintd-list \"$USER\"; read -r _"
+terminal = true
+keywords = "{{ t \"act.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.delete\" }}"
+run = "fprintd-delete \"$USER\"; read -r _"
+terminal = true
+keywords = "{{ t \"act.kw\" }}"
+
+[[checks]]
+name = "{{ t \"check.reader\" }}"
+run = "fprintd-list \"$USER\" >/dev/null 2>&1"

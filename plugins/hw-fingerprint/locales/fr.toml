@@ -1,0 +1,6 @@
+"plugin.name" = "Lecteur d'empreintes"
+"plugin.description" = "Un doigt déverrouille l'écran et autorise les changements système (le mot de passe marche toujours) ; doigts ajoutés et retirés depuis la palette. Capot fermé, le mot de passe. Proposé là où un lecteur pris en charge par fprintd est présent"
+"act.enroll" = "Empreinte : ajouter un doigt"
+"act.delete" = "Empreinte : retirer vos doigts"
+"act.kw" = "empreinte digitale doigt lecteur déverrouiller biométrie fprintd"
+"check.reader" = "fprintd voit le lecteur"

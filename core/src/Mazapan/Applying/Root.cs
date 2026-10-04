@@ -24,6 +24,8 @@ public static partial class AsRoot
         if (path != Paths.Clean(path) || !path.StartsWith('/')) return false;
         var dir = Paths.Dir(path);
         var name = Paths.Base(path);
+        // The few overrides of a package's /usr/lib file, by their exact path.
+        if (Plugins.Plugin.SystemOverrides.Contains(path)) return Paths.Real(dir) is not { } r || r == dir;
         // PAM: only the login screen's own service, never another name.
         if (dir == "/etc/pam.d" && name != "mazapan-greetd") return false;
         return Plugins.Plugin.SystemDirs.Contains(dir) && name.StartsWith("mazapan") &&

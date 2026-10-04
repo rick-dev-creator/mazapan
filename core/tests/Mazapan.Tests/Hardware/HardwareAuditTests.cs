@@ -19,6 +19,10 @@ public class HardwareAuditTests
     [InlineData("/etc/modprobe.d/nvidia.conf", false)]
     [InlineData("/etc/modprobe.d/../pacman.conf", false)]
     [InlineData("/etc/modprobe.d//mazapan-x.conf", false)]
+    [InlineData("/etc/pam.d/polkit-1", true)]          // the one override of a /usr/lib file
+    [InlineData("/etc/pam.d/sudo", false)]
+    [InlineData("/etc/pam.d/system-auth", false)]
+    [InlineData("/etc/pam.d/polkit-1.d", false)]
     [InlineData("etc/modprobe.d/mazapan-x.conf", false)]
     public void OnlyMazapanDropInsAreWrittenAsRoot(string path, bool ok) => Assert.Equal(ok, AsRoot.IsSystem(path));
 

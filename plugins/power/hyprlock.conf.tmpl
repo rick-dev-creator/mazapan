@@ -4,6 +4,16 @@
 general {
     hide_cursor = true
 }
+{{- if (under "/etc/pam.d/polkit-1").size > 0 }}
+
+# A fingerprint reader (hw-fingerprint): a finger unlocks too, beside the
+# password (hyprlock asks fprintd itself).
+auth {
+    fingerprint {
+        enabled = true
+    }
+}
+{{- end }}
 
 animations {
     enabled = {{ if theme.motion.enabled }}true{{ else }}false{{ end }}
