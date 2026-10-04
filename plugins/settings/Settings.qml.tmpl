@@ -564,7 +564,13 @@ Item {
                 ColumnLayout {
                   id: kindRow
                   required property var modelData
-                  readonly property var installed: modelData[3].filter(id => DesktopEntries.byId(id) !== null)
+                  // Read again as the apps come and go (installed after the
+                  // shell started, or before its list was read): byId alone
+                  // isn't something a binding follows.
+                  readonly property var installed: {
+                    DesktopEntries.applications.values
+                    return modelData[3].filter(id => !!DesktopEntries.byId(id))
+                  }
                   Layout.fillWidth: true
                   spacing: 4
                   Caption { text: kindRow.modelData[1] }
@@ -577,7 +583,13 @@ Item {
                         required property string modelData
                         text: root.appName(modelData)
                         primary: root.current[kindRow.modelData[2]] === modelData
-                        onClicked: root.set("default-apps", kindRow.modelData[0], JSON.stringify(modelData + ".desktop"))
+                        onClicked: {
+                          // Marked at once; the apply takes a few seconds, then it's read again.
+                          const c = Object.assign({}, root.current)
+                          c[kindRow.modelData[2]] = modelData
+                          root.current = c
+                          root.set("default-apps", kindRow.modelData[0], JSON.stringify(modelData + ".desktop"))
+                        }
                       }
                     }
                     Label {
