@@ -154,9 +154,11 @@ Item {
             duration: Math.max(1, bannerCard.lasts)
             onFinished: NotificationService.retire(bannerCard.key)
           }
-          // Updated by its app: its time starts again.
+          // Updated by its app: its time starts again. `lasts` stays a
+          // binding: assigned here, it would be cut off from `shown`, and as
+          // `at` can be set before `key` when the card is made, it would stay
+          // 0 and the banner would never go.
           onAtChanged: {
-            lasts = (NotificationService.shown[key] || {}).lasts || 0
             if (lasts > 0) {
               countdown.restart()
               // restart() forgets it was paused: under the pointer it stays.
