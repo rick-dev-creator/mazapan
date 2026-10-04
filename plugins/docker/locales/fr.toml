@@ -1,0 +1,5 @@
+"plugin.name" = "Docker"
+"plugin.description" = "Docker lui-même, prêt : son service démarre à la première commande, vous dans le groupe docker pour se passer de sudo (aussi puissant que root : dit), Compose et Buildx. Docker dans Apps l'active ; Podman est le choix léger"
+"setting.group" = "Docker sans sudo"
+"setting.group.help" = "Vous dans le groupe docker. Qui y est peut tout ce que root peut (un conteneur peut monter tout le disque). Au prochain démarrage de l'ordinateur."
+"check.socket" = "Docker est prêt"

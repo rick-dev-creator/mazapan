@@ -16,6 +16,18 @@ do
   end
 end
 
+-- Your own commands, first: ~/.local/bin (what pip, npm and mazapan put
+-- there: `docker` on Podman, rider, code). Once: Hyprland's own PATH is
+-- this one again on every reload.
+do
+  local ok, path, home = pcall(function() return os.getenv("PATH"), os.getenv("HOME") end)
+  if ok and home then
+    path = (path and path ~= "") and path or "/usr/local/sbin:/usr/local/bin:/usr/bin"
+    local bin = home .. "/.local/bin"
+    if not (":" .. path .. ":"):find(":" .. bin .. ":", 1, true) then hl.env("PATH", bin .. ":" .. path) end
+  end
+end
+
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 

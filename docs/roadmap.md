@@ -1439,6 +1439,38 @@ time on the theme's background with its colors drifting, moved each
 minute against burn-in; the idle inhibitors (a video, a call, "keep
 awake") keep it away; still with the theme's motion off.
 
+## Next: Omarchy's that matter, and what working people need (decided 2026-10-04)
+
+From Omarchy's 441 commands, only what's worth having (games, branding,
+tmux/herdr menus and niche tools left out):
+
+1. A development environment per language in one click (mise: Node,
+   Python, Go, Rust, Ruby, PHP, Java), beside .NET and Expo.
+2. Development databases in one click on Podman (Postgres, MySQL, Redis,
+   SQL Server), with their connection strings at hand.
+3. Fingerprint and security keys (FIDO2) for sudo, unlocking and the
+   keyring.
+4. Docking: the lid closed with an external screen, working on; external
+   screens' brightness (DDC) with the brightness keys.
+5. Launch or focus: SUPER + B goes to the browser when it's open.
+6. The theme in more apps: Ghostty, kitty, Alacritty, Obsidian, Claude
+   Code.
+7. A Windows virtual machine for what only exists there (Office, Adobe,
+   Visual Studio), its apps as windows of their own.
+8. Screen recording with the webcam over it.
+
+And what neither has, for people at work: backups of your files (Time
+Machine-like), printers and scanners working when plugged in, files found
+from the palette, the calendar and the next meeting in the bar, the phone
+linked (notifications, SMS, clipboard, files).
+
+*Done (2026-10-04):* containers ready either way: Podman by default in the
+Development and .NET profiles (`docker` commands on it, its socket for
+Testcontainers, devcontainers, Compose and Aspire, Podman Desktop without
+its telemetry), Docker itself as an app done right (its socket, you in its
+group as said, taken out when it's off); Mission Center for how the
+computer is doing; `~/.local/bin` on the session's PATH.
+
 ## Later, nice to have
 
 - Graphical plugins in .NET (Avalonia), for others to write in C#: whole

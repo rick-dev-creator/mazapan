@@ -208,7 +208,8 @@ written as root, with sudo, only in a drop-in folder (`/etc/modprobe.d`,
 `/etc/X11/xorg.conf.d`, browsers' `policies/managed`,
 `/etc/systemd/system/grub-btrfsd.service.d`, and for the login screen
 `/etc/greetd`, `/etc/systemd/system/greetd.service.d` and `/etc/pam.d`,
-`/etc/systemd/system/ufw.service.d` and `tailscaled.service.d`, a service
+`/etc/systemd/system/ufw.service.d`, `tailscaled.service.d` and
+`docker.socket.d`, a service
 of its own) and named `mazapan*`:
 never a file the system or another package owns. Its `reload` runs as
 root; `reboot = true` says it takes effect after a reboot. `[packages]

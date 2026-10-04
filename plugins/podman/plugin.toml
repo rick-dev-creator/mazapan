@@ -1,0 +1,50 @@
+[plugin]
+id = "podman"
+name = "Podman"
+version = "0.1.0"
+api = 1
+description = "Containers ready to use without root or a service: `docker` commands work (on Podman), and what looks for Docker finds it (Testcontainers, devcontainers, Compose, Aspire). Podman in Apps turns it on"
+categories = ["tools"]
+requires = ["hypr-base"]
+# Off until turned on (Apps does it with Podman, and the Development and .NET profiles).
+optional = true
+
+[packages]
+pacman = ["podman", "docker-compose"]
+
+# Podman's API socket at every login: tools that speak Docker's use it.
+# Gone: stopped and not started any more.
+[[targets]]
+template = "socket.conf.tmpl"
+output = "~/.config/systemd/user/podman.socket.d/mazapan.conf"
+reload = "if [ -e ~/.config/systemd/user/podman.socket.d/mazapan.conf ]; then systemctl --user daemon-reload; systemctl --user enable -q --now podman.socket; else systemctl --user disable -q --now podman.socket 2>/dev/null; systemctl --user daemon-reload; fi; true"
+
+[[targets]]
+template = "containers.conf.tmpl"
+output = "~/.config/containers/containers.conf.d/mazapan.conf"
+
+# Podman Desktop (the app): its telemetry off, as asked already; the rest
+# of its settings its own.
+[[targets]]
+template = "podman-desktop.json.tmpl"
+output = "~/.local/share/containers/podman-desktop/configuration/settings.json"
+merge = "json"
+
+[[targets]]
+template = "podman.lua.tmpl"
+output = "~/.config/hypr/mazapan/podman.lua"
+reload = "hyprctl reload >/dev/null"
+
+# `docker …` typed in a terminal: Podman (Docker's own wins when it's there).
+[[targets]]
+template = "docker.sh.tmpl"
+output = "~/.local/bin/docker"
+reload = "chmod +x ~/.local/bin/docker 2>/dev/null; true"
+
+[[checks]]
+name = "{{ t \"check.socket\" }}"
+run = "systemctl --user is-active -q podman.socket"
+
+[[checks]]
+name = "{{ t \"check.run\" }}"
+run = "podman info >/dev/null 2>&1"

@@ -119,6 +119,8 @@ public sealed partial class Plugin
         "/etc/systemd/system/ufw.service.d",
         // Tailscale: its daemon started at every start, the person made its operator.
         "/etc/systemd/system/tailscaled.service.d",
+        // Docker: its socket started at every start.
+        "/etc/systemd/system/docker.socket.d",
         // Hibernation: what a battery about to die does.
         "/etc/UPower/UPower.conf.d",
         // The boot menu in the theme: a script grub-mkconfig runs.

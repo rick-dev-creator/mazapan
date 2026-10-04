@@ -6,6 +6,14 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- Containers ready to use: Podman by default in the Development and .NET
+  profiles (`docker` and `docker compose` work on it, and Testcontainers,
+  devcontainers and Aspire find it), Podman Desktop to see them; Docker
+  itself from Apps, its service ready and no sudo needed (as said).
+- Mission Center, to see how the computer is doing, in the basic apps.
+- Commands in `~/.local/bin` (yours, pip's, npm's, rider, code) work from
+  any terminal.
+
 - Ask an agent about a notification (in the center, on the pointer), share
   a capture ("Share" in its bar) or something copied before (Ctrl+S in the
   clipboard history).

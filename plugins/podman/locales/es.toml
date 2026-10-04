@@ -1,0 +1,4 @@
+"plugin.name" = "Podman"
+"plugin.description" = "Contenedores listos sin root ni servicio: los comandos `docker` funcionan (sobre Podman), y lo que busca Docker lo encuentra (Testcontainers, devcontainers, Compose, Aspire). Podman en Apps lo activa"
+"check.socket" = "El socket de Podman escucha"
+"check.run" = "Podman ejecuta contenedores"

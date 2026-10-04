@@ -1,0 +1,32 @@
+[plugin]
+id = "docker"
+name = "Docker"
+version = "0.1.0"
+api = 1
+description = "Docker itself, ready: its service started with the first command, you in the docker group so it needs no sudo (as powerful as root: said), Compose and Buildx. Docker in Apps turns it on; Podman is the lighter choice"
+categories = ["tools"]
+# Off until turned on (Apps does it with Docker): it runs a daemon as root.
+optional = true
+
+[packages]
+pacman = ["docker", "docker-compose", "docker-buildx"]
+
+[settings]
+# You in the docker group: docker without sudo. Anyone in it can do
+# anything root can (a container can mount the whole disk). A change counts
+# from the next start (running containers aren't stopped for it).
+group = true
+
+# docker.socket at every start; gone: Docker stopped and not started any
+# more, and you out of its group.
+[[targets]]
+template = "socket.conf.tmpl"
+output = "/etc/systemd/system/docker.socket.d/mazapan.conf"
+system = true
+# Stopped before systemd forgets the drop-in (disable reloads it), so its
+# ExecStopPost runs.
+reload = "if [ -e /etc/systemd/system/docker.socket.d/mazapan.conf ]; then systemctl daemon-reload; systemctl enable -q --now docker.socket; else systemctl stop docker.socket docker.service 2>/dev/null; systemctl disable -q docker.socket 2>/dev/null; systemctl daemon-reload; fi; true"
+
+[[checks]]
+name = "{{ t \"check.socket\" }}"
+run = "systemctl is-active -q docker.socket || systemctl is-active -q docker.service"
