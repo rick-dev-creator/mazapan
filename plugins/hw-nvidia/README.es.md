@@ -27,3 +27,11 @@ Como todo plugin de hardware, está desactivado hasta que lo activas:
 "Activar" aquí, o `mazapan plugins enable hw-nvidia && mazapan apply
 --system`. Lo que corre como root se lista antes, y pide tu contraseña
 en una terminal; `mazapan undo` lo deshace.
+
+En una laptop con gráficos híbridos (una GPU integrada y la NVIDIA), la
+pantalla arranca en la integrada: los módulos de NVIDIA no van en el
+initramfs ni toma la consola, y las apps usan la integrada salvo que se
+pida: `prime-run APP` abre una en la NVIDIA. La suspensión y la hibernación
+conservan la memoria de la tarjeta (los servicios de NVIDIA, guardándola en
+/var/tmp). Tras cambiar el modo de GPU en el firmware de la laptop, ejecuta
+`mazapan hardware` y `mazapan apply --system`.

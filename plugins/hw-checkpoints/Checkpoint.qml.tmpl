@@ -199,6 +199,8 @@ Item {
           }
           Button {
             visible: !!root.booted && root.phase !== "kept"
+            // Never in the middle of making this one the main system.
+            enabled: root.phase !== "keeping"
             text: {{ tq "back" }}
             onClicked: root.restart()
           }

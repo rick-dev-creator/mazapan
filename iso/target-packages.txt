@@ -82,6 +82,7 @@ libva-intel-driver
 nvidia-open-dkms
 nvidia-utils
 libva-nvidia-driver
+nvidia-prime
 linux-headers
 dkms
 

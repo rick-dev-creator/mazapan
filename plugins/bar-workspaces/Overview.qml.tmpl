@@ -25,8 +25,8 @@ Item {
   property point pointer: Qt.point(0, 0)
 
   readonly property var mon: screenAtOpen ? Hyprland.monitorFor(screenAtOpen) : null
-  readonly property real monX: mon && mon.lastIpcObject ? mon.lastIpcObject.x : 0
-  readonly property real monY: mon && mon.lastIpcObject ? mon.lastIpcObject.y : 0
+  readonly property real monX: mon ? mon.x : 0
+  readonly property real monY: mon ? mon.y : 0
   readonly property bool rotated: mon && mon.lastIpcObject && mon.lastIpcObject.transform % 2 === 1
   readonly property real monW: mon ? (rotated ? mon.height : mon.width) / mon.scale : 1920
   readonly property real monH: mon ? (rotated ? mon.width : mon.height) / mon.scale : 1080
@@ -148,11 +148,14 @@ Item {
               readonly property int wsId: modelData
               readonly property var ws: Hyprland.workspaces.values.find(w => w.id === wsId) ?? null
               readonly property bool focused: Hyprland.focusedWorkspace !== null && Hyprland.focusedWorkspace.id === wsId
-              readonly property var windows: Hyprland.toplevels.values.filter(t => t.workspace && t.workspace.id === wsId && t.lastIpcObject && t.lastIpcObject.at)
+              // By workspace only: a window's title changing mustn't rebuild
+              // the thumbnails (and drop a drag); geometry is looked at below.
+              readonly property var windows: Hyprland.toplevels.values.filter(t => t.workspace && t.workspace.id === wsId)
+              readonly property var placed: windows.filter(t => t.lastIpcObject && t.lastIpcObject.at && t.lastIpcObject.size)
               readonly property bool target: root.dragging && root.cardAt(root.pointer) === wsId
               // The whole strip: the screen, and the columns off it either side.
-              readonly property real minX: Math.min(root.monX, ...windows.map(t => t.lastIpcObject.at[0]))
-              readonly property real maxX: Math.max(root.monX + root.monW, ...windows.map(t => t.lastIpcObject.at[0] + t.lastIpcObject.size[0]))
+              readonly property real minX: Math.min(root.monX, ...placed.map(t => t.lastIpcObject.at[0]))
+              readonly property real maxX: Math.max(root.monX + root.monW, ...placed.map(t => t.lastIpcObject.at[0] + t.lastIpcObject.size[0]))
               readonly property real k: Math.min(stage.width / (maxX - minX), stage.height / root.monH)
               // Centered in the card, whichever way it's narrower.
               readonly property real ox: (stage.width - (maxX - minX) * k) / 2
@@ -203,10 +206,12 @@ Item {
                     id: thumb
                     required property var modelData
                     readonly property var ipc: modelData.lastIpcObject
-                    x: card.ox + (ipc.at[0] - card.minX) * card.k
-                    y: card.oy + (ipc.at[1] - root.monY) * card.k
-                    width: ipc.size[0] * card.k
-                    height: ipc.size[1] * card.k
+                    readonly property bool hasGeometry: !!(ipc && ipc.at && ipc.size)
+                    visible: hasGeometry
+                    x: hasGeometry ? card.ox + (ipc.at[0] - card.minX) * card.k : 0
+                    y: hasGeometry ? card.oy + (ipc.at[1] - root.monY) * card.k : 0
+                    width: hasGeometry ? ipc.size[0] * card.k : 0
+                    height: hasGeometry ? ipc.size[1] * card.k : 0
                     opacity: root.held === modelData ? 0.35 : 1
 
                     ScreencopyView {

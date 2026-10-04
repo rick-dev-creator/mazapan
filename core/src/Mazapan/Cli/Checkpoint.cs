@@ -45,6 +45,8 @@ public static partial class Program
                 if (arg == null) throw new MazapanException("usage: mazapan checkpoint restore N");
                 return CheckpointKeep(arg, entries, days, yes);
             case "save": NeedRoot("save"); Console.WriteLine(Checkpoints.Checkpoints.Save()); return 0;
+            // pacman's PreTransaction hook (AbortOnFail): not on a checkpoint.
+            case "guard": return Checkpoints.Checkpoints.Guard();
             case "after-pacman":
                 // pacman's hook: never fails the transaction, says what went wrong.
                 NeedRoot("after-pacman");
@@ -180,7 +182,10 @@ public static partial class Program
         var booted = BootedCheckpoint();
         id ??= booted ?? throw new MazapanException("not on a checkpoint: to make one the main system, mazapan checkpoint restore N");
         NeedRoot(booted != null ? "keep" : "restore");
-        if (!yes && !Console.IsInputRedirected)
+        // Without a terminal (an agent, a script): only when said so.
+        if (!yes && Console.IsInputRedirected)
+            throw new MazapanException($"checkpoint {id}: without a terminal to ask in, say -y");
+        if (!yes)
         {
             Console.WriteLine(booted == id
                 ? $"Checkpoint {id} becomes the main system. The one it replaces is kept {days} days as the previous system (in the boot menu), then deleted."

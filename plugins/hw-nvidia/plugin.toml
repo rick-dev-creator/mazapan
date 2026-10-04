@@ -1,7 +1,7 @@
 [plugin]
 id = "hw-nvidia"
 name = "NVIDIA (Turing and newer)"
-version = "0.1.0"
+version = "0.2.0"
 api = 1
 description = "NVIDIA's open driver for GeForce RTX 20 and newer: packages, kernel modesetting loaded early, and Hyprland's variables for it"
 categories = ["hardware"]
@@ -12,22 +12,24 @@ requires = ["hypr-base"]
 gpu = ["NVIDIA*TU1*", "NVIDIA*GA1*", "NVIDIA*AD1*", "NVIDIA*GB2*", "NVIDIA*GH1*"]
 
 [packages]
-pacman = ["nvidia-open-dkms", "nvidia-utils", "libva-nvidia-driver", "linux-headers"]
+pacman = ["nvidia-open-dkms", "nvidia-utils", "libva-nvidia-driver", "linux-headers", "nvidia-prime"]
 
 [[targets]]
 template = "modprobe.conf.tmpl"
 output = "/etc/modprobe.d/mazapan-nvidia.conf"
 system = true
 reboot = true
-# The initramfs carries modprobe.d too (the modconf hook).
-reload = "mkinitcpio -P"
+# The initramfs carries modprobe.d too (the modconf hook). NVIDIA's sleep
+# services save the card's memory as the system sleeps or hibernates.
+reload = "for s in nvidia-suspend nvidia-hibernate nvidia-resume nvidia-suspend-then-hibernate; do [ -e /usr/lib/systemd/system/$s.service ] && systemctl enable $s.service; done; mkinitcpio -P"
 
 [[targets]]
 template = "mkinitcpio.conf.tmpl"
 output = "/etc/mkinitcpio.conf.d/mazapan-nvidia.conf"
 system = true
 reboot = true
-# The initramfs carries the modules, so the driver starts before the screen does.
+# With the screen on it, the initramfs carries the modules, so the driver
+# starts before the screen does (hybrid laptops: not needed).
 reload = "mkinitcpio -P"
 
 [[targets]]

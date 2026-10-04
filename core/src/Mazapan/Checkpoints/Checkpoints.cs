@@ -42,6 +42,9 @@ public static partial class Checkpoints
     /// <summary>The main system, read only, while on a checkpoint: what changed, for the person and an agent.</summary>
     public const string MainMount = "/run/mazapan/main";
     const string TopMount = "/run/mazapan/top";
+    /// <summary>A checkpoint made the main system, from the running one: until the restart, nothing else touches the menu or /boot.</summary>
+    public const string KeptPending = "/run/mazapan/checkpoint-kept";
+    const string LockFile = "/run/mazapan/checkpoints.lock";
     const string BootDir = "/boot/mazapan";
     const string Manifest = "/boot/mazapan/checkpoints.json";
     const string MenuFile = "mazapan-checkpoints.cfg";
@@ -105,12 +108,15 @@ public static partial class Checkpoints
     /// Snapper's snapshots of / (each one's info.xml): the "pre" and "single"
     /// ones, newest first, each told by its "post" too.
     /// </summary>
-    public static List<Checkpoint> List(string snapshots = "/.snapshots")
+    public static List<Checkpoint> List(string snapshots = "/.snapshots") => TryList(snapshots) ?? [];
+
+    /// <summary>The same, null when they couldn't be read (nothing is pruned on a listing that failed).</summary>
+    static List<Checkpoint>? TryList(string snapshots)
     {
         var items = new List<(long N, string Type, long Pre, DateTimeOffset Date, string What)>();
         try
         {
-            if (!Directory.Exists(snapshots)) return [];
+            if (!Directory.Exists(snapshots)) return null;
             foreach (var dir in Directory.GetDirectories(snapshots))
             {
                 var info = Path.Join(dir, "info.xml");
@@ -127,7 +133,7 @@ public static partial class Checkpoints
                 catch (Exception e) when (e is System.Xml.XmlException or IOException or UnauthorizedAccessException) { }
             }
         }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { return []; }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { return null; }
         var out_ = new List<Checkpoint>();
         foreach (var x in items.Where(i => i.Type is "pre" or "single").OrderByDescending(i => i.N))
         {
@@ -241,6 +247,8 @@ public static partial class Checkpoints
         public DateTimeOffset CurrentSince;
         public Dictionary<string, string> Current = [];
         public Dictionary<string, Dictionary<string, string>> Sets = [];
+        /// <summary>False: the manifest couldn't be read (cut short by a power cut): nothing is pruned on it.</summary>
+        public bool Valid = true;
 
         public static Kept Parse(string json)
         {
@@ -259,7 +267,10 @@ public static partial class Checkpoints
                 if (r.TryGetProperty("sets", out var s) && s.ValueKind == JsonValueKind.Object)
                     foreach (var p in s.EnumerateObject()) k.Sets[p.Name] = Map(p.Value);
             }
-            catch (JsonException) { }
+            catch (Exception e) when (e is JsonException or InvalidOperationException)
+            {
+                k.Valid = false;
+            }
             return k;
         }
 
@@ -283,12 +294,113 @@ public static partial class Checkpoints
         }
     }
 
-    static Kept LoadKept() => File.Exists(Manifest) ? Kept.Parse(File.ReadAllText(Manifest)) : new Kept();
+    static Kept LoadKept()
+    {
+        if (!File.Exists(Manifest)) return new Kept();
+        var k = Kept.Parse(File.ReadAllText(Manifest));
+        // Kept aside to look at; a new one starts, and nothing goes on this one's word.
+        if (!k.Valid) File.Copy(Manifest, Manifest + ".unreadable", overwrite: true);
+        return k;
+    }
 
     static void SaveKept(Kept k)
     {
         Files.CreateDirectory(BootDir);
-        Files.WriteAtomic(Manifest, k.ToJson());
+        WriteDurable(Manifest, Files.Utf8.GetBytes(k.ToJson()));
+    }
+
+    /// <summary>
+    /// Written whole and on the disk before it counts (the EFI partition is
+    /// FAT: a power cut can leave a file empty otherwise).
+    /// </summary>
+    static void WriteDurable(string path, byte[] b)
+    {
+        var tmp = path + ".mazapan-tmp";
+        using (var f = new FileStream(tmp, FileMode.Create, FileAccess.Write))
+        {
+            f.Write(b);
+            f.Flush(flushToDisk: true);
+        }
+        File.Move(tmp, path, overwrite: true);
+        Exec.Run("sync", ["-f", path]);
+    }
+
+    static void CopyDurable(string src, string dst)
+    {
+        var tmp = dst + ".mazapan-tmp";
+        using (var i = File.OpenRead(src))
+        using (var o = new FileStream(tmp, FileMode.Create, FileAccess.Write))
+        {
+            i.CopyTo(o);
+            o.Flush(flushToDisk: true);
+        }
+        File.Move(tmp, dst, overwrite: true);
+        Exec.Run("sync", ["-f", dst]);
+    }
+
+    /// <summary>
+    /// One at a time: pacman's hook, mkinitcpio's, snapper's cleanup, the
+    /// start and a keep can all come at once, and each reads and writes the
+    /// manifest and the menu. Within one process, again: it holds it already.
+    /// </summary>
+    static int lockDepth;
+    static FileStream? lockFile;
+    static T Locked<T>(Func<T> f)
+    {
+        if (lockDepth == 0)
+        {
+            Files.CreateDirectory(Paths.Dir(LockFile));
+            var until = DateTime.UtcNow.AddMinutes(3);
+            while (true)
+            {
+                try
+                {
+                    lockFile = new FileStream(LockFile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+                    break;
+                }
+                catch (IOException) when (DateTime.UtcNow < until)
+                {
+                    Thread.Sleep(500);
+                }
+                catch (IOException)
+                {
+                    throw new MazapanException("checkpoints: another one is busy (" + LockFile + ")");
+                }
+            }
+        }
+        lockDepth++;
+        try
+        {
+            return f();
+        }
+        finally
+        {
+            if (--lockDepth == 0)
+            {
+                lockFile?.Dispose();
+                lockFile = null;
+            }
+        }
+    }
+
+    /// <summary>Why the menu and /boot are to be left alone now (null: they aren't).</summary>
+    static string? HandsOff()
+    {
+        if (File.Exists(KeptPending)) return "a checkpoint was made the main system: restart first";
+        if (Booted(ReadText("/proc/cmdline")) != null) return "on a checkpoint: the main system's /boot and menu are left alone";
+        return null;
+    }
+
+    /// <summary>
+    /// pacman's PreTransaction hook: no package changes on a checkpoint (its
+    /// kernels would land on the main system's /boot, its modules in memory)
+    /// nor after making one the main system, until the restart.
+    /// </summary>
+    public static int Guard()
+    {
+        if (HandsOff() is not { } why) return 0;
+        Console.Error.WriteLine($"Not now: {why}. (sudo mazapan checkpoint keep makes this checkpoint the main system; then restart.)");
+        return 1;
     }
 
     /// <summary>
@@ -297,13 +409,25 @@ public static partial class Checkpoints
     /// and what /boot has now is kept. Only with /boot apart from the root
     /// filesystem; with it inside, each snapshot carries its own.
     /// </summary>
-    public static string Save(string grubCfg = "/boot/grub/grub.cfg")
+    public static string Save(string grubCfg = "/boot/grub/grub.cfg") => Locked(() => SaveCore(grubCfg));
+
+    static string SaveCore(string grubCfg)
     {
         if (BootOnRoot()) return "kernels: in each snapshot (/boot is on the root filesystem)";
+        if (HandsOff() is { } why) return why;
         if (MainSubvol() is not { } main) return "checkpoints: not on Mazapán's layout (the system in a subvolume of its own)";
-        if (!File.Exists(grubCfg) || MainEntry(File.ReadAllText(grubCfg)) is not { } entry) return "no GRUB entry to take the kernel from";
         var kept = LoadKept();
         kept.Assign(List(Path.Join("/", ".snapshots")));
+        // /boot has changed and these kernels can't be told apart: no
+        // checkpoint from now is given any (rather than the wrong ones).
+        string Unknown(string why)
+        {
+            kept.Current = [];
+            kept.CurrentSince = DateTimeOffset.UtcNow;
+            SaveKept(kept);
+            return why;
+        }
+        if (!File.Exists(grubCfg) || MainEntry(File.ReadAllText(grubCfg)) is not { } entry) return Unknown("no GRUB entry to take the kernel from");
         var set = new Dictionary<string, string>();
         var dir = Path.Join(BootDir, "k");
         Files.CreateDirectory(dir);
@@ -312,23 +436,20 @@ public static partial class Checkpoints
         foreach (var f in files)
         {
             var src = Path.Join("/boot", f);
-            if (!File.Exists(src)) return $"{src}: not there: kernels not kept";
+            if (!File.Exists(src)) return Unknown($"{src}: not there: kernels not kept");
             need += new FileInfo(src).Length;
         }
         // Room on the EFI partition: the oldest checkpoints' kernels go first.
         Prune(kept, keepIds: null);
         if (FreeBytes("/boot") is { } free && free < need + (64L << 20))
-            return "not enough room on /boot to keep the kernels";
+            return Unknown("not enough room on /boot to keep the kernels");
         foreach (var f in files)
         {
             var src = Path.Join("/boot", f);
             var hash = Hash(src);
             var copy = Path.Join(dir, hash);
-            if (!File.Exists(copy))
-            {
-                File.Copy(src, copy + ".tmp", overwrite: true);
-                File.Move(copy + ".tmp", copy, overwrite: true);
-            }
+            // A copy cut short (a power cut) is made again.
+            if (!File.Exists(copy) || new FileInfo(copy).Length != new FileInfo(src).Length) CopyDurable(src, copy);
             set[f] = "k/" + hash;
         }
         kept.Current = set;
@@ -352,6 +473,7 @@ public static partial class Checkpoints
     /// <summary>Sets of checkpoints that are gone go, then the copies no set names.</summary>
     static void Prune(Kept kept, HashSet<string>? keepIds)
     {
+        if (!kept.Valid) return;
         if (keepIds != null)
             foreach (var id in kept.Sets.Keys.Where(id => !keepIds.Contains(id)).ToList()) kept.Sets.Remove(id);
         var used = kept.Sets.Values.SelectMany(s => s.Values).Concat(kept.Current.Values).ToHashSet();
@@ -370,15 +492,21 @@ public static partial class Checkpoints
     /// mainRoot: where the main system is (/, or the new one right after a
     /// keep, mounted apart).
     /// </summary>
-    public static string Menu(int entries, int days, string mainRoot = "/")
+    public static string Menu(int entries, int days) => Locked(() =>
+        HandsOff() is { } why ? why
+        : MainSubvol() is not { } main ? "checkpoints: not on Mazapán's layout (the system in a subvolume of its own)"
+        : MenuCore(entries, days, main, "/"));
+
+    /// <summary>main: the main system's subvolume ("@"), as it's called once a restart is done (a keep renames it first).</summary>
+    static string MenuCore(int entries, int days, string main, string mainRoot)
     {
-        if (Booted(ReadText("/proc/cmdline")) != null && mainRoot == "/") return "on a checkpoint: the menu is the main system's to write";
-        if (MainSubvol() is not { } main) return "checkpoints: not on Mazapán's layout (the system in a subvolume of its own)";
         var onRoot = BootOnRoot();
         var grubDir = onRoot ? Path.Join(mainRoot, "boot/grub") : "/boot/grub";
         var cfgPath = Path.Join(grubDir, "grub.cfg");
         if (!File.Exists(cfgPath) || MainEntry(File.ReadAllText(cfgPath)) is not { } entry) return "no GRUB entry to make the checkpoints' from";
-        var all = List(Path.Join(mainRoot, ".snapshots"));
+        // A listing that failed prunes nothing.
+        var listed0 = TryList(Path.Join(mainRoot, ".snapshots"));
+        var all = listed0 ?? [];
         var kept = onRoot ? null : LoadKept();
         kept?.Assign(all);
 
@@ -402,6 +530,7 @@ public static partial class Checkpoints
                 }
                 else
                 {
+                    if (!Directory.Exists(Path.Join(top, subvol))) return false;
                     if (!kept!.Sets.TryGetValue(id, out var set)) return false;
                     if (!set.ContainsKey(entry.Kernel) || entry.Initrds.Any(i => !set.ContainsKey(i))) return false;
                     if (entry.Initrds.Prepend(entry.Kernel).Any(f => !File.Exists(Path.Join(BootDir, set[f])))) return false;
@@ -441,15 +570,15 @@ public static partial class Checkpoints
 
         if (kept != null)
         {
-            Prune(kept, keepIds);
+            if (listed0 != null) Prune(kept, keepIds);
             SaveKept(kept);
         }
         var cfg = Path.Join(grubDir, MenuFile);
         if (shown == 0)
         {
-            if (File.Exists(cfg)) File.Delete(cfg);
+            if (listed0 != null && File.Exists(cfg)) File.Delete(cfg);
         }
-        else Files.WriteAtomic(cfg, b.ToString());
+        else WriteDurable(cfg, Files.Utf8.GetBytes(b.ToString()));
         Files.CreateDirectory(Paths.Dir(MenuState));
         Files.WriteAtomic(MenuState, GoJson.Marshal(new Fields { { "entries", listed } }) + "\n");
         File.SetUnixFileMode(MenuState, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.GroupRead | UnixFileMode.OtherRead);
@@ -465,9 +594,16 @@ public static partial class Checkpoints
     /// /boot apart, the checkpoint's kernels put back as the system's (and
     /// the ones replaced kept, for the previous system's entry).
     /// </summary>
-    public static string Keep(string id, int entries, int days)
+    public static string Keep(string id, int entries, int days) => Locked(() => KeepCore(id, entries, days));
+
+    static string KeepCore(string id, int entries, int days)
     {
+        if (File.Exists(KeptPending)) throw new MazapanException("a checkpoint was made the main system already: restart first");
         if (MainSubvol() is not { } main) throw new MazapanException("checkpoints: not on Mazapán's layout (the system in a subvolume of its own)");
+        var booted = Booted(ReadText("/proc/cmdline")) != null;
+        // pacman halfway through on the main system: its files are half changed.
+        var db = booted ? Path.Join(MainMount, "var/lib/pacman/db.lck") : "/var/lib/pacman/db.lck";
+        if (File.Exists(db)) throw new MazapanException("pacman is working (" + db + "): wait for it to finish");
         var onRoot = BootOnRoot();
         var stamp = DateTimeOffset.Now.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture);
         var prevName = $"{main}-previous-{stamp}";
@@ -475,67 +611,145 @@ public static partial class Checkpoints
         Dictionary<string, string>? set = null;
         if (kept != null)
         {
+            if (!kept.Valid) throw new MazapanException("the kernels' manifest on /boot can't be read: nothing was changed");
             kept.Assign(List(SnapshotsDir(main)));
             if (!kept.Sets.TryGetValue(id, out set)) throw new MazapanException($"checkpoint {id}: its kernel wasn't kept: it can't start");
+            // Before anything changes: every file there, whole, and room to put them in place.
+            long need = 0;
+            foreach (var (path, copy) in set)
+            {
+                var f = Path.Join(BootDir, copy);
+                if (!File.Exists(f) || Hash(f) != Path.GetFileName(copy))
+                    throw new MazapanException($"checkpoint {id}: its {path} on /boot is missing or damaged: nothing was changed");
+                need += new FileInfo(f).Length;
+            }
+            if (FreeBytes("/boot") is { } free && free < need + (32L << 20))
+                throw new MazapanException("not enough room on /boot: nothing was changed");
         }
         string result = "";
-        WithTop(top =>
+        // On a checkpoint, /boot is kept read only (it's the main system's): for this, writable.
+        var remounted = booted && !onRoot && Exec.Run("mount", ["-o", "remount,rw", "/boot"]).ExitCode == 0;
+        try
         {
-            var mainDir = Path.Join(top, main);
-            var prevDir = Path.Join(top, prevName);
-            string source;
-            if (id.StartsWith("previous-"))
+            WithTop(top =>
             {
-                source = Path.Join(top, $"{main}-{id}");
-                if (!Directory.Exists(source)) throw new MazapanException($"{id}: not there anymore");
-            }
-            else
-            {
-                if (!long.TryParse(id, out var n) || !Directory.Exists(Path.Join(mainDir, ".snapshots", id, "snapshot")))
-                    throw new MazapanException($"checkpoint {id}: not there");
-                source = Path.Join(prevDir, ".snapshots", n.ToString(CultureInfo.InvariantCulture), "snapshot");
-            }
-            Directory.Move(mainDir, prevDir);
-            var r = Exec.Run("btrfs", ["subvolume", "snapshot", source, mainDir]);
-            if (r.ExitCode != 0)
-            {
-                Directory.Move(prevDir, mainDir);
-                throw new MazapanException("the checkpoint couldn't be copied: " + r.Stderr.Trim());
-            }
-            // The snapshots, history and all, go with the main system.
-            var snaps = Path.Join(mainDir, ".snapshots");
-            var oldSnaps = Path.Join(prevDir, ".snapshots");
-            try
-            {
-                if (Directory.Exists(oldSnaps))
+                var mainDir = Path.Join(top, main);
+                var prevDir = Path.Join(top, prevName);
+                string source;
+                if (id.StartsWith("previous-"))
                 {
-                    if (Directory.Exists(snaps) && !Directory.EnumerateFileSystemEntries(snaps).Any()) Directory.Delete(snaps);
-                    Directory.Move(oldSnaps, snaps);
+                    source = Path.Join(top, $"{main}-{id}");
+                    if (!Directory.Exists(source)) throw new MazapanException($"{id}: not there anymore");
                 }
-            }
-            catch (IOException e) { Console.Error.WriteLine($"the snapshots stayed with the previous system: {e.Message}"); }
-            // Said once, at the next start of the new main system.
-            var note = Path.Join(mainDir, Restored.TrimStart('/'));
-            Files.CreateDirectory(Paths.Dir(note));
-            Files.WriteAtomic(note, GoJson.Marshal(new Fields { { "from", id }, { "previous", prevName }, { "until", DateTimeOffset.Now.AddDays(days).ToString("yyyy-MM-ddTHH:mm:ssK", CultureInfo.InvariantCulture) } }) + "\n");
-            if (kept != null)
-            {
-                // The kernels /boot has now are the previous system's.
-                var now = new Dictionary<string, string>(kept.Current);
-                if (now.Count > 0) kept.Sets["previous-" + stamp] = now;
-                foreach (var (path, copy) in set!)
+                else
                 {
-                    var dst = Path.Join("/boot", path);
-                    File.Copy(Path.Join(BootDir, copy), dst + ".mazapan-tmp", overwrite: true);
-                    File.Move(dst + ".mazapan-tmp", dst, overwrite: true);
+                    if (!long.TryParse(id, out var n) || !Directory.Exists(Path.Join(mainDir, ".snapshots", id, "snapshot")))
+                        throw new MazapanException($"checkpoint {id}: not there");
+                    source = Path.Join(prevDir, ".snapshots", n.ToString(CultureInfo.InvariantCulture), "snapshot");
                 }
-                kept.Current = new(set);
-                kept.CurrentSince = DateTimeOffset.UtcNow;
-                SaveKept(kept);
-            }
-            result = Menu(entries, days, mainRoot: mainDir);
-        }, readOnly: false);
+                // What lives in subvolumes of their own inside the system
+                // (/var/lib/docker's layers, machines): a snapshot leaves them
+                // out, so they move to the new one rather than go with the old.
+                var nested = Nested(top, main).Where(p => p != ".snapshots" && !p.StartsWith(".snapshots/")).ToList();
+
+                Directory.Move(mainDir, prevDir);
+                var moved = new List<string>();
+                var snapsMoved = false;
+                var bootChanged = false;
+                try
+                {
+                    var r = Exec.Run("btrfs", ["subvolume", "snapshot", source, mainDir]);
+                    if (r.ExitCode != 0) throw new MazapanException("the checkpoint couldn't be copied: " + r.Stderr.Trim());
+                    // The snapshots, history and all, go with the main system.
+                    var snaps = Path.Join(mainDir, ".snapshots");
+                    var oldSnaps = Path.Join(prevDir, ".snapshots");
+                    if (Directory.Exists(oldSnaps))
+                    {
+                        if (Directory.Exists(snaps)) Directory.Delete(snaps); // empty: a snapshot leaves nested ones out
+                        Directory.Move(oldSnaps, snaps);
+                        snapsMoved = true;
+                    }
+                    foreach (var rel in nested)
+                    {
+                        var to = Path.Join(mainDir, rel);
+                        if (!Directory.Exists(Paths.Dir(to))) continue;
+                        if (Directory.Exists(to))
+                        {
+                            if (Directory.EnumerateFileSystemEntries(to).Any()) continue;
+                            Directory.Delete(to);
+                        }
+                        Directory.Move(Path.Join(prevDir, rel), to);
+                        moved.Add(rel);
+                    }
+                    // Said once, at the next start of the new main system.
+                    var note = Path.Join(mainDir, Restored.TrimStart('/'));
+                    Files.CreateDirectory(Paths.Dir(note));
+                    Files.WriteAtomic(note, GoJson.Marshal(new Fields { { "from", id }, { "previous", prevName }, { "until", DateTimeOffset.Now.AddDays(days).ToString("yyyy-MM-ddTHH:mm:ssK", CultureInfo.InvariantCulture) } }) + "\n");
+                    if (kept != null)
+                    {
+                        // The kernels /boot has now are the previous system's.
+                        var now = new Dictionary<string, string>(kept.Current);
+                        if (now.Count > 0) kept.Sets["previous-" + stamp] = now;
+                        bootChanged = true;
+                        foreach (var (path, copy) in set!) CopyDurable(Path.Join(BootDir, copy), Path.Join("/boot", path));
+                        kept.Current = new(set);
+                        kept.CurrentSince = DateTimeOffset.UtcNow;
+                        SaveKept(kept);
+                    }
+                }
+                catch (Exception e) when (e is MazapanException or IOException or UnauthorizedAccessException)
+                {
+                    // Everything back as it was.
+                    var undo = new List<string>();
+                    foreach (var rel in moved)
+                        try { Directory.Move(Path.Join(mainDir, rel), Path.Join(prevDir, rel)); } catch (IOException x) { undo.Add(x.Message); }
+                    if (snapsMoved)
+                        try { Directory.Move(Path.Join(mainDir, ".snapshots"), Path.Join(prevDir, ".snapshots")); } catch (IOException x) { undo.Add(x.Message); }
+                    if (Directory.Exists(mainDir))
+                    {
+                        var d = Exec.Run("btrfs", ["subvolume", "delete", "--recursive", mainDir]);
+                        if (d.ExitCode != 0) undo.Add(d.Stderr.Trim());
+                    }
+                    if (!Directory.Exists(mainDir))
+                        try { Directory.Move(prevDir, mainDir); } catch (IOException x) { undo.Add(x.Message); }
+                    if (bootChanged && kept != null)
+                        foreach (var (path, copy) in kept.Sets.GetValueOrDefault("previous-" + stamp) ?? [])
+                            try { CopyDurable(Path.Join(BootDir, copy), Path.Join("/boot", path)); } catch (IOException x) { undo.Add(x.Message); }
+                    throw new MazapanException(undo.Count == 0
+                        ? $"{e.Message}: nothing was changed"
+                        : $"{e.Message}; putting it back failed too ({string.Join("; ", undo)}): the system is in {prevName}, ask for help before restarting");
+                }
+                // Until the restart, the running system isn't the main one anymore.
+                if (!booted)
+                {
+                    Files.CreateDirectory(Paths.Dir(KeptPending));
+                    File.WriteAllText(KeptPending, prevName + "\n");
+                }
+                result = MenuCore(entries, days, main, mainDir);
+            }, readOnly: false);
+        }
+        finally
+        {
+            if (remounted) Exec.Run("mount", ["-o", "remount,ro", "/boot"]);
+        }
         return result;
+    }
+
+    /// <summary>The subvolumes inside the system's (paths relative to it), deepest last.</summary>
+    static List<string> Nested(string top, string main)
+    {
+        var r = Exec.Run("btrfs", ["subvolume", "list", "-o", Path.Join(top, main)]);
+        if (r.ExitCode != 0) return [];
+        var out_ = new List<string>();
+        foreach (var l in r.Stdout.Split('\n'))
+        {
+            var i = l.IndexOf(" path ", StringComparison.Ordinal);
+            if (i < 0) continue;
+            var p = l[(i + 6)..].Trim();
+            // "path" is from the top: "@/var/lib/docker".
+            if (p.StartsWith(main + "/")) out_.Add(p[(main.Length + 1)..]);
+        }
+        return out_.OrderBy(p => p.Count(c => c == '/')).ToList();
     }
 
     static string SnapshotsDir(string main) => Booted(ReadText("/proc/cmdline")) != null ? Path.Join(MainMount, ".snapshots") : "/.snapshots";
@@ -548,7 +762,9 @@ public static partial class Checkpoints
     /// written down for it; on the main system, a checkpoint just kept is
     /// said once, and the menu written again.
     /// </summary>
-    public static string Boot(int entries, int days)
+    public static string Boot(int entries, int days) => Locked(() => BootCore(entries, days));
+
+    static string BootCore(int entries, int days)
     {
         Files.CreateDirectory("/run/mazapan");
         var id = Booted(ReadText("/proc/cmdline"));
@@ -559,9 +775,15 @@ public static partial class Checkpoints
                 File.Copy(Restored, RunRestored, overwrite: true);
                 File.SetUnixFileMode(RunRestored, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.GroupRead | UnixFileMode.OtherRead);
                 File.Delete(Restored);
+                // /boot apart: only the main entry's kernel came back with the
+                // checkpoint; every kernel and initramfs made again from this
+                // system's own modules (as pacman's hook does).
+                if (!BootOnRoot()) Refresh();
             }
-            return Menu(entries, days);
+            return MainSubvol() is { } m ? MenuCore(entries, days, m, "/") : "checkpoints: not on Mazapán's layout";
         }
+        // The main system's /boot (the EFI partition): not this start's to change.
+        if (!BootOnRoot()) Exec.Run("mount", ["-o", "remount,ro", "/boot"]);
         var main = MainSubvolFromCmdline() ?? "@";
         Files.CreateDirectory(MainMount);
         if (BtrfsDevice() is { } dev && !IsMounted(MainMount))
@@ -582,6 +804,21 @@ public static partial class Checkpoints
         Files.WriteAtomic(RunState, GoJson.Marshal(f) + "\n");
         File.SetUnixFileMode(RunState, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.GroupRead | UnixFileMode.OtherRead);
         return $"on checkpoint {id}: {c?.Title ?? "?"}";
+    }
+
+    static void Refresh()
+    {
+        foreach (var d in Directory.Exists("/usr/lib/modules") ? Directory.GetDirectories("/usr/lib/modules") : [])
+        {
+            var vmlinuz = Path.Join(d, "vmlinuz");
+            var pkgbase = Path.Join(d, "pkgbase");
+            if (!File.Exists(vmlinuz) || !File.Exists(pkgbase)) continue;
+            var name = File.ReadAllText(pkgbase).Trim();
+            if (!Regex.IsMatch(name, @"^[a-z0-9][a-z0-9._+-]*\z")) continue;
+            CopyDurable(vmlinuz, Path.Join("/boot", "vmlinuz-" + name));
+        }
+        var r = Exec.Run("mkinitcpio", ["-P"]);
+        if (r.ExitCode != 0) Console.Error.WriteLine("mkinitcpio -P: " + (r.Stderr.Trim() is { Length: > 0 } e ? e : r.Stdout.Trim()));
     }
 
     // --- what changed ---------------------------------------------------------
@@ -640,6 +877,8 @@ public static partial class Checkpoints
         var root = Mounts().LastOrDefault(m => m.Where == "/");
         if (root.Type != "btrfs") return null;
         var s = root.Root.Trim('/');
+        // Renamed under the running system by a keep (until the restart): its old name.
+        if (Regex.Match(s, @"^(.+)-previous-\d{8}-\d{6}\z") is { Success: true } p) s = p.Groups[1].Value;
         return s == "" || s.Contains('/') ? null : s;
     }
 
@@ -653,13 +892,15 @@ public static partial class Checkpoints
         return null;
     }
 
+    /// <summary>The system's btrfs: /'s, or on a checkpoint (/ an overlay) the kernel line's root=.</summary>
     static string? BtrfsDevice()
     {
-        var ms = Mounts().Where(m => m.Type == "btrfs").ToList();
-        var m = ms.FirstOrDefault(x => x.Where == "/");
-        if (m == default) m = ms.FirstOrDefault(x => x.Where == "/home");
-        if (m == default) m = ms.FirstOrDefault();
-        return m == default ? null : m.Source;
+        var root = Mounts().LastOrDefault(x => x.Where == "/");
+        if (root.Type == "btrfs") return root.Source;
+        var cmd = ReadText("/proc/cmdline");
+        if (Regex.Match(cmd, @"(?:^|\s)root=UUID=([0-9a-fA-F-]+)") is { Success: true } u) return "/dev/disk/by-uuid/" + u.Groups[1].Value;
+        if (Regex.Match(cmd, @"(?:^|\s)root=(/dev/\S+)") is { Success: true } d) return d.Groups[1].Value;
+        return null;
     }
 
     static string? topMounted;
@@ -673,18 +914,21 @@ public static partial class Checkpoints
             return;
         }
         if (BtrfsDevice() is not { } dev) throw new MazapanException("no btrfs filesystem mounted");
-        Files.CreateDirectory(TopMount);
-        var r = Exec.Run("mount", ["-t", "btrfs", "-o", (readOnly ? "ro," : "") + "subvolid=5", dev, TopMount]);
+        // A folder of this process's own: another one's mount never stacks on it.
+        var at = TopMount + "-" + Environment.ProcessId.ToString(CultureInfo.InvariantCulture);
+        Files.CreateDirectory(at);
+        var r = Exec.Run("mount", ["-t", "btrfs", "-o", (readOnly ? "ro," : "") + "subvolid=5", dev, at]);
         if (r.ExitCode != 0) throw new MazapanException("the filesystem's top couldn't be mounted: " + r.Stderr.Trim());
-        topMounted = TopMount;
+        topMounted = at;
         try
         {
-            act(TopMount);
+            act(at);
         }
         finally
         {
             topMounted = null;
-            Exec.Run("umount", [TopMount]);
+            if (Exec.Run("umount", [at]).ExitCode == 0) Directory.Delete(at);
+            else Console.Error.WriteLine($"{at}: still mounted");
         }
     }
 

@@ -188,19 +188,43 @@ local function resize(sign)
 end
 
 -- All of the screen's width, and back to the width it had (per window).
-local before_max = {} -- window address -> width share
+-- The column's own width (a share of the screen), as the layout keeps it:
+-- whatever the gaps or the mode, it comes back exactly.
+local before_max = {} -- window address -> column width share
+local function column_of(win)
+  return win and not win.floating and win.layout and win.layout.column or nil
+end
 local function maximize()
-  local ws, win = hl.get_active_workspace(), hl.get_active_window()
-  if not ws or not win or win.floating then return end
-  local w = screen(ws)
+  local win = hl.get_active_window()
+  local col = column_of(win)
+  if not col then return end -- floating, or focus mode (not columns)
   local key = tostring(win.address)
-  if win.size.x >= 0.95 * (w - 2 * GAP_OUT) then
+  if before_max[key] or col.width >= 0.99 then
+    -- (a reload forgets: then back to a new window's width)
     hl.dispatch(hl.dsp.layout(string.format("colresize %.4f", before_max[key] or {{ settings.width }})))
     before_max[key] = nil
   else
-    before_max[key] = math.max(0.1, math.min(1, (win.size.x + 2 * GAP_IN) / (w - 2 * GAP_OUT)))
+    before_max[key] = col.width
     hl.dispatch(hl.dsp.layout("colresize 1.0"))
   end
+end
+
+-- Along the strip with the wheel, stopping at its ends (past the last
+-- column the layout would scroll every window off the screen).
+local function along(step)
+  local ws, win = hl.get_active_workspace(), hl.get_active_window()
+  local col = column_of(win)
+  if not ws or not col or col.index == nil then return end
+  if step < 0 and col.index <= 0 then return end
+  if step > 0 then
+    local last = 0
+    for _, w in ipairs(hl.get_windows({ workspace = ws.id }) or {}) do
+      local c = column_of(w)
+      if c and c.index and c.index > last then last = c.index end
+    end
+    if col.index >= last then return end
+  end
+  hl.dispatch(hl.dsp.layout(step > 0 and "move +col" or "move -col"))
 end
 
 -- The same as commands (`hyprctl eval 'mazapan_columns.equal()'`): the
@@ -228,12 +252,18 @@ hl.bind({{ lq settings.move_right_key }}, hl.dsp.layout("swapcol r"))
 -- The same key with SHIFT, after its first modifier ("SUPER + R" ->
 -- "SUPER + SHIFT + R"): the other way round.
 local function shifted(key)
+  if key:find("SHIFT", 1, true) then return nil end -- already with SHIFT: no other way round
+  if not key:find(" + ", 1, true) then return "SHIFT + " .. key end
   return (key:gsub("^([%w_]+) %+ ", "%1 + SHIFT + ", 1))
+end
+local function bind_shifted(key, action)
+  local k = shifted(key)
+  if k then hl.bind(k, action) end
 end
 
 -- Niri's: widths in turn, all of the width, windows into columns and out.
 hl.bind({{ lq settings.widths_key }}, hl.dsp.layout("colresize +conf"))
-hl.bind(shifted({{ lq settings.widths_key }}), hl.dsp.layout("colresize -conf"))
+bind_shifted({{ lq settings.widths_key }}, hl.dsp.layout("colresize -conf"))
 hl.bind({{ lq settings.maximize_key }}, maximize)
 hl.bind({{ lq settings.fullscreen_key }}, hl.dsp.window.fullscreen())
 hl.bind({{ lq settings.consume_left_key }}, hl.dsp.layout("consume_or_expel prev"))
@@ -243,13 +273,13 @@ hl.bind({{ lq settings.consume_right_key }}, hl.dsp.layout("consume_or_expel nex
 -- after the last one there's always a new one).
 hl.bind({{ lq settings.next_workspace_key }}, hl.dsp.focus({ workspace = "r+1" }))
 hl.bind({{ lq settings.previous_workspace_key }}, hl.dsp.focus({ workspace = "r-1" }))
-hl.bind(shifted({{ lq settings.next_workspace_key }}), hl.dsp.window.move({ workspace = "r+1" }))
-hl.bind(shifted({{ lq settings.previous_workspace_key }}), hl.dsp.window.move({ workspace = "r-1" }))
+bind_shifted({{ lq settings.next_workspace_key }}, hl.dsp.window.move({ workspace = "r+1" }))
+bind_shifted({{ lq settings.previous_workspace_key }}, hl.dsp.window.move({ workspace = "r-1" }))
 {{- if settings.wheel }}
 
 -- SUPER and the wheel: along the strip; with SHIFT, workspaces.
-hl.bind("SUPER + mouse_down", hl.dsp.layout("move +col"))
-hl.bind("SUPER + mouse_up", hl.dsp.layout("move -col"))
+hl.bind("SUPER + mouse_down", function() along(1) end)
+hl.bind("SUPER + mouse_up", function() along(-1) end)
 hl.bind("SUPER + SHIFT + mouse_down", hl.dsp.focus({ workspace = "r+1" }))
 hl.bind("SUPER + SHIFT + mouse_up", hl.dsp.focus({ workspace = "r-1" }))
 {{- end }}

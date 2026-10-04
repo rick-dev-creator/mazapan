@@ -16,7 +16,7 @@ BarItem {
 
   readonly property var ws: Hyprland.focusedWorkspace
   readonly property var mon: ws && ws.monitor ? ws.monitor : null
-  readonly property real monX: mon && mon.lastIpcObject ? mon.lastIpcObject.x : 0
+  readonly property real monX: mon ? mon.x : 0
   readonly property real monW: mon ? (mon.lastIpcObject && mon.lastIpcObject.transform % 2 === 1 ? mon.height : mon.width) / mon.scale : 1920
   property var columns: []   // [{x, w, on, focused, window}]
 
@@ -67,7 +67,8 @@ BarItem {
     target: Hyprland.toplevels
     function onValuesChanged() { root.update() }
   }
-  Timer { interval: 1500; repeat: true; running: true; triggeredOnStart: true; onTriggered: later.restart() }
+  // Only on the bar of the screen in focus (the others show nothing).
+  Timer { interval: 1500; repeat: true; running: !!root.mon && !!root.barScreen && root.mon.name === root.barScreen.name; triggeredOnStart: true; onTriggered: later.restart() }
   Component.onCompleted: update()
 
   Row {

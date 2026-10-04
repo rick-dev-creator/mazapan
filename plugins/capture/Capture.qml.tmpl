@@ -109,16 +109,16 @@ Item {
   // Notifications go first: they're drawn on the screen grim copies.
   // Hyprland hands a screen's picture over as it draws its next frame: a
   // screen that isn't drawing (turned off) would keep grim waiting, and the
-  // overlay from ever opening again. So a few seconds each; past them the
-  // screens are woken and it's tried once more; then it's said which one.
+  // overlay from ever opening again. So a few seconds each; past them that
+  // screen is woken and it's tried once more; then it's said which one.
   Process {
     id: freezer
     command: ["sh", "-c", "command -v grim >/dev/null || exit 3; hyprctl dismissnotify >/dev/null 2>&1; "
       // Banners held back while the picture's taken (and the overlay's up).
       + "qs ipc -c mazapan call notifications hold true >/dev/null 2>&1 && sleep 0.1; "
       + "mkdir -p -m 700 \"$0\" || exit 1; for o in \"$@\"; do "
-      + "timeout 4 grim -l 0 -o \"$o\" \"$0/$o.frozen.png\" && continue; "
-      + "hyprctl dispatch 'hl.dsp.dpms({ action = \"on\" })' >/dev/null 2>&1; sleep 0.5; "
+      + "timeout 4 grim -l 0 -o \"$o\" \"$0/$o.frozen.png\"; c=$?; [ $c = 0 ] && continue; [ $c = 124 ] || exit 1; "
+      + "hyprctl dispatch \"hl.dsp.dpms({ action = 'on', monitor = '$o' })\" >/dev/null 2>&1; sleep 0.5; "
       + "timeout 4 grim -l 0 -o \"$o\" \"$0/$o.frozen.png\" || { printf %s \"$o\"; exit 4; }; done",
       root.dir].concat(Quickshell.screens.map(s => s.name))
     stdout: StdioCollector { id: freezerOut }

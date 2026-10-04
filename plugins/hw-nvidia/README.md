@@ -25,3 +25,11 @@ Like any hardware plugin it's off until you turn it on: "Turn on" here,
 or `mazapan plugins enable hw-nvidia && mazapan apply --system`. What
 runs as root is listed first, and asks for your password in a terminal;
 `mazapan undo` takes it back.
+
+On a laptop with hybrid graphics (an integrated GPU and the NVIDIA card),
+the screen starts on the integrated one: NVIDIA's modules aren't put in
+the initramfs and its framebuffer isn't taken, and apps run on the
+integrated GPU unless asked: `prime-run APP` runs one on the NVIDIA card.
+Sleep and hibernation keep the card's memory (NVIDIA's own services, the
+memory saved in /var/tmp). After switching the laptop's GPU mode in its
+firmware, run `mazapan hardware` and `mazapan apply --system`.

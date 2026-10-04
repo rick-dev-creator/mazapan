@@ -53,6 +53,13 @@ output = "/etc/initcpio/post/mazapan-checkpoints"
 system = true
 reload = "[ -e /etc/initcpio/post/mazapan-checkpoints ] && chmod 755 /etc/initcpio/post/mazapan-checkpoints; true"
 
+# No package changes on a checkpoint (its kernels would land on the main
+# system's /boot) nor between making one the main system and the restart.
+[[targets]]
+template = "guard.hook.tmpl"
+output = "/etc/pacman.d/hooks/mazapan-checkpoints-guard.hook"
+system = true
+
 # And after snapper's cleanup, which deletes the oldest.
 [[targets]]
 template = "cleanup.conf.tmpl"
