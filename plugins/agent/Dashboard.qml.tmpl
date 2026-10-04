@@ -22,6 +22,8 @@ import "components/kit"
 
 FloatingWindow {
   id: win
+  // The same window across a reload (a new theme): it keeps its place.
+  reloadableId: "agents-dashboard"
 
   title: {{ tq "dash.title" }}
   implicitWidth: 1180

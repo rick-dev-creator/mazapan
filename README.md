@@ -3,12 +3,18 @@
   Mazapan
 </h1>
 
+<p align="center"><b>An agentic desktop OS on Arch Linux.</b></p>
+
 <p align="center">
-  A desktop on plain Arch Linux: Hyprland and Quickshell, one theme across
-  the whole OS, checkpoints you can boot into, and everything a plugin.
+  Your coding agents are part of the desktop: live in the bar, their limits
+  and spend in one place, and able to change the system only through
+  previewed, undoable steps that you approve. Hyprland and Quickshell, one
+  theme across the whole OS, checkpoints you can boot into.
 </p>
 
 <p align="center">
+  <img src="https://img.shields.io/badge/Agentic_OS-D97757?style=for-the-badge&logo=anthropic&logoColor=white&labelColor=101418" alt="Agentic OS">
+  <img src="https://img.shields.io/badge/MCP_server-built_in-6E56CF?style=for-the-badge&labelColor=101418" alt="MCP server built in">
   <img src="https://img.shields.io/badge/Arch_Linux-1793D1?style=for-the-badge&logo=archlinux&logoColor=white&labelColor=101418" alt="Arch Linux">
   <img src="https://img.shields.io/badge/Hyprland-58E1FF?style=for-the-badge&logo=hyprland&logoColor=101418&labelColor=101418" alt="Hyprland">
   <img src="https://img.shields.io/badge/Quickshell-8A6FDF?style=for-the-badge&labelColor=101418" alt="Quickshell">
@@ -17,17 +23,18 @@
 </p>
 
 <p align="center">
+  <a href="#agentic-os">Agentic OS</a> ·
+  <a href="#the-desktop">The desktop</a> ·
   <a href="#features">Features</a> ·
   <a href="#screenshots">Screenshots</a> ·
   <a href="#install">Install</a> ·
-  <a href="docs/development.md">Development</a> ·
-  <a href="docs/plugin-api.md">Plugins</a> ·
+  <a href="docs/agent-api.md">Agent API</a> ·
   <a href="docs/roadmap.md">Roadmap</a>
 </p>
 
-<p align="center"><img src="docs/media/themes.gif" alt="Changing the theme of the whole desktop, then the overview"></p>
+<p align="center"><img src="docs/media/agent.gif" alt="An agent asks to change the theme; the card shows the diff; allowed, the whole desktop follows"></p>
 
-<p align="center"><sub>One command changes everything: bar, terminals, editors, GTK and Qt apps, browsers, the lock and login screens, GRUB.</sub></p>
+<p align="center"><sub>Claude Code asks, through Mazapan's MCP server, to switch the theme. The card shows exactly what it would write; one click, and the whole desktop follows, the agents' dashboard included. <i>(Sample accounts and data.)</i></sub></p>
 
 > **A personal project, shared as it is.** Mazapan is one person's desktop,
 > made public in case it helps someone else. It comes with no warranty of
@@ -35,14 +42,80 @@
 > so back up what matters first, and read [docs/first-install.md](docs/first-install.md)
 > and [docs/security.md](docs/security.md) before trying it on a real machine.
 
+## Agentic OS
+
+Most desktops treat a coding agent as one more terminal. Mazapan treats
+agents as users of the system with their own place in it: it sees them, it
+counts what they spend, it answers their questions about the machine, and
+it lets them change things the way a person does, never behind your back.
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/media/agent-approval.webp" alt="The approval card with the diff"><p align="center"><b>Every change approved</b>, with its exact diff</p></td>
+    <td width="50%"><img src="docs/media/agent-dashboard.webp" alt="The agents dashboard"><p align="center"><b>Dashboard</b>: cost, tokens, models, projects, limits</p></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/media/agent-sessions.webp" alt="Live sessions and limits in the bar" width="80%"><p align="center"><b>Live sessions</b> and each account's limits, in the bar</p></td>
+    <td><img src="docs/media/agent-answer.webp" alt="An answer card"><p align="center"><b>Ask</b> from anywhere, answered in a card</p></td>
+  </tr>
+</table>
+<p align="center"><sub>Sample accounts and data; the answer shown is a sample too.</sub></p>
+
+### Sees your agents
+- **Live sessions in the bar** for Claude Code, Codex, opencode and pi: which
+  one is working, which **waits for you** (with a notification), which is
+  done; a click goes to its window.
+- **Every account found by itself**, each Claude account's **limits** (the
+  5-hour and weekly windows) and when they reset; `mazapan agents run claude`
+  starts it with the first account that still has room.
+- A **dashboard**: tokens and cost by day, agent, account, model and project,
+  at API prices; what the providers actually billed (keys kept in the
+  keyring); lines, commits and pull requests through OpenTelemetry; when you
+  work, by weekday and hour. Numbers only, read locally: never a prompt.
+
+### Lets them act, safely
+- **A built-in MCP server**, `mazapan mcp`: agents read the whole state
+  (themes, plugins, health checks, history, checkpoints, their own usage)
+  and change the desktop through `preview_change`, `apply_change` and `undo`.
+  ```sh
+  claude mcp add --scope user mazapan -- mazapan mcp
+  ```
+- **The approval card**: an agent's change waits for you, showing who asks
+  and the exact diff of every file. Allow, Don't allow, or Always allow
+  that agent. Each change is marked with the agent in History, and undoable.
+- **Guardrails by design**: agents set numbers and switches, never text
+  that could become a command; nothing as root; no plugin installs or
+  system updates. Those stay yours, and the agent is told the command to
+  give you instead.
+
+### Answers about your machine
+- **Ask from anywhere**: `?` in the palette, about a screenshot, the
+  selected text, files (right click in Files), or **by voice**. The answer
+  comes in a card; "Continue in a terminal" picks the conversation up.
+  Asked read-only, in an empty folder, with no keys.
+- **Diagnosis built in**: an app crashes, a health check fails, or a
+  checkpoint was needed, and "Ask an agent" hands over `mazapan report`
+  (state, failing checks, recent errors, what changed since the
+  checkpoint), framed as data, not instructions.
+- **Recent projects** in the palette reopen the editor and the agent's last
+  conversation together.
+
+Full reference: [docs/agent-api.md](docs/agent-api.md).
+
+## The desktop
+
+<p align="center"><img src="docs/media/themes.gif" alt="Changing the theme of the whole desktop, then the overview"></p>
+
+<p align="center"><sub>One command changes everything: bar, terminals, editors, GTK and Qt apps, browsers, the lock and login screens, GRUB.</sub></p>
+
 <p align="center"><img src="docs/media/desktop.webp" alt="The desktop: btop and Neovim side by side in columns"></p>
 
 ## Features
 
 Arch owns the critical parts (kernel, packages, updates); Mazapan is the
 layer on top, written as 100 plugins over one small core, `mazapan`, a single
-native binary. Every change it makes is previewed, written only where it
-may, and undoable.
+native binary. Every change it makes, yours or an agent's, is previewed,
+written only where it may, and undoable.
 
 ### Install and security
 - A **graphical installer** from a live desktop (and a text one for when
@@ -105,13 +178,6 @@ may, and undoable.
 - Seven **screensavers** of Mazapan's own: Mazapan, CRT, rain, stars, life,
   pipes, glow.
 
-### Agents
-- Claude Code, Codex and others in the bar: which is working, which waits
-  for you, each account's limits and spend.
-- `mazapan mcp`: agents change the desktop through the same previewed,
-  undoable steps a person does ([docs/agent-api.md](docs/agent-api.md)).
-- "Ask an agent" on a crash, a failed check or a checkpoint, read-only.
-
 ### Sharing
 - LocalSend to devices nearby, Taildrop to yours over Tailscale, from the
   palette or the file manager.
@@ -136,7 +202,8 @@ may, and undoable.
     <td><img src="docs/media/screensavers.webp" alt="Screensavers"><p align="center"><b>Screensavers</b>: Mazapan, CRT, pipes, rain</p></td>
   </tr>
   <tr>
-    <td colspan="2"><img src="docs/media/settings.webp" alt="Settings" width="60%" align="center"><p align="center"><b>Settings</b></p></td>
+    <td><img src="docs/media/monitors.webp" alt="Monitors"><p align="center"><b>Monitors</b>, with live thumbnails and profiles</p></td>
+    <td><img src="docs/media/settings.webp" alt="Settings"><p align="center"><b>Settings</b></p></td>
   </tr>
 </table>
 
