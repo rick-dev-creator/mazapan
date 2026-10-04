@@ -6,6 +6,11 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- The theme in kitty, Ghostty and Alacritty (installed from Apps: open
+  windows follow at once) and in Obsidian (a Mazapan theme in every vault).
+- Apps sets up an app you already had when you ask to install it (its
+  theme, its setup).
+
 - Languages in one click in Apps: Python (with uv), Go, Rust, Ruby, PHP,
   Java, Bun, Deno, Zig, Elixir, each with its language server.
 

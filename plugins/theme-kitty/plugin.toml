@@ -1,0 +1,29 @@
+[plugin]
+id = "theme-kitty"
+name = "kitty theme"
+version = "0.1.0"
+api = 1
+description = "kitty terminal in the theme: font, palette, opacity, tabs and borders; open windows recolored at once; your own kitty.conf kept"
+categories = ["theme"]
+# Off until turned on: Apps does it with the terminal (no folder made for an app not here).
+optional = true
+
+[packages]
+pacman = []
+
+[[targets]]
+template = "theme.conf.tmpl"
+output = "~/.config/kitty/mazapan-theme.conf"
+# kitty reloads its config on SIGUSR1: open windows follow.
+reload = "pkill -USR1 -x kitty 2>/dev/null; true"
+
+# One line at the top of kitty.conf: what follows it (yours) wins.
+[[targets]]
+template = "include.tmpl"
+output = "~/.config/kitty/kitty.conf"
+merge = "lines"
+reload = "pkill -USR1 -x kitty 2>/dev/null; true"
+
+[coverage]
+apps = ["kitty"]
+toolkits = ["terminal"]

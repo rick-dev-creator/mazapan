@@ -298,6 +298,7 @@ description = "Notes in plain Markdown files, linked"
 category = "office"
 pacman = ["obsidian"]
 desktop = "obsidian.desktop"
+plugins = ["theme-obsidian"]
 translations.es.description = "Notas en archivos Markdown, enlazadas"
 translations.de.description = "Notizen in einfachen Markdown-Dateien, verknüpft"
 translations.fr.description = "Des notes en simples fichiers Markdown, reliées entre elles"
@@ -706,6 +707,45 @@ translations.fr.name = "Bases de données de développement"
 translations.fr.description = "PostgreSQL, MySQL, Redis, SQL Server et MongoDB à un clic, leurs chaînes de connexion sous la main"
 translations.pt.name = "Bancos de dados para desenvolvimento"
 translations.pt.description = "PostgreSQL, MySQL, Redis, SQL Server e MongoDB a um clique, com a string de conexão à mão"
+
+[[app]]
+id = "kitty"
+name = "kitty"
+description = "A fast terminal with tabs, splits and images"
+category = "utilities"
+pacman = ["kitty"]
+desktop = "kitty.desktop"
+plugins = ["theme-kitty"]
+translations.es.description = "Una terminal rápida con pestañas, divisiones e imágenes"
+translations.de.description = "Ein schnelles Terminal mit Tabs, Teilungen und Bildern"
+translations.fr.description = "Un terminal rapide avec onglets, divisions et images"
+translations.pt.description = "Um terminal rápido com abas, divisões e imagens"
+
+[[app]]
+id = "ghostty"
+name = "Ghostty"
+description = "A fast, native terminal with tabs and splits"
+category = "utilities"
+pacman = ["ghostty"]
+desktop = "com.mitchellh.ghostty.desktop"
+plugins = ["theme-ghostty"]
+translations.es.description = "Una terminal rápida y nativa con pestañas y divisiones"
+translations.de.description = "Ein schnelles, natives Terminal mit Tabs und Teilungen"
+translations.fr.description = "Un terminal rapide et natif avec onglets et divisions"
+translations.pt.description = "Um terminal rápido e nativo com abas e divisões"
+
+[[app]]
+id = "alacritty"
+name = "Alacritty"
+description = "A minimal, fast terminal"
+category = "utilities"
+pacman = ["alacritty"]
+desktop = "Alacritty.desktop"
+plugins = ["theme-alacritty"]
+translations.es.description = "Una terminal mínima y rápida"
+translations.de.description = "Ein minimales, schnelles Terminal"
+translations.fr.description = "Un terminal minimal et rapide"
+translations.pt.description = "Um terminal mínimo e rápido"
 
 [[app]]
 id = "mission-center"

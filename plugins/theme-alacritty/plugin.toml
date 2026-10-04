@@ -1,0 +1,28 @@
+[plugin]
+id = "theme-alacritty"
+name = "Alacritty theme"
+version = "0.1.0"
+api = 1
+description = "Alacritty terminal in the theme: font, palette, opacity; open windows follow at once; your own alacritty.toml kept"
+categories = ["theme"]
+# Off until turned on: Apps does it with the terminal (no folder made for an app not here).
+optional = true
+
+[packages]
+pacman = []
+
+# Alacritty reloads its config (and what it imports) by itself.
+[[targets]]
+template = "theme.toml.tmpl"
+output = "~/.config/alacritty/mazapan-theme.toml"
+
+# One line at the top of alacritty.toml (a dotted key: your own [general]
+# table, if you have one, takes `import` there instead).
+[[targets]]
+template = "include.tmpl"
+output = "~/.config/alacritty/alacritty.toml"
+merge = "lines"
+
+[coverage]
+apps = ["alacritty", "Alacritty"]
+toolkits = ["terminal"]

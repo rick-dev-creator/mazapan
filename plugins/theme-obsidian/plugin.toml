@@ -1,0 +1,28 @@
+[plugin]
+id = "theme-obsidian"
+name = "Obsidian theme"
+version = "0.1.0"
+api = 1
+description = "Obsidian in the theme, in every vault: its colors, accent, fonts and corners as a theme of its own (Mazapan), picked once in its settings and following every change after"
+categories = ["theme"]
+# Off until turned on (Apps does it with Obsidian).
+optional = true
+
+[packages]
+pacman = []
+
+# In every vault (one opened once has .obsidian/appearance.json): a theme of
+# its own, to pick once in Settings, Appearance, Themes (which one is the
+# person's choice, never overwritten).
+[[targets]]
+template = "theme.css.tmpl"
+output = "themes/Mazapan/theme.css"
+each = ["~/*/.obsidian/appearance.json", "~/*/*/.obsidian/appearance.json", "~/*/*/*/.obsidian/appearance.json"]
+
+[[targets]]
+template = "manifest.json.tmpl"
+output = "themes/Mazapan/manifest.json"
+each = ["~/*/.obsidian/appearance.json", "~/*/*/.obsidian/appearance.json", "~/*/*/*/.obsidian/appearance.json"]
+
+[coverage]
+apps = ["obsidian", "md.obsidian.Obsidian"]

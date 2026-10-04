@@ -280,8 +280,9 @@ public static partial class Program
             if (now.Found.FirstOrDefault(x => x.Id == "webapps") is { } wp && (now.Cfg == null || !now.Cfg.IsOn(wp))) p.Enable.Add("webapps");
             if (!now.ChromiumBrowser) p.Targets.Add("chromium");
         }
-        // What goes with them: their plugins.
-        foreach (var a in p.Apps)
+        // What goes with them: their plugins; an app asked for that's already
+        // here (installed some other way) gets its own too (its theme, its setup).
+        foreach (var a in p.Apps.Concat(apps.Where(now.Has)))
             foreach (var id in a.Plugins)
                 if (now.Found.FirstOrDefault(x => x.Id == id) is { } pl && pl.Hardware == null && (now.Cfg == null || !now.Cfg.IsOn(pl)) && !p.Enable.Contains(id))
                     p.Enable.Add(id);
@@ -541,7 +542,7 @@ public static partial class Program
         var lang = Locale.Languages.Detect(now.Cfg?.Language ?? "");
         var plan = PlanInstall(apps, now, lang);
         foreach (var r in plan.Review) Console.WriteLine($"{r}: add it from the Plugins panel (it shows what it can do first)");
-        if (plan.Apps.Count == 0)
+        if (plan.Apps.Count == 0 && plan.Enable.Count == 0)
         {
             Console.WriteLine(plan.Review.Count > 0 ? "nothing else to install" : "already installed");
             return 0;
@@ -637,7 +638,7 @@ public static partial class Program
         DefaultApps();
         foreach (var f in failed) Console.WriteLine("fail " + f);
         if (failed.Count > 0) throw new MazapanException("not everything: " + string.Join("; ", failed));
-        Console.WriteLine("installed " + string.Join(", ", tx.Names));
+        Console.WriteLine(tx.Names.Count > 0 ? "installed " + string.Join(", ", tx.Names) : "already installed; set up: " + string.Join(", ", tx.Plugins));
         return 0;
     }
 

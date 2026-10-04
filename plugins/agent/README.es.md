@@ -84,6 +84,11 @@ que el agente se da. El Historial marca
 cada cambio suyo con el nombre del agente, y «Deshacer todos los de ese
 día» los revierte juntos.
 
+**Claude Code con el tema**: ejecuta `/theme` en Claude Code una vez y
+elige "Dark mode (ANSI colors only)" (o el claro): desde entonces dibuja
+con la paleta de la terminal, así que sigue cualquier tema. (Mazapán no lo
+cambia: esa elección es tuya, en los ajustes de Claude.)
+
 **Preguntar a un agente sobre este escritorio**, desde la paleta, abre tu
 agente (`command`; Claude con la primera cuenta que tenga margen) con el
 informe de mazapan: estado, comprobaciones que fallan, cierres inesperados,

@@ -1,0 +1,29 @@
+[plugin]
+id = "theme-ghostty"
+name = "Ghostty theme"
+version = "0.1.0"
+api = 1
+description = "Ghostty terminal in the theme: font, palette, opacity; open windows reload it at once; your own config kept"
+categories = ["theme"]
+# Off until turned on: Apps does it with the terminal (no folder made for an app not here).
+optional = true
+
+[packages]
+pacman = []
+
+[[targets]]
+template = "theme.tmpl"
+output = "~/.config/ghostty/mazapan-theme"
+# Ghostty reloads its config on SIGUSR2.
+reload = "pkill -USR2 -x ghostty 2>/dev/null; true"
+
+# One line at the top of its config: the theme file is read after it.
+[[targets]]
+template = "include.tmpl"
+output = "~/.config/ghostty/config"
+merge = "lines"
+reload = "pkill -USR2 -x ghostty 2>/dev/null; true"
+
+[coverage]
+apps = ["ghostty", "com.mitchellh.ghostty"]
+toolkits = ["terminal"]

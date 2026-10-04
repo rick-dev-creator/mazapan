@@ -1457,8 +1457,11 @@ tmux/herdr menus and niche tools left out):
    screens' brightness (DDC) with the brightness keys.
 5. ~~Launch or focus: SUPER + B goes to the browser when it's open~~
    *done: SUPER + B the browser, SUPER + E the files*.
-6. The theme in more apps: Ghostty, kitty, Alacritty, Obsidian, Claude
-   Code.
+6. ~~The theme in more apps: Ghostty, kitty, Alacritty, Obsidian, Claude
+   Code~~ *done: Ghostty, kitty, Alacritty (with Apps), Obsidian (a theme in
+   every vault, picked once); Claude Code: its own "ANSI colors" theme,
+   picked once, follows the terminal (writing its config would override
+   the person's choice and stop applies)*.
 7. A Windows virtual machine for what only exists there (Office, Adobe,
    Visual Studio), its apps as windows of their own.
 8. Screen recording with the webcam over it.

@@ -78,6 +78,11 @@ the name the agent gives itself.
 History marks each of its changes with the agent's name, and "Undo all of
 its that day" takes them back together.
 
+**Claude Code in the theme**: run `/theme` in Claude Code once and pick
+"Dark mode (ANSI colors only)" (or the light one): it then draws in the
+terminal's palette, so it follows every theme. (Mazapán doesn't set it:
+that choice is yours, in Claude's own settings.)
+
 **Ask an agent about this desktop**, from the palette, opens your agent
 (`command`; Claude with the first account that has room) with mazapan's
 report: state, failing checks, crashes, logged errors. "Copy a report"
