@@ -29,6 +29,12 @@ template = "Indicator.qml.tmpl"
 output = "~/.config/quickshell/mazapan/widgets/right/25-updates.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
+# Its place in the Control Center (when that's on, the icon leaves the bar).
+[[targets]]
+template = "Now.qml.tmpl"
+output = "~/.config/quickshell/mazapan/control/now/30-updates.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
 [[targets]]
 template = "Updates.qml.tmpl"
 output = "~/.config/quickshell/mazapan/panels/updates.qml"

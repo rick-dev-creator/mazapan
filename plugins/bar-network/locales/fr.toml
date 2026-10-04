@@ -25,3 +25,6 @@
 "speed_failed" = "Le test de débit n'a pas pu être joint"
 "speed_result" = "↓ %1 Mbps   ↑ %2 Mbps   %3 ms"
 "share_cant" = "Ce Wi‑Fi ne peut pas être partagé en code (son mot de passe n'a pas pu être lu, ou chacun a le sien)"
+"off" = "désactivé"
+"tile.wifi" = "Wi-Fi"
+"tile.ethernet" = "Ethernet"

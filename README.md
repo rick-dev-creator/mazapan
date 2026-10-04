@@ -83,12 +83,12 @@ If it's useful to you too, that's the best that could happen to it.
 | 🤖 **Agentic OS** | Every agent's live sessions in the bar · each account's limits · a dashboard of cost and tokens · a built-in MCP server · an approval card with the exact diff · ask from anywhere · diagnosis from crashes, checks and checkpoints |
 | 💿 **Install** | Graphical and text installers in 5 languages · full-disk encryption · a recovery key as text and QR · hardware fixes picked for your machine |
 | 🛟 **Updates and safety** | Arch news before updating · automatic rollback when a check fails · checkpoints you boot into from the menu · a signed repository · a firewall that denies everything in |
-| 🪟 **Desktop** | Niri-style scrolling columns · overview of every workspace · command palette · settings · monitors with profiles · notifications and Do Not Disturb · night light · modes · idle and hibernate |
+| 🪟 **Desktop** | A Control Center out of a status pill · Niri-style scrolling columns · overview of every workspace · command palette · settings · monitors with profiles · notifications and Do Not Disturb · night light · modes · idle and hibernate |
 | 🎨 **Look** | One theme for the whole OS (16 targets, GRUB to VS Code) · a live theme picker · a theme from any picture · 7 screensavers |
 | 🧰 **Everyday tools** | Capture with OCR, annotations, QR and recording · clipboard history · emoji and color pickers · offline dictation · reminders · web apps · LocalSend and Taildrop |
 | 👩‍💻 **Developers** | Profiles for Development, .NET, Mobile (Expo) · containers without root · one-click databases · every language's versions with mise |
 | 🎮 **Gaming** | Steam, Heroic, Lutris, gamescope, GameMode, MangoHud · games on the discrete GPU · emulators for 20+ systems |
-| 🧩 **Extensible** | 100 plugins, the bar and the installer included · a Plugins panel · write your own in minutes · every change previewed and undoable |
+| 🧩 **Extensible** | 101 plugins, the bar and the installer included · a Plugins panel · write your own in minutes · every change previewed and undoable |
 
 ## Agentic OS
 
@@ -300,7 +300,7 @@ TOML, JSON, CSS, shell…), filled from the theme and your settings.
   one that fails rolls the update back.
 
 <details>
-<summary><b>All 100 built-in plugins</b>, by what they're for</summary>
+<summary><b>All 101 built-in plugins</b>, by what they're for</summary>
 
 **Agents**
 
@@ -309,6 +309,7 @@ TOML, JSON, CSS, shell…), filled from the theme and your settings.
 **Shell and bar**
 
 - **Bar** (`shell-bar`): A bar on every monitor (Quickshell), filled with the widgets other plugins put in its left/center/right slots
+- **Control Center** (`control-center`): One panel for what was a row of icons on the bar's right
 - **Workspaces** (`bar-workspaces`): Workspace numbers in the bar, with a live preview on hover whose windows can be dragged out, and an overview of every workspace at once (as Niri's)
 - **Window title** (`bar-window-title`): The focused window's title in the bar, next to the workspaces
 - **Clock** (`bar-clock`): Day, date and time in the middle of the bar, in the system's language
@@ -441,7 +442,7 @@ How to write one: [docs/plugin-api.md](docs/plugin-api.md).
 ## Every feature
 
 Arch owns the critical parts (kernel, packages, updates); Mazapan is the
-layer on top, written as 100 plugins over one small core, `mazapan`, a single
+layer on top, written as 101 plugins over one small core, `mazapan`, a single
 native binary. Every change it makes, yours or an agent's, is previewed,
 written only where it may, and undoable.
 
@@ -471,6 +472,10 @@ written only where it may, and undoable.
 - **Columns tiling** borrowed from Niri: a scrolling strip per workspace,
   widths that cycle, touchpad gestures, and an **overview** of every
   workspace (`SUPER + Tab`).
+- A **Control Center** (`SUPER + A`) grown out of a status pill that says
+  when something needs you: Wi-Fi and Bluetooth with their lists in place,
+  Do Not Disturb, night light, keep awake, power saver, the sound and where
+  it goes, the music, your agents, updates and notifications.
 - A **command palette** (`SUPER + Space`) for apps, windows and every
   plugin's actions, each showing the command it runs.
 - **Settings** (`SUPER + ,`), monitors with live thumbnails and profiles

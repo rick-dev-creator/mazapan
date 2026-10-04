@@ -25,3 +25,6 @@
 "speed_failed" = "Couldn't reach the speed test"
 "speed_result" = "↓ %1 Mbps   ↑ %2 Mbps   %3 ms"
 "share_cant" = "This Wi-Fi can't be shared as a code (its password couldn't be read, or each person has their own)"
+"off" = "off"
+"tile.wifi" = "Wi-Fi"
+"tile.ethernet" = "Ethernet"

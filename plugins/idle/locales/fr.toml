@@ -14,3 +14,6 @@
 "setting.lock_on_sleep.help" = "Verrouille avant la mise en veille, quelle qu'en soit la cause (le capot, une touche)."
 "act.awake" = "Garder éveillé (ou non)"
 "act.awake.kw" = "inactivité caféine éveillé veille verrouiller suspendre écran allumé"
+"tile" = "Garder éveillé"
+"tile.on" = "Rien ne s'assombrit ni ne se met en veille"
+"tile.off" = "Désactivé"

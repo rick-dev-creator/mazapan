@@ -36,6 +36,12 @@ template = "NightLight.qml.tmpl"
 output = "~/.config/quickshell/mazapan/panels/night-light.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
+# Its switch in the Control Center.
+[[targets]]
+template = "Tile.qml.tmpl"
+output = "~/.config/quickshell/mazapan/control/tiles/40-night-light.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
 [[actions]]
 name = "{{ t \"act.toggle\" }}"
 run = "qs ipc -c mazapan call nightlight toggle"

@@ -13,3 +13,5 @@
 "hint" = "click: connect · right-click: forget"
 
 "check" = "Bluetooth works (if you use it)"
+"off_short" = "off"
+"on_short" = "on"

@@ -40,3 +40,5 @@
 "home" = "Bildschirme"
 "setting.clamshell" = "Geschlossener Deckel mit Bildschirm"
 "setting.clamshell.help" = "Laptopdeckel zu und ein anderer Bildschirm angeschlossen: der eigene Bildschirm geht aus und du arbeitest am anderen weiter; geöffnet, kommt er zurück."
+"tile" = "Bildschirme"
+"tile.many" = "%1 Bildschirme"

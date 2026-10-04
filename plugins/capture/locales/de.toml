@@ -49,3 +49,7 @@
 "ask" = "Fragen"
 "share" = "Teilen"
 "record_camera" = "Mit Kamera aufnehmen"
+"recording_pill" = "Aufnahme %1"
+"recording_title" = "Bildschirmaufnahme · %1"
+"recording_where" = "Beim Stoppen in Videos gespeichert"
+"stop" = "Stopp"

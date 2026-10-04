@@ -115,8 +115,22 @@ Item {
     return kept.override === "on" ? 1 : kept.override === "off" ? 0 : f
   }
 
+  // Whether it's on, for others to show (the Control Center's switch):
+  // "on" or "off" in a file of the session's runtime folder.
+  FileView {
+    id: said
+    path: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/mazapan-night-light"
+    printErrors: false
+    property string last: ""
+  }
+
   function update() {
     const l = level()
+    const now = l > 0 ? "on" : "off"
+    if (now !== said.last) {
+      said.last = now
+      said.setText(now)
+    }
     const k = l <= 0 ? 0 : Math.round((neutral - (neutral - warm) * l) / 50) * 50
     // Gone (it failed, or was stopped): started again, then told.
     if (!sunset.running) {

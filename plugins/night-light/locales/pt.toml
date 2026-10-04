@@ -14,3 +14,6 @@
 "setting.fade.help" = "Minutos que leva para aparecer e sumir."
 "act.toggle" = "Ligar ou desligar a luz noturna"
 "act.toggle.kw" = "luz noturna quente tela luz azul pôr do sol"
+"tile" = "Luz noturna"
+"tile.on" = "Mais quente, até a manhã"
+"tile.off" = "Desligada"

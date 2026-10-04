@@ -14,3 +14,6 @@
 "setting.lock_on_sleep.help" = "Bloquea antes de dormir, sea como sea (la tapa, una tecla)."
 "act.awake" = "Mantener despierto (o no)"
 "act.awake.kw" = "inactividad cafeína despierto dormir bloquear suspender pantalla encendida"
+"tile" = "Mantener despierto"
+"tile.on" = "Nada se atenúa ni suspende"
+"tile.off" = "Apagado"

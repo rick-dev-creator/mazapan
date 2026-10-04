@@ -58,6 +58,12 @@ template = "Awake.qml.tmpl"
 output = "~/.config/quickshell/mazapan/widgets/right/85-awake.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
+# Its switch in the Control Center (when that's on, the cup leaves the bar).
+[[targets]]
+template = "Tile.qml.tmpl"
+output = "~/.config/quickshell/mazapan/control/tiles/50-awake.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
 [[actions]]
 name = "{{ t \"act.awake\" }}"
 run = "sh ~/.local/share/mazapan/bin/idle awake toggle"

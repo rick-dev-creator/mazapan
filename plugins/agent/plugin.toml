@@ -57,6 +57,17 @@ template = "Agents.qml.tmpl"
 output = "~/.config/quickshell/mazapan/widgets/right/01-agents.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
+# Its place in the Control Center (when that's on, the robot leaves the bar).
+[[targets]]
+template = "Now.qml.tmpl"
+output = "~/.config/quickshell/mazapan/control/now/10-agents.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
+template = "Section.qml.tmpl"
+output = "~/.config/quickshell/mazapan/control/sections/40-agents.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
 # The dashboard: its own Quickshell process, beside the shell's files (the
 # same theme and kit), opened by its launcher.
 # The palette's "? question", and questions about a capture, the selected

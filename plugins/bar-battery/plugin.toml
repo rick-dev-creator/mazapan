@@ -23,6 +23,23 @@ template = "Battery.qml.tmpl"
 output = "~/.config/quickshell/mazapan/widgets/right/35-battery.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
+# Its place in the Control Center (when that's on, the widget leaves the bar):
+# low battery under Now, power saving as a switch, the screen's brightness.
+[[targets]]
+template = "Now.qml.tmpl"
+output = "~/.config/quickshell/mazapan/control/now/40-battery.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
+template = "Tile.qml.tmpl"
+output = "~/.config/quickshell/mazapan/control/tiles/60-battery.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
+template = "Light.qml.tmpl"
+output = "~/.config/quickshell/mazapan/control/sections/25-battery.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
 [[targets]]
 template = "Watch.qml.tmpl"
 output = "~/.config/quickshell/mazapan/panels/battery.qml"

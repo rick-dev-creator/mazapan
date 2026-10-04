@@ -24,6 +24,12 @@ template = "Volume.qml.tmpl"
 output = "~/.config/quickshell/mazapan/widgets/right/30-volume.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
+# Its place in the Control Center (when that's on, the widget leaves the bar).
+[[targets]]
+template = "Section.qml.tmpl"
+output = "~/.config/quickshell/mazapan/control/sections/20-volume.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
 # With a sound card, PipeWire runs and there is a default output. Without
 # one there is nothing to check.
 [[checks]]

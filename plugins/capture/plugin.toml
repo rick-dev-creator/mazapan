@@ -37,6 +37,13 @@ template = "Recording.qml.tmpl"
 output = "~/.config/quickshell/mazapan/widgets/center/40-recording.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
+# Its place in the Control Center (when that's on, the red dot leaves the
+# bar: the status pill says it).
+[[targets]]
+template = "Now.qml.tmpl"
+output = "~/.config/quickshell/mazapan/control/now/20-recording.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
 [[actions]]
 name = "{{ t \"act.capture\" }}"
 run = "qs ipc -c mazapan call mazapan panel capture"

@@ -48,3 +48,7 @@
 "ask" = "Demander"
 "share" = "Partager"
 "record_camera" = "Enregistrer avec la caméra"
+"recording_pill" = "Enregistrement %1"
+"recording_title" = "Enregistrement de l'écran · %1"
+"recording_where" = "Enregistré dans Vidéos à l'arrêt"
+"stop" = "Arrêter"

@@ -5,7 +5,7 @@ uses ([plugin-api.md](plugin-api.md)). `mazapan plugins` lists them on a machine
 `mazapan plugins show ID`, or its page in the Plugins panel (`SUPER + SHIFT + P`),
 says what each needs, what it can do, and its settings.
 
-100 plugins, by what they're for.
+101 plugins, by what they're for.
 
 ## Agents
 
@@ -18,6 +18,7 @@ says what each needs, what it can do, and its settings.
 | Plugin | What it does |
 |---|---|
 | [`shell-bar`](../plugins/shell-bar) | A bar on every monitor (Quickshell), filled with the widgets other plugins put in its left/center/right slots; ships a kit of components for them |
+| [`control-center`](../plugins/control-center) | One panel for what was a row of icons on the bar's right: the switches (Wi-Fi, Bluetooth, Do Not Disturb…), the sound and where it goes, the music, your agents, updates and notifications, grown out of a status pill that tells you when something needs you |
 | [`bar-workspaces`](../plugins/bar-workspaces) | Workspace numbers in the bar, with a live preview on hover whose windows can be dragged out, and an overview of every workspace at once (as Niri's) |
 | [`bar-window-title`](../plugins/bar-window-title) | The focused window's title in the bar, next to the workspaces |
 | [`bar-clock`](../plugins/bar-clock) | Day, date and time in the middle of the bar, in the system's language; click for a calendar |

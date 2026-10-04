@@ -16,6 +16,12 @@ template = "Network.qml.tmpl"
 output = "~/.config/quickshell/mazapan/widgets/right/10-network.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
+# Its place in the Control Center (when that's on, the widget leaves the bar).
+[[targets]]
+template = "Tile.qml.tmpl"
+output = "~/.config/quickshell/mazapan/control/tiles/10-network.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
 # NetworkManager runs and the machine is on some network.
 [[checks]]
 name = "{{ t \"check\" }}"
