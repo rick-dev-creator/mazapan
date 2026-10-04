@@ -795,9 +795,11 @@ Item {
           }
 
           // Ready: the few keys that matter (as they are here).
+          // As wide as the card, two equal columns: words that don't fit
+          // wrap (a longer language) instead of spilling past its edges.
           GridLayout {
             visible: root.step === "ready"
-            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width
             columns: 2
             rowSpacing: 10
             columnSpacing: 24
@@ -805,6 +807,8 @@ Item {
               model: root.keys
               RowLayout {
                 required property var modelData
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
                 spacing: 12
                 Rectangle {
                   implicitWidth: keyText.implicitWidth + 16
@@ -814,7 +818,7 @@ Item {
                   border.color: Theme.border
                   Label { id: keyText; anchors.centerIn: parent; text: modelData[0]; font.family: Theme.fontMono }
                 }
-                Label { text: modelData[1] }
+                Label { text: modelData[1]; wrapMode: Text.Wrap; Layout.fillWidth: true }
               }
             }
           }
