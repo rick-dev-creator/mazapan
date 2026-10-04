@@ -78,7 +78,9 @@ Item {
             out.push({ ip: f[0].trim(), name: f[1].trim() })
         }
         root.peers = out
-        root.tailscaleProblem = out.length === 0 && text.trim() !== "" && !/no targets/i.test(text) ? "Tailscale: " + text.trim().split("\n")[0] : ""
+        // Its service off: said plainly; anything else, its own first line.
+        root.tailscaleProblem = out.length === 0 && text.trim() !== "" && !/no targets/i.test(text)
+          ? (/failed to connect to local tailscale|tailscaled.*not running/i.test(text) ? {{ tq "tailscale_down" }} : "Tailscale: " + text.trim().split("\n")[0]) : ""
       }
     }
     onExited: code => { if (code === 3) { root.peers = []; root.tailscaleProblem = "" } }

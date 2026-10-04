@@ -11,6 +11,8 @@ How to share:
   logout).
 - **Files**: in Files, select them, right click, Scripts, Share. Or from a
   terminal: `~/.local/share/mazapan/bin/share FILE…`.
+- **A capture**: "Share" in the capture's bar.
+- **Something copied before**: in the clipboard history, Ctrl+S.
 
 The Share panel lists where it can go. **A device nearby** opens LocalSend
 with the files, to pick the device in its window (it finds phones and

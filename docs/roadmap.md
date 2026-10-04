@@ -122,7 +122,7 @@ Studio and the emulator, each hardware plugin on its machine.
 *done 2026-10-04: `mazapan themes import-omarchy` (the ones installed,
 Omarchy's repository, or any theme's git repository; all 22 pass every
 contrast)*; ~~LocalSend (22)~~ *done*; ~~"ask an agent about this" from a capture, a
-selection, a file~~ *done* (a notification: not yet), and ~~`? question` in the palette
+selection, a file, a notification~~ *done*, and ~~`? question` in the palette
 answered in a card~~ *done 2026-10-04 (`mazapan agents ask`)*;
 ~~an agent's changes approved with their diff, marked on the timeline, all
 undone at once~~ *done 2026-10-04*, ~~and permissions per agent~~ *done ("Always allow", `mazapan agents trust`)*; ~~recent projects in the palette
@@ -1394,8 +1394,8 @@ device nearby (LocalSend, opened with them) or one of yours on the
 tailnet (Taildrop, sent at once); the tailscale plugin (Apps' Tailscale
 turns it on): its service, you its operator (no sudo), signing in from
 the palette, Taildrop received into Downloads with a notification; the
-firewall lets LocalSend in (53317), as Omarchy does. Not yet: sharing from
-a capture's notification and from the clipboard history.
+firewall lets LocalSend in (53317), as Omarchy does. Also from a capture
+("Share" in its bar) and the clipboard history (Ctrl+S).
 
 ## 23. More capture
 

@@ -12,3 +12,4 @@ hints = "↑↓ entry   ↵ paste   right click or del remove   ctrl+p pin   esc
 "act.open" = "Clipboard history"
 "act.open.kw" = "clipboard copy paste history"
 "home" = "Clipboard"
+"hints.share" = "ctrl+s share"

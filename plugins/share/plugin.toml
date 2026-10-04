@@ -1,7 +1,7 @@
 [plugin]
 id = "share"
 name = "Share"
-version = "0.1.0"
+version = "0.2.0"
 api = 1
 description = "Files, a picture or text from the clipboard to a device nearby (LocalSend) or one of your devices on your tailnet (Taildrop), from the palette or Files' right click"
 categories = ["tools"]

@@ -6,6 +6,10 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- Ask an agent about a notification (in the center, on the pointer), share
+  a capture ("Share" in its bar) or something copied before (Ctrl+S in the
+  clipboard history).
+
 - Ask an agent by voice: SUPER + CTRL + A listens, the same key asks, the
   answer in the agent's card (dictation, worked out on this computer).
 

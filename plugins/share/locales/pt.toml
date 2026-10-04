@@ -17,3 +17,4 @@
 "act.clipboard.kw" = "compartilhar enviar localsend airdrop tailscale taildrop área de transferência celular"
 "act.open" = "Compartilhar…"
 "act.open.kw" = "compartilhar enviar localsend airdrop tailscale taildrop arquivos"
+"tailscale_down" = "O Tailscale não está rodando: ative o plugin do Tailscale (Plugins) ou instale o Tailscale pelo Apps."

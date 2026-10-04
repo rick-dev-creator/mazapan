@@ -26,3 +26,4 @@ hints = "↑↓ entrée   ↵ coller   clic droit ou suppr effacer   ctrl+p épi
 "act.open" = "Historique du presse-papiers"
 "act.open.kw" = "presse-papiers copier coller historique clipboard"
 "home" = "Presse-papiers"
+"hints.share" = "ctrl+s partager"

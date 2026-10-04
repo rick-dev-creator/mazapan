@@ -1,7 +1,7 @@
 [plugin]
 id = "notifications"
 name = "Notifications"
-version = "0.1.0"
+version = "0.2.0"
 api = 1
 description = "Every app's notifications, in the theme: banners that stop under the pointer, with their actions and replies; a quiet center stacked by app; Do Not Disturb by hand, on a schedule or in full screen"
 requires = ["shell-bar", "hypr-base"]

@@ -53,6 +53,16 @@ Item {
   }
 
   // Closed first: the paste goes to the window that had the focus.
+  // Ctrl+S: an entry to another device (the Share plugin's panel), as a file
+  // of its own with a plain name (clipboard.txt, clipboard.png).
+  readonly property bool canShare: {{ if (under "~/.local/share/mazapan/bin/share").size > 0 }}true{{ else }}false{{ end }}
+  function share(e) {
+    if (!e || !canShare) return
+    close()
+    Quickshell.execDetached(["sh", "-c", 'd="${XDG_RUNTIME_DIR:-/tmp}/mazapan-share"; mkdir -p "$d" && chmod 700 "$d" && f="$d/clipboard.$1" '
+      + '&& cp -- "$0" "$f" && exec sh "$HOME/.local/share/mazapan/bin/share" "$f"', e.path, e.image ? "png" : "txt"])
+  }
+
   function use(e) {
     if (!e) return
     close()
@@ -120,6 +130,7 @@ Item {
             else if (event.key === Qt.Key_Escape) root.close()
             else if (event.key === Qt.Key_Delete && e) ClipboardService.remove(e)
             else if (event.key === Qt.Key_P && (event.modifiers & Qt.ControlModifier) && e) ClipboardService.pin(e)
+            else if (event.key === Qt.Key_S && (event.modifiers & Qt.ControlModifier) && e) root.share(e)
             else return
             event.accepted = true
           }
@@ -211,7 +222,7 @@ Item {
         }
 
         Caption {
-          text: ClipboardService.pastes ? {{ tq "hints" }} : {{ tq "hints.copy" }}
+          text: (ClipboardService.pastes ? {{ tq "hints" }} : {{ tq "hints.copy" }}) + (root.canShare ? "   " + {{ tq "hints.share" }} : "")
           elide: Text.ElideRight
           Layout.fillWidth: true
         }

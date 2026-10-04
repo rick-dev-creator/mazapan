@@ -42,6 +42,13 @@ Rectangle {
   // The progress an app reports (0–100), as volume and downloads do.
   readonly property real progress: n && n.hints && n.hints.value !== undefined ? Number(n.hints.value) : -1
   readonly property var buttons: n ? n.actions.filter(a => a.identifier !== "default" && a.text !== "") : []
+  // In the center: asked to a coding agent (the Agents plugin's card), what it says.
+  readonly property bool canAsk: !banner && {{ if (under "~/.local/share/mazapan/bin/agent-ask").size > 0 }}true{{ else }}false{{ end }}
+  function ask() {
+    const text = [card.item.app || "", card.summary, card.body].filter(x => x !== "").join("\n\n")
+    Quickshell.execDetached(["sh", "-c", 'd="${XDG_RUNTIME_DIR:-/tmp}/mazapan-ask"; mkdir -p "$d" && chmod 700 "$d" && f="$d/notification-$$.txt" '
+      + '&& (umask 077; printf "%s" "$1" > "$f") && exec sh "$HOME/.local/share/mazapan/bin/agent-ask" "$f"', "ask", text])
+  }
 
   implicitWidth: 360
   implicitHeight: content.implicitHeight + 24
@@ -183,7 +190,8 @@ Rectangle {
 
     // Its actions: in a banner once the pointer is on it.
     Flow {
-      visible: (card.buttons.length > 0 || (card.n && card.n.hasInlineReply)) && (!card.banner || card.hovered) && !card.replying
+      // Ask (an agent) only while the pointer is on it: not a button on every one.
+      visible: (card.buttons.length > 0 || (card.n && card.n.hasInlineReply) || (card.canAsk && card.hovered)) && (!card.banner || card.hovered) && !card.replying
       Layout.fillWidth: true
       Layout.leftMargin: 42
       spacing: 6
@@ -195,6 +203,11 @@ Rectangle {
           text: modelData.text
           onClicked: card.action(modelData)
         }
+      }
+      Button {
+        visible: card.canAsk && card.hovered
+        text: "󰚩 " + {{ tq "ask" }}
+        onClicked: card.ask()
       }
       Button {
         visible: !!card.n && card.n.hasInlineReply

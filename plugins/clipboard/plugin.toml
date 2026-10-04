@@ -1,7 +1,7 @@
 [plugin]
 id = "clipboard"
 name = "Clipboard history"
-version = "0.1.0"
+version = "0.2.0"
 api = 1
 description = "What you copied, text and pictures, kept and searchable; pick one and it's pasted where you were. what's marked as secret is never kept"
 categories = ["panel", "tools"]

@@ -11,6 +11,8 @@ Cómo compartir:
   solo tuya, que se borra al cerrar sesión).
 - **Archivos**: en Archivos, selecciónalos, clic derecho, Scripts, Share.
   O desde una terminal: `~/.local/share/mazapan/bin/share ARCHIVO…`.
+- **Una captura**: "Compartir" en la barra de la captura.
+- **Algo copiado antes**: en el historial del portapapeles, Ctrl+S.
 
 El panel Compartir muestra a dónde pueden ir. **Un dispositivo cercano**
 abre LocalSend con los archivos, para elegir el dispositivo en su ventana

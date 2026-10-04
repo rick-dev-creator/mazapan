@@ -26,3 +26,4 @@ hints = "↑↓ Eintrag   ↵ einfügen   Rechtsklick oder entf löschen   strg+
 "act.open" = "Zwischenablage-Verlauf"
 "act.open.kw" = "zwischenablage kopieren einfügen verlauf clipboard"
 "home" = "Zwischenablage"
+"hints.share" = "Strg+S teilen"

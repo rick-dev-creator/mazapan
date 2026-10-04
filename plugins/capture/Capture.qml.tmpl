@@ -54,6 +54,8 @@ Item {
   readonly property string state: dir + "/recording" // "<pid> <start>" while recording
   // The action keys, in the system's language (English ones work too).
   readonly property var keysFor: ({ copy: {{ tq "key.copy" }}, save: {{ tq "key.save" }}, text: {{ tq "key.text" }}, qr: {{ tq "key.qr" }}, annotate: {{ tq "key.annotate" }}, record: {{ tq "key.record" }}, ask: {{ tq "key.ask" }} })
+  // Sending it to another device: with the Share plugin.
+  readonly property bool canShare: {{ if (under "~/.local/share/mazapan/bin/share").size > 0 }}true{{ else }}false{{ end }}
   // Asking a coding agent about it: with the Agents plugin's Ask card.
   readonly property bool canAsk: {{ if (under "~/.config/quickshell/mazapan/panels/ask.qml").size > 0 }}true{{ else }}false{{ end }}
 
@@ -154,6 +156,7 @@ Item {
       text: `tesseract shot.png - -l ${ocrLangs} | wl-copy`,
       qr: `zbarimg -q --raw shot.png | wl-copy`,
       ask: `mazapan agents ask --file shot.png …`,
+      share: `share shot.png`,
       record: command("record", "…").replace(q(videos + "/Recording ….mp4"), tilde(videos) + "/…") }
     hint = shown[action] ?? ""
   }
@@ -175,7 +178,10 @@ Item {
       }
       const stamp = Qt.formatDateTime(new Date(), "yyyy-MM-dd HH-mm-ss")
       let script
-      if (actions.includes("ask")) {
+      if (actions.includes("share")) {
+        script = `d="\${XDG_RUNTIME_DIR:-/tmp}/mazapan-share"; mkdir -p "$d" && chmod 700 "$d" && f="$d/Screenshot ${stamp}.png" && cp ${q(shot)} "$f" && `
+          + `sh "$HOME/.local/share/mazapan/bin/share" "$f"`
+      } else if (actions.includes("ask")) {
         // A copy of its own for the agent (the shot goes), in the runtime folder.
         script = `d="\${XDG_RUNTIME_DIR:-/tmp}/mazapan-ask"; mkdir -p "$d" && chmod 700 "$d" && f="$d/capture-${stamp}.png" && cp ${q(shot)} "$f" && `
           + `sh "$HOME/.local/share/mazapan/bin/agent-ask" "$f"`
@@ -566,6 +572,7 @@ Item {
             Action { action: "save"; text: "󰆓 " + {{ tq "save" }}; onClicked: root.act(["save"]) }
             Action { action: "text"; text: "󰈙 " + {{ tq "text" }}; onClicked: root.act(["text"]) }
             Action { action: "qr"; text: "󰐲 " + {{ tq "qr" }}; onClicked: root.act(["qr"]) }
+            Action { visible: root.canShare; action: "share"; text: "󰒖 " + {{ tq "share" }}; onClicked: root.act(["share"]) }
             Action { visible: root.canAsk; action: "ask"; text: "󰚩 " + {{ tq "ask" }}; onClicked: root.act(["ask"]) }
             Button { text: "󰏫 " + {{ tq "annotate" }}; onClicked: root.annotating = true }
             Action { action: "record"; text: "󰑋 " + {{ tq "record" }}; onClicked: root.record() }

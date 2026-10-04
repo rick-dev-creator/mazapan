@@ -17,3 +17,4 @@
 "act.clipboard.kw" = "partager envoyer localsend airdrop tailscale taildrop presse-papiers téléphone"
 "act.open" = "Partager…"
 "act.open.kw" = "partager envoyer localsend airdrop tailscale taildrop fichiers"
+"tailscale_down" = "Tailscale ne tourne pas : activez le plugin Tailscale (Plugins), ou installez Tailscale depuis Apps."

@@ -26,3 +26,4 @@ hints = "↑↓ entrada   ↵ pegar   clic derecho o supr borrar   ctrl+p fijar 
 "act.open" = "Historial del portapapeles"
 "act.open.kw" = "portapapeles copiar pegar historial"
 "home" = "Portapapeles"
+"hints.share" = "ctrl+s compartir"
