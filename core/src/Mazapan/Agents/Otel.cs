@@ -37,6 +37,30 @@ public static class Otel
     ];
 
     static string Home => Environment.GetEnvironmentVariable("HOME") ?? "";
+    /// <summary>
+    /// A secret only the person's agents know (in their settings, sent as a
+    /// header): another local user can't post here. Made the first time,
+    /// readable by the person alone.
+    /// </summary>
+    public static string Token()
+    {
+        var f = Paths.Join(Paths.Dir(StoreFile), "otel-token");
+        try
+        {
+            if (File.ReadAllText(f).Trim() is { Length: 64 } t) return t;
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
+        Directory.CreateDirectory(Paths.Dir(f));
+        var token = Convert.ToHexStringLower(System.Security.Cryptography.RandomNumberGenerator.GetBytes(32));
+        File.WriteAllText(f, "");
+        File.SetUnixFileMode(f, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+        File.WriteAllText(f, token + "\n");
+        return token;
+    }
+
+    const string TokenHeader = "x-mazapan-token";
+    public static string HeaderValue(string token) => $"{TokenHeader}={token}";
+
     public static string StoreFile => Paths.Join(Environment.GetEnvironmentVariable("XDG_STATE_HOME") is { Length: > 0 } s ? s : Paths.Join(Home, ".local/state"), "mazapan/agents/otel.jsonl");
 
     // --- receiving -----------------------------------------------------------------------
@@ -58,6 +82,7 @@ public static class Otel
             listener.Listen(16);
         }
         Prune();
+        var token = Token();
         using (listener)
             while (true)
             {
@@ -67,34 +92,47 @@ public static class Otel
                 catch (OperationCanceledException) { return; }
                 using (client)
                 {
-                    client.ReceiveTimeout = 10000;
-                    client.SendTimeout = 10000;
-                    try { Handle(client); }
-                    catch (Exception e) when (e is IOException or SocketException or JsonException or InvalidDataException or FormatException or InvalidOperationException) { }
+                    client.ReceiveTimeout = 5000;
+                    client.SendTimeout = 5000;
+                    // Whatever one request does, it's that request's: never the receiver's end.
+                    try { Handle(client, token); }
+                    catch (Exception) { }
                 }
             }
     }
 
     const int MaxBody = 8 << 20;
 
-    static void Handle(Socket client)
+    // A whole request in this long, however slowly it comes.
+    static readonly TimeSpan RequestTime = TimeSpan.FromSeconds(15);
+
+    static void Handle(Socket client, string token)
     {
         using var stream = new NetworkStream(client);
-        var (method, path, headers) = ReadHead(stream);
+        var started = System.Diagnostics.Stopwatch.StartNew();
+        void InTime() { if (started.Elapsed > RequestTime) throw new InvalidDataException("too slow"); }
+        var (method, path, headers) = ReadHead(stream, InTime);
         string Reply(int code, string why) => $"HTTP/1.1 {code} {why}\r\nContent-Type: application/json\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{{}}";
         void Say(string s) { var b = Encoding.ASCII.GetBytes(s); stream.Write(b, 0, b.Length); }
         // Traces and logs taken and dropped: a program an agent runs inherits
         // the endpoint, and an error for each export would fill its log.
         if (method == "POST" && path.Split('?')[0] is "/v1/traces" or "/v1/logs") { Say(Reply(200, "OK")); return; }
         if (method != "POST" || path.Split('?')[0] != "/v1/metrics") { Say(Reply(404, "Not Found")); return; }
+        if (headers.GetValueOrDefault(TokenHeader, "") != token) { Say(Reply(401, "Unauthorized")); return; }
         if (headers.GetValueOrDefault("content-type", "").Split(';')[0].Trim() != "application/json") { Say(Reply(415, "Unsupported Media Type")); return; }
         byte[] body;
-        if (headers.GetValueOrDefault("transfer-encoding", "").Contains("chunked", StringComparison.OrdinalIgnoreCase)) body = ReadChunked(stream);
+        if (headers.GetValueOrDefault("transfer-encoding", "").Contains("chunked", StringComparison.OrdinalIgnoreCase)) body = ReadChunked(stream, InTime);
         else
         {
             if (!int.TryParse(headers.GetValueOrDefault("content-length", "0"), out var len) || len < 0 || len > MaxBody) { Say(Reply(413, "Payload Too Large")); return; }
             body = new byte[len];
-            stream.ReadExactly(body);
+            for (var at = 0; at < len;)
+            {
+                InTime();
+                var n = stream.Read(body, at, Math.Min(65536, len - at));
+                if (n <= 0) throw new IOException("closed");
+                at += n;
+            }
         }
         if (headers.GetValueOrDefault("content-encoding", "") == "gzip")
         {
@@ -114,13 +152,14 @@ public static class Otel
         Say(Reply(200, "OK"));
     }
 
-    static (string Method, string Path, Dictionary<string, string> Headers) ReadHead(Stream s)
+    static (string Method, string Path, Dictionary<string, string> Headers) ReadHead(Stream s, Action inTime)
     {
         var sb = new StringBuilder();
         var headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         int b;
         while ((b = s.ReadByte()) >= 0)
         {
+            if ((sb.Length & 255) == 0) inTime();
             sb.Append((char)b);
             if (sb.Length > 16384) throw new InvalidDataException("head too long");
             if (sb.Length >= 4 && sb[^1] == '\n' && sb[^2] == '\r' && sb[^3] == '\n' && sb[^4] == '\r') break;
@@ -133,19 +172,31 @@ public static class Otel
         return (first[0], first.Length > 1 ? first[1] : "", headers);
     }
 
-    static byte[] ReadChunked(Stream s)
+    static byte[] ReadChunked(Stream s, Action inTime)
     {
         using var ms = new MemoryStream();
         while (true)
         {
+            inTime();
             var line = new StringBuilder();
             int b;
-            while ((b = s.ReadByte()) >= 0 && b != '\n') if (b != '\r') line.Append((char)b);
-            var size = int.Parse(line.ToString().Split(';')[0], NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+            while ((b = s.ReadByte()) >= 0 && b != '\n')
+            {
+                if (b != '\r') line.Append((char)b);
+                if (line.Length > 64) throw new InvalidDataException("chunk line too long");
+            }
+            if (!int.TryParse(line.ToString().Split(';')[0].Trim(), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out var size) || size < 0)
+                throw new InvalidDataException("bad chunk size");
             if (size == 0) { while ((b = s.ReadByte()) >= 0 && b != '\n') { } return ms.ToArray(); }
             if (ms.Length + size > MaxBody) throw new InvalidDataException("too big");
             var chunk = new byte[size];
-            s.ReadExactly(chunk);
+            for (var at = 0; at < size;)
+            {
+                inTime();
+                var n = s.Read(chunk, at, Math.Min(65536, size - at));
+                if (n <= 0) throw new IOException("closed");
+                at += n;
+            }
             ms.Write(chunk);
             s.ReadByte(); s.ReadByte(); // its \r\n
         }
@@ -180,8 +231,11 @@ public static class Otel
                         var a = Attributes(dp);
                         foreach (var (k, v) in resource) a.TryAdd(k, v);
                         double value = dp.TryGetProperty("asDouble", out var d) && d.ValueKind == JsonValueKind.Number ? d.GetDouble()
-                            : dp.TryGetProperty("asInt", out var n) ? (n.ValueKind == JsonValueKind.Number ? n.GetInt64() : long.Parse(n.GetString() ?? "0", CultureInfo.InvariantCulture))
+                            : dp.TryGetProperty("asInt", out var n) ? (n.ValueKind == JsonValueKind.Number && n.TryGetInt64(out var ni) ? ni
+                                : n.ValueKind == JsonValueKind.String && long.TryParse(n.GetString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var ns) ? ns : 0)
                             : 0;
+                        if (!double.IsFinite(value) || value < 0 || value > 1e9) continue; // not a count, a time
+
                         var repo = a.GetValueOrDefault("vcs.repository.name") ?? a.GetValueOrDefault("vcs.repository.url.full") ?? "";
                         out_.Add(new(Nano(dp, "timeUnixNano"), name, a.GetValueOrDefault("type") ?? "", a.GetValueOrDefault("model") ?? "",
                             a.GetValueOrDefault("session.id") ?? "", a.GetValueOrDefault("user.email") ?? "", Short(repo), value, cumulative, Nano(dp, "startTimeUnixNano")));
@@ -207,17 +261,29 @@ public static class Otel
             var key = Discovery.Str(kv, "key");
             if (key == "" || !kv.TryGetProperty("value", out var v) || v.ValueKind != JsonValueKind.Object) continue;
             foreach (var p in v.EnumerateObject())
-                out_[key] = p.Value.ValueKind == JsonValueKind.String ? p.Value.GetString() ?? "" : p.Value.ToString();
+            {
+                var text = p.Value.ValueKind == JsonValueKind.String ? p.Value.GetString() ?? "" : p.Value.ToString();
+                out_[key] = text.Length > 200 ? text[..200] : text; // names, never essays
+            }
         }
         return out_;
     }
 
     // --- keeping it --------------------------------------------------------------------
 
+    // Its size, at most: past it, the oldest half goes (a year of one person's work is far under).
+    const long MaxStore = 64L << 20;
+
     static void Append(List<OtelPoint> points)
     {
         if (points.Count == 0) return;
         Directory.CreateDirectory(Paths.Dir(StoreFile));
+        if (File.Exists(StoreFile) && new FileInfo(StoreFile).Length > MaxStore)
+        {
+            var all = Load().OrderBy(p => p.TimeMs).ToList();
+            File.Delete(StoreFile);
+            Append(all.Skip(all.Count / 2).ToList());
+        }
         var sb = new StringBuilder();
         foreach (var p in points)
             sb.Append(new JsonObject
@@ -272,8 +338,17 @@ public static class Otel
         var sinceMs = since.ToUnixTimeMilliseconds();
         var deltas = new List<OtelPoint>();
         foreach (var p in points.Where(p => p.TimeMs >= sinceMs && !p.Cumulative)) deltas.Add(p);
-        foreach (var g in points.Where(p => p.TimeMs >= sinceMs && p.Cumulative).GroupBy(p => (p.Metric, p.Type, p.Model, p.Session, p.StartMs)))
-            deltas.Add(g.MaxBy(p => p.TimeMs)!);
+        // A cumulative series: each point's growth since the one before, on its own day.
+        foreach (var g in points.Where(p => p.Cumulative).GroupBy(p => (p.Metric, p.Type, p.Model, p.Session, p.StartMs)))
+        {
+            double prev = 0;
+            foreach (var p in g.OrderBy(p => p.TimeMs))
+            {
+                var grew = p.Value >= prev ? p.Value - prev : p.Value; // started over
+                prev = p.Value;
+                if (p.TimeMs >= sinceMs && grew > 0) deltas.Add(p with { Value = grew });
+            }
+        }
         return deltas.GroupBy(p => DateTimeOffset.FromUnixTimeMilliseconds(p.TimeMs).ToLocalTime().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))
             .OrderBy(g => g.Key)
             .Select(g =>

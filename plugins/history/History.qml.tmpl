@@ -181,7 +181,8 @@ Item {
   function agentDay(e) {
     if (!e || !e.by) return []
     // Each undone newest first, so one a later change of its own covered comes back to be undone.
-    const all = entries.filter(x => x.kind === "apply" && x.by === e.by && x.known !== false && day(x.time) === day(e.time))
+    // Settings and plugins only (what undoes in any order); files alone undo only last.
+    const all = entries.filter(x => x.kind === "apply" && x.by === e.by && x.known !== false && x.changes.length > 0 && day(x.time) === day(e.time))
     return all.some(x => x.undo !== "none") ? all : []
   }
   function undoAll(list) {

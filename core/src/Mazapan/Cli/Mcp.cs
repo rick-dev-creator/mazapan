@@ -100,6 +100,9 @@ public static partial class Program
                 case "set":
                     foreach (var kv in p.Value.EnumerateObject())
                     {
+                        // plugin.key and nothing else: an "=" in it would carry a value of its own.
+                        if (!System.Text.RegularExpressions.Regex.IsMatch(kv.Name, @"^[a-z0-9-]+\.[a-z0-9_]+\z"))
+                            throw new MazapanException($"set: \"{kv.Name}\" isn't plugin.key");
                         // Text can be a command, a key binding, anything a template puts in
                         // code: an agent sets numbers and switches; text is the person's.
                         if (kv.Value.ValueKind == JsonValueKind.String ||

@@ -102,12 +102,10 @@ public static class Hooks
         ["OTEL_EXPORTER_OTLP_PROTOCOL"] = "http/json",
         ["OTEL_EXPORTER_OTLP_ENDPOINT"] = $"http://127.0.0.1:{port}",
         ["OTEL_METRICS_INCLUDE_REPOSITORY"] = "1",
+        // The receiver's secret: only these agents may post there.
+        ["OTEL_EXPORTER_OTLP_HEADERS"] = Otel.HeaderValue(Otel.Token()),
     };
 
-    static bool OurEndpoint(string? v) => v != null && v.StartsWith("http://127.0.0.1:", StringComparison.Ordinal)
-        && int.TryParse(v["http://127.0.0.1:".Length..], out _);
-
-    /// <summary>Claude Code's metrics sent here (on) or not; a telemetry of the person's own is left alone (null, and why).</summary>
     public static List<string> SetTelemetry(IEnumerable<Account> accounts, bool on, int port, List<string> theirs) =>
         Change(accounts, (file, json) =>
         {
@@ -115,6 +113,9 @@ public static class Hooks
             if (own) theirs.Add(file);
             return r;
         });
+
+    // Mazapán's mark beside them: without it, telemetry already there is the person's own.
+    const string Mark = "MAZAPAN_OTEL";
 
     public static string? ApplyTelemetry(string json, bool on, int port, out bool theirOwn)
     {
@@ -124,9 +125,11 @@ public static class Hooks
         var before = root.ToJsonString();
         var env = root["env"] as JsonObject;
         string? Get(string k) => env?[k] is JsonValue v && v.TryGetValue<string>(out var s) ? s : null;
-        var ours = OurEndpoint(Get("OTEL_EXPORTER_OTLP_ENDPOINT"));
-        // Telemetry set up by the person (their own collector): theirs.
-        if (!ours && (Get("CLAUDE_CODE_ENABLE_TELEMETRY") != null || Get("OTEL_EXPORTER_OTLP_ENDPOINT") != null || Get("OTEL_METRICS_EXPORTER") != null))
+        var ours = Get(Mark) == "1";
+        string[] watched = ["CLAUDE_CODE_ENABLE_TELEMETRY", "OTEL_METRICS_EXPORTER", "OTEL_EXPORTER_OTLP_PROTOCOL", "OTEL_EXPORTER_OTLP_ENDPOINT",
+            "OTEL_EXPORTER_OTLP_METRICS_ENDPOINT", "OTEL_EXPORTER_OTLP_METRICS_PROTOCOL", "OTEL_METRICS_INCLUDE_REPOSITORY", "OTEL_EXPORTER_OTLP_HEADERS"];
+        // Telemetry set up by the person (their own collector, even on this computer): theirs.
+        if (!ours && watched.Any(k => Get(k) != null))
         {
             theirOwn = true;
             return null;
@@ -135,10 +138,15 @@ public static class Hooks
         {
             if (env == null) root["env"] = env = new JsonObject();
             foreach (var (k, v) in TelemetryEnv(port)) env[k] = v;
+            env[Mark] = "1";
         }
         else if (ours && env != null)
         {
-            foreach (var k in TelemetryEnv(port).Keys) env.Remove(k);
+            // Only what is still as Mazapán wrote it (the endpoint: on this computer).
+            foreach (var (k, v) in TelemetryEnv(port))
+                if (Get(k) is { } now && (now == v || k == "OTEL_EXPORTER_OTLP_ENDPOINT" && now.StartsWith("http://127.0.0.1:", StringComparison.Ordinal)))
+                    env.Remove(k);
+            env.Remove(Mark);
             if (env.Count == 0) root.Remove("env");
         }
         if (root.ToJsonString() == before) return null;

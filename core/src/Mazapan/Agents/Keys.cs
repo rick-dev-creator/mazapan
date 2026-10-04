@@ -102,9 +102,13 @@ public static class Keys
     {
         var out_ = new Dictionary<string, string>();
         if (!Takes(agent)) return out_;
-        foreach (var p in Providers.Where(p => !p.Admin))
-            if (System.Environment.GetEnvironmentVariable(p.Env) is not { Length: > 0 } && Get(p.Id) is { } k)
-                out_[p.Env] = k;
+        try
+        {
+            foreach (var p in Providers.Where(p => !p.Admin))
+                if (System.Environment.GetEnvironmentVariable(p.Env) is not { Length: > 0 } && Get(p.Id) is { } k)
+                    out_[p.Env] = k;
+        }
+        catch (MazapanException) { } // no keyring (secret-tool missing, locked): the agent's own setup
         return out_;
     }
 }

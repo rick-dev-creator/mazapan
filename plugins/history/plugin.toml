@@ -1,7 +1,7 @@
 [plugin]
 id = "history"
 name = "History"
-version = "0.2.0"
+version = "0.3.0"
 api = 1
 description = "What changed on the desktop, in words (a theme, a setting, a plugin on or off, an update), newest first, each with its own undo"
 categories = ["panel", "tools"]

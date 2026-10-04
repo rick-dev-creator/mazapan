@@ -68,7 +68,13 @@ changes this desktop through mazapan's MCP server (a theme, a setting, a
 plugin), a card shows who asks and the exact diff of every file first;
 nothing is written until you click Allow (no answer in two minutes is no).
 "Always allow" trusts that agent from then on (`mazapan agents trust`
-lists them; "Agents: ask before every change again" in the palette).
+lists them; "Agents: ask before every change again" in the palette). An
+agent through MCP never sets text settings (commands, keys), never turns
+this card off, and undoes only its own changes. This guards the MCP way
+in, where an agent's mistakes or a page's planted words would go; an
+agent that can run any command as you can do anything you can, card or
+not, which is why its own client asks before it runs one. Trust goes by
+the name the agent gives itself.
 History marks each of its changes with the agent's name, and "Undo all of
 its that day" takes them back together.
 

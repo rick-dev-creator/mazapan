@@ -4,4 +4,4 @@
 "setting.ssh" = "Dejar entrar SSH"
 "setting.ssh.help" = "El puerto 22 abierto, con límite de intentos: solo para una computadora a la que se entra desde otra. El instalador lo enciende cuando recibió llaves SSH."
 "setting.localsend" = "Dejar entrar LocalSend"
-"setting.localsend.help" = "El puerto 53317 abierto (TCP y UDP): los móviles y equipos cercanos encuentran a este y le envían con LocalSend. Nada escucha ahí si LocalSend no está abierto."
+"setting.localsend.help" = "El puerto 53317 abierto (TCP y UDP), solo a la red local: los móviles y equipos cercanos encuentran a este y le envían con LocalSend. Nada escucha ahí si LocalSend no está abierto."

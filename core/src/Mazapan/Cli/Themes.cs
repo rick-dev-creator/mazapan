@@ -278,7 +278,16 @@ public static partial class Program
             File.WriteAllText(Paths.Join(tmp, "theme.toml"), text);
             Theme.Load([Paths.Dir(tmp)], id);
             if (Directory.Exists(dir)) Directory.Move(dir, old);
-            Directory.Move(tmp, dir);
+            try
+            {
+                Directory.Move(tmp, dir);
+            }
+            catch (IOException)
+            {
+                // The new one couldn't go in: the old one back, never lost.
+                if (Directory.Exists(old) && !Directory.Exists(dir)) Directory.Move(old, dir);
+                throw;
+            }
         }
         finally
         {
@@ -315,6 +324,7 @@ public static partial class Program
     {
         var fs = new Flags("themes import-omarchy")
             .Bool("apply", "switch to it (when one is imported)")
+            .Bool("force", "import over one edited since it was imported")
             .Bool("json", "what was imported: id, name, mode, problems")
             .Parse(args);
         var sources = fs.Rest.ToList();
@@ -368,12 +378,21 @@ public static partial class Program
                     var (colors, ansi, accents, mode) = Mazapan.Themes.Omarchy.Convert(palette);
                     var id = Mazapan.Themes.Omarchy.Id(raw);
                     var name = Mazapan.Themes.Omarchy.Readable(id["omarchy-".Length..]);
+                    // One edited since it was imported (or put there by hand): the person's, kept.
+                    var existing = Paths.Join(UserThemes(), id);
+                    if (Directory.Exists(existing) && !fs.IsSet("force") && !AsImported(existing))
+                    {
+                        failed.Add($"{raw}: {id} was edited since it was imported: kept (--force to import it over)");
+                        continue;
+                    }
                     var bg = Mazapan.Themes.Omarchy.Wallpaper(dir);
                     var picture = bg == null ? "grid" : FromImage.Shown(bg) ? "wallpaper" + Path.GetExtension(bg).ToLowerInvariant() : "wallpaper.png";
                     var text = FromImage.Toml(name, mode, $"Omarchy's {name}", picture, colors, ansi, accents, like)
                         .Replace("# Made by mazapan from a picture (mazapan themes from-image): its colors,\n# every contrast checked. Edit it as any theme.\n",
                             "# Imported from Omarchy (mazapan themes import-omarchy): its palette, the\n# accent's tokens and the status colors made to read. Edit it as any theme.\n", StringComparison.Ordinal);
                     PutTheme(id, text, bg, picture);
+                    // What was written, to tell an edit from it next time.
+                    File.WriteAllText(Paths.Join(UserThemes(), id, ".imported"), Hex(text) + "\n");
                     made.Add((id, name, mode, Problems(Theme.Load(ThemeDirs(), id))));
                 }
                 catch (Exception e) when (e is MazapanException or FormatException or KeyNotFoundException or IOException)
@@ -409,6 +428,18 @@ public static partial class Program
         }
     }
 
+    static string Hex(string text) => Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(text)));
+
+    /// <summary>Its theme.toml still as the import wrote it.</summary>
+    static bool AsImported(string dir)
+    {
+        try
+        {
+            return File.ReadAllText(Paths.Join(dir, ".imported")).Trim() == Hex(File.ReadAllText(Paths.Join(dir, "theme.toml")));
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { return false; }
+    }
+
     /// <summary>"https://github.com/me/omarchy-dune-theme.git" → "omarchy-dune-theme".</summary>
     static string RepoName(string url) => Path.GetFileName(url.TrimEnd('/')).Replace(".git", "", StringComparison.Ordinal);
 
@@ -423,8 +454,16 @@ public static partial class Program
             ? ["clone", "--quiet", "--depth", "1", "--filter=blob:none", "--sparse", "--", url, tmp]
             : ["clone", "--quiet", "--depth", "1", "--", url, tmp];
         Console.Error.WriteLine($"fetching {url}…");
-        if (ThemeGit(clone) != 0) throw new MazapanException($"{url}: couldn't be fetched");
-        if (omarchy && ThemeGit(["-C", tmp, "sparse-checkout", "set", "themes"]) != 0) throw new MazapanException($"{url}: its themes couldn't be fetched");
+        try
+        {
+            if (ThemeGit(clone) != 0) throw new MazapanException($"{url}: couldn't be fetched");
+            if (omarchy && ThemeGit(["-C", tmp, "sparse-checkout", "set", "themes"]) != 0) throw new MazapanException($"{url}: its themes couldn't be fetched");
+        }
+        catch (MazapanException)
+        {
+            if (Directory.Exists(tmp)) Directory.Delete(tmp, true);
+            throw;
+        }
         return tmp;
     }
 

@@ -5,6 +5,8 @@
 # person's alone.
 d="${XDG_RUNTIME_DIR:-/tmp}/mazapan-ask"
 mkdir -p "$d" && chmod 700 "$d" || exit 1
+# What earlier questions were about (captures, notifications), gone after a day.
+find "$d" -maxdepth 1 -type f -mmin +1440 -delete 2>/dev/null
 if [ "$1" = "--selection" ]; then
   shift
   t=$(wl-paste --primary --no-newline 2>/dev/null)

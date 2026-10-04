@@ -354,6 +354,17 @@ public static partial class Program
                     throw new MazapanException($"{id} is a hardware plugin: turning it on or off, or changing it, is the person's (mazapan hardware)");
         }
         var sets = fs.All("set").Select(ParseSet).ToList();
+        if (fs.IsSet("agent"))
+        {
+            // An agent sets numbers and switches: text can be a command, a key,
+            // anything a template puts in code (checked here, whatever asked).
+            foreach (var (plugin, key, value) in sets)
+                if (value is string || value is Tomlyn.Model.TomlArray arr && arr.Any(x => x is string))
+                    throw new MazapanException($"{plugin}.{key}: text settings can hold commands, so they're the person's to set");
+            // Asking first is the person's to turn off, never an agent's.
+            if (sets.Any(x => x.Plugin == "agent" && x.Key == "approve_changes"))
+                throw new MazapanException("agent.approve_changes: whether an agent's changes ask first is the person's to change");
+        }
         var resets = fs.All("reset").Select(r => SplitKey(r, "--reset")).ToList();
         // One apply at a time, from reading config.toml to the end: two at
         // once (a theme picked while an undo runs) would each save its own
@@ -375,7 +386,7 @@ public static partial class Program
             {
                 if (!c.Plugins.TryGetValue(plugin, out var m)) c.Plugins[plugin] = m = new(StringComparer.Ordinal);
                 m[key] = value;
-                edits.Add($"{plugin}.{key}");
+                edits.Add($"{plugin}.{key} = {TomlWriter.Value(value)}");
             }
             foreach (var (plugin, key) in resets)
             {
@@ -428,6 +439,9 @@ public static partial class Program
         // An agent's change: the person allows it first, seeing the diff (when
         // the desktop has the card to ask on). Nothing to write: nothing to ask.
         var by = fs.IsSet("agent") ? (AgentClient != "" ? AgentClient : "an agent") : "";
+        // Nor by turning off what asks (the Agents plugin, the bar the card is drawn by).
+        if (fs.IsSet("agent") && Approval.Wanted() && orphans.Any(o => o.EndsWith("/quickshell/mazapan/panels/approve.qml", StringComparison.Ordinal)))
+            throw new MazapanException("that would turn off the card that asks you about agents' changes: it's the person's to do");
         if (fs.IsSet("agent") && Approval.Wanted() && !Approval.Trusted().Contains(by) && (configChanged || changes.Any(c => c.State != State.Unchanged) || orphans.Count > 0))
         {
             var diff = new StringWriter { NewLine = "\n" };

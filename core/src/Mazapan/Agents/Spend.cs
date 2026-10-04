@@ -22,11 +22,12 @@ public static class Spend
     {
         if (!refresh && Cached(days) is { } cached) return cached;
         var out_ = new List<ProviderSpend>();
+        var keyring = true;
         foreach (var (id, read) in new (string, Func<string, int, ProviderSpend>)[] { ("openrouter", OpenRouter), ("anthropic-admin", Anthropic), ("openai-admin", OpenAI) })
         {
             string? key;
             try { key = Keys.Get(id); }
-            catch (MazapanException) { break; } // no keyring: none
+            catch (MazapanException) { keyring = false; break; } // no keyring (locked, missing): none now, asked again next time
             if (key == null) continue;
             try { out_.Add(read(key, days)); }
             catch (Exception e) when (e is HttpRequestException or TaskCanceledException or JsonException or InvalidOperationException or KeyNotFoundException or FormatException)
@@ -35,7 +36,7 @@ public static class Spend
                 out_.Add(new(id, p.Name, [], 0, 0, null, null, e is HttpRequestException h && h.StatusCode is { } s ? (int)s is 401 or 403 ? $"key refused ({(int)s})" : $"error {(int)s}" : "can't be reached"));
             }
         }
-        Write(days, out_);
+        if (keyring) Write(days, out_);
         return out_;
     }
 
@@ -180,6 +181,13 @@ public static class Spend
             Files.WriteAtomic(CacheFile, GoJson.Marshal(new Fields { { "days", days }, { "providers", list.Select(Json).ToList() } }) + "\n");
             File.SetUnixFileMode(CacheFile, UnixFileMode.UserRead | UnixFileMode.UserWrite);
         }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
+    }
+
+    /// <summary>A key added or taken out: what was kept says nothing about it any more.</summary>
+    public static void Forget()
+    {
+        try { File.Delete(CacheFile); }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
     }
 

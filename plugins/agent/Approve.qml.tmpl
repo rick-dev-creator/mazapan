@@ -30,8 +30,12 @@ Item {
   property var lines: []
   property double deadline: 0
   property double now: 0
+  property double shownAt: 0      // clicks in the first second after it changes are ignored
+  property var waiting: []         // requests come one at a time; others wait their turn
 
   function toggle() { if (open) answer("deny") }
+  // SUPER + Q closes panels through this: a no.
+  function close() { if (request !== "") answer("deny"); else open = false }
   function show() {
     screenAtOpen = Quickshell.screens.find(s => Hyprland.focusedMonitor && s.name === Hyprland.focusedMonitor.name) ?? Quickshell.screens[0]
     open = true
@@ -39,24 +43,33 @@ Item {
 
   function showWith(path) {
     if (!/^\/.*\/mazapan-approve\/r-\d+-\d+\.json$/.test(path)) return
-    // One asked before still open: it's a no (the newer one is shown).
-    if (open && request !== "") answer("deny")
+    // One being decided: this one waits its turn (never shown in its place).
+    if (request !== "") { waiting = waiting.concat([path]); return }
     request = path
-    reader.command = ["cat", "--", path]
+    // The path read back with it: what's shown is what's answered.
+    reader.command = ["sh", "-c", 'printf "%s\\n" "$0"; cat -- "$0"', path]
     reader.running = true
+  }
+  function next() {
+    const w = waiting
+    waiting = []
+    for (const p of w) showWith(p)
   }
   Process {
     id: reader
     stdout: StdioCollector {
       onStreamFinished: {
+        const nl = text.indexOf("\n")
+        if (nl < 0 || text.slice(0, nl) !== root.request) return
         let r = {}
-        try { r = JSON.parse(text) } catch (e) { root.answer("deny"); return }
+        try { r = JSON.parse(text.slice(nl + 1)) } catch (e) { root.answer("deny"); return }
 {{- if settings.approve_changes }}
         root.by = r.by || ""
         root.what = r.what || ""
         root.lines = (r.diff || "").split("\n").slice(0, 4000)
         root.deadline = Date.now() + 115000
         root.now = Date.now()
+        root.shownAt = Date.now()
         root.show()
 {{- else }}
         root.answer("allow")
@@ -65,14 +78,17 @@ Item {
     }
   }
 
-  // The answer, next to the request (the core waits for it).
+  // The answer, next to the request (the core waits for it), written whole.
   function answer(a) {
+    open = false
     if (request === "") return
     const file = request.replace(/\.json$/, ".answer")
-    Quickshell.execDetached(["sh", "-c", 'umask 077; printf "%s" "$1" > "$0"', file, a])
+    Quickshell.execDetached(["sh", "-c", 'umask 077; printf "%s" "$1" > "$0.tmp" && mv -f "$0.tmp" "$0"', file, a])
     request = ""
-    open = false
+    Qt.callLater(next)
   }
+  // A click meant for what was there a moment ago doesn't count.
+  function click(a) { if (Date.now() - shownAt > 1000) answer(a) }
 
   Timer {
     interval: 1000
@@ -172,10 +188,10 @@ Item {
           Layout.fillWidth: true
           spacing: 8
           Caption { text: {{ tq "approve.undo" }}; color: Theme.fgSubtle; Layout.fillWidth: true; wrapMode: Text.Wrap }
-          Button { text: {{ tq "approve.deny" }}; onClicked: root.answer("deny") }
+          Button { text: {{ tq "approve.deny" }}; onClicked: root.click("deny") }
           // This one, and from now on every one of this agent's (mazapan agents trust NAME off undoes it).
-          Button { visible: root.by !== "" && root.by !== "an agent"; text: {{ tq "approve.always" }}.arg(root.by); onClicked: root.answer("always") }
-          Button { text: {{ tq "approve.allow" }}; primary: true; onClicked: root.answer("allow") }
+          Button { visible: root.by !== "" && root.by !== "an agent"; text: {{ tq "approve.always" }}.arg(root.by); onClicked: root.click("always") }
+          Button { text: {{ tq "approve.allow" }}; primary: true; onClicked: root.click("allow") }
         }
       }
     }

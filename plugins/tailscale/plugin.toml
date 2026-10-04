@@ -1,7 +1,7 @@
 [plugin]
 id = "tailscale"
 name = "Tailscale"
-version = "0.1.0"
+version = "0.2.0"
 api = 1
 description = "Tailscale ready to use: its service started, you its operator (no sudo to sign in or send files), signing in from the palette, and files sent to you with Taildrop in Downloads with a notification. Installing Tailscale in Apps turns it on"
 categories = ["tools"]
@@ -21,11 +21,13 @@ receive = true
 template = "tailscaled.conf.tmpl"
 output = "/etc/systemd/system/tailscaled.service.d/mazapan.conf"
 system = true
-reload = "systemctl daemon-reload; if [ -e /etc/systemd/system/tailscaled.service.d/mazapan.conf ]; then systemctl enable -q tailscaled.service; systemctl restart tailscaled.service; else systemctl disable -q --now tailscaled.service 2>/dev/null; fi; true"
+reload = "systemctl daemon-reload; if [ -e /etc/systemd/system/tailscaled.service.d/mazapan.conf ]; then systemctl enable -q tailscaled.service; systemctl restart tailscaled.service; else tailscale set --operator= 2>/dev/null; systemctl disable -q --now tailscaled.service 2>/dev/null; fi; true"
 
 [[targets]]
 template = "taildrop.sh.tmpl"
 output = "~/.local/share/mazapan/bin/taildrop"
+# A new script: the running receiver picks it up.
+reload = "systemctl --user try-restart mazapan-taildrop.service 2>/dev/null; true"
 
 # Off or gone: stopped first (a unit whose file has gone can still be
 # stopped, not disabled), then its link taken out.

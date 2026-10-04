@@ -73,7 +73,14 @@ tema, un ajuste, un plugin), antes aparece una tarjeta con quién lo pide y
 el diff exacto de cada archivo; no se escribe nada hasta que pulsas
 Permitir (sin respuesta en dos minutos, es que no). «Permitir siempre»
 confía en ese agente desde entonces (`mazapan agents trust` los lista;
-«Agentes: volver a preguntar antes de cada cambio» en la paleta). El Historial marca
+«Agentes: volver a preguntar antes de cada cambio» en la paleta). Un
+agente por MCP nunca pone ajustes de texto (comandos, teclas), nunca
+apaga esta tarjeta y solo deshace sus propios cambios. Esto protege la
+vía MCP, por donde entrarían los errores de un agente o las palabras que
+una página le haya colado; un agente que puede ejecutar cualquier comando
+como tú puede hacer todo lo que tú, con tarjeta o sin ella, y por eso su
+propio cliente pregunta antes de ejecutarlo. La confianza va por el nombre
+que el agente se da. El Historial marca
 cada cambio suyo con el nombre del agente, y «Deshacer todos los de ese
 día» los revierte juntos.
 

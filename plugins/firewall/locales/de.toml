@@ -4,4 +4,4 @@
 "setting.ssh" = "SSH hereinlassen"
 "setting.ssh.help" = "Port 22 offen, mit Versuchsbegrenzung: nur für einen Computer, auf den von einem anderen zugegriffen wird. Das Installationsprogramm schaltet es ein, wenn es SSH-Schlüssel erhalten hat."
 "setting.localsend" = "LocalSend hereinlassen"
-"setting.localsend.help" = "Port 53317 offen (TCP und UDP): Handys und Computer in der Nähe finden diesen und senden ihm mit LocalSend. Dort lauscht nichts, solange LocalSend nicht läuft."
+"setting.localsend.help" = "Port 53317 offen (TCP und UDP), nur im lokalen Netz: Handys und Computer in der Nähe finden diesen und senden ihm mit LocalSend. Dort lauscht nichts, solange LocalSend nicht läuft."

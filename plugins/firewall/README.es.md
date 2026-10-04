@@ -3,8 +3,8 @@
 Un firewall que simplemente está encendido, como en macOS: no entra nada
 que esta computadora no haya pedido, y sale todo lo que pide. Las
 impresoras y otros dispositivos de la red se siguen encontrando (las
-reglas de ufw dejan pasar mDNS y SSDP). Un puerto queda abierto: el de
-LocalSend (53317), para que los móviles y equipos cercanos puedan enviar
+reglas de ufw dejan pasar mDNS y SSDP). Un puerto queda abierto, solo a la red
+local (nunca a internet): el de LocalSend (53317), para que los móviles y equipos cercanos puedan enviar
 a este, como en Omarchy ("Dejar entrar LocalSend"; nada escucha ahí si
 LocalSend no está abierto). El de SSH no, salvo con "Dejar entrar SSH" (el
 instalador lo enciende cuando recibió llaves SSH).

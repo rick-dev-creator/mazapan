@@ -234,6 +234,13 @@ public static partial class Program
             throw new MazapanException(snaps.Any(x => x.ID == want)
                 ? $"{want} isn't the last apply any more ({snap.ID}: {snap.What} came after it): undo that first, or leave it"
                 : $"no apply {want} to undo (mazapan undo --list)");
+        // An agent undoes only what it did itself (the person's change, or another
+        // agent's, is the person's to undo: from History).
+        var me = AgentClient != "" ? AgentClient : "an agent";
+        if (fs.IsSet("agent") && snap.By != me)
+            throw new MazapanException(snap.By == ""
+                ? $"{snap.ID} ({snap.What}) was the person's change: undoing it is theirs (History, or mazapan undo)"
+                : $"{snap.ID} ({snap.What}) was {snap.By}'s change, not this agent's: undoing it is the person's");
         var asRoot = snap.Files.Any(e => AsRoot.IsSystem(e.Path)) || snap.Packages.Count > 0;
         if (asRoot && fs.IsSet("agent"))
             throw new MazapanException($"{snap.ID} ({snap.What}) was done as root: undoing it is the person's (mazapan undo)");

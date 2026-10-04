@@ -1,7 +1,7 @@
 [plugin]
 id = "agent"
 name = "Agents"
-version = "0.8.0"
+version = "0.9.0"
 api = 1
 description = "Your coding agents: in the bar, which is working and which waits for you (a click goes to its window), each account's limits and when they reset, and what they've used today, for Claude Code, opencode, pi, Codex… every account found by itself; and from the palette, ask one about this desktop with mazapan's report"
 categories = ["agent", "tools", "bar"]
@@ -104,7 +104,8 @@ output = "~/.config/opencode/plugin/mazapan-sessions.js"
 [[targets]]
 template = "claude-hooks.sh.tmpl"
 output = "~/.local/share/mazapan/bin/agent-claude-hooks"
-reload = "sh ~/.local/share/mazapan/bin/agent-claude-hooks >/dev/null 2>&1; true"
+# The plugin gone (the script with it): hooks and telemetry taken out of Claude's settings.
+reload = "f=~/.local/share/mazapan/bin/agent-claude-hooks; if [ -e \"$f\" ]; then sh \"$f\"; else mazapan agents hooks remove; mazapan agents telemetry off; fi >/dev/null 2>&1; true"
 
 # The receiver, through a socket: nothing runs until an agent sends.
 [[targets]]

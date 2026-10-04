@@ -5,20 +5,30 @@
 dir=$(xdg-user-dir DOWNLOAD 2>/dev/null)
 [ -n "$dir" ] && [ "$dir" != "$HOME" ] || dir="$HOME/Downloads"
 mkdir -p "$dir"
-list() { ls -A "$dir" 2>/dev/null; }
+# Received first into a folder of its own (beside Downloads: the same disk),
+# then moved in one by one: only what Taildrop brought is announced.
+stage="$dir/.taildrop"
+mkdir -p "$stage" && chmod 700 "$stage"
 while :; do
-  before=$(list)
-  if ! tailscale file get --wait --conflict=rename "$dir" >/dev/null 2>&1; then
+  if ! tailscale file get --wait --conflict=rename "$stage" >/dev/null 2>&1; then
     sleep 60
     continue
   fi
-  list | while IFS= read -r f; do
-    [ -n "$f" ] || continue
-    printf '%s\n' "$before" | grep -qxF -- "$f" && continue
+  for p in "$stage"/* "$stage"/.[!.]*; do
+    [ -f "$p" ] || continue
+    f=${p##*/}
+    # A name taken in Downloads: "name (2).ext", as browsers do.
+    t="$dir/$f"; n=2
+    while [ -e "$t" ]; do
+      case "$f" in *.*) t="$dir/${f%.*} ($n).${f##*.}" ;; *) t="$dir/$f ($n)" ;; esac
+      n=$((n + 1))
+    done
+    mv -n -- "$p" "$t" || continue
+    f=${t##*/}
     # Its buttons wait an hour at most (the notification stays in the center).
     ( a=$(timeout 3600 notify-send -a {{ shq (t "app") }} -i document-save -A open={{ shq (t "open") }} -A folder={{ shq (t "folder") }} -w -- {{ shq (t "received") }} "$f")
       case "$a" in
-        open) xdg-open "$dir/$f" ;;
+        open) xdg-open "$t" ;;
         folder) xdg-open "$dir" ;;
       esac ) >/dev/null 2>&1 &
   done

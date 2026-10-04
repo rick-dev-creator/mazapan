@@ -67,9 +67,8 @@ static class Approval
             var until = DateTime.UtcNow + wait;
             while (DateTime.UtcNow < until)
             {
-                if (File.Exists(answer))
+                if (File.Exists(answer) && File.ReadAllText(answer).Trim() is { Length: > 0 } a)
                 {
-                    var a = File.ReadAllText(answer).Trim();
                     // "always": this one, and from now on every one of this agent's.
                     if (a == "always" && by != "an agent") Trust(by, true);
                     return a is "allow" or "always";

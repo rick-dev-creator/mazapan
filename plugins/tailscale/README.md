@@ -9,7 +9,8 @@ Tailscale ready to use, as Omarchy sets it up and a little further:
 - "Tailscale: sign in" in the palette prints the address to sign in at;
   "Tailscale: devices and status" lists your tailnet;
 - files your other devices send you with Taildrop land in Downloads (a
-  name already there: renamed), each with a notification to open it or
+  name already there: renamed; received first into `Downloads/.taildrop`,
+  so only they are announced), each with a notification to open it or
   its folder (`receive`).
 
 Sending is the Share plugin's: your devices that are online show in its

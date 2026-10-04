@@ -9,7 +9,8 @@ Tailscale listo para usar, como lo deja Omarchy y un poco más:
 - «Tailscale: iniciar sesión» en la paleta muestra la dirección para
   entrar; «Tailscale: dispositivos y estado» lista tu tailnet;
 - los archivos que te envíen tus otros dispositivos con Taildrop llegan a
-  Descargas (si el nombre ya existe, se renombra), cada uno con un aviso
+  Descargas (si el nombre ya existe, se renombra; se reciben antes en
+  `Descargas/.taildrop`, así solo se avisan esos), cada uno con un aviso
   para abrirlo o abrir su carpeta (`receive`).
 
 Enviar es cosa del plugin Compartir: tus dispositivos conectados aparecen

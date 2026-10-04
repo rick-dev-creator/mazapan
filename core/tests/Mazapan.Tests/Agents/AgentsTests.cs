@@ -302,6 +302,21 @@ public class AgentsTests
             l.Stop();
             var server = Task.Run(() => Otel.Serve(port, TimeSpan.FromSeconds(2)));
             using var http = new HttpClient();
+            // Without the secret: refused; then a chunk size that overflows: that request alone fails.
+            HttpResponseMessage? anon = null;
+            for (var i = 0; i < 50 && anon == null; i++)
+            {
+                try { anon = http.PostAsync($"http://127.0.0.1:{port}/v1/metrics", new StringContent(OtlpExport, System.Text.Encoding.UTF8, "application/json")).GetAwaiter().GetResult(); }
+                catch (HttpRequestException) { Thread.Sleep(50); }
+            }
+            Assert.Equal(System.Net.HttpStatusCode.Unauthorized, anon!.StatusCode);
+            using (var raw = new System.Net.Sockets.TcpClient("127.0.0.1", port))
+            {
+                var bad = System.Text.Encoding.ASCII.GetBytes($"POST /v1/metrics HTTP/1.1\r\nx-mazapan-token: {Otel.Token()}\r\ncontent-type: application/json\r\ntransfer-encoding: chunked\r\n\r\nFFFFFFFF\r\n");
+                raw.GetStream().Write(bad);
+                raw.GetStream().ReadByte();
+            }
+            http.DefaultRequestHeaders.Add("x-mazapan-token", Otel.Token());
             HttpResponseMessage? res = null;
             for (var i = 0; i < 50 && res == null; i++)
             {
@@ -324,6 +339,15 @@ public class AgentsTests
     [Fact]
     public void ClaudesTelemetryGoesInUnlessThePersonHasTheirOwn()
     {
+        using var d = new Mazapan.Tests.Foundation.TempDir();
+        var oldState = Environment.GetEnvironmentVariable("XDG_STATE_HOME");
+        Environment.SetEnvironmentVariable("XDG_STATE_HOME", d.Path);
+        try { TelemetryCases(); }
+        finally { Environment.SetEnvironmentVariable("XDG_STATE_HOME", oldState); }
+    }
+
+    static void TelemetryCases()
+    {
         var on = Hooks.ApplyTelemetry("""{"model":"opus","env":{"FOO":"1"}}""", true, 47318, out var theirs)!;
         Assert.False(theirs);
         Assert.Contains("\"OTEL_EXPORTER_OTLP_ENDPOINT\": \"http://127.0.0.1:47318\"", on);
@@ -334,5 +358,11 @@ public class AgentsTests
         Assert.Contains("\"FOO\": \"1\"", off);
         Assert.Null(Hooks.ApplyTelemetry("""{"env":{"OTEL_EXPORTER_OTLP_ENDPOINT":"https://collector.example:4318"}}""", true, 47318, out theirs));
         Assert.True(theirs);
+        // A collector of the person's own on this computer is theirs too (no mark of Mazapán's).
+        Assert.Null(Hooks.ApplyTelemetry("""{"env":{"OTEL_EXPORTER_OTLP_ENDPOINT":"http://127.0.0.1:4318","CLAUDE_CODE_ENABLE_TELEMETRY":"1"}}""", false, 47318, out theirs));
+        Assert.True(theirs);
+        // A value the person changed after Mazapán set it stays when it's turned off.
+        var edited = on.Replace("\"OTEL_METRICS_INCLUDE_REPOSITORY\": \"1\"", "\"OTEL_METRICS_INCLUDE_REPOSITORY\": \"0\"");
+        Assert.Contains("\"OTEL_METRICS_INCLUDE_REPOSITORY\": \"0\"", Hooks.ApplyTelemetry(edited, false, 47318, out _)!);
     }
 }

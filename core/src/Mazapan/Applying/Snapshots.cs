@@ -328,7 +328,8 @@ public sealed class ApplyLock : IDisposable
         var path = Paths.ExpandHome("~/.local/state/mazapan/lock");
         Files.CreateDirectory(Paths.Dir(path));
         var said = false;
-        var deadline = DateTime.UtcNow + TimeSpan.FromMinutes(1);
+        // Longer than an agent's change can wait for the person (two minutes).
+        var deadline = DateTime.UtcNow + TimeSpan.FromMinutes(3);
         while (true)
         {
             try
@@ -338,9 +339,13 @@ public sealed class ApplyLock : IDisposable
             }
             catch (IOException) when (DateTime.UtcNow < deadline)
             {
-                if (!said) Console.Error.WriteLine("waiting for another mazapan apply to finish…");
+                if (!said) Console.Error.WriteLine("waiting for another mazapan apply to finish (an agent's change waiting for you?)…");
                 said = true;
                 Thread.Sleep(200);
+            }
+            catch (IOException)
+            {
+                throw new Util.MazapanException("another mazapan apply is still running: try again when it's done");
             }
         }
     }

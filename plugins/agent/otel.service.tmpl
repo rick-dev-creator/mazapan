@@ -2,6 +2,8 @@
 # socket (mazapan-agents-otel.socket); it ends after 10 minutes idle.
 [Unit]
 Description=Mazapan: the coding agents' metrics (OpenTelemetry receiver)
+# Never "failed" for starting often: its socket must keep the port.
+StartLimitIntervalSec=0
 
 [Service]
 ExecStart=/usr/bin/mazapan agents otel --idle 10

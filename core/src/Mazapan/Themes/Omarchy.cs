@@ -13,10 +13,13 @@ namespace Mazapan.Themes;
 public static class Omarchy
 {
     /// <summary>Its palette, by Omarchy's names (background, foreground, accent, red…), from colors.toml or alacritty.toml; null when it has neither.</summary>
+    /// <summary>A plain file (not a link: a repository's link could point at anything of the person's).</summary>
+    static bool Plain(string path) => File.Exists(path) && new FileInfo(path).LinkTarget == null;
+
     public static Dictionary<string, string>? Palette(string dir)
     {
         var colors = Path.Join(dir, "colors.toml");
-        if (File.Exists(colors))
+        if (Plain(colors))
         {
             var out_ = new Dictionary<string, string>();
             foreach (var (k, v) in Toml.Parse(File.ReadAllText(colors), colors))
@@ -24,7 +27,7 @@ public static class Omarchy
             return out_;
         }
         var alacritty = Path.Join(dir, "alacritty.toml");
-        if (!File.Exists(alacritty)) return null;
+        if (!Plain(alacritty)) return null;
         var t = Toml.Parse(File.ReadAllText(alacritty), alacritty);
         var p = new Dictionary<string, string>();
         TomlTable? Sub(TomlTable? x, string k) => x != null && x.TryGetValue(k, out var v) ? v as TomlTable : null;
@@ -109,8 +112,8 @@ public static class Omarchy
     public static string? Wallpaper(string dir)
     {
         var bgs = Path.Join(dir, "backgrounds");
-        if (!Directory.Exists(bgs)) return null;
-        return Directory.GetFiles(bgs).Where(f => Path.GetExtension(f).ToLowerInvariant() is ".png" or ".jpg" or ".jpeg" or ".webp")
+        if (!Directory.Exists(bgs) || new DirectoryInfo(bgs).LinkTarget != null) return null;
+        return Directory.GetFiles(bgs).Where(f => Plain(f) && Path.GetExtension(f).ToLowerInvariant() is ".png" or ".jpg" or ".jpeg" or ".webp")
             .Order(StringComparer.Ordinal).FirstOrDefault();
     }
 

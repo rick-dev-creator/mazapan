@@ -5,6 +5,8 @@
 # file there (qs ipc reads brackets in an argument its own way).
 d="${XDG_RUNTIME_DIR:-/tmp}/mazapan-share"
 mkdir -p "$d" && chmod 700 "$d" || exit 1
+# What was shared before (captures, clipboard copies), gone after a day.
+find "$d" -maxdepth 1 -type f -mmin +1440 -delete 2>/dev/null
 if [ "$1" = "--clipboard" ]; then
   rm -f "$d"/clipboard.*
   types=$(wl-paste --list-types 2>/dev/null)
