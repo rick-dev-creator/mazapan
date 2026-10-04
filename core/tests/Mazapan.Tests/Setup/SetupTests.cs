@@ -241,8 +241,9 @@ public class SetupTests
         Assert.DoesNotContain("Default_keyring", files); // PAM opens the login keyring
         Assert.Contains("enabled_plugins = [\"hw-snapshots\", \"hw-checkpoints\", \"theme-grub\", \"theme-plymouth\", \"update-ahead\", \"firewall\", \"login\"]", files);
         Assert.DoesNotContain("autologin", files); // not encrypted: the login screen, always
-        Assert.Contains("snapper --no-dbus -c root create", post);
-        Assert.True(post.IndexOf("mazapan apply") < post.IndexOf("snapper --no-dbus -c root create"));
+        // The first checkpoint is the first start's (hw-checkpoints): taken
+        // here, the system's fstab wouldn't be in it yet.
+        Assert.DoesNotContain("snapper --no-dbus -c root create", post);
         Assert.Contains("Option \"XkbLayout\" \"latam\"", files);
         Assert.Contains("mazapan apply --system -y", post);
         Assert.DoesNotContain("hardware --enable", post); // worked out before, from the ISO

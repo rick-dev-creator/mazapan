@@ -45,6 +45,8 @@ public static partial class Checkpoints
     /// <summary>A checkpoint made the main system, from the running one: until the restart, nothing else touches the menu or /boot.</summary>
     public const string KeptPending = "/run/mazapan/checkpoint-kept";
     const string LockFile = "/run/mazapan/checkpoints.lock";
+    /// <summary>The first start's checkpoint was taken.</summary>
+    const string FirstMark = "/var/lib/mazapan/first-checkpoint";
     const string BootDir = "/boot/mazapan";
     const string Manifest = "/boot/mazapan/checkpoints.json";
     const string MenuFile = "mazapan-checkpoints.cfg";
@@ -519,6 +521,9 @@ public static partial class Checkpoints
         {
             bool Add(string id, string subvol, string title, DateTimeOffset when)
             {
+                // A snapshot without its fstab (one taken half way through an
+                // install) would start without /home: not offered.
+                if (!HasFstab(Path.Join(top, subvol))) return false;
                 string kernel;
                 List<string> initrds;
                 if (onRoot)
@@ -660,6 +665,8 @@ public static partial class Checkpoints
                 {
                     var r = Exec.Run("btrfs", ["subvolume", "snapshot", source, mainDir]);
                     if (r.ExitCode != 0) throw new MazapanException("the checkpoint couldn't be copied: " + r.Stderr.Trim());
+                    // Taken as pacman began (snap-pac's "pre"), it holds pacman's lock: gone.
+                    File.Delete(Path.Join(mainDir, "var/lib/pacman/db.lck"));
                     // The snapshots, history and all, go with the main system.
                     var snaps = Path.Join(mainDir, ".snapshots");
                     var oldSnaps = Path.Join(prevDir, ".snapshots");
@@ -735,6 +742,16 @@ public static partial class Checkpoints
         return result;
     }
 
+    /// <summary>A system that mounts something besides itself (its fstab has a line).</summary>
+    static bool HasFstab(string root)
+    {
+        try
+        {
+            return File.ReadLines(Path.Join(root, "etc/fstab")).Any(l => l.Trim() is { Length: > 0 } t && !t.StartsWith('#'));
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { return false; }
+    }
+
     /// <summary>The subvolumes inside the system's (paths relative to it), deepest last.</summary>
     static List<string> Nested(string top, string main)
     {
@@ -770,6 +787,18 @@ public static partial class Checkpoints
         var id = Booted(ReadText("/proc/cmdline"));
         if (id == null)
         {
+            // The first start: the system as installed, whole (taken while
+            // installing it would lack what's written last, its fstab).
+            if (!File.Exists(FirstMark) && File.Exists("/etc/snapper/configs/root"))
+            {
+                var r = Exec.Run("snapper", ["--no-dbus", "-c", "root", "create", "-c", "number", "-d", "mazapan installed", "--userdata", "important=yes"]);
+                if (r.ExitCode == 0)
+                {
+                    Files.CreateDirectory(Paths.Dir(FirstMark));
+                    File.WriteAllText(FirstMark, DateTimeOffset.UtcNow.ToString("o", CultureInfo.InvariantCulture) + "\n");
+                }
+                else Console.Error.WriteLine("the first checkpoint: " + r.Stderr.Trim());
+            }
             if (File.Exists(Restored))
             {
                 File.Copy(Restored, RunRestored, overwrite: true);
@@ -778,12 +807,20 @@ public static partial class Checkpoints
                 // /boot apart: only the main entry's kernel came back with the
                 // checkpoint; every kernel and initramfs made again from this
                 // system's own modules (as pacman's hook does).
-                if (!BootOnRoot()) Refresh();
+                if (!BootOnRoot())
+                {
+                    Refresh();
+                    // What /boot has now (mkinitcpio's hook couldn't: this holds the lock).
+                    SaveCore("/boot/grub/grub.cfg");
+                }
             }
             return MainSubvol() is { } m ? MenuCore(entries, days, m, "/") : "checkpoints: not on Mazapán's layout";
         }
         // The main system's /boot (the EFI partition): not this start's to change.
         if (!BootOnRoot()) Exec.Run("mount", ["-o", "remount,ro", "/boot"]);
+        // The snapshot was taken as pacman began: its lock goes (in memory), so
+        // pacman says why it won't run here rather than "unable to lock".
+        try { File.Delete("/var/lib/pacman/db.lck"); } catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
         var main = MainSubvolFromCmdline() ?? "@";
         Files.CreateDirectory(MainMount);
         if (BtrfsDevice() is { } dev && !IsMounted(MainMount))
@@ -817,7 +854,8 @@ public static partial class Checkpoints
             if (!Regex.IsMatch(name, @"^[a-z0-9][a-z0-9._+-]*\z")) continue;
             CopyDurable(vmlinuz, Path.Join("/boot", "vmlinuz-" + name));
         }
-        var r = Exec.Run("mkinitcpio", ["-P"]);
+        // Its post hook would wait for the lock this holds: told not to.
+        var r = Exec.Run("mkinitcpio", ["-P"], ("MAZAPAN_CHECKPOINTS_LOCKED", "1"));
         if (r.ExitCode != 0) Console.Error.WriteLine("mkinitcpio -P: " + (r.Stderr.Trim() is { Length: > 0 } e ? e : r.Stdout.Trim()));
     }
 

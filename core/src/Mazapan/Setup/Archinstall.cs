@@ -282,10 +282,8 @@ public static class Archinstall
         // Its desktop, now (reloads fail here, nothing runs yet: warnings only).
         s.Append($"HOME={home} USER={a.User} mazapan apply --system -y > /var/log/mazapan-first-apply.log 2>&1 || echo \"mazapan apply failed: /var/log/mazapan-first-apply.log\"\n");
         s.Append($"chown -R {a.User}:{a.User} {home}\n");
-        // The first one: the system as installed, to go back to.
-        s.Append("if grep -qE '^SNAPPER_CONFIGS=.*[\" ]root[\" ]' /etc/conf.d/snapper 2>/dev/null; then snapper --no-dbus -c root create -c number -d 'mazapan installed' --userdata important=yes || true; fi\n");
-        // In the boot menu already, as a checkpoint.
-        s.Append("if [ -x /etc/grub.d/mazapan_checkpoints ]; then mazapan checkpoint menu >> /var/log/mazapan-first-apply.log 2>&1 || echo \"the checkpoints' menu failed: /var/log/mazapan-first-apply.log\"; fi\n");
+        // The first checkpoint, the system as installed, is taken as it first
+        // starts (hw-checkpoints' service): here, its fstab isn't written yet.
         return s.ToString();
     }
 

@@ -93,6 +93,13 @@ where they fit Hyprland.
      built-in plugins' default keys apart.*
    - A panel changed by an apply was seen keeping its old version until
      the shell restarted (the overview, 2026-10-04).
+   - *Audited 2026-10-04 (three reviews: checkpoints' root code, Niri and
+     capture, readiness for the MSI): every finding fixed (1359f0b). The
+     laptop is an RTX 5070 Ti/5080 (Blackwell) with MediaTek Wi-Fi:
+     hw-nvidia now leaves the screen on the integrated GPU, keeps the
+     card's memory through sleep, brings prime-run; the ISO has a safe
+     graphics entry and an installer in text. docs/first-install.md is
+     the checklist (Secure Boot off, graphics on Hybrid, offline first).*
    - A THIRD_PARTY_NOTICES crediting Omarchy (MIT) for the hardware
      fixes taken from it, with the repository.
 

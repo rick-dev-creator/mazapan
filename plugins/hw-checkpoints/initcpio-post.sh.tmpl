@@ -3,5 +3,7 @@
 # initramfs it makes (pacman's, an apply's, by hand): checkpoints taken
 # before it keep the kernels they started with, and these are kept from now.
 # Never fails mkinitcpio.
+# (Run by mazapan itself, it records them after.)
+[ -n "${MAZAPAN_CHECKPOINTS_LOCKED:-}" ] && exit 0
 command -v mazapan >/dev/null 2>&1 && mazapan checkpoint save >/dev/null 2>&1
 exit 0
