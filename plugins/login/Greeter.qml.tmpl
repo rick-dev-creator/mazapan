@@ -180,6 +180,7 @@ ShellRoot {
           }
           Text {
             text: root.user ? root.user.full : ""
+            textFormat: Text.PlainText
             color: root.fg
             font.family: root.font
             font.pointSize: 16
@@ -234,6 +235,7 @@ ShellRoot {
         }
         Text {
           text: root.message
+          textFormat: Text.PlainText
           visible: root.message !== ""
           color: root.danger
           font.family: root.font

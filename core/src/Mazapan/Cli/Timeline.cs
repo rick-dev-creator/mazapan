@@ -228,34 +228,15 @@ public static partial class Program
     }
 
     /// <summary>
-    /// Snapper's snapshots of /, from each one's info.xml (hw-snapshots makes
-    /// /.snapshots readable: listing them needs no rights over them):
+    /// Snapper's snapshots of /, from each one's info.xml (or, without the
+    /// rights to /.snapshots, the list hw-checkpoints keeps):
     /// (before, after or 0, when, what).
     /// </summary>
     static List<(long Pre, long Post, DateTimeOffset When, string What)> SystemSnapshots()
     {
         var out_ = new List<(long, long, DateTimeOffset, string)>();
-        var items = new List<(long N, string Type, long Pre, DateTimeOffset Date, string What)>();
-        try
-        {
-            if (!Directory.Exists("/.snapshots")) return out_;
-            foreach (var dir in Directory.GetDirectories("/.snapshots"))
-            {
-                var info = Paths.Join(dir, "info.xml");
-                if (!File.Exists(info)) continue;
-                try
-                {
-                    var x = System.Xml.Linq.XDocument.Load(info).Root!;
-                    string V(string n) => x.Element(n)?.Value.Trim() ?? "";
-                    if (!long.TryParse(V("num"), out var num) || num <= 0) continue;
-                    // snapper writes UTC.
-                    if (!DateTimeOffset.TryParse(V("date"), CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var date)) continue;
-                    items.Add((num, V("type"), long.TryParse(V("pre_num"), out var pn) ? pn : 0, date.ToLocalTime(), V("description")));
-                }
-                catch (Exception e) when (e is System.Xml.XmlException or IOException or UnauthorizedAccessException) { }
-            }
-        }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { return out_; }
+        // /.snapshots is root's: the list root keeps stands in (hw-checkpoints).
+        var items = (Checkpoints.Checkpoints.Raw() ?? []).Select(x => (x.N, x.Type, x.Pre, Date: x.Date.ToLocalTime(), x.What)).ToList();
         var paired = items.Where(x => x.Type == "post").Select(x => x.Pre).ToHashSet();
         foreach (var x in items)
         {

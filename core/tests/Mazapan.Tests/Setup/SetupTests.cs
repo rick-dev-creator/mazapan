@@ -296,9 +296,11 @@ public class LocalesTests
     public void EncryptedThePasswordIsWhatAnyKeyboardTypes()
     {
         const string a = """{"disk":"/dev/vda","user":"rick","fullname":"R","theme":"paper","encrypt":true,"password":""";
-        Assert.Throws<Mazapan.Util.MazapanException>(() => Answers.Parse(a + "\"añejo\"}"));
-        Assert.Equal("a-Z_9!", Answers.Parse(a + "\"a-Z_9!\"}").Password);
-        Assert.Equal("añejo", Answers.Parse(a.Replace("true", "false") + "\"añejo\"}").Password);
+        Assert.Throws<Mazapan.Util.MazapanException>(() => Answers.Parse(a + "\"añejo añejo\"}"));
+        Assert.Equal("a-Z_9!a-Z_9!", Answers.Parse(a + "\"a-Z_9!a-Z_9!\"}").Password);
+        Assert.Equal("añejo añejo", Answers.Parse(a.Replace("true", "false") + "\"añejo añejo\"}").Password);
+        // It opens the disk, the account and the keyring: never a short one.
+        Assert.Throws<Mazapan.Util.MazapanException>(() => Answers.Parse(a + "\"short\"}"));
     }
 }
 
@@ -328,7 +330,7 @@ public class InstallProgressTests
     [Fact]
     public void WithKeysTheAccountHasSsh()
     {
-        var a = Answers.Parse("""{"disk":"/dev/vda","user":"rick","fullname":"R","password":"x","theme":"paper"}""");
+        var a = Answers.Parse("""{"disk":"/dev/vda","user":"rick","fullname":"R","password":"xxxxxxxx","theme":"paper"}""");
         a.SshKeys = ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHk mazapan-vm"];
         using var doc = System.Text.Json.JsonDocument.Parse(Archinstall.Config(a, 64L << 30, "us"));
         Assert.Contains("openssh", doc.RootElement.GetProperty("packages").EnumerateArray().Select(x => x.GetString()));

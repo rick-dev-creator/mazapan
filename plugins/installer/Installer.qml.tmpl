@@ -462,6 +462,7 @@ Item {
     if (root.taken.includes(user)) return {{ tq "acc.taken_user" }}
     if (fullname.length > 100 || /[:,\n\r]/.test(fullname)) return {{ tq "acc.bad_name" }}
     if (session.password === "") return {{ tq "acc.need_password" }}
+    if (session.password.length < 8) return {{ tq "acc.short_password" }}
     if (session.password !== session.again) return {{ tq "acc.mismatch" }}
     if (encrypt && !/^[ -~]*$/.test(session.password)) return {{ tq "acc.ascii" }}
     if (!/^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/.test(hostname)) return {{ tq "acc.bad_host" }}

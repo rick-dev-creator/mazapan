@@ -58,6 +58,7 @@ tz_undetected = "Impossible de le savoir d'après la connexion : cherchez votre 
 "acc.bad_user" = "Le nom d'utilisateur : lettres minuscules, chiffres, - et _, en commençant par une lettre"
 "acc.taken_user" = "Ce nom d'utilisateur appartient au système : choisissez-en un autre"
 "acc.need_password" = "Choisissez un mot de passe"
+"acc.short_password" = "Au moins 8 caractères : il ouvre le disque, le compte et le trousseau"
 "acc.mismatch" = "Les mots de passe ne sont pas identiques"
 "acc.bad_host" = "Le nom de l'ordinateur : lettres minuscules, chiffres et -"
 "apps.count" = "%1 applications"

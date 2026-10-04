@@ -17,3 +17,5 @@ this computer alone with `-p 127.0.0.1:8080:80`.
 Docker in Apps turns it on. Turned off: Docker stopped, not started any
 more, you out of its group. The Podman plugin is the lighter choice (no
 root, no service); with both on, `docker` is Docker's own.
+
+Ports containers publish listen on this computer only (`local_only`, on): Docker writes its own firewall rules, which go around ufw, so a project database published with `-p 5432:5432` would otherwise be open to any network you join. Turn it off, or write `-p 0.0.0.0:5432:5432`, to share one on purpose.

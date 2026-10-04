@@ -166,6 +166,9 @@ public sealed partial class Plugin
     [
         // polkit's PAM service (its own in /usr/lib/pam.d): the fingerprint as well.
         "/etc/pam.d/polkit-1",
+        // Docker's settings (no package has one): its published ports on this
+        // computer only, not around the firewall.
+        "/etc/docker/daemon.json",
     ];
 
     static readonly HashSet<string> KnownToolkits =

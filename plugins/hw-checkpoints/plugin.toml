@@ -37,7 +37,7 @@ reload = "mkinitcpio -P"
 template = "grub.sh.tmpl"
 output = "/etc/grub.d/mazapan_checkpoints"
 system = true
-reload = "[ -e /etc/grub.d/mazapan_checkpoints ] && chmod 755 /etc/grub.d/mazapan_checkpoints || rm -f /boot/grub/mazapan-checkpoints.cfg; grub-mkconfig -o /boot/grub/grub.cfg >/dev/null 2>&1; [ -e /etc/grub.d/mazapan_checkpoints ] || exit 0; mazapan checkpoint save >/dev/null; mazapan checkpoint menu --entries {{ settings.entries }} --keep-days {{ settings.keep_days }}"
+reload = "[ -e /etc/grub.d/mazapan_checkpoints ] && chmod 755 /etc/grub.d/mazapan_checkpoints || rm -f /boot/grub/mazapan-checkpoints.cfg; grub-mkconfig -o /boot/grub/grub.cfg >/dev/null 2>&1; [ -e /etc/grub.d/mazapan_checkpoints ] || exit 0; /usr/bin/mazapan checkpoint save >/dev/null; /usr/bin/mazapan checkpoint menu --entries {{ settings.entries }} --keep-days {{ settings.keep_days }}"
 
 # After every package change (after mkinitcpio's hook): the kernels the
 # checkpoint taken before it started with kept, and the menu written.
@@ -104,4 +104,4 @@ run = "mazapan checkpoint status --json | grep -q '\"supported\":true'"
 
 [[checks]]
 name = "{{ t \"check.menu\" }}"
-run = "mazapan checkpoint status --json | grep -q '\"in_menu\":[1-9]' || { [ -z \"$(ls /.snapshots 2>/dev/null)\" ] && echo 'no checkpoints yet'; } || { echo 'checkpoints taken, none in the boot menu: sudo mazapan checkpoint menu'; exit 1; }"
+run = "mazapan checkpoint status --json | grep -q '\"in_menu\":[1-9]' || { mazapan checkpoint list --json | grep -q '\"checkpoints\":\\[\\]' && echo 'no checkpoints yet'; } || { echo 'checkpoints taken, none in the boot menu: sudo mazapan checkpoint menu'; exit 1; }"

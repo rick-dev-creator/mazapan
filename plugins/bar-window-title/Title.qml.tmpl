@@ -24,6 +24,8 @@ Item {
     anchors.verticalCenter: parent.verticalCenter
     width: root.width
     text: root.title
+    // A window's title is anyone's (a web page, a terminal): never markup.
+    textFormat: Text.PlainText
     elide: Text.ElideRight
     color: Theme.fgMuted
     font.family: Theme.fontMono

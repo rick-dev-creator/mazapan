@@ -8,9 +8,7 @@ for d in nes snes megadrive mastersystem gb gbc gba n64 nds 3ds psx ps2 psp ps3 
   mkdir -p "$games/ROMs/$d"
 done
 mkdir -p "$games/BIOS"
-[ -e "$games/BIOS/README.txt" ] || cat > "$games/BIOS/README.txt" <<'TXT'
-{{ t "bios.readme" }}
-TXT
+[ -e "$games/BIOS/README.txt" ] || printf '%s\n' {{ shq (t "bios.readme") }} > "$games/BIOS/README.txt"
 # RetroArch: only when it has no settings of its own yet.
 ra="$HOME/.config/retroarch/retroarch.cfg"
 if command -v retroarch >/dev/null && [ ! -e "$ra" ]; then

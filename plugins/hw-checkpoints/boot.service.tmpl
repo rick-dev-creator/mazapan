@@ -9,7 +9,7 @@ ConditionPathExists=/etc/grub.d/mazapan_checkpoints
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/env mazapan checkpoint boot --entries {{ settings.entries }} --keep-days {{ settings.keep_days }}
+ExecStart=/usr/bin/mazapan checkpoint boot --entries {{ settings.entries }} --keep-days {{ settings.keep_days }}
 
 [Install]
 WantedBy=multi-user.target

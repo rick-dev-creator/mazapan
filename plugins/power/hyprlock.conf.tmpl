@@ -53,7 +53,7 @@ label {
 
 label {
     monitor =
-    text = cmd[update:0] echo "❯ $USER@$(uname -n) · {{ t "locked" }}"
+    text = cmd[update:0] echo "❯ $USER@$(uname -n) · "{{ shq (t "locked") }}
     color = {{ rgb (c "accent_text") }}
     font_size = 11
     font_family = {{ theme.font.mono }}

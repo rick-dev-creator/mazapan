@@ -102,6 +102,7 @@ public static partial class Program
     internal static string? PasswordProblem(string password, bool encrypted)
     {
         if (password == "") return "the new password is empty";
+        if (password.Length < Setup.Answers.MinPassword) return $"the new password needs at least {Setup.Answers.MinPassword} characters (it opens the disk, the account and the keyring)";
         if (password.Contains('\n') || password.Contains('\0')) return "the new password has a line break in it";
         // Typed as the computer starts, before anything but the console's
         // keyboard: as the installer says.

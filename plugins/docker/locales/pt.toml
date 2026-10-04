@@ -3,3 +3,5 @@
 "setting.group" = "Docker sem sudo"
 "setting.group.help" = "Você no grupo docker. Quem está nele pode tudo o que o root pode (um contêiner pode montar o disco todo). A partir da próxima vez que o computador ligar."
 "check.socket" = "O Docker está pronto"
+"setting.local_only" = "Portas só neste computador"
+"setting.local_only.help" = "As portas que os contêineres publicam, só neste computador (127.0.0.1): as regras do Docker passam por cima do firewall, e senão o banco de dados de um projeto fica aberto em qualquer rede em que você entrar."

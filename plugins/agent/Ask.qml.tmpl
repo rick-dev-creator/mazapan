@@ -86,8 +86,10 @@ Item {
   }
   // Shown as Markdown, without what would load by itself: an image (or HTML)
   // the answer names could carry what the agent read to a server, unclicked.
+  // Every "![" made a plain link (nothing loads by itself), reference
+  // definitions taken out (they'd make "[x]" a link to anywhere), and tags.
   function safe(md) {
-    return md.replace(/!\[[^\]]*\]\([^)]*\)/g, "").replace(/!\[[^\]]*\]\[[^\]]*\]/g, "").replace(/<[^>]*>/g, "")
+    return md.replace(/!\[/g, "[").replace(/^ {0,3}\[[^\]\n]+\]:.*$/gm, "").replace(/<[^>]*>/g, "")
   }
   function cancel() {
     running_ = 0

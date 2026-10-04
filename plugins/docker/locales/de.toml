@@ -3,3 +3,5 @@
 "setting.group" = "Docker ohne sudo"
 "setting.group.help" = "Du in der docker-Gruppe. Wer darin ist, kann alles, was root kann (ein Container kann die ganze Platte einhängen). Ab dem nächsten Start des Rechners."
 "check.socket" = "Docker ist bereit"
+"setting.local_only" = "Ports nur auf diesem Computer"
+"setting.local_only.help" = "Von Containern veröffentlichte Ports nur auf diesem Computer (127.0.0.1): Dockers eigene Regeln umgehen die Firewall, sonst ist die Datenbank eines Projekts in jedem Netz offen, in dem du bist."

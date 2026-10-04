@@ -117,6 +117,9 @@ public sealed partial class Answers
     }
 
     /// <summary>Every value, or what's wrong with the first that isn't right.</summary>
+    /// <summary>The shortest password taken: it opens the disk, the account and the keyring.</summary>
+    public const int MinPassword = 8;
+
     public void Check()
     {
         void Need(bool ok, string what) { if (!ok) throw new MazapanException("answers: " + what); }
@@ -126,6 +129,9 @@ public sealed partial class Answers
         Need(!Taken.Contains(User), $"user name {Quote(User)} is taken by the system");
         Need(FullName.Length <= 100 && !FullName.Any(c => c is ':' or ',' or '\n' or '\r' || char.IsControl(c)), "the full name can't have : , or line breaks");
         Need(Password.Length > 0, "a password is needed");
+        // One password opens the disk, the account and the keyring: a stolen
+        // disk can be guessed at offline, so not a short one.
+        Need(Password.Length >= MinPassword, $"the password needs at least {MinPassword} characters");
         Need(!Password.Contains('\n') && !Password.Contains('\0'), "the password can't have line breaks");
         // Encrypted, it's typed at boot before anything but the console's
         // keymap is there: letters with accents or dead keys may not come

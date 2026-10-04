@@ -205,7 +205,7 @@ public static partial class Program
     static int CheckpointDiagnose(string? id)
     {
         var booted = BootedCheckpoint();
-        var b = new StringBuilder();
+        var b = new StringBuilder(DataPreamble);
         string a, bRoot, aName, bName;
         if (booted != null)
         {
@@ -234,7 +234,9 @@ public static partial class Program
 
         var diff = Checkpoints.Checkpoints.Diff(Checkpoints.Checkpoints.Packages(a), Checkpoints.Checkpoints.Packages(bRoot));
         b.Append($"## Packages that differ ({diff.Count})\n\n");
-        if (diff.Count == 0) b.Append("None (or the other system's package database couldn't be read).\n");
+        if (diff.Count == 0) b.Append(booted == null && GetEuid() != 0
+            ? "None found; the checkpoint's packages are root's to read: sudo mazapan checkpoint diagnose for them.\n"
+            : "None (or the other system's package database couldn't be read).\n");
         foreach (var (name, x, y) in diff.Take(300))
             b.Append($"- {name}: {(x == "" ? "(not installed)" : x)} ({aName}) → {(y == "" ? "(not installed)" : y)} ({bName})\n");
         if (diff.Count > 300) b.Append($"- … and {diff.Count - 300} more\n");
@@ -253,7 +255,7 @@ public static partial class Program
             var r = Exec.Run("journalctl", args.Concat(["--no-pager", "-q"]));
             // Nothing found (-g exits 1 then, saying nothing): none.
             if (r.Stdout.Trim() == "") return r.Stderr.Trim() == "" ? "(none)" : $"(journalctl: {r.Stderr.Trim()})";
-            return r.Stdout.TrimEnd();
+            return Fenced(r.Stdout.TrimEnd());
         }
         b.Append("\n## The last starts\n\n```\n").Append(Journal("--list-boots")).Append("\n```\n");
         // On a checkpoint, the start before this one is the one that went wrong.

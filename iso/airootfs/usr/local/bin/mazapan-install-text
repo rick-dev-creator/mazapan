@@ -42,8 +42,8 @@ done
 while :; do
   read -r -s -p "Password (the disk's and the account's): " pass; echo
   read -r -s -p "Again: " pass2; echo
-  [[ -n $pass && $pass == "$pass2" ]] && break
-  echo "  ${amber}They don't match, or it's empty.${off}"
+  [[ ${#pass} -ge 8 && $pass == "$pass2" ]] && break
+  echo "  ${amber}They don't match, or it's shorter than 8 characters (it opens the disk, the account and the keyring).${off}"
 done
 
 echo

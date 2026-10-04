@@ -3,8 +3,9 @@
  "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
 <!-- What the password dialog says when pacman runs through pkexec (the
      Apps menu, the welcome, updates): in words, and in the person's
-     language, instead of the command line. Kept a few minutes once given
-     (auth_admin_keep): an update that has to roll back doesn't ask again. -->
+     language, instead of the command line. Asked every time (auth_admin, not
+     _keep): polkit would keep it for the whole session, and any program of
+     the person's could run pacman as root meanwhile, unasked. -->
 <policyconfig>
   <vendor>mazapan</vendor>
   <action id="org.mazapan.pacman">
@@ -22,7 +23,7 @@
     <defaults>
       <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
-      <allow_active>auth_admin_keep</allow_active>
+      <allow_active>auth_admin</allow_active>
     </defaults>
     <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/pacman</annotate>
   </action>

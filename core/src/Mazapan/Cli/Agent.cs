@@ -248,12 +248,28 @@ public static partial class Program
         foreach (var e in snap.Files)
             Console.WriteLine($"  {(e.Before == "" ? "remove " : "restore"),-8} {Tilde(e.Path)}");
         foreach (var pkg in snap.Packages) Console.WriteLine($"  {"uninstall",-8} {pkg}");
+        // What goes back as root comes from the person's own files (the
+        // snapshot, the remembered reloads), which any program of theirs could
+        // have changed: in full, before sudo, as apply --system shows its own.
+        var rootReloads = SystemState.Reloads();
+        var system = snap.Files.Where(e => AsRoot.IsSystem(e.Path)).ToList();
+        if (system.Count > 0)
+        {
+            Header("As root, with sudo");
+            foreach (var e in system)
+            {
+                var now = Applying.Apply.ReadOrNull(e.Path) is { } b ? Files.Utf8.GetString(b) : "";
+                var back = e.Before == "" ? "" : File.ReadAllText(Paths.Join(snap.Dir(), e.Before));
+                Console.Write(Diff.Unified(now, back, now == "" ? "/dev/null" : e.Path, back == "" ? "/dev/null" : e.Path));
+            }
+            foreach (var cmd in system.Select(e => rootReloads.GetValueOrDefault(e.Path, "")).Where(c => c != "").Distinct())
+                Console.WriteLine($"  run      {cmd}");
+        }
         if (!fs.IsSet("y"))
         {
             if (!IsTerminal(0)) throw new MazapanException("no terminal to ask on: undo with -y");
-            if (!Confirm("Put these back as they were?")) return 0;
+            if (!Confirm(system.Count > 0 ? "Put these back as they were (as root, as shown)?" : "Put these back as they were?")) return 0;
         }
-        var rootReloads = SystemState.Reloads();
         var res = Snapshots.Undo(snap, Settings.Path);
         // System files' reloads, as root, as when they were written: the
         // plugin may be off by now and not say them any more.

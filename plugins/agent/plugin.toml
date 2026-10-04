@@ -127,7 +127,7 @@ output = "~/.local/share/mazapan/bin/agent-keys"
 [[actions]]
 name = "{{ t \"ask\" }}"
 # Claude Code with the first account that has room (mazapan agents run).
-run = "{{ if settings.command == \"claude\" }}mazapan agents run claude{{ else }}{{ settings.command }}{{ end }} \"$(mazapan report)\""
+run = "{{ if settings.command == \"claude\" }}mazapan agents run claude{{ else }}{{ settings.command }}{{ end }} \"$(mazapan report --agent)\""
 terminal = true
 keywords = "{{ t \"ask.kw\" }}"
 

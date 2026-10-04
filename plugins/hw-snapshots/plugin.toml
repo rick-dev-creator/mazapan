@@ -19,15 +19,15 @@ keep = { default = 10, min = 3, max = 50 }
 
 # Snapper set up for / (once; a subvolume already mounted at /.snapshots,
 # as archinstall makes, is put back in place after), told how many to keep,
-# and /.snapshots made listable (each snapshot's info.xml is readable
-# already): the History panel lists them without any rights over them.
+# and /.snapshots kept root's (0750: old snapshots hold old setuid
+# programs); the History panel reads the list hw-checkpoints keeps.
 # Only while this file is there. Without D-Bus (snapper talks to its
 # daemon otherwise): the same as root, and it works while installing too.
 [[targets]]
 template = "snapshots.conf.tmpl"
 output = "/etc/tmpfiles.d/mazapan-snapshots.conf"
 system = true
-reload = "[ -e /etc/tmpfiles.d/mazapan-snapshots.conf ] || exit 0; if ! grep -qE '^SNAPPER_CONFIGS=.*[\" ]root[\" ]' /etc/conf.d/snapper 2>/dev/null; then if mountpoint -q /.snapshots; then umount /.snapshots && rmdir /.snapshots && snapper --no-dbus -c root create-config / && btrfs subvolume delete /.snapshots && mkdir /.snapshots && mount /.snapshots || exit 1; else snapper --no-dbus -c root create-config / || exit 1; fi; fi; snapper --no-dbus -c root set-config TIMELINE_CREATE=no NUMBER_CLEANUP=yes NUMBER_LIMIT={{ settings.keep * 2 }} NUMBER_LIMIT_IMPORTANT={{ settings.keep * 2 }} && chmod 0755 /.snapshots && systemctl enable --now snapper-cleanup.timer"
+reload = "[ -e /etc/tmpfiles.d/mazapan-snapshots.conf ] || exit 0; if ! grep -qE '^SNAPPER_CONFIGS=.*[\" ]root[\" ]' /etc/conf.d/snapper 2>/dev/null; then if mountpoint -q /.snapshots; then umount /.snapshots && rmdir /.snapshots && snapper --no-dbus -c root create-config / && btrfs subvolume delete /.snapshots && mkdir /.snapshots && mount /.snapshots || exit 1; else snapper --no-dbus -c root create-config / || exit 1; fi; fi; snapper --no-dbus -c root set-config TIMELINE_CREATE=no NUMBER_CLEANUP=yes NUMBER_LIMIT={{ settings.keep * 2 }} NUMBER_LIMIT_IMPORTANT={{ settings.keep * 2 }} && chmod 0750 /.snapshots && systemctl enable --now snapper-cleanup.timer"
 
 [[checks]]
 name = "{{ t \"check.config\" }}"

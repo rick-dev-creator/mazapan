@@ -2,7 +2,7 @@
 
 {{- func gsettings -}}
 {{- $gtk = "adw-gtk3" }}{{ if theme.meta.mode == "dark" }}{{ $gtk = "adw-gtk3-dark" }}{{ end -}}
-gsettings set org.gnome.desktop.interface color-scheme 'prefer-{{ theme.meta.mode }}' && gsettings set org.gnome.desktop.interface gtk-theme '{{ $gtk }}' && gsettings set org.gnome.desktop.interface font-name '{{ theme.font.ui }} {{ num theme.font.size }}' && gsettings set org.gnome.desktop.interface monospace-font-name '{{ theme.font.mono }} {{ num theme.font.size }}'
+gsettings set org.gnome.desktop.interface color-scheme 'prefer-{{ theme.meta.mode }}' && gsettings set org.gnome.desktop.interface gtk-theme '{{ $gtk }}' && gsettings set org.gnome.desktop.interface font-name {{ shq (theme.font.ui + " " + (num theme.font.size)) }} && gsettings set org.gnome.desktop.interface monospace-font-name {{ shq (theme.font.mono + " " + (num theme.font.size)) }}
 {{- end -}}
 
 {{- ## libadwaita's named colors. adw-gtk3 reads the same names, which is

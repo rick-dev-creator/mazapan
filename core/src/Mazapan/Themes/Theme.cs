@@ -198,6 +198,11 @@ public sealed partial class Theme
         }
         if (Font.Mono == "" || Font.UI == "" || Font.Size <= 0)
             problems.Add("[font] needs mono, ui and a positive size");
+        // Font names go into shell, Lua, QML and configs: a family's name only
+        // (a theme from someone else could hide a command in one otherwise).
+        foreach (var (k, v) in new[] { ("mono", Font.Mono), ("ui", Font.UI) })
+            if (v != "" && !FontName().IsMatch(v))
+                problems.Add($"[font] {k} {GoFormat.Quote(v)}: a font family's name (letters, digits, spaces)");
         if (problems.Count > 0)
             throw new MazapanException("invalid theme:\n  " + string.Join("\n  ", problems));
     }
@@ -209,4 +214,9 @@ public sealed partial class Theme
         if (Ansi.TryGetValue(name, out v)) return v;
         throw new MazapanException($"theme \"{Id}\" has no color \"{name}\"");
     }
+
+    // As fc-list writes a family: letters, digits, spaces and a few signs;
+    // never a quote or a line break.
+    [System.Text.RegularExpressions.GeneratedRegex(@"^[\p{L}\p{N} ._+&-]{1,64}\z")]
+    private static partial System.Text.RegularExpressions.Regex FontName();
 }

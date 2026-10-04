@@ -1598,6 +1598,24 @@ profile (plugin `emulation`), seven screensavers. Next from Niri, proposed:
 workspaces that go back to their screen, tabs in a column, widths per app
 (the `scrolling_width` window rule), the overview by keyboard and gestures.
 
+*Security audit (2026-10-04):* three reviews (root and install, network
+and agents, injection) and an installed system looked at from inside; no
+critical or high finding, nothing that lets someone without the password
+in. Fixed: polkit kept pacman's authorization for the session (now asked
+every time); `undo` ran root files and commands from the person's own
+state unshown (now shown in full); /.snapshots readable by all (now root's,
+the History reads a list root keeps); a theme's font names reached shell
+and configs unchecked; the Ask card and READMEs could load images or open
+any link; window titles shown as markup; translations in shell; root hooks
+found mazapan through PATH; the fingerprint's lid gate never worked;
+Docker's ports went around the firewall (now 127.0.0.1); reports and
+diagnoses reached agents as the person's words (now framed as data); `ask`
+with Claude now an allow list, Codex without the person's MCP servers;
+passwords of at least 8 characters; secret-looking text kept out of the
+clipboard history; admin keys stored with a warning. What isn't protected
+(Secure Boot, programs one runs oneself, the docker group) is said in
+docs/security.md. Next for security: Secure Boot with signed images.
+
 ## Later, nice to have
 
 - Graphical plugins in .NET (Avalonia), for others to write in C#: whole

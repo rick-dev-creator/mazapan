@@ -18,3 +18,5 @@ la red; para que sea solo de este equipo, `-p 127.0.0.1:8080:80`.
 Docker en Apps lo activa. Al desactivarlo: Docker se para, deja de
 arrancar y sales de su grupo. El plugin Podman es la opción ligera (sin
 root, sin servicio); con los dos activos, `docker` es el de Docker.
+
+Los puertos que publican los contenedores escuchan solo en este equipo (`local_only`, activado): Docker escribe sus propias reglas de cortafuegos, que se saltan ufw, así que una base de datos publicada con `-p 5432:5432` quedaría abierta en cualquier red. Desactívalo, o escribe `-p 0.0.0.0:5432:5432`, para compartir una a propósito.

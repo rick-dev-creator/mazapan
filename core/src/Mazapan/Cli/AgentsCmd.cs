@@ -435,13 +435,17 @@ public static partial class Program
         {
             case "claude":
                 argv = ["-p", "--output-format", "json", "--append-system-prompt", AskContext,
+                    // Of its own tools, Read only (an allow list: tools that come later aren't in it),
+                    // asked as usual whatever the person's settings say (bypass, accept edits).
+                    "--tools", "Read", "--permission-mode", "default",
                     "--mcp-config", "{\"mcpServers\":{\"mazapan\":{\"command\":\"/usr/bin/mazapan\",\"args\":[\"mcp\"]}}}", "--strict-mcp-config",
                     "--allowedTools", string.Join(",", AskTools.Select(t => "mcp__mazapan__" + t).Concat(readFiles.Select(f => $"Read(/{f})"))),
                     // Denied over any allow rule of the person's own.
                     "--disallowedTools", "Bash,Edit,MultiEdit,Write,NotebookEdit,WebFetch,WebSearch,Task,mcp__mazapan__apply_change,mcp__mazapan__undo"];
                 break;
             case "codex":
-                argv = ["exec", "--skip-git-repo-check", "--sandbox", "read-only", "-"];
+                // Read only, and none of the person's own MCP servers (they could act).
+                argv = ["exec", "--skip-git-repo-check", "--sandbox", "read-only", "-c", "mcp_servers={}", "-"];
                 break;
             default: // pi: its read-only tools, the question as an attached file
                 var qf = questionFile = Paths.Join(work, $"question-{Environment.ProcessId}.md");
@@ -547,6 +551,12 @@ public static partial class Program
                 Keys.Set(id, key);
                 Spend.Forget();
                 Console.WriteLine($"{provider.Name}: kept in the keyring.");
+                // Said plainly: the keyring is open while the session is, to any
+                // program of the person's (an agent's shell, a project's scripts).
+                if (provider.Admin)
+                    Console.WriteLine($"{Style.Amber}An admin key manages the whole organization (keys, members), not just its spend; " +
+                        $"any program you run can read the keyring while you're logged in. If that's too much, remove it " +
+                        $"(mazapan agents keys remove {id}) and see the spend in the provider's console.{Style.Reset}");
                 return 0;
             case ["remove", var id]:
                 Spend.Forget();

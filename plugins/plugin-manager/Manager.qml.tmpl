@@ -220,7 +220,7 @@ Item {
   // A README from anyone, shown: no images (fetched from anywhere, before
   // anything is approved) and no HTML.
   function safeMarkdown(md) {
-    return md.replace(/!\[/g, "[").replace(/<[^>\n]*>/g, "")
+    return md.replace(/!\[/g, "[").replace(/<[^>]*>/g, "")
   }
 
   // What a number setting takes: "10 – 3600", "≥ 1".
@@ -651,7 +651,8 @@ Item {
                     linkColor: Theme.accentText
                     font.family: Theme.fontUi
                     font.pointSize: 10
-                    onLinkActivated: link => Qt.openUrlExternally(link)
+                    // Web pages only: a README is someone else's (steam://, file:// … would reach other apps).
+                    onLinkActivated: link => { if (/^https:\/\//i.test(link)) Qt.openUrlExternally(link) }
                   }
                   Label {
                     visible: root.section === "details" && root.detail && root.detail.requires.length > 0

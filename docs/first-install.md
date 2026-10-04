@@ -59,6 +59,13 @@ password on the stick) and run `mazapan-install-text`.
 - An external monitor on the laptop's HDMI port is on the NVIDIA card:
   it works, with a little more delay than the built-in one.
 
+## Security, in short
+
+What's protected and what isn't (someone with the laptop in their hands for
+a while, programs you run yourself) is in docs/security.md. The short of
+it: a good password (it opens the disk, the account and the keyring),
+the recovery key somewhere safe, and the laptop not left alone unlocked.
+
 ## If something goes wrong
 
 - **It doesn't start after an update:** in the boot menu, *Checkpoints*,

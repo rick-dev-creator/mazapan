@@ -4,8 +4,9 @@
 # JSON; "disk": "auto" takes the one disk there is, "after": "poweroff"
 # (default), "reboot" or "none"). Installed with nobody there; the live
 # desktop's installer shows how it goes. With a writable drive, the
-# recovery key (encrypted) and the log are left on it. A failed install
-# leaves the machine on, for someone to look.
+# recovery key (encrypted installs) and the log are left on it, in plain
+# text: keep the stick safe, or wipe it after. A failed install leaves the
+# machine on, for someone to look.
 set -u
 dev=
 for _ in $(seq 1 20); do

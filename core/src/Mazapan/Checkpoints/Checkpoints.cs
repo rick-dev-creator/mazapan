@@ -115,10 +115,31 @@ public static partial class Checkpoints
     /// <summary>The same, null when they couldn't be read (nothing is pruned on a listing that failed).</summary>
     static List<Checkpoint>? TryList(string snapshots)
     {
-        var items = new List<(long N, string Type, long Pre, DateTimeOffset Date, string What)>();
+        if (Raw(snapshots) is not { } items) return null;
+        var out_ = new List<Checkpoint>();
+        foreach (var x in items.Where(i => i.Type is "pre" or "single").OrderByDescending(i => i.N))
+        {
+            var post = items.FirstOrDefault(y => y.Type == "post" && y.Pre == x.N);
+            var (kind, packages) = Describe(x.What, post.What ?? "");
+            out_.Add(new Checkpoint(x.N.ToString(CultureInfo.InvariantCulture), x.N, x.Date, kind, packages, x.What));
+        }
+        return out_;
+    }
+
+    /// <summary>One of snapper's snapshots, as its info.xml says.</summary>
+    public readonly record struct Snap(long N, string Type, long Pre, DateTimeOffset Date, string What);
+
+    /// <summary>
+    /// Every snapshot snapper has (from each info.xml). /.snapshots is root's
+    /// alone (0750: old snapshots hold old setuid programs); without the
+    /// rights, the list root wrote last (SnapsState) stands in. Null: neither.
+    /// </summary>
+    public static List<Snap>? Raw(string snapshots = "/.snapshots")
+    {
+        var items = new List<Snap>();
         try
         {
-            if (!Directory.Exists(snapshots)) return null;
+            if (!Directory.Exists(snapshots)) return snapshots == "/.snapshots" ? FromState() : null;
             foreach (var dir in Directory.GetDirectories(snapshots))
             {
                 var info = Path.Join(dir, "info.xml");
@@ -130,20 +151,40 @@ public static partial class Checkpoints
                     if (!long.TryParse(V("num"), out var num) || num <= 0) continue;
                     // snapper writes UTC.
                     if (!DateTimeOffset.TryParse(V("date"), CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var date)) continue;
-                    items.Add((num, V("type"), long.TryParse(V("pre_num"), out var pn) ? pn : 0, date, V("description")));
+                    items.Add(new Snap(num, V("type"), long.TryParse(V("pre_num"), out var pn) ? pn : 0, date, V("description")));
                 }
                 catch (Exception e) when (e is System.Xml.XmlException or IOException or UnauthorizedAccessException) { }
             }
         }
-        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { return null; }
-        var out_ = new List<Checkpoint>();
-        foreach (var x in items.Where(i => i.Type is "pre" or "single").OrderByDescending(i => i.N))
+        catch (UnauthorizedAccessException) { return snapshots == "/.snapshots" ? FromState() : null; }
+        catch (IOException) { return null; }
+        return items;
+    }
+
+    /// <summary>Snapshots' list for those who can't read /.snapshots (root writes it with the menu).</summary>
+    public const string SnapsState = "/var/lib/mazapan/snapshots.json";
+
+    static List<Snap>? FromState()
+    {
+        try
         {
-            var post = items.FirstOrDefault(y => y.Type == "post" && y.Pre == x.N);
-            var (kind, packages) = Describe(x.What, post.What ?? "");
-            out_.Add(new Checkpoint(x.N.ToString(CultureInfo.InvariantCulture), x.N, x.Date, kind, packages, x.What));
+            using var doc = JsonDocument.Parse(File.ReadAllText(SnapsState));
+            return doc.RootElement.GetProperty("snapshots").EnumerateArray().Select(e => new Snap(
+                e.GetProperty("n").GetInt64(), e.GetProperty("type").GetString() ?? "", e.GetProperty("pre").GetInt64(),
+                DateTimeOffset.Parse(e.GetProperty("date").GetString()!, CultureInfo.InvariantCulture), e.GetProperty("what").GetString() ?? "")).ToList();
         }
-        return out_;
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonException or KeyNotFoundException or InvalidOperationException or FormatException) { return null; }
+    }
+
+    static void SaveSnapsState(List<Snap> items)
+    {
+        Files.CreateDirectory(Paths.Dir(SnapsState));
+        Files.WriteAtomic(SnapsState, GoJson.Marshal(new Fields { { "snapshots", items.OrderBy(i => i.N).Select(i => (object?)new Fields
+        {
+            { "n", i.N }, { "type", i.Type }, { "pre", i.Pre },
+            { "date", i.Date.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture) }, { "what", i.What },
+        }).ToList() } }) + "\n");
+        File.SetUnixFileMode(SnapsState, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.GroupRead | UnixFileMode.OtherRead);
     }
 
     // --- the boot menu --------------------------------------------------------
@@ -508,6 +549,7 @@ public static partial class Checkpoints
         if (!File.Exists(cfgPath) || MainEntry(File.ReadAllText(cfgPath)) is not { } entry) return "no GRUB entry to make the checkpoints' from";
         // A listing that failed prunes nothing.
         var listed0 = TryList(Path.Join(mainRoot, ".snapshots"));
+        if (Raw(Path.Join(mainRoot, ".snapshots")) is { } raw) SaveSnapsState(raw);
         var all = listed0 ?? [];
         var kept = onRoot ? null : LoadKept();
         kept?.Assign(all);
@@ -866,8 +908,10 @@ public static partial class Checkpoints
     {
         var out_ = new Dictionary<string, string>(StringComparer.Ordinal);
         var dir = Path.Join(root, "var/lib/pacman/local");
-        if (!Directory.Exists(dir)) return out_;
-        foreach (var d in Directory.GetDirectories(dir))
+        string[] dirs;
+        try { dirs = Directory.Exists(dir) ? Directory.GetDirectories(dir) : []; }
+        catch (Exception e) when (e is UnauthorizedAccessException or IOException) { return out_; }
+        foreach (var d in dirs)
         {
             var n = Path.GetFileName(d);
             var rel = n.LastIndexOf('-');
