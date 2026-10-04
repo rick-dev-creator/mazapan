@@ -37,6 +37,15 @@ ShellRoot {
   // Quickshell's own file watching loses track of files mazapan replaces
   // atomically, so plugins ask for a reload after writing (see the reload
   // command of any Quickshell target).
+  // Every apply reloads the shell, so Quickshell's "Config reloaded" toast
+  // would pop up on each theme change; a failed reload still shows its own.
+  Connections {
+    target: Quickshell
+    function onReloadCompleted() {
+      Quickshell.inhibitReloadPopup()
+    }
+  }
+
   // Widgets taken out of the bar for a while (a mode hides the ticker
   // during a talk): their names, "markets" for widgets/right/45-markets.qml.
   // Kept across reloads (as text: lists aren't kept).
