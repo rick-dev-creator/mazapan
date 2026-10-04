@@ -12,3 +12,8 @@ hl.env("SSL_CERT_DIR", home .. "/.aspnet/dev-certs/trust:/etc/ssl/certs")
 hl.env("DOTNET_CLI_TELEMETRY_OPTOUT", "1")
 {{- end }}
 hl.env("ASPIRE_CONTAINER_RUNTIME", {{ lq settings.containers }})
+
+-- Set up (the certificate, Aspire's templates) until it has worked once.
+hl.on("hyprland.start", function()
+  hl.dispatch(hl.dsp.exec_cmd("sh ~/.local/share/mazapan/bin/dotnet-setup --if-needed"))
+end)

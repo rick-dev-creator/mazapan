@@ -49,11 +49,11 @@ run = "dotnet --list-sdks | grep -q ."
 
 [[checks]]
 name = "{{ t \"check.aspire\" }}"
-run = "dotnet new list aspire 2>/dev/null | grep -qi aspire"
+run = "dotnet new list aspire 2>/dev/null | grep -qi aspire || { echo 'not set up yet: from the palette, \"Set up .NET again\" (it needs a connection)'; exit 1; }"
 
 [[checks]]
 name = "{{ t \"check.cert\" }}"
-run = "SSL_CERT_DIR=\"$HOME/.aspnet/dev-certs/trust:/etc/ssl/certs\" dotnet dev-certs https --check --trust >/dev/null 2>&1"
+run = "SSL_CERT_DIR=\"$HOME/.aspnet/dev-certs/trust:/etc/ssl/certs\" dotnet dev-certs https --check --trust >/dev/null 2>&1 || { echo 'not set up yet: from the palette, \"Set up .NET again\" (it needs a connection)'; exit 1; }"
 
 # Aspire runs its resources in containers: the runtime chosen has to be there
 # (the .NET profile installs Podman; the .NET SDK alone doesn't).
