@@ -7,3 +7,7 @@ default chosen in an app ("make Firefox my browser") stays. Set one in
 its settings (a desktop file's name, "firefox.desktop") and it's that
 one. Run on every apply and after the Apps menu installs or removes an
 app.
+
+**One key to each**: `SUPER + B` goes to the browser's window when it's
+open (the one used last), and opens it when it isn't; `SUPER + E` the same
+for the files (`browser_key`, `files_key`; empty: no key).

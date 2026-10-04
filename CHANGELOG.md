@@ -6,6 +6,11 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- Databases for development in one click (PostgreSQL, MySQL, Redis, SQL
+  Server, MongoDB): start, stop, copy the .NET connection string or a URL.
+- SUPER + B goes to the browser (opening it if it isn't), SUPER + E to the
+  files.
+
 - Containers ready to use: Podman by default in the Development and .NET
   profiles (`docker` and `docker compose` work on it, and Testcontainers,
   devcontainers and Aspire find it), Podman Desktop to see them; Docker

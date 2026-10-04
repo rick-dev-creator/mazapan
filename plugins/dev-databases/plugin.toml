@@ -1,0 +1,32 @@
+[plugin]
+id = "dev-databases"
+name = "Databases for development"
+version = "0.1.0"
+api = 1
+description = "PostgreSQL, MySQL, Redis, SQL Server and MongoDB one click away, in containers on this computer alone, their data kept: start, stop, copy the connection string (.NET's, or a URL). The .NET and Development profiles in Apps turn it on"
+categories = ["panel"]
+requires = ["shell-bar"]
+# Off until turned on (Apps does it, with the Development and .NET profiles).
+optional = true
+
+[packages]
+pacman = ["jq", "wl-clipboard"]
+
+[[targets]]
+template = "devdb.sh.tmpl"
+output = "~/.local/share/mazapan/bin/devdb"
+
+[[targets]]
+template = "Databases.qml.tmpl"
+output = "~/.config/quickshell/mazapan/panels/databases.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[actions]]
+name = "{{ t \"act.open\" }}"
+run = "qs ipc -c mazapan call mazapan panel databases"
+keywords = "{{ t \"act.open.kw\" }}"
+glyph = "󰆼"
+
+[[checks]]
+name = "{{ t \"check.engine\" }}"
+run = "command -v podman >/dev/null || command -v docker >/dev/null"

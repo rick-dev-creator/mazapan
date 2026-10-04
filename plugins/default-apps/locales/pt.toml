@@ -16,3 +16,7 @@
 "setting.text.help" = "Texto simples."
 "setting.email" = "E-mail"
 "setting.email.help" = "Links de e-mail (mailto:)."
+"setting.browser_key" = "Tecla do navegador"
+"setting.browser_key.help" = "Vai para a janela do navegador se estiver aberto; se não, abre. Vazia: nenhuma."
+"setting.files_key" = "Tecla dos arquivos"
+"setting.files_key.help" = "Vai para a janela do gerenciador de arquivos se estiver aberto; se não, abre. Vazia: nenhuma."

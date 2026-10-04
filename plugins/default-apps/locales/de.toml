@@ -16,3 +16,7 @@
 "setting.text.help" = "Reiner Text."
 "setting.email" = "E-Mail"
 "setting.email.help" = "E-Mail-Links (mailto:)."
+"setting.browser_key" = "Taste für den Browser"
+"setting.browser_key.help" = "Springt zum Browserfenster, wenn er offen ist, sonst öffnet sie ihn. Leer: keine."
+"setting.files_key" = "Taste für Dateien"
+"setting.files_key.help" = "Springt zum Fenster der Dateiverwaltung, wenn sie offen ist, sonst öffnet sie sie. Leer: keine."

@@ -1446,13 +1446,15 @@ tmux/herdr menus and niche tools left out):
 
 1. A development environment per language in one click (mise: Node,
    Python, Go, Rust, Ruby, PHP, Java), beside .NET and Expo.
-2. Development databases in one click on Podman (Postgres, MySQL, Redis,
-   SQL Server), with their connection strings at hand.
+2. ~~Development databases in one click on Podman (Postgres, MySQL, Redis,
+   SQL Server), with their connection strings at hand~~ *done: the
+   dev-databases panel, MongoDB too*.
 3. Fingerprint and security keys (FIDO2) for sudo, unlocking and the
    keyring.
 4. Docking: the lid closed with an external screen, working on; external
    screens' brightness (DDC) with the brightness keys.
-5. Launch or focus: SUPER + B goes to the browser when it's open.
+5. ~~Launch or focus: SUPER + B goes to the browser when it's open~~
+   *done: SUPER + B the browser, SUPER + E the files*.
 6. The theme in more apps: Ghostty, kitty, Alacritty, Obsidian, Claude
    Code.
 7. A Windows virtual machine for what only exists there (Office, Adobe,

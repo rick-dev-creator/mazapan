@@ -53,7 +53,7 @@ id = "development"
 name = "Development"
 description = "Code editors, git, containers, languages and the command-line tools developers reach for"
 glyph = 0xF0169
-apps = ["vscode", "neovim", "git", "github-cli", "lazygit", "podman", "podman-desktop", "mise", "cli-tools", "zed"]
+apps = ["vscode", "neovim", "git", "github-cli", "lazygit", "podman", "podman-desktop", "dev-databases", "mise", "cli-tools", "zed"]
 translations.es.name = "Desarrollo"
 translations.de.name = "Entwicklung"
 translations.fr.name = "Développement"
@@ -68,7 +68,7 @@ id = "dotnet"
 name = ".NET"
 description = "ASP.NET Core and Aspire, ready: the SDK set up (its HTTPS certificate trusted, Aspire's templates), containers for Aspire, Rider and Visual Studio Code from their makers"
 glyph = 0xF0AAE
-apps = ["dotnet-sdk", "podman", "podman-desktop", "rider", "vscode-microsoft", "git"]
+apps = ["dotnet-sdk", "podman", "podman-desktop", "dev-databases", "rider", "vscode-microsoft", "git"]
 translations.es.description = "ASP.NET Core y Aspire, listos: el SDK configurado (su certificado HTTPS de confianza, las plantillas de Aspire), contenedores para Aspire, Rider y Visual Studio Code de sus fabricantes"
 translations.de.description = "ASP.NET Core und Aspire, bereit: das SDK eingerichtet (sein HTTPS-Zertifikat vertrauenswürdig, die Aspire-Vorlagen), Container für Aspire, Rider und Visual Studio Code von ihren Herstellern"
 translations.fr.description = "ASP.NET Core et Aspire, prêts : le SDK configuré (son certificat HTTPS approuvé, les modèles Aspire), des conteneurs pour Aspire, Rider et Visual Studio Code de leurs éditeurs"
@@ -691,6 +691,21 @@ translations.es.description = "Abre y crea zip, tar y otros comprimidos"
 translations.de.description = "Zip, tar und andere Archive öffnen und erstellen"
 translations.fr.description = "Ouvrez et créez des archives zip, tar et autres"
 translations.pt.description = "Abra e crie zip, tar e outros arquivos compactados"
+
+[[app]]
+id = "dev-databases"
+name = "Databases for development"
+description = "PostgreSQL, MySQL, Redis, SQL Server and MongoDB one click away, their connection strings at hand"
+category = "development"
+plugin = "dev-databases"
+translations.es.name = "Bases de datos para desarrollo"
+translations.es.description = "PostgreSQL, MySQL, Redis, SQL Server y MongoDB a un clic, con su cadena de conexión a mano"
+translations.de.name = "Datenbanken für die Entwicklung"
+translations.de.description = "PostgreSQL, MySQL, Redis, SQL Server und MongoDB einen Klick entfernt, ihre Connection-Strings griffbereit"
+translations.fr.name = "Bases de données de développement"
+translations.fr.description = "PostgreSQL, MySQL, Redis, SQL Server et MongoDB à un clic, leurs chaînes de connexion sous la main"
+translations.pt.name = "Bancos de dados para desenvolvimento"
+translations.pt.description = "PostgreSQL, MySQL, Redis, SQL Server e MongoDB a um clique, com a string de conexão à mão"
 
 [[app]]
 id = "mission-center"

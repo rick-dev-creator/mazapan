@@ -16,3 +16,7 @@
 "setting.text.help" = "Texte brut."
 "setting.email" = "E-mail"
 "setting.email.help" = "Liens e-mail (mailto:)."
+"setting.browser_key" = "Touche du navigateur"
+"setting.browser_key.help" = "Va à la fenêtre du navigateur s'il est ouvert, sinon l'ouvre. Vide : aucune."
+"setting.files_key" = "Touche des fichiers"
+"setting.files_key.help" = "Va à la fenêtre du gestionnaire de fichiers s'il est ouvert, sinon l'ouvre. Vide : aucune."
