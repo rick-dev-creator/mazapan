@@ -1464,6 +1464,9 @@ awake") keep it away; still with the theme's motion off.
   in a running session), never right after a login, not reproduced with
   reloads or applies alone. To find what makes Hyprland forget the rule.
 
-- `mazapan update` offering plugin updates; Chromium's accent through its
-  policy. (The "updates available" widget is item 20's.)
+- ~~`mazapan update` offering plugin updates~~ *done: `update --json`
+  lists them, the Updates panel offers `mazapan plugins update`*.
+  Chromium's accent through its policy: left as it is on purpose: a
+  system policy (BrowserThemeColor) wins over GTK mode and needs root on
+  every theme change, which the theme picker can't ask for.
 
