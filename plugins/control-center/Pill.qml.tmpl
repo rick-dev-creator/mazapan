@@ -25,7 +25,6 @@ BarItem {
   open: ControlService.open
   padding: 10
   onClicked: {
-    place()
     if (!ControlService.open) ControlService.screen = root.barScreen
     ControlService.toggle()
   }
@@ -39,8 +38,13 @@ BarItem {
     ControlService.pillTop = p.y
     ControlService.pillRight = Math.max(0, w - (p.x + root.width))
   }
-  onWidthChanged: if (ControlService.open) place()
-  Component.onCompleted: Qt.callLater(place)
+  onWidthChanged: if (ControlService.open && ControlService.screen === root.barScreen) place()
+  Connections {
+    target: ControlService
+    function onMeasure() {
+      if (!ControlService.screen || ControlService.screen === root.barScreen) root.place()
+    }
+  }
 
   // Something needs you: a dot that breathes, and what it is.
   Rectangle {

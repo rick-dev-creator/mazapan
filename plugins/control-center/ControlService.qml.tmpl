@@ -17,10 +17,24 @@ Singleton {
   property real pillTop: 4       // from the top of the screen
   property real pillRight: 8     // from the right of the screen
 
+  // What a switch shows below the switches (its networks, its devices): a
+  // Component of that switch's, or null. One at a time; the switch itself
+  // never moves, so its arrow stays under the pointer.
+  property var detail: null
+  onOpenChanged: if (!open) detail = null
+
   // The most urgent "now" ({ text, level }), or null; and the quiet glyphs.
   property var live: null
   property var glyphs: []
 
-  function toggle() { open = !open }
+  // Asked of the pills right before it opens: the one on `screen` says
+  // where it is (measured then, not at start: the bar lays out its widgets
+  // after the pill is made).
+  signal measure()
+
+  function toggle() {
+    if (!open) measure()
+    open = !open
+  }
   function close() { open = false }
 }

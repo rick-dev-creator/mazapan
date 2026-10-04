@@ -6,7 +6,9 @@
 //
 //   control/now/NN-<name>.qml       a card that needs you now (an agent
 //                                   waiting, a recording, an update)
-//   control/tiles/NN-<name>.qml     a big switch (Wi-Fi, Bluetooth…), two a row
+//   control/tiles/NN-<name>.qml     a big switch (Wi-Fi, Bluetooth…), two a row;
+//                                   what it opens (its networks) goes below
+//                                   them: ControlService.detail = a Component
 //   control/sections/NN-<name>.qml  a section as wide as the panel (sound,
 //                                   music, agents, notifications…)
 //
@@ -14,7 +16,7 @@
 // `property string pillGlyph` (shown in the pill while nothing needs you);
 // a now card has `property bool live`, `property string pill` (what the pill
 // says while it's live) and `property int level` (0 news, 1 needs you,
-// 2 urgent); a tile may set `property bool wide` (both columns: open).
+// 2 urgent).
 // A bar widget of the same <name> leaves the bar while this is on.
 
 import QtQuick
@@ -111,31 +113,34 @@ Item {
     id: win
     screen: ControlService.screen ?? root.focusedScreen
     visible: root.open || card.width > ControlService.pillWidth + 1
+    // The whole screen, clear but for the card: a click anywhere else lands
+    // here and closes it. (A layer that holds the keyboard gets the clicks
+    // of the whole screen, so it has to be the one to catch them.)
     anchors.top: true
+    anchors.bottom: true
+    anchors.left: true
     anchors.right: true
-    margins.top: ControlService.pillTop
-    margins.right: ControlService.pillRight
     exclusionMode: ExclusionMode.Ignore
     color: "transparent"
-    implicitWidth: root.fullWidth
-    implicitHeight: root.fullHeight
-    // Only the card takes clicks; what's around it is the desktop's.
-    mask: Region { item: card }
     WlrLayershell.layer: WlrLayer.Overlay
     // "mazapan-panel-…": SUPER + Q closes it (see hypr-base).
     WlrLayershell.namespace: "mazapan-panel-control-center"
     WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
-    HyprlandFocusGrab {
-      active: root.open
-      windows: [win]
-      onCleared: root.close()
+
+    MouseArea {
+      anchors.fill: parent
+      enabled: root.open
+      acceptedButtons: Qt.AllButtons
+      onPressed: root.close()
     }
 
     Rectangle {
       id: card
       anchors.top: parent.top
       anchors.right: parent.right
+      anchors.topMargin: ControlService.pillTop
+      anchors.rightMargin: ControlService.pillRight
       // Out of the pill: its size when closed, the panel's when open.
       width: root.open ? root.fullWidth : ControlService.pillWidth
       height: root.open ? root.fullHeight : ControlService.pillHeight
@@ -151,6 +156,12 @@ Item {
       }
       Behavior on height {
         NumberAnimation { duration: Theme.morph + 60; easing.type: root.open ? Easing.OutBack : Easing.InOutCubic; easing.overshoot: 0.5 }
+      }
+
+      // A click on the card itself (between its parts) isn't one outside it.
+      MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.AllButtons
       }
 
       // 0 as the pill, 1 as the panel: the content comes in late, goes early.
@@ -242,7 +253,6 @@ Item {
               Loader {
                 required property string modelData
                 Layout.fillWidth: true
-                Layout.columnSpan: status === Loader.Ready && item.wide === true ? 2 : 1
                 Layout.preferredWidth: 1
                 visible: status === Loader.Ready && item.shown !== false
                 Layout.preferredHeight: visible ? item.implicitHeight : 0
@@ -250,6 +260,14 @@ Item {
                 onStatusChanged: if (status === Loader.Error) console.warn("mazapan: control center: failed to load", modelData)
               }
             }
+          }
+
+          // What a switch opened (its networks, its devices).
+          Loader {
+            Layout.fillWidth: true
+            active: ControlService.detail !== null
+            visible: active
+            sourceComponent: ControlService.detail
           }
 
           // --- the sections ---------------------------------------------------
