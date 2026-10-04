@@ -9,7 +9,7 @@ pkgver=0.1.0
 pkgrel=1
 pkgdesc="A desktop on plain Arch: Hyprland + Quickshell, one theme across the whole system, everything a plugin"
 arch=(x86_64)
-license=(unknown)
+license=(MIT)
 options=(!strip !debug)
 
 _repo=$(realpath "${MAZAPAN_REPO:-$startdir/..}")
@@ -61,6 +61,8 @@ package() {
     sed -i "s|^server = .*|server = \"$MAZAPAN_REPO_SERVER\"|" "$pkgdir/usr/lib/mazapan/pkg/repository.toml"
   fi
   install -Dm644 "$_repo/README.md" "$pkgdir/usr/share/doc/mazapan/README.md"
+  install -Dm644 "$_repo/LICENSE" "$pkgdir/usr/share/licenses/mazapan/LICENSE"
+  install -Dm644 "$_repo/THIRD_PARTY_NOTICES.md" "$pkgdir/usr/share/licenses/mazapan/THIRD_PARTY_NOTICES.md"
   install -Dm644 "$_repo/CHANGELOG.md" "$pkgdir/usr/share/doc/mazapan/CHANGELOG.md"
   cp -r --no-preserve=ownership "$_repo/docs/." "$pkgdir/usr/share/doc/mazapan/"
 }

@@ -7,7 +7,7 @@ pkgver=0
 pkgrel=1
 pkgdesc="Mazapán's package signing keys"
 arch=(any)
-license=(unknown)
+license=(MIT)
 install=$pkgname.install
 
 _repo=$(realpath "${MAZAPAN_REPO:-$startdir/../..}")
@@ -28,6 +28,7 @@ pkgver() {
 package() {
   local d="$pkgdir/usr/share/pacman/keyrings"
   install -d "$d"
+  install -Dm644 "$_repo/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
   # Without keys yet (Mazapán not published), an empty keyring: installed
   # all the same, so the install's package list never depends on it.
   [[ -f $_keys/mazapan.gpg ]] || return 0

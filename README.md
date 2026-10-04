@@ -8,6 +8,12 @@ consistently across the whole OS, and everything extensible through plugins.
 Arch owns the critical parts (kernel, packages, updates). This repo only adds
 the layer on top.
 
+> **A personal project, shared as it is.** Mazapán is one person's desktop,
+> made public in case it helps someone else. It comes with no warranty of
+> any kind (see [LICENSE](LICENSE)): installing it erases the disk you pick,
+> so back up what matters first, and read [docs/first-install.md](docs/first-install.md)
+> and [docs/security.md](docs/security.md) before trying it on a real machine.
+
 ## Layout
 
 ```
@@ -203,3 +209,10 @@ to the guest; move the pointer out and they go back to the host.
 Ctrl+Alt+G toggles the grab by hand.
 
 Requirements on the host: `qemu-desktop`, `xorriso`, `curl`, `python3`, KVM access.
+
+## License
+
+[MIT](LICENSE). What Mazapán learned from others, and their notices, is in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md); among them Omarchy, whose
+hardware fixes the `hw-*` plugins carry. The name "Mazapán" and its icon
+aren't covered by the license: a fork is welcome under another name.

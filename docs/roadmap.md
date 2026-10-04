@@ -339,7 +339,9 @@ configuration rolled back on its own, the next one went through.
 **D. Published**
 9. The ISO published, with its checksum and signature, and an install
    guide.
-10. A license (the package says `unknown`).
+10. ~~A license (the package says `unknown`).~~ *Done (2026-10-04): MIT,
+    THIRD_PARTY_NOTICES.md crediting Omarchy; the repository on GitHub,
+    github.com/rick-dev-creator/mazapan (public).*
 11. ~~The 34 built-in plugins without a README.~~ Done (2026-10-03): every
     built-in plugin has its page, in English and Spanish.
 
