@@ -40,7 +40,7 @@ jobs:
       - name: Build
         run: sudo -u builder env DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1 core/build
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: mazapan
           path: bin/mazapan
