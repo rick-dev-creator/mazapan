@@ -618,9 +618,10 @@ Each is a root Item. Optional properties: `shown` (false: left out),
 `pillGlyph` (shown in the pill while nothing needs the person: "󰕾 65%").
 A *now* card also has `live` (shown, and said by the pill, while true),
 `pill` (what the pill says then: "Recording 0:42") and `level` (0 news,
-1 needs the person, 2 urgent: the pill's color, and which one it says). A
-tile may set `wide` (both columns, while it shows what's behind its
-arrow). `ControlService.close()` (`import "../../components/control"`)
+1 needs the person, 2 urgent: the pill's color, and which one it says). What
+a tile's arrow opens (its networks, its devices) goes below the switches:
+`ControlService.detail = aComponent` (null closes it; one at a time), so the
+tile never moves under the pointer. `ControlService.close()` (`import "../../components/control"`)
 closes the panel after an action.
 
 A bar widget whose file name (without `NN-` and `.qml`) is the same as a

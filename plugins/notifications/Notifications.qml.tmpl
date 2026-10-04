@@ -211,31 +211,37 @@ Item {
     id: centerWin
     screen: root.screenAtOpen
     visible: root.open
+    // The whole screen (below the bar), clear but for the sheet: a click
+    // anywhere else lands here and closes it. (A layer that holds the
+    // keyboard gets the clicks of the whole screen, so it has to be the one
+    // to catch them: Hyprland's focus grab doesn't.)
     anchors.top: true
     anchors.right: true
     anchors.bottom: true
-    margins.top: Theme.gapOut
-    margins.right: Theme.gapOut
-    margins.bottom: Theme.gapOut
+    anchors.left: true
     exclusionMode: ExclusionMode.Normal
     exclusiveZone: 0
     color: "transparent"
-    implicitWidth: 400
     WlrLayershell.layer: WlrLayer.Overlay
     // "mazapan-panel-…": SUPER + Q closes it (see hypr-base).
     WlrLayershell.namespace: "mazapan-panel-notifications"
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
-    // A click anywhere else closes it.
-    HyprlandFocusGrab {
-      active: root.open
-      windows: [centerWin]
-      onCleared: root.close()
+    MouseArea {
+      anchors.fill: parent
+      acceptedButtons: Qt.AllButtons
+      onPressed: root.close()
     }
 
     Rectangle {
       id: sheet
-      anchors.fill: parent
+      anchors.top: parent.top
+      anchors.right: parent.right
+      anchors.bottom: parent.bottom
+      anchors.margins: Theme.gapOut
+      width: 400
+      // Its own clicks (between its parts) aren't outside it.
+      MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons; z: -1 }
       color: Theme.surfaceRaised
       border.color: Theme.border
       border.width: 1
