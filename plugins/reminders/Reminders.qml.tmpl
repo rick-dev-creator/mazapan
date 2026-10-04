@@ -32,7 +32,8 @@ BarItem {
 
   Glyph {
     anchors.verticalCenter: parent.verticalCenter
-    text: root.waiting > 0 ? "󰂞" : "󰂚"
+    // An alarm clock, not a bell: the bell is the notifications'.
+    text: root.waiting > 0 ? "󰀠" : "󰀣"
     color: root.waiting > 0 ? Theme.accentText : Theme.fgMuted
   }
 
@@ -156,7 +157,7 @@ BarItem {
         model: RemindersService.items
         ListRow {
           required property var modelData
-          glyph: "󰂚"
+          glyph: "󰀠"
           title: modelData.text
           detail: RemindersService.when(modelData.at)
           trailing: "󰅖"

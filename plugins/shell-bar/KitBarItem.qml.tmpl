@@ -22,7 +22,14 @@ Item {
   signal clicked(var mouse)
   signal wheel(var event)
 
-  implicitWidth: row.implicitWidth + padding * 2
+  // Steady: as wide as it has been at its widest, so a widget whose words
+  // change (a ticker taking turns) doesn't move everything beside it.
+  // widest = 0 starts again.
+  property bool steady: false
+  property real widest: 0
+  readonly property real natural: row.implicitWidth + padding * 2
+  onNaturalChanged: if (natural > widest) widest = natural
+  implicitWidth: steady ? Math.max(natural, widest) : natural
   implicitHeight: barHeight
 
   Rectangle {

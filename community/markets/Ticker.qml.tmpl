@@ -20,6 +20,9 @@ BarItem {
   readonly property bool up: quote !== null && quote.change >= 0
 
   shown: {{ settings.bar }} && pins.length > 0
+  // The symbols take turns at different widths: the icons beside it stay put.
+  steady: true
+  onPinsChanged: widest = 0
   onClicked: Quickshell.execDetached(["qs", "ipc", "-c", "mazapan", "call", "mazapan", "panel", "markets"])
   onWheel: event => root.turn += event.angleDelta.y > 0 ? pins.length - 1 : 1
 
