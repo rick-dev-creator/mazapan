@@ -5,6 +5,10 @@ tecla otra vez para, y lo que dijiste se escribe en la ventana donde estás
 (o se copia, para pegarlo, con `type` apagado). A los dos minutos para
 solo.
 
+`SUPER + CTRL + A` (`ask_key`) en cambio pregunta a un agente: lo que
+dijiste va a la tarjeta del plugin de Agentes, con su respuesta (sin ese
+plugin, se escribe como siempre).
+
 Se procesa en este equipo, con whisper.cpp: nada de lo que dices sale de
 él. La primera vez, el modelo con el que entiende se descarga una sola vez
 desde whisper.cpp (Hugging Face) y se comprueba contra su suma conocida:

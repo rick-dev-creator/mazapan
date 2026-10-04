@@ -1,7 +1,7 @@
 [plugin]
 id = "dictation"
 name = "Dictation"
-version = "0.1.0"
+version = "0.2.0"
 api = 1
 description = "Speak instead of typing: a key starts listening, the same key stops, and what you said is typed where you are. Worked out on this computer (whisper.cpp): nothing you say leaves it"
 categories = ["tools"]
@@ -23,6 +23,9 @@ model = { default = "base", choices = ["tiny", "base", "small"] }
 language = ""
 # Typed where you are; off: copied, to paste.
 type = true
+# Asks a coding agent what you say (with the Agents plugin: its answer in a
+# card): starts listening; pressed again, stops and asks.
+ask_key = "SUPER + CTRL + A"
 
 [[targets]]
 template = "dictate.sh.tmpl"
@@ -38,3 +41,9 @@ name = "{{ t \"act.dictate\" }}"
 run = "sh ~/.local/share/mazapan/bin/dictate"
 key = "{{ settings.key }}"
 keywords = "{{ t \"act.dictate.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.ask\" }}"
+run = "sh ~/.local/share/mazapan/bin/dictate ask"
+key = "{{ settings.ask_key }}"
+keywords = "{{ t \"act.ask.kw\" }}"

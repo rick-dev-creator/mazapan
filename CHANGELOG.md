@@ -6,6 +6,9 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- Ask an agent by voice: SUPER + CTRL + A listens, the same key asks, the
+  answer in the agent's card (dictation, worked out on this computer).
+
 - Recent projects in the palette: type a project's name to reopen it in
   your editor with the agent's last conversation there.
 
