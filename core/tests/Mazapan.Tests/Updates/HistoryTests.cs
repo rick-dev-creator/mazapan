@@ -298,6 +298,17 @@ public sealed class HistoryTests : IDisposable
     // What the Go version wrote reads back: nanoseconds, "Z", keys in any
     // case, unknown keys ignored; a record Go couldn't read is skipped.
     [Fact]
+    public void KeepsTheAppsItUpdated()
+    {
+        var r = Record.New();
+        r.Apps.AddRange(["LocalSend", "Rider"]);
+        var back = Record.FromJson(r.ToJson());
+        Assert.Equal(["LocalSend", "Rider"], back!.Apps);
+        Assert.DoesNotContain("\"apps\"", Record.New().ToJson());
+        Assert.Empty(Record.FromJson("{\"apps\": null}")!.Apps);
+    }
+
+    [Fact]
     public void ReadsWhatGoWrote()
     {
         const string go = """

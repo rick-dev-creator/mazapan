@@ -40,6 +40,8 @@ public sealed class Record
     public List<Health.Result> Baseline = [];
     public string Outcome = "";
     public string Note = "";
+    /// <summary>The apps it updated besides packages: Flatpak apps, apps from their makers (their names).</summary>
+    public List<string> Apps = [];
     /// <summary>
     /// Generated files before the update. Written even when null: an empty
     /// backup ({}) and no backup at all (null) mean different things.
@@ -96,6 +98,7 @@ public sealed class Record
         if (Baseline.Count > 0) f.Add("baseline", Baseline.Select(Check).ToList());
         f.Add("outcome", Outcome);
         if (Note != "") f.Add("note", Note);
+        if (Apps.Count > 0) f.Add("apps", Apps.Select(a => (object?)a).ToList());
         f.Add("owned", Owned);
         if (AfterOwned is { Count: > 0 }) f.Add("after_owned", AfterOwned);
         return GoJsonCodec.Marshal(f, true, "  ");
@@ -139,6 +142,7 @@ public sealed class Record
         else if (Is(key, "baseline")) Baseline = List(v, Baseline, CheckResultFrom);
         else if (Is(key, "outcome")) Outcome = Str(v, Outcome);
         else if (Is(key, "note")) Note = Str(v, Note);
+        else if (Is(key, "apps")) Apps = List(v, Apps, x => x as string ?? "").Where(a => a != "").ToList();
         else if (Is(key, "owned")) Owned = Applying.Owned.FromTree(v, "apply.Owned");
         else if (Is(key, "after_owned")) AfterOwned = Applying.Owned.FromTree(v, "apply.Owned");
     }

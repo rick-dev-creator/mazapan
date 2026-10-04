@@ -41,9 +41,16 @@ public static partial class Program
         if (Exec.LookPath("flatpak") == null) return out_;
         var (code, text, _) = AppsCapture("flatpak", "remote-ls", "--updates", "--user", "--app", "--columns=application,name");
         if (code != 0) return out_;
+        // The name it shows installed ("LocalSend"): the remote's is often the
+        // id's last part ("localsend_app").
+        var names = new Dictionary<string, string>();
+        var (lc, listed, _) = AppsCapture("flatpak", "list", "--user", "--app", "--columns=application,name");
+        if (lc == 0)
+            foreach (var line in listed.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                if (line.Split('\t') is [var id, var name, ..] && name != "") names[id] = name;
         foreach (var line in text.Split('\n', StringSplitOptions.RemoveEmptyEntries))
             if (line.Split('\t') is [var id, .. var rest] && id != "Application ID")
-                out_.Add((id, rest.Length > 0 ? rest[0] : id));
+                out_.Add((id, names.GetValueOrDefault(id) ?? (rest.Length > 0 ? rest[0] : id)));
         return out_;
     }
 
@@ -367,8 +374,16 @@ public static partial class Program
         // The Flatpak apps too (the account's, as the Apps menu installs them):
         // their own runtime, no root, not part of what a rollback undoes. Not
         // when the system's part didn't go through (a password refused).
-        if (upErr == null && flatpaks.Count > 0 && !UpdateFlatpaks()) rec.Note = "the Flatpak apps didn't update (flatpak update --user)";
-        if (upErr == null && !UpdateVendorApps(vendor)) rec.Note = (rec.Note == "" ? "" : rec.Note + "; ") + "an app from its maker didn't update";
+        if (upErr == null && flatpaks.Count > 0)
+        {
+            if (UpdateFlatpaks()) rec.Apps.AddRange(flatpaks.Select(f => f.Name));
+            else rec.Note = "the Flatpak apps didn't update (flatpak update --user)";
+        }
+        if (upErr == null && vendor.Count > 0)
+        {
+            if (UpdateVendorApps(vendor)) rec.Apps.AddRange(vendor.Select(v => v.App.Name));
+            else rec.Note = (rec.Note == "" ? "" : rec.Note + "; ") + "an app from its maker didn't update";
+        }
         Dictionary<string, string> after;
         try
         {
@@ -540,7 +555,12 @@ public static partial class Program
             rec.Outcome = Outcomes.OK;
             rec.Finished = DateTimeOffset.Now;
             rec.Save();
-            var what = rec.Changes.Count == 0 ? "the configuration" : Plural(rec.Changes.Count, "package", "packages");
+            // What it updated: packages, Flatpak apps, apps from their makers
+            // (those that didn't update are in the note); else the configuration.
+            var parts = new List<string>();
+            if (rec.Changes.Count > 0) parts.Add(Plural(rec.Changes.Count, "package", "packages"));
+            if (rec.Apps.Count > 0) parts.Add(rec.Apps.Count <= 3 ? string.Join(", ", rec.Apps) : Plural(rec.Apps.Count, "app", "apps"));
+            var what = parts.Count == 0 ? "the configuration" : string.Join(" and ", parts);
             Console.WriteLine($"\n{Style.Green}Updated {what}; everything checks out.{Style.Reset}");
             if (rec.Note.Contains("not re-applied"))
                 Console.WriteLine($"{Style.Amber}But the configuration wasn't re-applied: see above.{Style.Reset}");
