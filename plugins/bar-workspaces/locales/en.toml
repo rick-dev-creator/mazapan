@@ -6,3 +6,8 @@
 "setting.grow_delay_ms" = "Grow delay (ms)"
 "setting.open_delay_ms" = "Open delay (ms)"
 "setting.preview_width_large" = "Grown preview width"
+"overview" = "Workspaces: overview"
+"overview.kw" = "overview expose workspaces windows all niri"
+"overview.title" = "Workspaces"
+"overview.hint" = "click to go · drag a window to another workspace · 1–9 · esc"
+"overview.empty" = "%1 · empty"

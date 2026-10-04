@@ -26,3 +26,12 @@ números; `preview_width` (320) y `preview_width_large` (640) para la
 tarjeta, pequeña y grande, tras `grow_delay_ms` (200 ms); `preview_aspect`
 (1.6) la mantiene al menos así de apaisada, y un ultrapanorámico conserva
 su propia forma.
+
+## Vista general
+
+`SUPER + Tab` (`overview_key`) muestra todos los espacios de trabajo de la
+pantalla a la vez, como la vista general de Niri: cada uno con sus
+ventanas en vivo, la tira de columnas entera (lo que está en pantalla,
+marcado) y uno vacío después del último. Un clic en una ventana va a ella;
+en un espacio, a ese espacio. Una ventana arrastrada a otro espacio va
+allí. `1`…`9` van a ese espacio; Esc la cierra.

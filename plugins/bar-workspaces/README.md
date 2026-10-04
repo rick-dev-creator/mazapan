@@ -26,3 +26,12 @@ numbers; `preview_width` (320) and `preview_width_large` (640) for the
 card, small and grown, after `grow_delay_ms` (200 ms); `preview_aspect`
 (1.6) keeps it at least that landscape, while an ultrawide keeps its own
 shape.
+
+## Overview
+
+`SUPER + Tab` (`overview_key`) shows every workspace of the screen at once,
+as Niri's overview: each with its windows live, the whole strip of
+columns (the part on the screen outlined), and an empty one after the
+last. A click on a window goes to it; on a workspace, there. A window
+dragged onto another workspace goes there. `1`…`9` go to that workspace;
+Esc closes it.

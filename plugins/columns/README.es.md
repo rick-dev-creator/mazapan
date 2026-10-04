@@ -1,4 +1,31 @@
-# Columnas iguales
+# Columnas
+
+Las ventanas una al lado de otra, en columnas sobre una tira que se
+desplaza, como lo hace [Niri](https://github.com/YaLTeR/niri), sobre la
+disposición de desplazamiento de Hyprland:
+
+- Una ventana nueva se abre a la derecha con la mitad de la pantalla
+  (`width`); las demás conservan su ancho y la tira se desplaza hasta la
+  que tiene el foco.
+- `SUPER + R`: la columna activa pasa por un tercio, la mitad, dos tercios
+  y toda la pantalla (`SUPER + SHIFT + R` al revés). `SUPER + F`: todo el
+  ancho, y de vuelta. `SUPER + SHIFT + F`: pantalla completa.
+- `SUPER + [` / `SUPER + ]`: la ventana entra en la columna de su izquierda
+  o derecha (dos ventanas apiladas en una columna) o, si comparte columna,
+  sale a una propia.
+- `SUPER + Av Pág` / `SUPER + Re Pág`: el espacio de trabajo siguiente o
+  anterior de esta pantalla, uno nuevo vacío después del último (con
+  `SHIFT`, la ventana va también).
+- `SUPER` + la rueda desplaza la tira; con `SHIFT`, cambia de espacio. En
+  un touchpad, tres dedos de lado desplazan la tira; arriba y abajo
+  cambian de espacio.
+- En la barra, junto a los espacios: un bloque por columna, tan ancho como
+  ella, los que están en pantalla rellenos y el activo en el color de
+  acento; un clic va a esa columna. `SUPER + Tab` (plugin de espacios de
+  trabajo) muestra todos los espacios con su tira entera.
+
+Además, tres disposiciones de las de antes, que se recuerdan en cada
+espacio de trabajo:
 
 Las ventanas una al lado de otra, en columnas (la disposición de
 desplazamiento de Hyprland), en vez de que cada ventana nueva parta en dos
@@ -24,7 +51,6 @@ pantalla), nunca por debajo de `min_width`; mantenidas, se repiten.
 `SUPER + SHIFT + ←` y `SUPER + SHIFT + →` la mueven un lugar en la fila.
 Todas las teclas se pueden cambiar, y también están en la paleta.
 
-Las columnas se vuelven a acomodar cada vez que una ventana se abre, se
-cierra o llega, para que siempre compartan la pantalla (`auto`,
-activado). Desactívalo para conservar columnas que ajustaste a mano:
-entonces solo las teclas las reordenan.
+Con `auto` activado, las columnas se vuelven a acomodar cada vez que una
+ventana se abre, se cierra o llega, para que siempre compartan la pantalla
+(del mismo ancho, como antes de que lo de Niri fuera lo normal).

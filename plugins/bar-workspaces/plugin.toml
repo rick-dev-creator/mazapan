@@ -1,11 +1,11 @@
 [plugin]
 id = "bar-workspaces"
 name = "Workspaces"
-version = "0.4.0"
+version = "0.5.0"
 api = 1
-description = "Workspace numbers in the bar, with a live preview on hover whose windows can be dragged out"
+description = "Workspace numbers in the bar, with a live preview on hover whose windows can be dragged out, and an overview of every workspace at once (as Niri's)"
 categories = ["bar"]
-requires = ["shell-bar"]
+requires = ["shell-bar", "hypr-base"]
 
 [packages]
 pacman = ["quickshell"]
@@ -37,6 +37,10 @@ preview_width_large = { default = 640, min = 320, max = 2560 }
 # landscape. A monitor wider than that (an ultrawide) keeps its own shape.
 preview_aspect = { default = 1.6, min = 1.0, max = 3.0, step = 0.1 }
 
+# Every workspace of the screen at once, with its windows live: click to
+# go, drag a window onto another workspace.
+overview_key = "SUPER + Tab"
+
 [[targets]]
 template = "Workspaces.qml.tmpl"
 output = "~/.config/quickshell/mazapan/widgets/left/10-workspaces.qml"
@@ -46,3 +50,19 @@ reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 template = "Preview.qml.tmpl"
 output = "~/.config/quickshell/mazapan/components/workspaces/Preview.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
+template = "Overview.qml.tmpl"
+output = "~/.config/quickshell/mazapan/panels/overview.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
+template = "overview.lua.tmpl"
+output = "~/.config/hypr/mazapan/overview.lua"
+reload = "hyprctl reload >/dev/null"
+
+[[actions]]
+name = "{{ t \"overview\" }}"
+run = "qs ipc -c mazapan call mazapan panel overview"
+key = "{{ settings.overview_key }}"
+keywords = "{{ t \"overview.kw\" }}"

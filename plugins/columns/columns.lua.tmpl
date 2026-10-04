@@ -2,7 +2,14 @@
 --
 -- Windows are laid out as side-by-side columns (Hyprland's scrolling
 -- layout) instead of dwindle, where every new window halves the previous
--- one. Three arrangements, remembered per workspace:
+-- one. {{ if settings.auto }}Every change shares the screen out again (auto).{{ else }}As Niri does: a new window opens to the right at {{ inline settings.width }} of
+-- the screen, the others keep their width, and the strip scrolls to show
+-- the focused one.{{ end }} {{ inline settings.widths_key }} cycles the focused column through a third,
+-- a half, two thirds and all of the screen; {{ inline settings.maximize_key }} makes it all of it and back;
+-- {{ inline settings.consume_left_key }} / {{ inline settings.consume_right_key }} put the window in the next column or out of its own.
+-- {{ inline settings.next_workspace_key }} / {{ inline settings.previous_workspace_key }}: workspaces one after another, a new
+-- empty one after the last. Three arrangements on top, remembered per
+-- workspace:
 --
 --   equal  {{ inline settings.key }}: every column the same width, filling the screen
 --   phone  {{ inline settings.phone_key }}: phone-width columns, centered as a group
@@ -26,6 +33,13 @@ local GAP_IN, GAP_OUT = {{ theme.shape.gap_in }}, {{ theme.shape.gap_out }}
 
 hl.config({
   general = { layout = "scrolling" },
+  scrolling = {
+    column_width = {{ settings.width }},
+    -- The focused column brought into view with as little scrolling as
+    -- can be (Niri's way), not centered every time.
+    focus_fit_method = 1,
+    follow_focus = true,
+  },
   -- Only focus mode uses master. Center it even with a single other window,
   -- and keep new windows on the sides.
   master = {
@@ -173,9 +187,26 @@ local function resize(sign)
   hl.dispatch(hl.dsp.layout(string.format("colresize %s%.4f", sign, STEP)))
 end
 
+-- All of the screen's width, and back to the width it had (per window).
+local before_max = {} -- window address -> width share
+local function maximize()
+  local ws, win = hl.get_active_workspace(), hl.get_active_window()
+  if not ws or not win or win.floating then return end
+  local w = screen(ws)
+  local key = tostring(win.address)
+  if win.size.x >= 0.95 * (w - 2 * GAP_OUT) then
+    hl.dispatch(hl.dsp.layout(string.format("colresize %.4f", before_max[key] or {{ settings.width }})))
+    before_max[key] = nil
+  else
+    before_max[key] = math.max(0.1, math.min(1, (win.size.x + 2 * GAP_IN) / (w - 2 * GAP_OUT)))
+    hl.dispatch(hl.dsp.layout("colresize 1.0"))
+  end
+end
+
 -- The same as commands (`hyprctl eval 'mazapan_columns.equal()'`): the
 -- command palette runs and shows these.
 mazapan_columns = {
+  maximize = maximize,
   equal = function() arrange("equal") end,
   phone = function()
     local ws = hl.get_active_workspace()
@@ -193,6 +224,41 @@ hl.bind({{ lq settings.grow_key }}, mazapan_columns.grow, { repeating = true })
 hl.bind({{ lq settings.shrink_key }}, mazapan_columns.shrink, { repeating = true })
 hl.bind({{ lq settings.move_left_key }}, hl.dsp.layout("swapcol l"))
 hl.bind({{ lq settings.move_right_key }}, hl.dsp.layout("swapcol r"))
+
+-- The same key with SHIFT, after its first modifier ("SUPER + R" ->
+-- "SUPER + SHIFT + R"): the other way round.
+local function shifted(key)
+  return (key:gsub("^([%w_]+) %+ ", "%1 + SHIFT + ", 1))
+end
+
+-- Niri's: widths in turn, all of the width, windows into columns and out.
+hl.bind({{ lq settings.widths_key }}, hl.dsp.layout("colresize +conf"))
+hl.bind(shifted({{ lq settings.widths_key }}), hl.dsp.layout("colresize -conf"))
+hl.bind({{ lq settings.maximize_key }}, maximize)
+hl.bind({{ lq settings.fullscreen_key }}, hl.dsp.window.fullscreen())
+hl.bind({{ lq settings.consume_left_key }}, hl.dsp.layout("consume_or_expel prev"))
+hl.bind({{ lq settings.consume_right_key }}, hl.dsp.layout("consume_or_expel next"))
+
+-- Workspaces one after another on each screen (r: empty ones count, so
+-- after the last one there's always a new one).
+hl.bind({{ lq settings.next_workspace_key }}, hl.dsp.focus({ workspace = "r+1" }))
+hl.bind({{ lq settings.previous_workspace_key }}, hl.dsp.focus({ workspace = "r-1" }))
+hl.bind(shifted({{ lq settings.next_workspace_key }}), hl.dsp.window.move({ workspace = "r+1" }))
+hl.bind(shifted({{ lq settings.previous_workspace_key }}), hl.dsp.window.move({ workspace = "r-1" }))
+{{- if settings.wheel }}
+
+-- SUPER and the wheel: along the strip; with SHIFT, workspaces.
+hl.bind("SUPER + mouse_down", hl.dsp.layout("move +col"))
+hl.bind("SUPER + mouse_up", hl.dsp.layout("move -col"))
+hl.bind("SUPER + SHIFT + mouse_down", hl.dsp.focus({ workspace = "r+1" }))
+hl.bind("SUPER + SHIFT + mouse_up", hl.dsp.focus({ workspace = "r-1" }))
+{{- end }}
+{{- if settings.gestures }}
+
+-- Three fingers: sideways along the strip, up and down between workspaces.
+hl.gesture({ fingers = 3, direction = "horizontal", action = "scroll_move" })
+hl.gesture({ fingers = 3, direction = "vertical", action = "workspace" })
+{{- end }}
 {{- if settings.auto }}
 
 -- Re-apply whatever mode the workspace is in when its windows change.

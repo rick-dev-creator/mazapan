@@ -1,11 +1,11 @@
 [plugin]
 id = "columns"
-name = "Equal columns"
-version = "0.5.0"
+name = "Columns"
+version = "0.6.0"
 api = 1
-description = "Windows as columns: equal widths, phone-width and centered, or a focus layout with the active window in the middle"
+description = "Windows as columns on a strip that scrolls, as Niri does: each opens to the right at its own width, the others untouched; or equal widths, phone-width, a focus layout. Workspaces one after another, touchpad gestures"
 categories = ["window"]
-requires = ["hypr-base"]
+requires = ["hypr-base", "shell-bar"]
 
 [packages]
 pacman = ["hyprland"]
@@ -38,9 +38,35 @@ move_left_key = "SUPER + SHIFT + left"
 # Move the focused column one place right in the row.
 move_right_key = "SUPER + SHIFT + right"
 # Re-apply the workspace's mode whenever a window opens, closes or moves in,
-# so the columns always share the screen. Turn it off to keep columns you
-# resized by hand: then only the keys rearrange them.
-auto = true
+# so the columns always share the screen. Off (as Niri): a window opens to
+# the right at `width`, the others keep theirs, and the strip scrolls to
+# show the one in focus; the keys rearrange them.
+auto = false
+# A new window's width, as a share of the screen.
+width = { default = 0.5, min = 0.2, max = 1.0, step = 0.05 }
+# The focused column's width: a third, a half, two thirds, all of it, in
+# turn (with SHIFT, the other way round).
+widths_key = "SUPER + R"
+# The focused column all the screen's width; again, back to how it was.
+maximize_key = "SUPER + F"
+# The focused window fullscreen (and back).
+fullscreen_key = "SUPER + SHIFT + F"
+# The focused window into the column on its left / right, beside the one
+# there; alone in a column, the same; in one with others, out into its own.
+consume_left_key = "SUPER + bracketleft"
+# Into the column on its right (or out of its own, to the right).
+consume_right_key = "SUPER + bracketright"
+# The next / previous workspace on this screen; after the last one with
+# windows, a new empty one. With SHIFT, the window goes along.
+next_workspace_key = "SUPER + Page_Down"
+# The previous workspace on this screen.
+previous_workspace_key = "SUPER + Page_Up"
+# The mouse: SUPER and the wheel scroll the strip; SUPER, SHIFT and the
+# wheel change workspace.
+wheel = true
+# The touchpad: three fingers sideways scroll the strip, up and down
+# change workspace.
+gestures = true
 # Narrowest a column may get, in logical pixels: shrinking stops here, and
 # in equal mode, with more windows than fit at this width, columns keep it
 # and the row scrolls.
@@ -50,6 +76,12 @@ min_width = { default = 400, min = 200, max = 1600 }
 template = "columns.lua.tmpl"
 output = "~/.config/hypr/mazapan/columns.lua"
 reload = "hyprctl reload >/dev/null"
+
+# Where you are on the strip of columns, in the bar.
+[[targets]]
+template = "Strip.qml.tmpl"
+output = "~/.config/quickshell/mazapan/widgets/left/20-strip.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[actions]]
 name = "{{ t \"equal\" }}"
@@ -80,6 +112,24 @@ name = "{{ t \"shrink\" }}"
 run = "hyprctl eval 'mazapan_columns.shrink()'"
 key = "{{ settings.shrink_key }}"
 keywords = "{{ t \"shrink.kw\" }}"
+
+[[actions]]
+name = "{{ t \"widths\" }}"
+run = "hyprctl dispatch 'hl.dsp.layout(\"colresize +conf\")'"
+key = "{{ settings.widths_key }}"
+keywords = "{{ t \"widths.kw\" }}"
+
+[[actions]]
+name = "{{ t \"maximize\" }}"
+run = "hyprctl eval 'mazapan_columns.maximize()'"
+key = "{{ settings.maximize_key }}"
+keywords = "{{ t \"maximize.kw\" }}"
+
+[[actions]]
+name = "{{ t \"next_workspace\" }}"
+run = "hyprctl dispatch 'hl.dsp.focus({ workspace = \"r+1\" })'"
+key = "{{ settings.next_workspace_key }}"
+keywords = "{{ t \"workspace.kw\" }}"
 
 [[actions]]
 name = "{{ t \"move_left\" }}"
