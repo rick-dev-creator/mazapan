@@ -67,8 +67,9 @@ echo "${bold}About to install${off} on $disk (erased), for $fullname ($user), $l
 ask go "Type yes to go ahead" ""
 [[ $go == yes ]] || { echo "Nothing was done."; exit 1; }
 
-answers=$(mktemp /run/mazapan-text-XXXXXX.json)
-chmod 600 "$answers"
+# Yours alone (the password is in it), gone at the end.
+tmp=${XDG_RUNTIME_DIR:-/tmp}
+answers=$(umask 077; mktemp "$tmp/mazapan-text-XXXXXX.json") || { echo "${red}Can't write in $tmp.${off}"; exit 1; }
 jq -n --arg disk "$disk" --arg user "$user" --arg full "$fullname" --arg pass "$pass" --arg tz "$tz" \
   --arg lang "$lang" --arg locale "$locale" --arg kb "$kb" \
   '{disk: $disk, encrypt: true, user: $user, fullname: $full, password: $pass, timezone: $tz,
@@ -76,7 +77,7 @@ jq -n --arg disk "$disk" --arg user "$user" --arg full "$fullname" --arg pass "$
 unset pass pass2
 
 echo
-log=/run/mazapan-text-install.log
+log=$(umask 077; mktemp "$tmp/mazapan-text-XXXXXX.log")
 sudo mazapan install run "$answers" 2>&1 | tee "$log" | while IFS= read -r l; do
   case $l in
     "step "*) echo "  ${l#step }…" ;;
@@ -84,7 +85,7 @@ sudo mazapan install run "$answers" 2>&1 | tee "$log" | while IFS= read -r l; do
   esac
 done
 code=${PIPESTATUS[0]}
-sudo rm -f "$answers"
+rm -f "$answers"
 if [[ $code != 0 ]]; then
   echo "${red}The install failed.${off} What happened: /var/log/mazapan-install.log"
   exit "$code"

@@ -99,7 +99,17 @@ where they fit Hyprland.
      hw-nvidia now leaves the screen on the integrated GPU, keeps the
      card's memory through sleep, brings prime-run; the ISO has a safe
      graphics entry and an installer in text. docs/first-install.md is
-     the checklist (Secure Boot off, graphics on Hybrid, offline first).*
+     the checklist (Secure Boot off, graphics on Hybrid, offline first).
+     Installing from the ISO then found three more, fixed (ee90f0d): the
+     "as installed" checkpoint lacked its fstab (now taken at the first
+     start), snap-pac's snapshots hold pacman's lock (removed from a kept
+     checkpoint), and a restore's mkinitcpio waited on its own lock.
+     Then, from the ISO (2026-10-04): the release gate encrypted and
+     plain, each with the checkpoints end to end (16 checks: the first
+     start's checkpoint, one from a package change, started from, the
+     guard, /boot read only, kept, pacman after, the first one whole), and
+     the installer in text (installed, encrypted, recovery key, the desktop
+     in Spanish). Ready for the laptop.*
    - A THIRD_PARTY_NOTICES crediting Omarchy (MIT) for the hardware
      fixes taken from it, with the repository.
 
