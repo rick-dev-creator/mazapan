@@ -25,7 +25,9 @@
 <p align="center">
   <a href="#why-i-made-mazapan">Why</a> ·
   <a href="#agentic-os">Agentic OS</a> ·
-  <a href="#made-for-developers-net-first">.NET</a> ·
+  <a href="#made-for-developers">Developers</a> ·
+  <a href="#tiling-borrowed-from-niri">Tiling</a> ·
+  <a href="#plugins-and-extensibility">Plugins</a> ·
   <a href="#the-desktop">The desktop</a> ·
   <a href="#features">Features</a> ·
   <a href="#screenshots">Screenshots</a> ·
@@ -134,23 +136,30 @@ it lets them change things the way a person does, never behind your back.
 
 Full reference: [docs/agent-api.md](docs/agent-api.md).
 
-## Made for developers, .NET first
+## Made for developers
 
-- **The .NET profile**: the .NET SDK, ASP.NET Core's HTTPS development
-  certificate trusted by .NET, Chromium and Firefox, **Aspire** and its
-  templates, Rider and VS Code installed from their makers and checked
-  against their SHA-256, dotnet's tools on the PATH, telemetry off.
+Whatever you build, the first start sets it up: pick the profiles that fit
+you, and each installs its apps and wires them together, saying first what
+it will do, undoable.
+
+- **Development**: VS Code, Zed, Neovim, Git, GitHub CLI, lazygit, the
+  command-line tools you reach for (ripgrep, fd, fzf, bat, eza, zoxide, jq),
+  and **mise** for every language's versions per project (Node, Python,
+  Ruby, Go…).
 - **Containers without root**: Podman with `docker` commands working, found
-  by Testcontainers, devcontainers, Compose and Aspire.
-- **Databases one click away**: PostgreSQL, SQL Server, MySQL, Redis and
+  by Testcontainers, devcontainers and Compose; Docker too if you prefer it.
+- **Databases one click away**: PostgreSQL, MySQL, SQL Server, Redis and
   MongoDB in local containers, their data kept, the connection string
-  copied in .NET's format or as a URL.
-- **Mobile (Expo)**: Android's SDK and emulator, Java 17 for Gradle, phones
-  over USB, a new Expo app one action away.
-- **Profiles for everyone else**: Basic, Development, Gaming, Retro,
-  Creative, Office, Streaming, Trading. Pick them at the first start or any
-  time later (`SUPER + ALT + A`); each says what it will install, and is
-  undoable.
+  copied as a URL or in your framework's format.
+- **.NET**: the SDK with ASP.NET Core's HTTPS certificate trusted (by .NET,
+  Chromium and Firefox), **Aspire** and its templates on Podman, Rider and
+  VS Code from their makers, checked against their SHA-256.
+- **Mobile (Expo)**: Node.js, Java 17, Android Studio with its SDK and
+  emulators found, phones over USB, a new app one action away.
+- **Your agents**, whatever you code with: see [Agentic OS](#agentic-os).
+- **And for everyone else**: Basic, Gaming, Retro, Creative, Office,
+  Streaming, Trading. Profiles can be mixed, and changed any time
+  (`SUPER + ALT + A`).
 
 ## The desktop
 
@@ -159,6 +168,26 @@ Full reference: [docs/agent-api.md](docs/agent-api.md).
 <p align="center"><sub>One command changes everything: bar, terminals, editors, GTK and Qt apps, browsers, the lock and login screens, GRUB.</sub></p>
 
 <p align="center"><img src="docs/media/desktop.webp" alt="The desktop: btop and Neovim side by side in columns"></p>
+
+## Tiling, borrowed from Niri
+
+<p align="center"><img src="docs/media/tiling.gif" alt="Columns on a scrolling strip: windows open to the right, widths cycle, two windows share a column, a window maximized, the overview"></p>
+
+Hyprland underneath, Niri's ideas on top (the `columns` and
+`bar-workspaces` plugins):
+
+- **A strip that scrolls**: each window opens as a new column to the right,
+  at its own width; the others never resize. The view follows the focus.
+- **Widths that cycle** (`SUPER + R`: a third, a half, two thirds, all of it), grow and
+  shrink (`SUPER + ALT + ← →`), **maximize the column** (`SUPER + F`), and
+  **stack two windows in one column** or take one out (`SUPER + [ ]`).
+- **Columns that move** (`SUPER + SHIFT + ← →`), workspaces one after
+  another (`SUPER + Page Up/Down`), touchpad **gestures** to scroll the strip
+  and change workspace.
+- **An overview** of every workspace at once (`SUPER + Tab`), live previews
+  on hover in the bar whose windows you drag out, and a mini map of the
+  strip in the bar.
+- Or the classic layouts: equal widths, a phone-width column, a focus layout.
 
 ## Features
 
@@ -231,6 +260,170 @@ written only where it may, and undoable.
 ### Sharing
 - LocalSend to devices nearby, Taildrop to yours over Tailscale, from the
   palette or the file manager.
+
+## Plugins and extensibility
+
+<p align="center"><img src="docs/media/plugins.webp" alt="The Plugins panel: each plugin with its page, what it can do and its settings" width="85%"></p>
+
+**Everything is a plugin**, the bar and the installer included, and yours
+use the same API as the built-in ones: a `plugin.toml` (what it needs, its
+settings, actions, keybindings, health checks, translations) and templates
+for the files it writes, in any format (Lua for Hyprland, QML for the shell,
+TOML, JSON, CSS, shell…), filled from the theme and your settings.
+
+- **The Plugins panel** (`SUPER + SHIFT + P`), like an editor's extensions
+  view: built-in, yours and the catalogs', each with its README, what it
+  can do and its settings as controls, in your language.
+- **Write one in minutes**: `mazapan plugins new my-widget --kind bar`, then
+  `plugins dev` (applied again on every save) and `plugins check`; `plugins
+  fork` copies a built-in one to change it.
+- **Installed with consent**: `mazapan plugins add <git-url>` shows what a
+  plugin will be able to do (files, commands, root, packages) before
+  anything runs; `plugins.lock` brings the same set to another machine.
+- **Safe to experiment**: Mazapan never overwrites a file it didn't write
+  or one you edited; every apply is previewed (`--dry-run --diff`) and
+  undoable (`mazapan undo`, or History).
+- **Health checks** of every plugin after each update (`mazapan doctor`);
+  one that fails rolls the update back.
+
+<details>
+<summary><b>All 100 built-in plugins</b>, by what they're for</summary>
+
+**Agents**
+
+- **Agents** (`agent`): Your coding agents: in the bar, which is working and which waits for you (a click goes to its window), each account's limits and when they reset,…
+
+**Shell and bar**
+
+- **Bar** (`shell-bar`): A bar on every monitor (Quickshell), filled with the widgets other plugins put in its left/center/right slots
+- **Workspaces** (`bar-workspaces`): Workspace numbers in the bar, with a live preview on hover whose windows can be dragged out, and an overview of every workspace at once (as Niri's)
+- **Window title** (`bar-window-title`): The focused window's title in the bar, next to the workspaces
+- **Clock** (`bar-clock`): Day, date and time in the middle of the bar, in the system's language
+- **Weather** (`bar-weather`): Current weather in the middle of the bar: click for details and the forecast
+- **Battery** (`bar-battery`): The battery in the bar (only where there is one)
+- **Network** (`bar-network`): Network state in the bar: click for Wi-Fi (scan, join, forget) and wired connections
+- **Bluetooth** (`bar-bluetooth`): Bluetooth in the bar: click to connect, pair and forget devices
+- **Volume** (`bar-volume`): Output volume in the bar: scroll to change, middle-click to mute, click for outputs and inputs
+- **Notifications** (`notifications`): Every app's notifications, in the theme: banners that stop under the pointer, with their actions and replies
+- **Media keys** (`osd`): The volume, microphone, brightness and media keys, and what they did shown for a moment on screen
+- **Privacy dots** (`privacy`): Dots in the bar while the microphone, the camera or the screen is in use, as macOS shows them
+- **Power** (`power`): Lock, suspend, log out, reboot and shut down: a button in the bar, the palette, and a lock screen in the theme
+- **Password prompts** (`polkit`): The polkit agent: when an app needs rights it doesn't have (mount a disk, change the time), it asks for your password here, in the theme
+
+**Finding and changing things**
+
+- **Command palette** (`palette`): One palette for apps, open windows, every plugin's actions and keybindings, each showing the command it runs
+- **Settings** (`settings`): The settings everyone needs, a page each: keyboard, touchpad and mouse, default apps, language and time zone, the screens and the look
+- **History** (`history`): What changed on the desktop, in words (a theme, a setting, a plugin on or off, an update), newest first, each with its own undo
+- **Welcome** (`welcome`): The first login's welcome: language, keyboard, time zone, Wi-Fi, the look and apps by profile, a screen each
+- **Plugins** (`plugin-manager`): Find, install and set up plugins: the built-in ones, yours and the catalogs', each with its page (README, what it can do, settings)
+- **Login screen** (`login`): The login screen in the theme: the clock, your name, your password (greetd, with a Hyprland of its own and a Quickshell greeter)
+
+**Windows, workspaces and screens**
+
+- **Hyprland base** (`hypr-base`): Hyprland entry point: monitors, input, core bindings
+- **Columns** (`columns`): Windows as columns on a strip that scrolls, as Niri does
+- **Window titles** (`window-titles`): One key shows or hides a title bar on every window
+- **Monitors** (`monitors`): Monitor profiles matched by EDID, applied on their own when screens come and go
+- **External screens' brightness** (`ddc-brightness`): The brightness keys (and the palette's Brighter and Dimmer) change external screens too, over the cable (DDC/CI), as the laptop's own
+
+**Look**
+
+- **Theme picker** (`themes`): Pick a theme and an accent, previewed live on the desktop, with each theme's contrast checked
+- **Wallpaper** (`wallpaper`): The wallpaper: drawn from the theme, the theme's picture, or yours (per screen, filled, tinted with the theme, in turn, day and night), with a…
+- **Screensaver** (`screensaver`): After a while without use, every screen shows the time over one of seven scenes in the theme's colors (the mazapán bouncing about, an 80s…
+- **Night light** (`night-light`): The screens warmer at night, fading in and out slowly
+- **Hyprland theme** (`theme-hyprland`): Borders, gaps, rounding, background and animations from the theme
+- **Quickshell theme** (`theme-quickshell`): Theme tokens as a QML singleton (Theme.qml) for every shell widget
+- **GTK theme** (`theme-gtk`): GTK4/libadwaita and GTK3 (via adw-gtk3) colors, fonts and dark mode
+- **Qt theme** (`theme-qt`): Qt 6 apps (KDE's too) in the theme: palette, font and style through qt6ct, and KDE's color scheme
+- **foot theme** (`theme-foot`): foot terminal: font, palette, opacity and a blinking block cursor in the accent color
+- **kitty theme** (`theme-kitty`): kitty terminal in the theme: font, palette, opacity, tabs and borders
+- **Alacritty theme** (`theme-alacritty`): Alacritty terminal in the theme: font, palette, opacity
+- **Ghostty theme** (`theme-ghostty`): Ghostty terminal in the theme: font, palette, opacity
+- **btop theme** (`theme-btop`): btop in the theme: its boxes, graphs and meters from the theme's colors, over the terminal's background
+- **Neovim theme** (`theme-neovim`): A Neovim colorscheme from the theme (syntax, Treesitter, LSP, diagnostics, git, Telescope), used when you haven't chosen another
+- **VS Code theme** (`theme-vscode`): VS Code, Code - OSS and VSCodium in the theme
+- **Obsidian theme** (`theme-obsidian`): Obsidian in the theme, in every vault: its colors, accent, fonts and corners as a theme of its own (Mazapan), picked once in its settings and…
+- **Firefox theme** (`theme-firefox`): Firefox and its forks (Zen, LibreWolf, Floorp, Waterfox) in the theme, in every profile
+- **Chromium theme** (`theme-chromium`): Chromium, Chrome, Brave and Edge follow the theme through GTK (theme-gtk), in every profile
+- **Boot screen in the theme** (`theme-plymouth`): The screen while the computer starts, and the disk's password asked there, in the theme's colors and your language (Plymouth)
+- **Boot menu in the theme** (`theme-grub`): GRUB's menu (and the snapshots in it) in the theme's colors
+
+**Everyday tools**
+
+- **Capture** (`capture`): One capture overlay: pick a region or a window on a frozen screen, then copy, save, copy its text (OCR), annotate or record it
+- **Clipboard history** (`clipboard`): What you copied, text and pictures, kept and searchable
+- **Color picker** (`color-picker`): Pick any color on screen: it's copied, and a notification says which
+- **Emoji picker** (`emoji`): Every emoji, by category and found by name in your language
+- **Dictation** (`dictation`): Speak instead of typing: a key starts listening, the same key stops, and what you said is typed where you are
+- **Reminders** (`reminders`): A bell in the bar: what to remember and when (in ten minutes, at five, tomorrow morning), said as a notification then
+- **Share** (`share`): Files, a picture or text from the clipboard to a device nearby (LocalSend) or one of your devices on your tailnet (Taildrop), from the palette or…
+- **Web apps** (`webapps`): A site as an app of its own (WhatsApp, Gmail…)
+- **Default apps** (`default-apps`): What opens links, PDFs, pictures, videos, music, text, folders, mail, documents and archives
+- **Input method** (`input-method`): Typing Chinese, Japanese and Korean (fcitx5, with Pinyin, Mozc and Hangul), in every app
+- **Modes** (`modes`): The whole desktop changed at once: quiet but for some apps, the theme, night light, the power profile, keep awake, what the bar shows
+- **Idle** (`idle`): After a while without use: the screens dim, then lock, turn off, and the computer suspends (sooner on battery)
+- **Hibernation** (`hibernate`): Nothing lost when the battery dies: the lid's sleep turns into hibernation after a while, and a battery about to die hibernates instead of cutting out
+- **Crash watcher** (`crash-watch`): When an app closes unexpectedly (the desktop itself included), a notification says which, with "Ask an agent": the agent gets the report, the…
+
+**Apps and development**
+
+- **Apps** (`apps`): Install apps by what you'll use the computer for (Development, Gaming, Creative…) or one by one, with one button
+- **.NET, set up** (`dev-dotnet`): ASP.NET Core and Aspire ready to use: the HTTPS development certificate trusted (by .NET, and by Chromium and Firefox), Aspire's templates…
+- **Expo, set up** (`dev-expo`): Expo apps on Android from the first try: Android's SDK and emulator found (ANDROID_HOME, adb and the emulator on the PATH), Java 17 for Gradle,…
+- **Databases for development** (`dev-databases`): PostgreSQL, MySQL, Redis, SQL Server and MongoDB one click away, in containers on this computer alone, their data kept
+- **Podman** (`podman`): Containers ready to use without root or a service
+- **Docker** (`docker`): Docker itself, ready: its service started with the first command, you in the docker group so it needs no sudo (as powerful as root
+- **Tailscale** (`tailscale`): Tailscale ready to use: its service started, you its operator (no sudo to sign in or send files), signing in from the palette, and files sent to…
+
+**Gaming**
+
+- **Gaming** (`gaming`): Games at their best: on the NVIDIA card on hybrid laptops, the 32-bit drivers Windows games need, drawn with the least delay, and the screen never…
+- **Emulation** (`emulation`): Retro and console games, ready: ~/Games with a folder per console for your games and one for BIOS, RetroArch set up on them the first time, and…
+
+**System, updates and safety**
+
+- **Updates** (`updates`): Updates you see: the bar says when there are (the whole system's and the Flatpak apps'), a panel shows what changes, the news to read first and…
+- **Updates downloaded ahead** (`update-ahead`): The updates there are, downloaded in the background while plugged in and on a connection that isn't metered, so updating takes moments
+- **Checkpoints** (`hw-checkpoints`): The system as it was before every change, in the boot menu (encrypted disks too)
+- **System snapshots** (`hw-snapshots`): A btrfs snapshot of the system before and after every package change (an update, an install), the last ones kept
+- **Firewall** (`firewall`): A firewall, as macOS has one switch for: nothing comes in that this computer didn't ask for, everything it asks for goes out (ufw)
+- **Installer** (`installer`): The ISO's installer: this system onto a disk in a few screens (language, keyboard, where you are, the disk, your account, what you'll use it for),…
+
+**Hardware fixes (on the machines that need them)**
+
+- **Wi-Fi passwords on Macs with Broadcom Wi-Fi** (`hw-apple-brcmfmac-wpa`): Macs whose Broadcom Wi-Fi runs on the brcmfmac driver (2015 on, T2 Macs too) join WPA2/WPA3 networks that otherwise turn the right password down
+- **Function keys first on Apple keyboards** (`hw-apple-fnkeys`): F1–F12 as function keys, media keys with Fn, on keyboards the hid_apple driver runs
+- **MacBook NVMe waking from sleep** (`hw-apple-nvme-suspend`): Keeps the NVMe drive of the 2015-2017 MacBook and MacBook Pro out of its deepest power state (D3cold), which it fails to wake from after sleep
+- **MacBook SPI keyboard at boot** (`hw-apple-spi-keyboard`): The built-in keyboard and touchpad of the 2015-2017 MacBook and MacBook Pro (on SPI) working from the start of boot, so the disk password can be typed
+- **ASUS ExpertBook B9406 screen that keeps updating** (`hw-asus-b9406-panel-replay`): The ASUS ExpertBook B9406 (Intel Panther Lake) screen no longer freezes on its last frame
+- **ASUS Panther Lake screen brightness** (`hw-asus-ptl-backlight`): Screen brightness that really changes on the ASUS ExpertBook B9406 and Zenbook UX5406AA (Intel Panther Lake), not only full or off
+- **ASUS ROG laptop controls** (`hw-asus-rog`): asusctl on ASUS ROG laptops: performance profiles, fan curves, a battery charge limit and the keyboard's lighting
+- **ASUS ROG laptop speaker volume** (`hw-asus-rog-audio`): Volume on ASUS ROG laptops set in software (WirePlumber's soft mixer), away from the Realtek codec's hardware mixer quirks that muffle the speakers
+- **ASUS ROG Flow Z13 touchpad while typing** (`hw-asus-z13-touchpad`): The touchpad of the ASUS ROG Flow Z13's (GZ302) detachable keyboard ignored while typing, as a built-in one is
+- **Broadcom BCM4360 and BCM4331 Wi-Fi** (`hw-broadcom-wl`): Broadcom's wl driver for the BCM4360 and BCM4331 Wi-Fi chips (2012-2015 MacBooks, and other laptops), which the kernel's own drivers run poorly or…
+- **Fingerprint reader** (`hw-fingerprint`): A finger unlocks the screen and allows system changes (the password still works)
+- **Framework Laptop 13 (AMD) microphones** (`hw-framework13-amd-mic`): The built-in microphones of the Framework Laptop 13 with AMD Ryzen working
+- **Framework Laptop 16 keyboard lighting** (`hw-framework16-keyboard`): Lets you, not only root, talk to the Framework Laptop 16's keyboard, to set its RGB lighting and keys (qmk_hid, or the VIA configurator in a browser)
+- **Intel low power mode** (`hw-intel-lpmd`): Intel's Low Power Mode Daemon on laptops with a hybrid Intel processor (Alder Lake, Raptor Lake, Meteor Lake, Lunar Lake, Panther Lake)
+- **Video decoding on Intel graphics** (`hw-intel-video`): Hardware video decoding (VA-API) on Intel graphics
+- **Wi-Fi 6 on Intel BE200 and BE211 cards** (`hw-intel-wifi7-eht`): Turns Wi-Fi 7 off on Intel BE200 and BE211 cards (Dell XPS 14 and 16 on Panther Lake, and others)
+- **Cursor with several GPUs** (`hw-multi-gpu-cursor`): Draws the cursor in software when the machine has several GPUs (one renders, another drives screens
+- **Cursor on the nouveau driver** (`hw-nouveau-cursor`): Draws the cursor in software where an NVIDIA GPU runs the open nouveau driver
+- **NVIDIA (Turing and newer)** (`hw-nvidia`): NVIDIA's open driver for GeForce RTX 20 and newer
+- **Surface keyboard at boot** (`hw-surface-keyboard`): The built-in keyboard of Microsoft Surface laptops working from the start of boot, so the disk password can be typed
+- **Surface Wi-Fi firmware** (`hw-surface-wifi`): The firmware for the Marvell Wi-Fi and Bluetooth in Microsoft Surface devices (linux-firmware-marvell), which Arch's linux-firmware doesn't bring…
+- **Synaptics touchpads over SMBus** (`hw-synaptics-intertouch`): Synaptics touchpads through InterTouch (SMBus) instead of PS/2: smooth scrolling and gestures on ThinkPads and other laptops
+- **Vulkan on Intel graphics** (`hw-vulkan-intel`): Vulkan on Intel graphics (Mesa's driver): games, Steam and Proton, and apps that draw with Vulkan, on the GPU instead of failing or falling back…
+- **Vulkan on AMD graphics** (`hw-vulkan-radeon`): Vulkan on AMD Radeon graphics (Mesa's RADV driver)
+- **Lenovo Yoga Pro 7 bass speakers** (`hw-yoga-pro7-bass`): Turns on the bass speakers of the Lenovo Yoga Pro 7 (14IAH10), silent without the right codec pin model
+
+Each with its full description: [docs/plugins.md](docs/plugins.md).
+
+</details>
+
+How to write one: [docs/plugin-api.md](docs/plugin-api.md).
 
 ## Screenshots
 
