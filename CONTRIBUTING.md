@@ -111,7 +111,9 @@ mazapan plugins check my-widget             # every theme × every language, and
 See [docs/plugin-api.md](docs/plugin-api.md). A plugin says what it
 needs (`[packages]`), what it writes (`[[targets]]`), and never writes
 outside the person's home except as a hardware plugin (`[hardware]`,
-system files only in drop-in folders, off until turned on).
+system files only in drop-in folders, off until turned on), or a built-in
+optional one (`optional = true`, as Docker and Tailscale: off until someone
+picks it).
 
 ## An app or a profile
 

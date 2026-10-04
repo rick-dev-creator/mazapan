@@ -526,7 +526,11 @@ public static partial class Program
         foreach (var k in p.Settings.Keys.Order(StringComparer.Ordinal))
             if ((p.SettingsInfo.GetValueOrDefault(k)?.Description ?? "") == "")
                 warnings.Add($"setting {k}: no description (a # comment above it in plugin.toml)");
-        if (p.Targets.Any(t => t.System) && p.Hardware == null)
+        // System files only where they stay off until turned on: a hardware
+        // plugin, or a built-in optional one (Docker, Tailscale), which is
+        // only ever on when someone picks it (the Apps menu, or by hand).
+        var builtIn = Paths.Dir(Paths.Real(dir) ?? dir) == (Paths.Real(Paths.Join(Root(), "plugins")) ?? Paths.Join(Root(), "plugins"));
+        if (p.Targets.Any(t => t.System) && p.Hardware == null && !(builtIn && p.Meta.Optional))
             errors.Add("writes system files, but has no [hardware] rules");
 
         foreach (var e in errors.Distinct()) Console.WriteLine($"{Style.Red}✗{Style.Reset} {e}");
