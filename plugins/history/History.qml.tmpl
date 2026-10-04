@@ -86,13 +86,18 @@ Item {
   }
 
   function value(v, def) {
-    if (v === null || v === undefined) return def === null || def === undefined ? {{ tq "default" }} : {{ tq "default_is" }}.arg(show_(def))
+    if (v === null || v === undefined) return def === null || def === undefined || def === "" ? {{ tq "default" }} : {{ tq "default_is" }}.arg(show_(def))
     return show_(v)
   }
   function show_(v) {
     if (typeof v === "boolean") return v ? {{ tq "yes" }} : {{ tq "no" }}
     if (Array.isArray(v)) return v.map(show_).join(", ")
     if (v !== null && typeof v === "object") return JSON.stringify(v)
+    // An app (a default app): by its name, as the launcher shows it.
+    if (typeof v === "string" && v.endsWith(".desktop")) {
+      const e = DesktopEntries.byId(v.slice(0, -8))
+      if (e) return e.name
+    }
     return String(v)
   }
 
@@ -114,7 +119,12 @@ Item {
   // An entry in words: its changes, or whose files, or the update; an agent's, marked.
   function title(e) { return (e.by ? "󰚩 " : "") + title_(e) }
   function title_(e) {
-    if (e.kind === "update") return {{ tq "update" }}.arg(e.packages_changed)
+    if (e.kind === "update") {
+      // The apps it updated too (Flatpak's, from their makers), by name.
+      const apps = (e.apps || []).slice(0, 3).join(", ") + ((e.apps || []).length > 3 ? "…" : "")
+      if (apps === "") return {{ tq "update" }}.arg(e.packages_changed)
+      return e.packages_changed > 0 ? {{ tq "update_both" }}.arg(e.packages_changed).arg(apps) : {{ tq "update_apps" }}.arg(apps)
+    }
     if (e.kind === "snapshot") return {{ tq "snapshot" }}.arg(e.what)
     if (e.kind === "apps") return (e.action === "install" ? {{ tq "apps_installed" }} : {{ tq "apps_removed" }}).arg(e.names.join(", "))
     if (e.changes.length > 0) return says(e.changes[0]) + (e.changes.length > 1 ? " " + {{ tq "and_more" }}.arg(e.changes.length - 1) : "")

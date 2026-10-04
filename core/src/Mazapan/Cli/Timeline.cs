@@ -110,8 +110,11 @@ public static partial class Program
             }
             // What undo can do: put back what it changed that's still so; a
             // change of files only, the last apply's.
-            // The files, by plugin: added, changed, removed.
-            var byPlugin = s.Files.GroupBy(x => owners.GetValueOrDefault(x.Path, ""))
+            // The files, by plugin: added, changed, removed. Only those that
+            // changed: an apply also keeps the system's files it would write
+            // with --system, and without it they're as they were.
+            var moved = s.Files.Where(x => x.After != x.BeforeSum).ToList();
+            var byPlugin = moved.GroupBy(x => owners.GetValueOrDefault(x.Path, ""))
                 .OrderBy(g => g.Key == "" ? 1 : 0).ThenBy(g => g.Key, StringComparer.Ordinal)
                 .Select(g => new Fields
                 {
@@ -123,7 +126,7 @@ public static partial class Program
                 }).ToList();
             // Files only, the last apply's: as root when it wrote system files
             // or installed packages (in a terminal, for the password).
-            var asRoot = s.Files.Any(e => AsRoot.IsSystem(e.Path)) || s.Packages.Count > 0;
+            var asRoot = moved.Any(e => AsRoot.IsSystem(e.Path)) || s.Packages.Count > 0;
             var undo = list.Any(f => (bool)f["current"]! && Invertible(f)) ? "change"
                 : i == 0 && changes != null && list.Count == 0 && !s.Pending ? (asRoot ? "root" : "last") : "none";
             out_.Add((s.Time, new Fields
@@ -137,7 +140,7 @@ public static partial class Program
                 { "title", list.Count > 0 ? string.Join("; ", list.Select(f => f["text"]))
                     : changes == null ? "an earlier change (what it was isn't kept)"
                     : "files of " + string.Join(", ", byPlugin.Select(g => (string)g["plugin_name"]! is { Length: > 0 } n ? n : "others")) },
-                { "files", s.Files.Count },
+                { "files", moved.Count },
                 { "by_plugin", byPlugin },
                 { "packages", s.Packages },
                 { "known", changes != null },
@@ -159,6 +162,7 @@ public static partial class Program
                 { "what", "update" },
                 { "title", $"update: {Plural(r.Changes.Count, "package", "packages")}, {r.Outcome}" },
                 { "packages_changed", r.Changes.Count },
+                { "apps", r.Apps.Select(a => (object?)a).ToList() },
                 { "outcome", r.Outcome },
                 { "note", r.Note },
                 { "changes", new List<Fields>() },
