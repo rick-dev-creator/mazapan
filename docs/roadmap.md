@@ -5,6 +5,68 @@ ships most of these in some form, including a plugin system and an AI
 agent for crashes; each item says what it does today and what "much better"
 means here. Ordered by impact.
 
+## Next: checkpoints anyone understands, and Niri's workspaces (decided 2026-10-04)
+
+The person's words: a checkpoint they once booted on Omarchy never said it
+was one, nor how to repair the main system or keep the checkpoint as the
+main one; "it should be easy to understand, and agents should diagnose and
+repair it". And Niri's tiling, which they liked: its workspaces, taken
+where they fit Hyprland.
+
+1. **Checkpoints anyone understands.** The word is "checkpoint" (never
+   "snapshot 127"), each named for what it was before ("before updating
+   12 packages, 4 Oct").
+   - In the boot menu on every install, encrypted ones too: today only an
+     unencrypted install (/boot on the root filesystem) gets them, through
+     grub-btrfs. With the disk encrypted, each checkpoint's kernel and
+     initramfs go to the ESP (2 GiB there), the last few kept, with
+     Mazapán's own menu entries; the disk's password asked once, as ever.
+   - Booted into one, it says so, at once and while it lasts (a card, and
+     a mark in the bar): "You're on the checkpoint from before Sunday's
+     update; your system is as it was then; what you change here is lost
+     at the next start." Three answers: **Keep this one** (it becomes the
+     main system; the one that failed stays a few days as "the previous
+     system", then goes), **Back to the main system** (a restart), and
+     **Ask an agent what broke**.
+   - The agent gets what changed between the checkpoint and the main
+     system (packages, the update's record, the failed boot's journal,
+     `mazapan doctor`), read only; it explains and proposes a repair (a
+     package back a version, the previous kernel) that runs only when
+     allowed, through the same approval card as every agent change.
+   - From a running system: History lists the checkpoints in those words,
+     with "Restore this checkpoint" (no boot menu needed while it starts).
+   - `mazapan checkpoint status | list | keep | restore`, and the same as
+     MCP tools for agents (reading free; keep and restore approved).
+2. ~~**Captures that never hang.**~~ *done 2026-10-04.* Hyprland hands a
+   screen's picture over as it draws its next frame; a screen that isn't
+   drawing kept grim waiting, and the overlay from ever opening again.
+   Now a few seconds each, the screens woken, tried again, then said
+   which. And the "allow grim?" dialog: Hyprland takes permission rules
+   on its first config load only; screen permissions turned on in a
+   reload soon after login (a first start installing plugins) came
+   without them. Now on only if on at that first load (hypr-base marks
+   it). An update replacing the screen-sharing portal restarts it (the
+   bar's check already restarts the bar), so neither asks as "an unknown
+   app".
+3. **Niri's workspaces, on Hyprland's scrolling layout.** Hyprland 0.56's
+   scrolling layout already has Niri's mechanics (preset column widths,
+   consume and expel, centering, following the focus); what's missing is
+   the way of working:
+   - Windows open to the right at their own width (half the screen, then
+     1/3, 2/3, all with SUPER + R), the others untouched; the view follows
+     the focus. The `columns` plugin's equal mode stays one key away.
+   - Workspaces as a column per screen, created as needed: always one
+     empty one after the last, empty ones go; SUPER + Page Up/Down moves
+     between them, with SHIFT the window goes along.
+   - Where you are in the strip, in the bar: a dot per column, the
+     visible ones lit.
+   - An overview (SUPER + Tab): every workspace with its windows, live;
+     click to go, drag a window to another workspace.
+   - Touchpad: three fingers sideways scroll the strip, up and down change
+     workspace.
+
+Order: 2 (done), 1, then 3.
+
 ## Next: what matters most (decided 2026-10-03)
 
 An evaluation against Omarchy (read from its installed code, 2026-10-03)
@@ -1492,19 +1554,14 @@ computer is doing; `~/.local/bin` on the session's PATH.
   live on a change) and the translations from locales/*.toml. Avalonia 11
   runs through XWayland until its Wayland backend is out of preview.
 
-- Ideas from Niri's scrolling tiling (the person found it striking): an
-  endless strip of columns per workspace, windows opened to the right
-  without resizing the rest, the view scrolling to the focused one. After
-  every item above; the `columns` plugin is the place to start.
+- ~~Ideas from Niri's scrolling tiling~~ *moved up: item 3 of "Checkpoints
+  anyone understands, and Niri's workspaces" at the top (2026-10-04).*
 
 ## Also pending
 
-- With screen permissions on (privacy's `screen_ask`), now and then in a
-  long session `grim` gets Hyprland's "allow grim to capture?" dialog
-  although `/usr/bin/grim` is allowed; a capture waits on it. Seen twice
-  in the VM (2026-10-04: after installing packages and turning plugins on
-  in a running session), never right after a login, not reproduced with
-  reloads or applies alone. To find what makes Hyprland forget the rule.
+- ~~With screen permissions on, now and then grim got Hyprland's "allow
+  grim to capture?" dialog~~ *done 2026-10-04: see "Captures that never
+  hang" at the top.*
 
 - ~~`mazapan update` offering plugin updates~~ *done: `update --json`
   lists them, the Updates panel offers `mazapan plugins update`*.

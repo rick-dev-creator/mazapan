@@ -153,7 +153,14 @@ public static partial class Program
         return out_;
     }
 
-    static bool HyprlandReplaced()
+    static bool HyprlandReplaced() => Replaced(exe => exe.StartsWith("/usr/bin/Hyprland", StringComparison.Ordinal));
+
+    /// <summary>
+    /// A running program whose binary an update replaced (its exe now
+    /// "… (deleted)"), picked by that path; only the processes this account
+    /// can see.
+    /// </summary>
+    static bool Replaced(Func<string, bool> which)
     {
         try
         {
@@ -162,14 +169,27 @@ public static partial class Program
                 if (!int.TryParse(Path.GetFileName(d), out _)) continue;
                 try
                 {
-                    if (File.ReadAllText(Path.Join(d, "comm")).Trim() != "Hyprland") continue;
-                    if (new FileInfo(Path.Join(d, "exe")).LinkTarget is { } t && t.EndsWith(" (deleted)", StringComparison.Ordinal)) return true;
+                    if (new FileInfo(Path.Join(d, "exe")).LinkTarget is { } t && t.EndsWith(" (deleted)", StringComparison.Ordinal) && which(t)) return true;
                 }
                 catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
             }
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
         return false;
+    }
+
+    /// <summary>
+    /// Hyprland knows the desktop's own screen readers by their binary's path
+    /// (privacy's screen permission): one left running on a replaced binary
+    /// has none, and its next look at the screen would ask as "an unknown
+    /// app". The screen-sharing portal, replaced, starts again on the new one
+    /// (the bar's own check restarts the bar).
+    /// </summary>
+    static void RestartReplaced(IEnumerable<Change> changes)
+    {
+        if (Environment.GetEnvironmentVariable("HYPRLAND_INSTANCE_SIGNATURE") is null or "") return;
+        if (changes.Any(c => c.Name == "xdg-desktop-portal-hyprland") && Replaced(exe => exe.StartsWith("/usr/lib/xdg-desktop-portal-hyprland", StringComparison.Ordinal)))
+            Exec.Run("systemctl", ["--user", "try-restart", "xdg-desktop-portal-hyprland.service"]);
     }
 
     static readonly HttpClient ChangelogHttp = new() { Timeout = TimeSpan.FromSeconds(8) };

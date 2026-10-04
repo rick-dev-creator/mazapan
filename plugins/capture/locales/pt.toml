@@ -31,6 +31,7 @@
 "act.stop" = "Parar a gravação de tela"
 "act.stop.kw" = "gravação vídeo screencast"
 "missing" = "%1 não está instalado"
+"stuck" = "A tela %1 não entregou sua imagem; tente de novo"
 "failed" = "Não foi possível criar a imagem"
 "record_failed" = "A gravação falhou: nada foi salvo"
 "key.copy" = "c"

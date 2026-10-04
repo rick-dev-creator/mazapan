@@ -20,6 +20,7 @@
 "act.stop" = "Stop the screen recording"
 "act.stop.kw" = "recording video screencast"
 "missing" = "%1 isn't installed"
+"stuck" = "The screen %1 didn't hand its picture over; try again"
 "failed" = "Couldn't make the picture"
 "record_failed" = "The recording failed: nothing was saved"
 "key.copy" = "c"

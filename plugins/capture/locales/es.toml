@@ -31,6 +31,7 @@
 "act.stop" = "Detener la grabación de pantalla"
 "act.stop.kw" = "grabación video"
 "missing" = "%1 no está instalado"
+"stuck" = "La pantalla %1 no entregó su imagen; inténtalo de nuevo"
 "failed" = "No se pudo crear la imagen"
 "record_failed" = "La grabación falló: no se guardó nada"
 "key.copy" = "c"

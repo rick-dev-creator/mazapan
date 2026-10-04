@@ -4,12 +4,12 @@
 -- The desktop's own tools that read the screen for you don't ask
 -- (each binary is a regular expression, matched on the full path).
 --
--- Decided as Hyprland starts and kept until it ends: turned on half way
--- through a session, Hyprland leaves captures waiting with no dialog. So
--- what it started with is written down (a file in the runtime directory,
--- per Hyprland instance) and reloads keep to it; a change counts from the
--- next login. Hyprland's instance signature carries when it started: a
--- first load long after that (the plugin turned on later) is a reload.
+-- Decided as Hyprland starts and kept until it ends: Hyprland takes its
+-- permission rules on its first load only, and turned on later it would
+-- ask about the desktop's own tools too. So what it started with is written
+-- down (a file in the runtime directory, per Hyprland instance) and reloads
+-- keep to it; a change counts from the next login. Whether this is that
+-- first load, hypr-base knows (mazapan_first_load).
 local wanted = {{ settings.screen_ask }}
 local started = false
 pcall(function()
@@ -21,8 +21,7 @@ pcall(function()
     f:close()
     return
   end
-  local since = tonumber(sig:match("_(%d+)_"))
-  started = wanted and since ~= nil and os.time() - since < 120
+  started = wanted and mazapan_first_load == true
   f = io.open(marker, "w")
   f:write(started and "on" or "off")
   f:close()

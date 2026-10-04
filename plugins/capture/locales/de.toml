@@ -31,6 +31,7 @@
 "act.stop" = "Bildschirmaufnahme beenden"
 "act.stop.kw" = "aufnahme video screencast"
 "missing" = "%1 ist nicht installiert"
+"stuck" = "Der Bildschirm %1 hat sein Bild nicht geliefert; versuchen Sie es erneut"
 "failed" = "Das Bild konnte nicht erstellt werden"
 "record_failed" = "Die Aufnahme ist fehlgeschlagen: Nichts wurde gespeichert"
 "key.copy" = "k"

@@ -6,6 +6,11 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- Capture never hangs: a screen that isn't drawing (turned off) no longer
+  keeps it from opening again; it's woken and tried once more, or it says
+  which screen. Screen permissions no longer ask about the desktop's own
+  tools ("allow grim?", "an unknown app") after turning them on soon after
+  logging in, or after an update replaced the screen-sharing portal.
 - A fingerprint reader unlocks the screen and allows system changes
   (offered where there's one; fingers added from the palette).
 

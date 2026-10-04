@@ -570,6 +570,7 @@ public static partial class Program
     /// </summary>
     static void Afterwards(Record rec, Steps steps, bool ask)
     {
+        RestartReplaced(rec.Changes);
         var reasons = RebootReasons(rec.Changes);
         foreach (var r in reasons) steps.Reboot(r);
         if (reasons.Count > 0)
@@ -812,6 +813,7 @@ public static partial class Program
         if (failed.Count > 0)
             rec.Note = (rec.Note + "; " + Plural(failed.Count, "check still failed", "checks still failed") + " after rolling back").TrimStart(';', ' ');
         TrySave(rec);
+        RestartReplaced(rec.Changes);
         Console.WriteLine($"\n{Style.Green}Rolled back: the system is as it was before {rec.ID}.{Style.Reset}");
         if (failed.Count > 0)
             Console.WriteLine($"{Style.Amber}{Plural(failed.Count, "check is", "checks are")} still failing: see mazapan doctor.{Style.Reset}");

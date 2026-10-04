@@ -30,6 +30,7 @@
 "act.stop" = "Arrêter l'enregistrement de l'écran"
 "act.stop.kw" = "enregistrement vidéo screencast"
 "missing" = "%1 n'est pas installé"
+"stuck" = "L'écran %1 n'a pas donné son image ; réessayez"
 "failed" = "Impossible de créer l'image"
 "record_failed" = "L'enregistrement a échoué : rien n'a été sauvegardé"
 "key.copy" = "c"
