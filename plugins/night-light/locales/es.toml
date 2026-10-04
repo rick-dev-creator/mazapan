@@ -14,3 +14,6 @@
 "setting.fade.help" = "Minutos que tarda en aparecer y desaparecer."
 "act.toggle" = "Luz nocturna sí o no"
 "act.toggle.kw" = "luz nocturna cálida pantalla luz azul atardecer"
+"tile" = "Luz nocturna"
+"tile.on" = "Más cálida, hasta la mañana"
+"tile.off" = "Apagada"

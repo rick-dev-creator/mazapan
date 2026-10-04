@@ -59,6 +59,12 @@ template = "Ticker.qml.tmpl"
 output = "~/.config/quickshell/mazapan/widgets/right/45-markets.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
+# Its place in the Control Center (when that's on, the ticker leaves the bar).
+[[targets]]
+template = "Section.qml.tmpl"
+output = "~/.config/quickshell/mazapan/control/sections/50-markets.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
 [[targets]]
 template = "Markets.qml.tmpl"
 output = "~/.config/quickshell/mazapan/panels/markets.qml"

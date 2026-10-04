@@ -27,3 +27,6 @@
 "speed_failed" = "Não foi possível chegar ao teste de velocidade"
 "speed_result" = "↓ %1 Mbps   ↑ %2 Mbps   %3 ms"
 "share_cant" = "Este Wi‑Fi não pode ser compartilhado como código (a senha não pôde ser lida, ou cada pessoa tem a sua)"
+"off" = "desligado"
+"tile.wifi" = "Wi-Fi"
+"tile.ethernet" = "Ethernet"

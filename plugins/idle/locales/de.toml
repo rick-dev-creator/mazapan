@@ -14,3 +14,6 @@
 "setting.lock_on_sleep.help" = "Sperrt vor dem Standby, egal wie er ausgelöst wird (Deckel, eine Taste)."
 "act.awake" = "Wach halten (oder nicht)"
 "act.awake.kw" = "inaktivität koffein wach schlafen sperren standby bildschirm anlassen"
+"tile" = "Wach halten"
+"tile.on" = "Nichts dimmt oder schläft"
+"tile.off" = "Aus"

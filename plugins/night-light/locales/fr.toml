@@ -14,3 +14,6 @@
 "setting.fade.help" = "Minutes pour apparaître et disparaître."
 "act.toggle" = "Activer ou désactiver l'éclairage nocturne"
 "act.toggle.kw" = "éclairage nocturne veilleuse chaud écran lumière bleue coucher de soleil night light"
+"tile" = "Éclairage nocturne"
+"tile.on" = "Plus chaud, jusqu'au matin"
+"tile.off" = "Désactivé"

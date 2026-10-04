@@ -17,3 +17,5 @@
 "hint" = "clique: conectar · clique direito: esquecer"
 
 "check" = "O Bluetooth funciona (se você usa)"
+"off_short" = "desligado"
+"on_short" = "ligado"

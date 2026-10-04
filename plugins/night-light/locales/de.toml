@@ -14,3 +14,6 @@
 "setting.fade.help" = "Minuten, die das Ein- und Ausblenden dauert."
 "act.toggle" = "Nachtlicht ein oder aus"
 "act.toggle.kw" = "nachtlicht warm bildschirm blaulicht filter sonnenuntergang"
+"tile" = "Nachtlicht"
+"tile.on" = "Wärmer, bis zum Morgen"
+"tile.off" = "Aus"

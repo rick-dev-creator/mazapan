@@ -21,6 +21,12 @@ template = "Power.qml.tmpl"
 output = "~/.config/quickshell/mazapan/widgets/center/30-power.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
+# Its place in the Control Center (when that's on, the button leaves the bar).
+[[targets]]
+template = "Section.qml.tmpl"
+output = "~/.config/quickshell/mazapan/control/sections/99-power.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
 [[targets]]
 template = "hyprlock.conf.tmpl"
 output = "~/.config/hypr/hyprlock.conf"

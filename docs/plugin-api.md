@@ -594,11 +594,38 @@ back), `mazapan widgets` lists them; `notifications setMode NAME QUIET
 | `ListRow`  | a row in a list: `glyph`, `title`, `detail`, `trailing`, `active`, `clicked(mouse)` |
 | `Button`   | `text`, `primary`, `clicked`                                   |
 | `TextField`| `text`, `placeholder`, `echoMode`, `accepted`, `focusInput()`  |
+| `Tile`     | a big switch for the Control Center: `glyph`, `title`, `detail`, `checked`, `more` (an arrow that opens what's behind it), `expanded`, `toggled`, `opened` |
+| `Group`    | a group of controls (a Control Center section): `title`, `trailing` (a word at its right), `trailingClicked`, what's put in it stacked |
 
 They all take their colors, font and shape from the theme. A
 `TextField`'s own `Keys` (`Keys.onPressed` on it) see a key before the
 text does: what they accept (the arrows of a list, Delete for an entry,
 Esc) never reaches the text; the rest is typed.
+
+### The Control Center
+
+The `control-center` plugin replaces the icons on the bar's right with a
+status pill that opens one panel. A plugin puts its part in it as it puts a
+widget in the bar, with a target:
+
+| Folder | What it is |
+|---|---|
+| `~/.config/quickshell/mazapan/control/now/NN-<name>.qml` | a card under *Now*, only while something needs the person: an agent waiting, a recording, an update |
+| `~/.config/quickshell/mazapan/control/tiles/NN-<name>.qml` | a switch, two to a row (a `Tile`) |
+| `~/.config/quickshell/mazapan/control/sections/NN-<name>.qml` | a section as wide as the panel (a `Group`) |
+
+Each is a root Item. Optional properties: `shown` (false: left out),
+`pillGlyph` (shown in the pill while nothing needs the person: "󰕾 65%").
+A *now* card also has `live` (shown, and said by the pill, while true),
+`pill` (what the pill says then: "Recording 0:42") and `level` (0 news,
+1 needs the person, 2 urgent: the pill's color, and which one it says). A
+tile may set `wide` (both columns, while it shows what's behind its
+arrow). `ControlService.close()` (`import "../../components/control"`)
+closes the panel after an action.
+
+A bar widget whose file name (without `NN-` and `.qml`) is the same as a
+part's leaves the bar while the Control Center is on: `widgets/right/30-volume.qml`
+and `control/sections/20-volume.qml`. With it off, the widgets are back.
 
 ## Writing a plugin
 

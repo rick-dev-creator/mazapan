@@ -27,3 +27,6 @@
 "speed_failed" = "Der Geschwindigkeitstest war nicht erreichbar"
 "speed_result" = "↓ %1 Mbit/s   ↑ %2 Mbit/s   %3 ms"
 "share_cant" = "Dieses WLAN lässt sich nicht als Code teilen (sein Passwort war nicht lesbar, oder jede Person hat ein eigenes)"
+"off" = "aus"
+"tile.wifi" = "WLAN"
+"tile.ethernet" = "Ethernet"

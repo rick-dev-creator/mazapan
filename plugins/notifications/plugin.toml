@@ -61,6 +61,17 @@ template = "Bell.qml.tmpl"
 output = "~/.config/quickshell/mazapan/widgets/right/90-notifications.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
+# Its place in the Control Center (when that's on, the bell leaves the bar).
+[[targets]]
+template = "Tile.qml.tmpl"
+output = "~/.config/quickshell/mazapan/control/tiles/30-notifications.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
+template = "Section.qml.tmpl"
+output = "~/.config/quickshell/mazapan/control/sections/90-notifications.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
 [[targets]]
 template = "notifications.lua.tmpl"
 output = "~/.config/hypr/mazapan/notifications.lua"

@@ -17,3 +17,5 @@
 "hint" = "Klick: verbinden · Rechtsklick: vergessen"
 
 "check" = "Bluetooth funktioniert (falls du es nutzt)"
+"off_short" = "aus"
+"on_short" = "an"

@@ -1,0 +1,54 @@
+[plugin]
+id = "control-center"
+name = "Control Center"
+version = "0.1.0"
+api = 1
+description = "One panel for what was a row of icons on the bar's right: the switches (Wi-Fi, Bluetooth, Do Not Disturb…), the sound and where it goes, the music, your agents, updates and notifications, grown out of a status pill that tells you when something needs you"
+categories = ["bar"]
+requires = ["shell-bar"]
+
+[packages]
+pacman = ["quickshell"]
+
+[settings]
+# The key that opens and closes it.
+key = "SUPER + A"
+
+[[targets]]
+template = "qmldir.tmpl"
+output = "~/.config/quickshell/mazapan/components/control/qmldir"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
+template = "ControlService.qml.tmpl"
+output = "~/.config/quickshell/mazapan/components/control/ControlService.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+# The status pill: last on the bar's right.
+[[targets]]
+template = "Pill.qml.tmpl"
+output = "~/.config/quickshell/mazapan/widgets/right/98-control.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
+template = "ControlCenter.qml.tmpl"
+output = "~/.config/quickshell/mazapan/panels/control-center.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+# The music: no plugin of its own, so it's this one's.
+[[targets]]
+template = "Media.qml.tmpl"
+output = "~/.config/quickshell/mazapan/control/sections/30-media.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
+template = "control.lua.tmpl"
+output = "~/.config/hypr/mazapan/control-center.lua"
+reload = "hyprctl reload >/dev/null"
+
+[[actions]]
+name = "{{ t \"act.open\" }}"
+run = "qs ipc -c mazapan call mazapan panel control-center"
+key = "{{ settings.key }}"
+keywords = "{{ t \"act.open.kw\" }}"
+glyph = "󰒓"

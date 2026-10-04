@@ -49,3 +49,7 @@
 "ask" = "Perguntar"
 "share" = "Compartilhar"
 "record_camera" = "Gravar com câmera"
+"recording_pill" = "Gravando %1"
+"recording_title" = "Gravando a tela · %1"
+"recording_where" = "Salvo em Vídeos ao parar"
+"stop" = "Parar"

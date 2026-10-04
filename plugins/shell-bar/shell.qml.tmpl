@@ -55,6 +55,18 @@ ShellRoot {
     property string hidden: ""
   }
   readonly property var hiddenWidgets: barState.hidden.split(",").filter(n => n !== "")
+  // With the Control Center on, a widget whose plugin put a section of the
+  // same name in it (control/*/NN-<name>.qml) lives there, not in the bar:
+  // turn the Control Center off and they're all back.
+  readonly property var absorbed: [
+{{- has_cc = false }}
+{{- for file in under "~/.config/quickshell/mazapan/panels/" }}{{ if file | string.ends_with "/control-center.qml" }}{{ has_cc = true }}{{ end }}{{ end }}
+{{- if has_cc }}
+{{- for file in under "~/.config/quickshell/mazapan/control/" }}
+    {{ quote file }},
+{{- end }}
+{{- end }}
+  ].map(f => widgetName(f))
   function widgetName(file) {
     return file.split("/").pop().replace(/\.qml$/, "").replace(/^[0-9]+-/, "")
   }
@@ -154,7 +166,7 @@ ShellRoot {
 
         // Not the widget's `visible`: inside a hidden slot it would read
         // false forever, so the widget could never come back.
-        visible: !root.hiddenWidgets.includes(root.widgetName(slot.file))
+        visible: !root.hiddenWidgets.includes(root.widgetName(slot.file)) && !root.absorbed.includes(root.widgetName(slot.file))
           && (loader.status !== Loader.Ready || loader.item.shown !== false)
 
         implicitWidth: loader.status === Loader.Ready ? loader.implicitWidth : failed.implicitWidth

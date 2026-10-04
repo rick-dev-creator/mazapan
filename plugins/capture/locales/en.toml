@@ -38,3 +38,7 @@
 "ask" = "Ask"
 "share" = "Share"
 "record_camera" = "Record with camera"
+"recording_pill" = "Recording %1"
+"recording_title" = "Recording the screen · %1"
+"recording_where" = "Saved to Videos when you stop"
+"stop" = "Stop"
