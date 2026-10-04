@@ -1,6 +1,6 @@
-<p align="center"><img src="assets/mazapan-app.svg" width="128" alt="Mazapán"></p>
+<p align="center"><img src="assets/mazapan-app.svg" width="128" alt="Mazapan"></p>
 
-# Mazapán
+# Mazapan
 
 A desktop on plain Arch Linux: Hyprland + Quickshell, one theme applied
 consistently across the whole OS, and everything extensible through plugins.
@@ -8,7 +8,7 @@ consistently across the whole OS, and everything extensible through plugins.
 Arch owns the critical parts (kernel, packages, updates). This repo only adds
 the layer on top.
 
-> **A personal project, shared as it is.** Mazapán is one person's desktop,
+> **A personal project, shared as it is.** Mazapan is one person's desktop,
 > made public in case it helps someone else. It comes with no warranty of
 > any kind (see [LICENSE](LICENSE)): installing it erases the disk you pick,
 > so back up what matters first, and read [docs/first-install.md](docs/first-install.md)
@@ -52,7 +52,7 @@ mazapan apply --system           # also system files (/etc) and packages, with s
 ```
 
 Agents (Claude Code, any MCP client) change the desktop the way a person
-does: through Mazapán, previewed with the exact diff, undoable. See
+does: through Mazapan, previewed with the exact diff, undoable. See
 [docs/agent-api.md](docs/agent-api.md).
 
 `SUPER + SHIFT + T` opens the theme picker: each theme drawn as a small
@@ -89,16 +89,16 @@ mazapan doctor           # run every plugin's health check now
 mazapan history          # past updates and how they went
 mazapan rollback [ID]    # undo an update: previous packages from pacman's
                         # cache, generated files as they were
-mazapan channel [stable|edge]  # where Mazapán's own updates come from
+mazapan channel [stable|edge]  # where Mazapan's own updates come from
 mazapan version
 ```
 
 An update is a few steps, each with its ✓: getting ready (room, power,
 the machine kept awake), the keyrings first when they change, the
-packages (Arch's, Mazapán's from its own signed repository, the Flatpak
+packages (Arch's, Mazapan's from its own signed repository, the Flatpak
 apps), the configuration written again, the checks; then what needs a
 restart, offered. The updates panel shows the same steps, and what's new
-in Mazapán from its changelog.
+in Mazapan from its changelog.
 
 Rolling back needs no reboot: it reinstalls the previous version of exactly
 the packages the update changed, from pacman's cache or, when the cache no
@@ -212,7 +212,7 @@ Requirements on the host: `qemu-desktop`, `xorriso`, `curl`, `python3`, KVM acce
 
 ## License
 
-[MIT](LICENSE). What Mazapán learned from others, and their notices, is in
+[MIT](LICENSE). What Mazapan learned from others, and their notices, is in
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md); among them Omarchy, whose
-hardware fixes the `hw-*` plugins carry. The name "Mazapán" and its icon
+hardware fixes the `hw-*` plugins carry. The name "Mazapan" and its icon
 aren't covered by the license: a fork is welcome under another name.
