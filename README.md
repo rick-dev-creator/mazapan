@@ -23,7 +23,9 @@
 </p>
 
 <p align="center">
+  <a href="#why-i-made-mazapan">Why</a> ·
   <a href="#agentic-os">Agentic OS</a> ·
+  <a href="#made-for-developers-net-first">.NET</a> ·
   <a href="#the-desktop">The desktop</a> ·
   <a href="#features">Features</a> ·
   <a href="#screenshots">Screenshots</a> ·
@@ -41,6 +43,32 @@
 > any kind (see [LICENSE](LICENSE)): installing it erases the disk you pick,
 > so back up what matters first, and read [docs/first-install.md](docs/first-install.md)
 > and [docs/security.md](docs/security.md) before trying it on a real machine.
+
+## Why I made Mazapan
+
+I changed Linux little by little until it became something I think is
+worth sharing: a desktop for developers who want Linux without having to
+live in the terminal to keep it running. Everything has a panel, and every
+panel shows the command it runs, so you learn as you go instead of before
+you start.
+
+I'm a .NET developer, and I wanted to show that .NET belongs on Linux too:
+the core of Mazapan is C#, compiled ahead of time into one native binary,
+and ASP.NET Core, Aspire, Rider and VS Code are ready to use from the first
+start.
+
+I work with several coding agents and several subscriptions, and the tools
+around them fell short: which one is waiting for me, how close each account
+is to its limit, what all of it costs. So Mazapan grew around agents: it
+sees them, counts for them, and lets them work on the system safely.
+
+And we're all different: gamers, developers, designers, people who just
+want a browser and an office suite. So the first start asks what you'll use
+the computer for, and installs the apps for it, my .NET stack included.
+
+If it's useful to you too, that's the best that could happen to it.
+
+— rickdev
 
 ## Agentic OS
 
@@ -101,6 +129,24 @@ it lets them change things the way a person does, never behind your back.
   conversation together.
 
 Full reference: [docs/agent-api.md](docs/agent-api.md).
+
+## Made for developers, .NET first
+
+- **The .NET profile**: the .NET SDK, ASP.NET Core's HTTPS development
+  certificate trusted by .NET, Chromium and Firefox, **Aspire** and its
+  templates, Rider and VS Code installed from their makers and checked
+  against their SHA-256, dotnet's tools on the PATH, telemetry off.
+- **Containers without root**: Podman with `docker` commands working, found
+  by Testcontainers, devcontainers, Compose and Aspire.
+- **Databases one click away**: PostgreSQL, SQL Server, MySQL, Redis and
+  MongoDB in local containers, their data kept, the connection string
+  copied in .NET's format or as a URL.
+- **Mobile (Expo)**: Android's SDK and emulator, Java 17 for Gradle, phones
+  over USB, a new Expo app one action away.
+- **Profiles for everyone else**: Basic, Development, Gaming, Retro,
+  Creative, Office, Streaming, Trading. Pick them at the first start or any
+  time later (`SUPER + ALT + A`); each says what it will install, and is
+  undoable.
 
 ## The desktop
 
