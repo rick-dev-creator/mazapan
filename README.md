@@ -46,7 +46,11 @@
 
 ## Why I made Mazapan
 
-I changed Linux little by little until it became something I think is
+I've been writing software for two decades, always on Windows. I still like
+Windows, but Linux's versatility, and how far you can make it your own,
+won me over.
+
+So I changed Linux little by little until it became something I think is
 worth sharing: a desktop for developers who want Linux without having to
 live in the terminal to keep it running. Everything has a panel, and every
 panel shows the command it runs, so you learn as you go instead of before
