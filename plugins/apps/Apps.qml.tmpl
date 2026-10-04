@@ -365,7 +365,11 @@ Item {
     property var app
     implicitWidth: 32
     implicitHeight: 32
-    readonly property var entry: app && app.desktop ? DesktopEntries.byId(app.desktop.replace(/\.desktop$/, "")) : null
+    // Looked up again as apps come and go (one just installed gets its icon).
+    readonly property var entry: {
+      DesktopEntries.applications.values
+      return app && app.desktop ? DesktopEntries.byId(app.desktop.replace(/\.desktop$/, "")) : null
+    }
     Image {
       id: pic
       anchors.fill: parent
