@@ -1,11 +1,61 @@
 # Contributing
 
-Mazapán is for anyone, anywhere: any language, keyboard, time zone and
+Mazapan is for anyone, anywhere: any language, keyboard, time zone and
 machine. Contributions that make it work better somewhere it doesn't yet
 are the most welcome.
 
 Code, comments and commit messages are in English; what people see is in
-their language.
+their language. Everyone taking part follows the
+[Code of Conduct](CODE_OF_CONDUCT.md); a security problem goes to
+[SECURITY.md](SECURITY.md), never to an issue.
+
+## Ways to help
+
+- **Try it and say what broke**: a [bug report](https://github.com/rick-dev-creator/mazapan/issues/new?template=bug_report.yml),
+  with `mazapan version` and, for hardware, `mazapan hardware`.
+- **A machine it doesn't handle yet**: a hardware plugin (`[hardware]`),
+  see [A plugin](#a-plugin).
+- **A language**: see [A language](#a-language).
+- **An app or a profile** for the Apps menu: `catalog/apps.toml`.
+- **A plugin** of your own, shared in a catalog or proposed as a built-in.
+- **Code** in the core (C#) or a plugin: start from an issue labelled
+  `good first issue`, or open one to talk it over first.
+
+## How a change gets in
+
+1. **An issue first** for anything bigger than a fix, so the idea can be
+   talked over before the work.
+2. **Fork, branch** from `main` (`fix/ocr-threads`, `plugin/bar-uptime`…).
+3. **Build and test** (below), and try it **in the VM**: never on the
+   machine you work on.
+4. **A pull request** with the template filled in: what, why, how it was
+   tried, screenshots for anything visible.
+5. **CI** must pass: the core's tests and its Native AOT build, every
+   plugin through `mazapan plugins check`, and shellcheck on the scripts.
+6. The maintainer reviews; changes are squashed or rebased onto `main`.
+
+### Commit messages
+
+What changed, for whoever reads the history later: an area, a colon, and
+what it does now, in the present tense; the body says why, and what was
+wrong before.
+
+```
+Capture: copying the text takes a second, not twenty
+
+Tesseract's own threads (OpenMP) made reading a screenshot many times
+slower: one thread.
+```
+
+### Code
+
+- **C#** (core/): .NET 10, Native AOT (no reflection the trimmer can't see),
+  nullable on; `.editorconfig` holds the formatting. A test for every
+  change in behaviour (core/tests).
+- **Plugins**: templates render with every theme and language
+  (`plugins check`); text in `locales/`; text settings that reach code
+  go through `shq`/`lq`/`quote`, never raw.
+- **Comments** say why, in plain words, for the next person.
 
 ## Build and test
 
@@ -13,7 +63,7 @@ their language.
 core/build test        # the core (needs the .NET 10 SDK and clang): tests, then bin/mazapan
 ```
 
-Everything that runs Mazapán runs in a VM, never on the machine you work
+Everything that runs Mazapan runs in a VM, never on the machine you work
 on (it rewrites your desktop's files):
 
 ```sh
@@ -44,10 +94,10 @@ in the plugins you translate, with the same keys, and the catalog's
 `translations.<lang>.*` in `catalog/apps.toml`, and `self = "<its name>"`
 in `plugins/installer/locales/<lang>.toml`.
 
-The installer offers the world's main languages whether or not Mazapán is
+The installer offers the world's main languages whether or not Mazapan is
 translated to them: the system and its apps speak the one chosen (its
 locale comes from the language and the time zone,
-`core/src/Mazapan/Setup/Locales.cs`), and Mazapán's own screens show in
+`core/src/Mazapan/Setup/Locales.cs`), and Mazapan's own screens show in
 English where a translation is missing, which the installer says. Those
 with a translation come first; a new one moves up by itself.
 

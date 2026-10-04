@@ -20,6 +20,7 @@
   <img src="https://img.shields.io/badge/Quickshell-8A6FDF?style=for-the-badge&labelColor=101418" alt="Quickshell">
   <img src="https://img.shields.io/badge/.NET_10_AOT-512BD4?style=for-the-badge&logo=dotnet&logoColor=white&labelColor=101418" alt=".NET 10 AOT">
   <img src="https://img.shields.io/github/license/rick-dev-creator/mazapan?style=for-the-badge&labelColor=101418&color=C9A15B" alt="MIT">
+  <a href="https://github.com/rick-dev-creator/mazapan/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/rick-dev-creator/mazapan/ci.yml?branch=main&style=for-the-badge&labelColor=101418&label=CI" alt="CI"></a>
 </p>
 
 <p align="center">
@@ -31,6 +32,7 @@
   <a href="#plugins-and-extensibility">Plugins</a> ·
   <a href="#every-feature">Every feature</a> ·
   <a href="#install">Install</a> ·
+  <a href="#contributing">Contributing</a> ·
   <a href="docs/roadmap.md">Roadmap</a>
 </p>
 
@@ -534,6 +536,15 @@ mazapan apply --theme phosphor   # write it; mazapan undo takes it back
 | [docs/first-install.md](docs/first-install.md) | The first install on real hardware |
 | [docs/security.md](docs/security.md) | What's protected, and what isn't |
 | [docs/roadmap.md](docs/roadmap.md) | Where it's going |
+
+## Contributing
+
+Bug reports, hardware it doesn't handle yet, translations, apps for the
+profiles, plugins and code are all welcome. Start with
+[CONTRIBUTING.md](CONTRIBUTING.md): how to build, test in the VM, and send
+a pull request (CI runs the tests, checks every plugin and the scripts).
+Everyone follows the [Code of Conduct](CODE_OF_CONDUCT.md); security
+problems go privately, as [SECURITY.md](SECURITY.md) says.
 
 ## License
 

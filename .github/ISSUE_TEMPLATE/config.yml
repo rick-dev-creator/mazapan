@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security problem
+    url: https://github.com/rick-dev-creator/mazapan/security/advisories/new
+    about: Report it privately, please, not as an issue.
+  - name: Writing a plugin
+    url: https://github.com/rick-dev-creator/mazapan/blob/main/docs/plugin-api.md
+    about: The plugin API, from a first plugin to sharing it.

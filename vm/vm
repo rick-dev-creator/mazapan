@@ -157,7 +157,7 @@ boot() {
   # the system draws its own (firmware, GRUB, the disk's password): vm/vm
   # try screen. Slower graphics; for looking at boot only.
   local gpu=(-device "virtio-vga-gl,xres=$w,yres=$h,max_outputs=$outputs")
-  if [[ ${MAZAPAN_VGA:-} == std ]]; then gpu=(-device VGA,vgamem_mb=64); display=(-display none); fi
+  if [[ ${MAZAPAN_VGA:-} == std ]]; then gpu=(-device "VGA,vgamem_mb=64"); display=(-display none); fi
   log "booting ($cpus cpus, $mem, ${res}); serial log: vm/.state/${serial##*/}"
   setsid -f qemu-system-x86_64 \
     -name "$name" \
@@ -347,8 +347,7 @@ cmd_stop() {
   # The power button (ACPI, through QMP) when SSH can't do it; killed only
   # if it hasn't stopped in 90 s.
   ssh "${ssh_opts[@]}" "$ssh_user@127.0.0.1" sudo systemctl poweroff 2>/dev/null || qmp system_powerdown || true
-  local i
-  for i in $(seq 1 90); do running || break; sleep 1; done
+  for _ in $(seq 1 90); do running || break; sleep 1; done
   running && kill "$(cat "$pidfile")"
   while running; do sleep 1; done
   rm -f "$pidfile"
