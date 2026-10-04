@@ -86,7 +86,8 @@ case "$1" in
       mysql:dotnet) echo "Server=localhost;Port=$p;User ID=root;Password=$pw" ;;
       mysql:*) echo "mysql://root:$pw@localhost:$p" ;;
       redis:dotnet) echo "localhost:$p,password=$pw" ;;
-      redis:*) echo "redis://:$pw@localhost:$p" ;;
+      # "default" named: with no user (redis://:pw@) redis-cli 7 and others log in as "" and fail.
+      redis:*) echo "redis://default:$pw@localhost:$p" ;;
       sqlserver:dotnet) echo "Server=localhost,$p;User ID=sa;Password=$pw;TrustServerCertificate=True" ;;
       sqlserver:*) echo "sqlserver://sa:$pw@localhost:$p" ;;
       mongodb:*) echo "mongodb://root:$pw@localhost:$p" ;;
