@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    name: Core · tests and Native AOT build
+    runs-on: ubuntu-latest
+    # Arch, as Mazapan runs on: its .NET SDK, its tools.
+    container: archlinux:latest
+    steps:
+      - name: Tools
+        run: pacman -Syu --noconfirm --needed dotnet-sdk clang lld git sqlite base-devel sudo
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # pkg/version reads the tags and the history
+
+      # Not as root: tests about files that can't be read would pass for root.
+      - name: A user to build as
+        run: |
+          useradd -m builder
+          chown -R builder: "$GITHUB_WORKSPACE"
+          sudo -u builder git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Tests
+        run: sudo -u builder env DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1 dotnet test core/tests/Mazapan.Tests --nologo -v q
+
+      - name: Build
+        run: sudo -u builder env DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1 core/build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mazapan
+          path: bin/mazapan
+          retention-days: 7
+
+  plugins:
+    name: Plugins · every one checked
+    needs: core
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Tools
+        run: pacman -Syu --noconfirm --needed git
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: mazapan
+          path: bin
+
+      # Each plugin rendered with every theme and language, and what it can
+      # do read out: the built-in ones and the community's.
+      - name: plugins check
+        run: |
+          chmod +x bin/mazapan
+          export HOME="$(mktemp -d)"
+          fail=0
+          for p in plugins/*/ community/*/; do
+            if ! out=$(bin/mazapan plugins check "$p" 2>&1); then
+              echo "::error title=plugins check ${p%/}::$(printf '%s' "$out" | tail -n 5 | tr '\n' ' ')"
+              printf '%s\n' "$out"
+              fail=1
+            fi
+          done
+          exit $fail
+
+  shell:
+    name: Shell scripts · shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Plain scripts only: templates (*.tmpl) are shell only once rendered.
+      - name: shellcheck
+        run: |
+          files=$(git ls-files | grep -v '\.tmpl$' | while read -r f; do
+            [ -f "$f" ] && head -n1 "$f" | grep -qE '^#!.*\b(ba|da)?sh\b' && echo "$f"
+          done)
+          echo "$files"
+          shellcheck -S warning $files

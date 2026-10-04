@@ -57,6 +57,8 @@ log "offline repository"
 offline="$work/offline"
 mkdir -p "$offline" "$work/offline-db"
 mapfile -t target < <(sed -e 's/#.*//' -e '/^\s*$/d' "$repo/iso/target-packages.txt")
+# The logs are ours, written as us: only the command runs as root.
+# shellcheck disable=SC2024
 sudo pacman --config "$conf" --dbpath "$work/offline-db" --cachedir "$offline" -Syw --noconfirm "${target[@]}" \
   >"$work/offline.log" 2>&1 || { tail -20 "$work/offline.log" >&2; die "downloading the offline repository failed"; }
 sudo rm -rf "$work/offline-db"
@@ -118,6 +120,7 @@ sed -e 's/^title .*/title    mazapan, safe graphics (NVIDIA off)/' -e 's/^sort-k
   -e 's/^options .*/& modprobe.blacklist=nouveau,nvidia,nvidia_drm,nvidia_modeset/' "$e" > "$p/efiboot/loader/entries/01-mazapan-safe.conf"
 
 log "mkarchiso (a few minutes)"
+# shellcheck disable=SC2024
 sudo mkarchiso -v -w "$work/mkarchiso" -o "$out" "$p" >"$work/mkarchiso.log" 2>&1 \
   || { tail -30 "$work/mkarchiso.log" >&2; die "mkarchiso failed (log: $work/mkarchiso.log)"; }
 sudo rm -rf "$work/mkarchiso"

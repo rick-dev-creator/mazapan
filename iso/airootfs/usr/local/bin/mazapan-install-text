@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# ask() assigns its answers with printf -v, which shellcheck doesn't follow.
+# shellcheck disable=SC2154
 # The installer in text, for when the live desktop can't start (graphics
 # the ISO's drivers don't handle yet): the same questions as the graphical
 # one, the same answers file, the same `mazapan install run`. The disk is
