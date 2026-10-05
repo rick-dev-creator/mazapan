@@ -554,6 +554,6 @@ problems go privately, as [SECURITY.md](SECURITY.md) says.
 ## License
 
 [MIT](LICENSE). What Mazapan learned from others, and their notices, is in
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md); among them Omarchy, whose
-hardware fixes the `hw-*` plugins carry. The name "Mazapan" and its icon
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), including the source of
+the hardware fixes the `hw-*` plugins carry. The name "Mazapan" and its icon
 aren't covered by the license: a fork is welcome under another name.

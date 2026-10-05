@@ -73,7 +73,7 @@ public static class Archinstall
                     new Fields {
                         { "btrfs", new List<object> { Subvol("@", "/"), Subvol("@home", "/home"), Subvol("@log", "/var/log"), Subvol("@pkg", "/var/cache/pacman/pkg") }
                             // Hibernation's swap file in a top-level subvolume of its own: inside
-                            // the root's, a snapshot's rollback would take it along (Omarchy's).
+                            // the root's, a snapshot's rollback would take it along.
                             .Concat(a.Hibernate == true ? [Subvol("@swap", "/swap")] : []).ToList() },
                         { "dev_path", null }, { "flags", new List<object>() }, { "fs_type", "btrfs" },
                         { "mount_options", new List<object> { "compress=zstd" } }, { "mountpoint", null },

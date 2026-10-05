@@ -47,7 +47,7 @@ public static partial class Program
     const int MinBattery = 20;
 
     /// <summary>
-    /// Ready: what has to hold before anything changes (Omarchy's checks):
+    /// Ready: what has to hold before anything changes:
     /// room for the packages, and power. An error says what to do; else what
     /// was found, in a few words.
     /// </summary>

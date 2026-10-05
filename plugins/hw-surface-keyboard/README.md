@@ -6,8 +6,8 @@ LPSS. Left to load on their own, its modules come up once the system
 has started: too late for the disk password, asked for before that.
 This loads them from the start.
 
-Offered on Microsoft Surface devices. Tested by Omarchy, where this
-comes from, on the Surface Laptop 3; other models may need more.
+Offered on Microsoft Surface devices. Tested upstream on the Surface
+Laptop 3 (see THIRD_PARTY_NOTICES.md); other models may need more.
 
 It writes one file, as root:
 `/etc/mkinitcpio.conf.d/mazapan-surface-keyboard.conf`, with the

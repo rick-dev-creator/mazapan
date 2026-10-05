@@ -1,6 +1,6 @@
 # Tailscale
 
-Tailscale ready to use, as Omarchy sets it up and a little further:
+Tailscale ready to use:
 
 - its service, `tailscaled`, started now and at every start;
 - you made its operator, so signing in (`tailscale up`) and sending or
