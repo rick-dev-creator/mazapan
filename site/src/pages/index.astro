@@ -3,6 +3,15 @@ import Chomp from "../components/Chomp.astro";
 
 const github = "https://github.com/rick-dev-creator/mazapan";
 const downloads = "https://sourceforge.net/projects/mazapan/files/";
+// The release's ISO (pkg/sourceforge puts it there, with its .sha256 and .sig).
+const release = {
+  version: "0.1.0",
+  name: "Mazapan",
+  iso: "mazapan-0.1.0-2026.10.05-x86_64.iso",
+  sha256: "f29f501ffb5c1fe9ac3a77abb5a637351c483061c25779bb79c25edfe3b1bc28",
+};
+const isoUrl = `${downloads}${release.version}/${release.iso}`;
+const key = "7C05 EB75 B1C5 4AD8 F9E1  61C7 1FCE 814E 8077 F475";
 
 const features = [
   ["Your agents, part of the desktop", "Every coding agent's live sessions in the bar, each account's limits and spend in one place, a built-in MCP server, and changes to the system only through previewed steps you approve."],
@@ -61,10 +70,15 @@ const features = [
 
       <section id="download" class="download">
         <h2>Download</h2>
-        <p class="soon">The first release, <strong>0.1 “Mazapan”</strong>, is on its way.</p>
+        <p class="soon">
+          <strong>{release.version} “{release.name}”</strong>, the first release.
+        </p>
+        <p><a class="button primary" href={`${isoUrl}/download`}>Download {release.iso}</a></p>
         <ol>
-          <li>Get the ISO from <a href={downloads}>SourceForge</a>, with its <code>.sha256</code> file.</li>
-          <li>Check it: <code>sha256sum -c mazapan-*.iso.sha256</code> says <code>OK</code>.</li>
+          <li>Get the ISO, its <a href={`${isoUrl}.sha256/download`}><code>.sha256</code></a> and its <a href={`${isoUrl}.sig/download`}><code>.sig</code></a>.</li>
+          <li>Check it: <code>sha256sum -c {release.iso}.sha256</code> says <code>OK</code>
+            (SHA-256 <code class="hash">{release.sha256}</code>), and the signature is
+            the Mazapan release key's: <code class="hash">{key}</code>.</li>
           <li>Write it to a USB stick of 8 GB or more and start the computer from it.</li>
           <li>The installer guides you: language, disk, account, and the apps you want.</li>
         </ol>
@@ -182,6 +196,7 @@ const features = [
   .download ol { padding-left: 1.25rem; }
   .download li { margin-block: 0.4rem; }
   .soon { margin-top: 0; }
+  .hash { word-break: break-all; }
   .note { color: var(--muted); margin-bottom: 0; }
 
   footer { padding-block: 2rem 3rem; color: var(--muted); text-align: center; border-top: 1px solid var(--border); }
