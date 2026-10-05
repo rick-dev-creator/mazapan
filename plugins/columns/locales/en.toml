@@ -16,3 +16,4 @@
 "maximize.kw" = "maximize full width column niri"
 "next_workspace" = "Workspaces: the next one (a new one after the last)"
 "workspace.kw" = "workspace next new empty niri"
+"previous_workspace" = "Workspaces: the one before"

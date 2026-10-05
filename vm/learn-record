@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Records the Learn plugin's lessons in the dev VM (plugins/learn/media):
+# the desktop cleared first (no panel, no notification, the pointer in a
+# corner), then each lesson by vm/guest/learn-record.sh.
+#   vm/learn-record [ID…]     every lesson by default
+set -euo pipefail
+repo="$(cd "$(dirname "$0")/.." && pwd)"
+vm="$repo/vm/vm"
+ids=("$@")
+[[ ${#ids[@]} -gt 0 ]] || ids=(focus move width equal max workspaces overview palette keys)
+for id in "${ids[@]}"; do
+  printf '\e[1;35m[learn]\e[0m %s\n' "$id"
+  "$vm" mouse move 1919 1079 >/dev/null
+  "$vm" run 'qs ipc -c mazapan call mazapan close; qs ipc -c mazapan call notifications clear; true' >/dev/null 2>&1 || true
+  sleep 1
+  "$vm" run "sh /home/arch/my-arch/vm/guest/learn-record.sh $id"
+done

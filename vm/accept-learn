@@ -1,0 +1,220 @@
+#!/usr/bin/env bash
+# Acceptance for the Learn plugin (docs/acceptance/learn.md), in the dev VM,
+# with real keys: QEMU's keyboard, as a person would press them. Every
+# point marked auto there; screenshots of the rest in vm/.state/accept-learn.
+# On the VM's own keyboard (Latin American: every key used is a letter, an
+# arrow or a function key, where every layout has them); its config.toml,
+# changed for one check, is put back after.
+#   vm/accept-learn
+set -euo pipefail
+repo="$(cd "$(dirname "$0")/.." && pwd)"
+vm="$repo/vm/vm"
+shots="$repo/vm/.state/accept-learn"
+mkdir -p "$shots"
+n=0
+pass() { n=$((n + 1)); printf '\e[1;32m[accept] PASS\e[0m %s\n' "$*"; }
+fail() { printf '\e[1;31m[accept] FAIL\e[0m %s\n' "$*" >&2; restore; exit 1; }
+step() { printf '\e[1;35m[accept]\e[0m %s\n' "$*"; }
+run() { "$vm" run "$@" 2>/dev/null | tail -n 1; }
+key() { "$vm" key "$@" >/dev/null; }
+layer() { run "hyprctl layers -j | jq -r '.. | .namespace? // empty' | grep -c '^$1\$' || true"; }
+alive() { [[ $(run 'qs ipc -c mazapan call mazapan ping') == ok ]] || fail "the shell went down ($1)"; }
+practice_count() { run "hyprctl clients -j | jq '[.[] | select(.class == \"mazapan-practice\")] | length'"; }
+# Waits up to $2 seconds for a command's last line to be $3.
+until_is() {
+  local i
+  for ((i = 0; i < $2 * 2; i++)); do [[ $(run "$1") == "$3" ]] && return 0; sleep 0.5; done
+  return 1
+}
+
+cfg=/home/arch/.config/mazapan/config.toml
+restore() {
+  run "[ -f $cfg.accept ] && mv $cfg.accept $cfg && mazapan apply >/dev/null 2>&1; true" >/dev/null || true
+}
+trap restore EXIT
+
+step "config.toml kept aside, applied as it is"
+run "cp $cfg $cfg.accept && mazapan apply >/dev/null 2>&1; qs ipc -c mazapan call mazapan reload; echo done" >/dev/null
+sleep 5
+"$vm" mouse move 700 500 >/dev/null
+run 'qs ipc -c mazapan call mazapan close; rm -f ~/.local/state/mazapan/learn.json; true' >/dev/null
+alive "start"
+
+# 1
+out=$(run 'mazapan plugins check learn 2>&1 | grep "^learn "')
+[[ $out == *"0 errors, 0 warnings"* ]] || fail "plugins check: $out"
+pass "1 renders everywhere: $out"
+
+# 2
+ids=$(run "jq -r '[.lessons[].id] | join(\" \")' ~/.config/quickshell/mazapan/learn/lessons.json")
+[[ $(wc -w <<<"$ids") -eq 9 ]] || fail "lessons: $ids"
+media=$(run "jq -r .media ~/.config/quickshell/mazapan/learn/lessons.json")
+for id in $ids; do
+  # Where the panel reads it, in the VM; then what it is, here.
+  [[ $(run "test -s '$media/$id.webp' && echo yes") == yes ]] || fail "no recording for $id at $media"
+  f="$repo/plugins/learn/media/$id.webp"
+  [[ $(head -c 4 "$f") == RIFF && $(dd if="$f" bs=1 skip=8 count=4 2>/dev/null) == WEBP ]] || fail "$id.webp isn't a WebP"
+  grep -q ANIM "$f" || fail "$id.webp isn't animated"
+done
+pass "2 nine lessons, each recording there and animated"
+
+# 3
+run "sed -i '/^\s*\[plugins.columns\]/a\    move_right_key = \"SUPER + SHIFT + L\"' $cfg && mazapan apply >/dev/null 2>&1; echo ok" >/dev/null
+got=$(run "jq -r '.lessons[] | select(.id == \"move\") | .steps[0].keys' ~/.config/quickshell/mazapan/learn/lessons.json")
+run "sed -i '/move_right_key = \"SUPER + SHIFT + L\"/d' $cfg && mazapan apply >/dev/null 2>&1; echo ok" >/dev/null
+[[ $got == "SUPER + SHIFT + L" ]] || fail "the move lesson shows '$got', not the key set"
+pass "3 a changed key shows changed in its lesson"
+sleep 3
+
+# 4
+key meta_l-f1
+sleep 1.5
+[[ $(layer mazapan-panel-learn) == 1 ]] || fail "SUPER + F1 didn't open Learn"
+"$vm" shot "$shots/learn.png" >/dev/null 2>&1 || true
+key esc
+sleep 1
+[[ $(layer mazapan-panel-learn) == 0 ]] || fail "Esc didn't close Learn"
+pass "4 SUPER + F1 opens Learn, Esc closes it"
+
+# 5
+key "meta_l 2500" &
+sleep 1.6
+held=$(layer mazapan-panel-keys)
+"$vm" shot "$shots/keys.png" >/dev/null 2>&1 || true
+wait
+sleep 0.8
+let=$(layer mazapan-panel-keys)
+[[ $held == 1 && $let == 0 ]] || fail "hold SUPER: shown $held while held, $let after"
+pass "5 SUPER held shows every key, letting go hides them"
+
+# 6
+key meta_l-right
+sleep 1.5
+[[ $(layer mazapan-panel-keys) == 0 ]] || fail "SUPER + → showed the keys"
+# …and holding it afterwards still does (a hold cut short by a shortcut
+# once left the next ones dead).
+key "meta_l 2000" &
+sleep 1.4
+again=$(layer mazapan-panel-keys)
+wait
+sleep 0.8
+[[ $again == 1 ]] || fail "after a shortcut, holding SUPER no longer shows the keys"
+pass "6 a shortcut with SUPER never shows them, and holding it after still does"
+
+# 7 (the key starts `qs ipc`, which can take a moment: waited for)
+LAYERS="hyprctl layers -j | jq -r '.. | .namespace? // empty' | grep -c '^mazapan-panel-keys\$' || true"
+key meta_l-k
+until_is "$LAYERS" 5 1 || fail "SUPER + K didn't show the keys"
+key meta_l-k
+until_is "$LAYERS" 5 0 || fail "SUPER + K again didn't hide them"
+pass "7 SUPER + K shows the keys and hides them"
+alive "keys"
+
+# 15: stopping a practice while its windows open leaves none behind
+ws0=$(run 'hyprctl activeworkspace -j | jq .id')
+run "qs ipc -c mazapan call mazapan open learn focus" >/dev/null
+sleep 1.5
+key ret
+sleep 0.4
+key meta_l-f1
+until_is "hyprctl clients -j | jq '[.[] | select(.class == \"mazapan-practice\")] | length'" 10 0 ||
+  fail "stopped while opening: practice windows left behind"
+sleep 2
+[[ $(practice_count) == 0 ]] || fail "stopped while opening: windows kept opening after"
+[[ $(run 'hyprctl activeworkspace -j | jq .id') == "$ws0" ]] || fail "stopped while opening: not back on workspace $ws0"
+run 'qs ipc -c mazapan call mazapan close' >/dev/null
+pass "15 stopped while its windows open: none left, back where it was"
+
+# 16: SUPER + Q in a practice stops the practice (not one of its windows)
+run "qs ipc -c mazapan call mazapan open learn move" >/dev/null
+sleep 1.5
+key ret
+until_is "hyprctl clients -j | jq '[.[] | select(.class == \"mazapan-practice\")] | length'" 15 3 || fail "move: practice didn't open"
+sleep 1
+key meta_l-q
+until_is "hyprctl clients -j | jq '[.[] | select(.class == \"mazapan-practice\")] | length'" 10 0 || fail "SUPER + Q didn't stop the practice"
+[[ $(layer mazapan-panel-learn-practice) == 0 ]] || fail "SUPER + Q left the practice card"
+[[ $(run "jq -r '.done | index(\"move\") != null' ~/.local/state/mazapan/learn.json 2>/dev/null") != true ]] || fail "SUPER + Q ticked the lesson off"
+pass "16 SUPER + Q stops a practice"
+alive "stops"
+
+# 8: each lesson tried for real. What closes what the move opened after.
+declare -A move=([focus]=meta_l-right [move]=meta_l-shift-right [width]=meta_l-alt-right [equal]=meta_l-w
+  [max]=meta_l-f [workspaces]=meta_l-pgdn [overview]=meta_l-tab [palette]=meta_l-spc [keys]="meta_l 1500")
+declare -A after=([overview]=meta_l-tab [palette]=esc)
+ws0=$(run 'hyprctl activeworkspace -j | jq .id')
+for id in $ids; do
+  run "qs ipc -c mazapan call mazapan open learn $id" >/dev/null
+  sleep 1.5
+  want=$(run "jq '.lessons[] | select(.id == \"$id\") | .windows' ~/.config/quickshell/mazapan/learn/lessons.json")
+  key ret
+  if [[ $want -gt 0 ]]; then
+    until_is "hyprctl clients -j | jq '[.[] | select(.class == \"mazapan-practice\")] | length'" 15 "$want" ||
+      fail "$id: $want practice windows didn't open"
+  fi
+  sleep 1.5
+  [[ $(layer mazapan-panel-learn) == 0 && $(layer mazapan-panel-learn-practice) == 1 ]] ||
+    fail "$id: the panel didn't step aside for the practice card"
+  # Nothing pressed yet: not done by itself.
+  [[ $(run "jq -r '.done | index(\"$id\") != null' ~/.local/state/mazapan/learn.json 2>/dev/null") != true ]] ||
+    fail "$id: ticked off before anything was pressed"
+  key "${move[$id]}"
+  if [[ -n ${after[$id]:-} ]]; then sleep 1.5; key "${after[$id]}"; fi
+  until_is "jq -r '.done | index(\"$id\") != null' ~/.local/state/mazapan/learn.json 2>/dev/null" 10 true ||
+    fail "$id: the move wasn't ticked off"
+  # Back on the panel (after its moment of ✓), the practice gone.
+  until_is "hyprctl layers -j | jq -r '.. | .namespace? // empty' | grep -c '^mazapan-panel-learn\$' || true" 8 1 ||
+    fail "$id: the panel didn't come back"
+  [[ $(practice_count) == 0 ]] || fail "$id: practice windows left open"
+  [[ $(run 'hyprctl activeworkspace -j | jq .id') == "$ws0" ]] || fail "$id: not back on workspace $ws0"
+  key esc
+  sleep 1
+  alive "lesson $id"
+  pass "8 $id: tried for real, ticked off, tidied up"
+done
+pass "9 the shell stayed up throughout"
+
+# 10
+out=$(run 'P="sh $HOME/.local/share/mazapan/bin/learn-practice"; $P open 3; wf-recorder -f /tmp/accept.mp4 >/dev/null 2>&1 & p=$!; sleep 1;
+  qs ipc -c mazapan call mazapan panel overview; sleep 2; qs ipc -c mazapan call mazapan panel overview; sleep 1;
+  kill -INT $p; wait $p; sleep 1; $P close; sleep 2; rm -f /tmp/accept.mp4; qs ipc -c mazapan call mazapan ping')
+[[ $out == ok ]] || fail "recording + overview + closing windows brought the shell down"
+pass "10 recording with the overview's previews, then closing the windows: the shell stays"
+
+# 14: the columns' keys on this (Latin American) keyboard
+st() { run 'sh $HOME/.local/share/mazapan/bin/learn-practice state'; }
+run 'sh $HOME/.local/share/mazapan/bin/learn-practice open 3' >/dev/null
+sleep 1
+before=$(st)
+key meta_l-p
+sleep 1.5
+after_p=$(st)
+[[ $(jq -c .widths <<<"$before") != $(jq -c .widths <<<"$after_p") ]] || fail "SUPER + P didn't change the widths"
+key meta_l-p
+sleep 1
+cols0=$(jq .columns <<<"$(st)")
+key meta_l-ctrl-right
+sleep 1.5
+cols1=$(jq .columns <<<"$(st)")
+run 'sh $HOME/.local/share/mazapan/bin/learn-practice close' >/dev/null
+[[ $cols1 -lt $cols0 ]] || fail "SUPER + CTRL + → didn't put the window into the next column ($cols0 → $cols1 columns)"
+pass "14 SUPER + P and SUPER + CTRL + → work on a Latin American keyboard"
+alive "columns keys"
+
+# 11, 13: screenshots
+run 'qs ipc -c mazapan call mazapan panel palette' >/dev/null
+sleep 1
+for k in m o v e; do key $k; done
+sleep 0.5
+key down
+sleep 2
+"$vm" shot "$shots/palette-move.png" >/dev/null 2>&1 || true
+key esc
+
+# 12
+grep_welcome=$(run 'grep -c "canLearn: true" ~/.config/quickshell/mazapan/panels/welcome.qml')
+[[ $grep_welcome == 1 ]] || fail "the welcome doesn't offer the tour"
+pass "12 the welcome offers the tour"
+
+step "screenshots for 11 and 13: $shots"
+pass "all $n checks"

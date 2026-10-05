@@ -258,6 +258,7 @@ Item {
   // Only what's for this machine, and with the keys as they are: from
   // every plugin's palette actions.
   readonly property var actions: {{ json actions }}
+  readonly property bool canLearn: {{ if (under "~/.config/quickshell/mazapan/panels/learn.qml").size > 0 }}true{{ else }}false{{ end }}
   readonly property var keys: [
     ["panel palette", {{ tq "k.palette" }}], ["foot", {{ tq "k.terminal" }}], ["panel apps", {{ tq "k.apps" }}],
     ["panel themes", {{ tq "k.themes" }}], ["panel modes", {{ tq "k.modes" }}], ["panel history", {{ tq "k.history" }}],
@@ -869,6 +870,31 @@ Item {
                   Label { id: keyText; anchors.centerIn: parent; text: modelData[0]; font.family: Theme.fontMono }
                 }
                 Label { text: modelData[1]; wrapMode: Text.Wrap; Layout.fillWidth: true }
+              }
+            }
+          }
+        }
+
+        // The tour, offered once everything's set (the Learn plugin's).
+        Rectangle {
+          visible: root.step === "ready" && root.canLearn
+          Layout.fillWidth: true
+          implicitHeight: learnRow.implicitHeight + 24
+          radius: Theme.radius
+          color: Theme.accentDeep
+          border.width: 1
+          border.color: Theme.accent
+          RowLayout {
+            id: learnRow
+            anchors.fill: parent
+            anchors.margins: 12
+            spacing: 14
+            Label { text: {{ tq "learn.text" }}; wrapMode: Text.Wrap; Layout.fillWidth: true }
+            Button {
+              text: {{ tq "learn.button" }}
+              onClicked: {
+                root.finish()
+                Quickshell.execDetached(["qs", "ipc", "-c", "mazapan", "call", "mazapan", "open", "learn", ""])
               }
             }
           }

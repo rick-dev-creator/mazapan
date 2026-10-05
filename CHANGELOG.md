@@ -6,6 +6,20 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- The columns' keys work on every keyboard: equal widths is SUPER + W,
+  phone width SUPER + P, a window into the next column SUPER + CTRL + ←/→
+  (`=`, `[` and `]` need SHIFT or ALTGR on Spanish, Latin American or
+  German keyboards, so those keys couldn't be pressed there). Keys you set
+  yourself stay as they are.
+- Learn (SUPER + F1, or Learn in the palette): short lessons on moving
+  around, each a real recording of the move with its keys lit as it
+  happens, then tried for real on practice windows of their own and
+  ticked off. Holding SUPER shows every key, grouped, until it's let go
+  (SUPER + K too). In the palette, an action a lesson teaches shows its
+  recording beside it; the welcome offers the tour at the end.
+- The overview and the workspace previews let go of their window captures
+  when they hide: a screen recording followed by closing a window that had
+  been in the overview brought the whole shell down.
 - Updates with nothing to update say only that, without Arch's news or a
   warning that looked like a manual update was needed; the news shows
   before an update, each in full, the ones asking for a step by hand

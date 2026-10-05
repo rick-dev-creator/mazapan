@@ -217,7 +217,10 @@ Item {
                     ScreencopyView {
                       anchors.fill: parent
                       anchors.margins: 1
-                      captureSource: thumb.modelData.wayland
+                      // Released as soon as it's out of sight: a capture kept for a
+                      // window that closes later, after the screen was recorded,
+                      // brought the whole shell down (Quickshell 0.3).
+                      captureSource: root.open ? thumb.modelData.wayland : null
                       live: root.open
                       constraintSize: Qt.size(width, height)
                     }
@@ -271,7 +274,7 @@ Item {
         ScreencopyView {
           anchors.fill: parent
           anchors.margins: 2
-          captureSource: root.held ? root.held.wayland : null
+          captureSource: root.held && parent.visible ? root.held.wayland : null
           live: parent.visible
           constraintSize: Qt.size(width, height)
         }

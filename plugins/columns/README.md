@@ -9,7 +9,7 @@ layout:
 - `SUPER + R`: the focused column a third, half, two thirds, all of the
   screen, in turn (`SUPER + SHIFT + R` the other way round). `SUPER + F`:
   all of the width, and back. `SUPER + SHIFT + F`: fullscreen.
-- `SUPER + [` / `SUPER + ]`: the window into the column on its left or
+- `SUPER + CTRL + ←` / `SUPER + CTRL + →`: the window into the column on its left or
   right (two windows stacked in one column), or, in a column with others,
   out into its own.
 - `SUPER + Page Down` / `SUPER + Page Up`: the next or previous workspace
@@ -30,10 +30,10 @@ Windows side by side as columns (Hyprland's scrolling layout), instead of
 each new window halving the one before. Three arrangements, remembered
 for each workspace:
 
-- **Equal** (`SUPER + =`): every column the same width, filling the
+- **Equal** (`SUPER + W`, for widths): every column the same width, filling the
   screen. With more windows than fit at `min_width` (400 logical pixels),
   the columns keep that width and the row scrolls.
-- **Phone** (`SUPER + SHIFT + =`): every column a phone's width, the
+- **Phone** (`SUPER + P`): every column a phone's width, the
   group centered on the screen. Again, and it's back to equal.
   `phone_aspect` is a column's width to height (0.4615, a phone held
   upright), so the width follows each screen's height.
@@ -51,3 +51,7 @@ row. Every key can be changed, and they're all in the palette too.
 With `auto` on, the columns are arranged again whenever a window opens,
 closes or moves in, so they always share the screen (equal widths, as
 before Niri's way was the default).
+
+The keys are letters and arrows, so every keyboard has them without SHIFT
+or ALTGR: `=`, `[` and `]` need one of those on Spanish, Latin American or
+German keyboards, where a key with them couldn't be pressed at all.
