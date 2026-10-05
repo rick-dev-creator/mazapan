@@ -4,6 +4,14 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
+## Unreleased
+
+- The palette: typing a place's name finds the place first ("wallpaper"
+  opens the wallpaper picker, before the actions that start with the same
+  word). Next wallpaper with no pictures of yours opens the picker, which
+  says where to put them; the theme's own wallpaper when it's already the
+  one says so, instead of nothing.
+
 ## 0.1.0 — Mazapan (2026-10-05)
 
 - The apps chosen in the installer go in with the system: Basic's (the
