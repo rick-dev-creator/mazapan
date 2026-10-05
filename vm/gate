@@ -12,6 +12,8 @@
 # MAZAPAN_GATE_APPS='["lazygit","github-cli"]' chooses apps at the install:
 # at the first login they're installed (the password typed into the polkit
 # agent's dialog, as a person would), and checked there.
+# MAZAPAN_GATE_LANG=es installs in that language (its locale, es_ES.UTF-8;
+# the keyboard stays us, for the password typed at the disk's prompt).
 # MAZAPAN_GATE_REPO=DIR also updates the installed system from that
 # repository (pkg/release's out/repo), copied to /srv/mazapan-repo: the ISO
 # has to be built with MAZAPAN_REPO_SERVER='file:///srv/mazapan-repo/$channel/$arch'
@@ -44,10 +46,12 @@ type_password() {
   "$vm" try key ret >/dev/null 2>&1
 }
 
+lang="${MAZAPAN_GATE_LANG:-en}"
+case $lang in en) locale=en_US.UTF-8 ;; pt) locale=pt_BR.UTF-8 ;; *) locale="${lang}_${lang^^}.UTF-8" ;; esac
 answers="$state/gate-answers.json"
 cat > "$answers" <<EOF
 {"disk":"auto","encrypt":$([[ $mode == encrypted ]] && echo true || echo false),"user":"$user","fullname":"Gate",
- "password":"$pass","timezone":"UTC","language":"en","locale":"en_US.UTF-8","kb_layout":"us","kb_variant":"",
+ "password":"$pass","timezone":"UTC","language":"${lang}","locale":"${locale}","kb_layout":"us","kb_variant":"",
  "theme":"phosphor","apps":${MAZAPAN_GATE_APPS:-[]},"after":"none"$([[ ${MAZAPAN_GATE_HIBERNATE:-} == 1 ]] && echo ',"hibernate":true')}
 EOF
 

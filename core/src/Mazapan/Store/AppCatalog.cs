@@ -12,6 +12,8 @@ namespace Mazapan.Store;
 public sealed class App
 {
     public string Id = "", Name = "", Description = "", Category = "", Desktop = "";
+    /// <summary>A program without a launcher (lazygit, gh): what a terminal runs to open it.</summary>
+    public string Command = "";
     public List<string> Pacman = [];
     public string Flatpak = "", Webapp = "", Plugin = "";
     /// <summary>From its maker (jetbrains:RD, vscode:stable): see Vendor.</summary>
@@ -126,6 +128,7 @@ public static partial class AppCatalog
                 Description = t.String("description"),
                 Category = t.String("category"),
                 Desktop = t.String("desktop"),
+                Command = t.String("command"),
                 Pacman = t.Strings("pacman"),
                 Flatpak = t.String("flatpak"),
                 Webapp = t.String("webapp"),
@@ -152,6 +155,8 @@ public static partial class AppCatalog
             if (a.Plugin != "" && !Mazapan.Plugins.Plugin.IdPattern().IsMatch(a.Plugin)) throw new MazapanException($"{from}: {a.Id}: plugin \"{a.Plugin}\"");
             if (a.Plugins.FirstOrDefault(p => !Mazapan.Plugins.Plugin.IdPattern().IsMatch(p)) is { } badp) throw new MazapanException($"{from}: {a.Id}: plugins: \"{badp}\"");
             if (a.Desktop != "" && !DesktopPattern().IsMatch(a.Desktop)) throw new MazapanException($"{from}: {a.Id}: desktop \"{a.Desktop}\"");
+            // One program's name: it goes into a shell command.
+            if (a.Command != "" && !PackagePattern().IsMatch(a.Command)) throw new MazapanException($"{from}: {a.Id}: command \"{a.Command}\": a program's name");
             if (apps.Any(x => x.Id == a.Id)) throw new MazapanException($"{from}: app {a.Id} twice");
             apps.Add(a);
         }

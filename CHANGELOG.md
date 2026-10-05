@@ -6,6 +6,13 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- Updates with nothing to update say only that, without Arch's news or a
+  warning that looked like a manual update was needed; the news shows
+  before an update, each in full, the ones asking for a step by hand
+  saying so. An error is said in full under the title, never past the
+  window's edge.
+- Apps without a window of their own (Lazygit, GitHub CLI, mise) are found
+  in the palette as installed, and open in a terminal.
 - The command palette, redesigned: your apps first, with their icons;
   results in sections (best match, apps, windows, actions, settings, not
   installed) and filters you can see; every row says what Enter does, and
