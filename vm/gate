@@ -203,7 +203,9 @@ if [[ -n ${MAZAPAN_GATE_APPS:-} ]]; then
   fi
   # Each one with a command answers.
   for cmd in $(as_user 'mazapan apps list --json' 2>/dev/null | jq -r --argjson want "$MAZAPAN_GATE_APPS" '.apps[] | select(.id as $i | $want | index($i)) | .command // empty'); do
-    as_user "bash -lc '$cmd --version >/dev/null 2>&1 || $cmd --help >/dev/null 2>&1'" 2>/dev/null || fail "$cmd doesn't answer"
+    # With the PATH apps opened from the desktop get (Hyprland's, ~/.local/bin
+    # first: where the makers' apps go), as a terminal there would have it.
+    as_user "export PATH=\$(tr '\\0' '\\n' </proc/\$(pgrep -u \$USER -x qs | head -1)/environ | sed -n 's/^PATH=//p'); $cmd --version >/dev/null 2>&1 || $cmd --help >/dev/null 2>&1" 2>/dev/null || fail "$cmd doesn't answer"
   done
   pass_ "installed: $(jq -r 'join(", ")' <<<"$MAZAPAN_GATE_APPS")"
 fi
