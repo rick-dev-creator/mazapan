@@ -17,6 +17,7 @@
 # MAZAPAN_GATE_OFFLINE=1: no internet from the install to the first login
 # (SSH still in): Basic comes from the ISO, the rest waits, said once; then a
 # cable is plugged in (vm/vm try plug) and the rest goes in by itself.
+# MAZAPAN_GATE_KEEP=1 leaves the VM running when a check fails.
 # MAZAPAN_GATE_LANG=es installs in that language (its locale, es_ES.UTF-8;
 # the keyboard stays us, for the password typed at the disk's prompt).
 # MAZAPAN_GATE_REPO=DIR also updates the installed system from that
@@ -40,7 +41,8 @@ step() { printf '\e[1;35m[gate]\e[0m %s\n' "$*"; }
 pass_() { printf '\e[1;32m[gate] PASS\e[0m %s\n' "$*"; }
 fail() {
   printf '\e[1;31m[gate] FAIL\e[0m %s\n' "$*" >&2
-  "$vm" try stop >/dev/null 2>&1 || true
+  # MAZAPAN_GATE_KEEP=1: left running, to look at what failed (vm/vm try ssh).
+  [[ ${MAZAPAN_GATE_KEEP:-} == 1 ]] || "$vm" try stop >/dev/null 2>&1 || true
   exit 1
 }
 running() { [[ -f $state/try.pid ]] && kill -0 "$(cat "$state/try.pid")" 2>/dev/null; }
@@ -163,11 +165,13 @@ if [[ -n ${MAZAPAN_GATE_APPS:-} ]]; then
   ! notices | grep -q "$waiting" || fail "the 'waiting for a connection' notice came, online"
   }
   # The password only if something still needs root (it didn't all go in).
+  # One SSH connection a look: the firewall lets 6 in every 30 s, and more
+  # shut the gate out (each look failing, as if the apps never finished).
   asked=
   for i in $(seq 1 30); do
-    as_user 'pgrep -x pkexec >/dev/null' 2>/dev/null && { asked=1; break; }
-    as_user 'test -f ~/.local/state/mazapan/first-apps' 2>/dev/null || break
-    as_user 'grep -q "^DONE " ~/.local/state/mazapan/apps/run.log' 2>/dev/null && break
+    look=$(as_user 'pgrep -x pkexec >/dev/null && echo asked; test -f ~/.local/state/mazapan/first-apps || echo gone; grep -q "^DONE " ~/.local/state/mazapan/apps/run.log 2>/dev/null && echo done' 2>/dev/null)
+    grep -q asked <<<"$look" && { asked=1; break; }
+    grep -qE 'gone|done' <<<"$look" && break
     pause 12
   done
   if [[ -n $asked ]]; then pause 3; type_password; fi

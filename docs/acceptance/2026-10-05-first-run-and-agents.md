@@ -70,6 +70,9 @@ and an agentic OS had no way to install an agent.
 - Quickshell reads `pragma Singleton` only before the first `{` of the file: a brace in a header comment made `Online` silently not a singleton (`plugins/shell-bar/Online.qml.tmpl:1`).
 - T3 Code's window class is `com.t3tools.T3Code`, not the AppImage's `StartupWMClass=t3code`.
 
+- The welcome's "waiting for a connection" notice came at a first login that was online (the network a second late): it now waits 20 s and is said only if still offline. Verified: an online encrypted install's first login gave "Installing…" and "installed", no waiting notice.
+- vm/gate's wait for the first login made 3 SSH connections every 12 s; Mazapan's firewall lets 6 in every 30 s, so the gate shut itself out and reported apps not installed that were (`DONE 0` at 13:06:45). One connection a look now.
+
 ### Gaps
 - AC-A1 is proven at NetworkManager's level and in the unit test; the live → installed rename (wlan0 → wlp5s0) only happens on real hardware: the next install on the laptop closes it.
 
