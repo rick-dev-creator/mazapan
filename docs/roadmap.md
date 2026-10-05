@@ -5,6 +5,74 @@ ships most of these in some form, including a plugin system and an AI
 agent for crashes; each item says what it does today and what "much better"
 means here. Ordered by impact.
 
+## Next: the real laptop, then the bar's other half (decided 2026-10-05)
+
+Done 2026-10-04/05, after the checkpoints and Niri below:
+
+- **Every feature tried by hand in the VM**, with realistic data, and what
+  it turned up fixed (each a commit): notification banners that never went
+  away; .NET's setup (certificate, Aspire's templates) run until it works;
+  Settings' default apps that said "none installed"; an app's icon right
+  after installing it; History listing files it didn't change (and asking
+  for root to undo them); the update summary naming the apps it updated;
+  OCR twenty times faster (tesseract on one thread); Redis's URL that
+  couldn't log in; the market ticker moving the icons beside it; reminders
+  as an alarm clock (not the notifications' bell); the welcome's last
+  step spilling out of its card; the agents' dashboard following the
+  theme; the approval card showing only what an agent's change writes.
+- **The repository others can contribute to**: CI on Arch (the core's
+  tests and its Native AOT build, every plugin through `plugins check`,
+  shellcheck), main protected by it; issue forms, a PR template,
+  CODEOWNERS, Dependabot, Code of Conduct, SECURITY.md (private reports),
+  CONTRIBUTING.md.
+- **The README** as a showcase: an agentic OS first, why it was made, a
+  tour in GIFs, every feature, every plugin (`docs/plugins.md`).
+- **25. A Control Center** (new): a status pill on the bar's right that
+  says what needs you (an agent waiting, a recording, the battery low, an
+  update ready), and grows into one panel with what was a row of icons:
+  Now (only what needs you, each with its action), the switches (Wi-Fi and
+  Bluetooth with their lists, Do Not Disturb, night light, keep awake,
+  power saver, displays), the sound and where it goes, brightness, the
+  music (MPRIS), agents, markets, notifications, power. Every part comes
+  from the plugin it belongs to (`control/now`, `tiles`, `sections`); its
+  bar widget leaves the bar while it's on. Audited control by control; the
+  notification center's click outside fixed with it.
+
+Next, in order:
+
+1. **The laptop** (MSI Vector A16 HX): the ISO with all of the above, the
+   gate passed, written to a USB stick; then `docs/first-install.md`. What
+   only real hardware shows: NVIDIA (Blackwell), suspend and hibernate,
+   Wi-Fi, Bluetooth, the battery and brightness in the Control Center,
+   night light's warmth.
+2. **The ISO published**: on Cloudflare (R2, the official site), with its
+   checksum and signature in the GitHub release. 4.9 GB: compressing it
+   saves 2% (it's zstd inside). Cheap savings first: nvidia-open (built)
+   instead of nvidia-open-dkms drops headers, gcc and dkms (~150 MB).
+3. **The bar's other half: the time as one button** that grows into a
+   panel (the clock, the calendar, the weather by the hour, reminders,
+   power), as the Control Center does on the right. Concept:
+   https://claude.ai/artifact/7Enp3ALZNNp1UAvFTaEjQG
+4. **VS Code ready for C#** in the .NET profile: the C# Dev Kit (the same
+   license as Visual Studio Community) and its extensions installed, so F5
+   runs a backend and Aspire on Linux. Visual Studio itself only runs on
+   Windows: a Windows VM with its apps as windows stays an optional plugin
+   for what needs Windows (WinForms, WPF, .NET Framework).
+5. Ideas kept for later, the person's to choose:
+   - *Friction, as macOS and Windows:* "where do you come from?" in the
+     welcome (floating windows with snapping, title bars, the keys they
+     know), a dock or taskbar with Alt+Tab previews, the phone (KDE
+     Connect), files searched from the palette, Quick Look, a right click
+     on the desktop, Win+P for screens, the scale set by the screen's
+     density, accounts (calendar, mail), a key's cheat sheet while SUPER is
+     held, printers said when plugged in.
+   - *Robustness:* an LTS kernel to fall back on, systemd-oomd so a full
+     memory closes an app instead of freezing everything, backups of the
+     person's files (restic, as Time Machine), the disk's and the battery's
+     health, btrfs scrub and balance, updates applied at restart, security
+     advisories (arch-audit), reinstall keeping the files, "report this
+     bug" from a crash.
+
 ## Next: checkpoints anyone understands, and Niri's workspaces (decided 2026-10-04)
 
 The person's words: a checkpoint they once booted on Omarchy never said it
@@ -440,6 +508,7 @@ Hyprland, the shell restarted on its own). Better than it:
 | 22 | Sharing | **Done** (2026-10-04): Wi-Fi as a QR and a speed test in the network card; the Share panel (LocalSend, Taildrop) from the clipboard, Files, a capture, the clipboard history; the tailscale plugin; LocalSend's port to the local network |
 | 23 | More capture | **Done** (2026-10-04): text read in the desktop's language, QR codes copied as secrets, the camera in a corner while recording, Ask and Share from the capture's bar |
 | 24 | Extras | **Done** (2026-10-03): optional plugins; reminders, the crash watcher (to the agent), the screensaver in the theme, dictation on the computer itself (whisper.cpp), asking an agent by voice. The Windows VM: the last of the list (2026-10-04's plan) |
+| 25 | A Control Center | **Done** (2026-10-05): a status pill that says what needs you, grown into one panel with the bar's right side; every part from its own plugin; audited control by control. Next: the time as one button (the bar's center) |
 
 Part two (items 9–15, 2026-09-29): what's still missing next to Omarchy,
 and what would set this apart from it. 9–12 done; 13 left; 14 and 15
