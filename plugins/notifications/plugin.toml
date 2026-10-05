@@ -97,6 +97,7 @@ keywords = "{{ t \"act.open.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.quiet\" }}"
+setting = true
 run = "qs ipc -c mazapan call notifications toggleQuiet"
 key = "{{ settings.quiet_key }}"
 keywords = "{{ t \"act.quiet.kw\" }}"

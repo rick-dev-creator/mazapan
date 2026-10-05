@@ -8,11 +8,13 @@ categories = ["panel", "tools"]
 requires = ["shell-bar", "hypr-base", "polkit"]
 
 [packages]
-pacman = ["quickshell", "polkit"]
+pacman = ["quickshell", "polkit", "foot"]
 
 [settings]
 # Opens the Apps menu.
 key = "SUPER + ALT + A"
+# Terminal apps (Neovim, btop…) open in this terminal.
+terminal = "foot"
 
 [[targets]]
 template = "Apps.qml.tmpl"

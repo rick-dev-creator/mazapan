@@ -32,3 +32,59 @@ home = 3
 glyph = ""
 key = "{{ settings.key }}"
 keywords = "{{ t \"act.open.kw\" }}"
+
+[[actions]]
+name = "{{ t \"p.keyboard\" }}"
+run = "qs ipc -c mazapan call mazapan open settings keyboard"
+glyph = "󰌌"
+setting = true
+keywords = "{{ t \"kw.keyboard\" }}"
+
+[[actions]]
+name = "{{ t \"p.pointer\" }}"
+run = "qs ipc -c mazapan call mazapan open settings pointer"
+glyph = "󰍽"
+setting = true
+keywords = "{{ t \"kw.pointer\" }}"
+
+[[actions]]
+name = "{{ t \"p.text\" }}"
+run = "qs ipc -c mazapan call mazapan open settings text"
+glyph = "󰛖"
+setting = true
+keywords = "{{ t \"kw.text\" }}"
+
+[[actions]]
+name = "{{ t \"p.keys\" }}"
+run = "qs ipc -c mazapan call mazapan open settings keys"
+glyph = "󰘳"
+setting = true
+keywords = "{{ t \"kw.keys\" }}"
+
+[[actions]]
+name = "{{ t \"p.apps\" }}"
+run = "qs ipc -c mazapan call mazapan open settings apps"
+glyph = "󰀻"
+setting = true
+keywords = "{{ t \"kw.apps\" }}"
+
+[[actions]]
+name = "{{ t \"p.region\" }}"
+run = "qs ipc -c mazapan call mazapan open settings region"
+glyph = "󰗊"
+setting = true
+keywords = "{{ t \"kw.region\" }}"
+
+[[actions]]
+name = "{{ t \"p.display\" }}"
+run = "qs ipc -c mazapan call mazapan open settings display"
+glyph = "󰍹"
+setting = true
+keywords = "{{ t \"kw.display\" }}"
+
+[[actions]]
+name = "{{ t \"p.security\" }}"
+run = "qs ipc -c mazapan call mazapan open settings security"
+glyph = "󰒃"
+setting = true
+keywords = "{{ t \"kw.security\" }}"

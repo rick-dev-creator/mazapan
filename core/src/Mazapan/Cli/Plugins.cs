@@ -237,11 +237,15 @@ public static partial class Program
             return All.Where(p => cfg.IsOn(p) && Applies(p) && !s.Contains(p.Id)).ToList();
         }
 
-        /// <summary>Origin: built-in, local (a folder someone put in the plugin folder), or the git source it was added from.</summary>
+        /// <summary>
+        /// Origin: built-in, community (shipped, made by others), local (a
+        /// folder someone put in the plugin folder), or the git source it was
+        /// added from.
+        /// </summary>
         public string Origin(Plugin p)
         {
             if (LockedEntry(lck, p) is { } e) return "git " + e.Source + " @ " + e.Commit[..10];
-            return Paths.Dir(p.Dir) == Git.Dir ? "local" : "built-in";
+            return Paths.Dir(p.Dir) == Git.Dir ? "local" : p.Community ? "community" : "built-in";
         }
     }
 
@@ -446,6 +450,7 @@ public static partial class Program
             catch (MazapanException) { } // its page says what's wrong
             // As on its page: its catalog entry's words, if it's from there.
             var tr = listed?.TranslatedTo(lang) ?? (Name: "", Description: "");
+            var on = c.Cfg.IsOn(p);
             rows.Add(new Fields
             {
                 { "id", p.Id },
@@ -454,8 +459,15 @@ public static partial class Program
                 { "author", listed?.Author ?? (origin == "built-in" ? "mazapan" : "") },
                 { "version", p.Meta.Version },
                 { "categories", p.CategoriesOrGuess() },
-                { "state", origin.StartsWith("git ") ? "installed" : origin == "local" ? "local" : "built-in" },
-                { "enabled", c.Cfg.IsOn(p) },
+                // A community plugin shipped with mazapan is to install until
+                // it's on (installing it is turning it on).
+                { "state", origin.StartsWith("git ") ? "installed" : origin == "local" ? "local"
+                    : origin == "community" ? (on ? "installed" : "available") : "built-in" },
+                // Who made it: mazapan, the community (shipped or from git), or you.
+                { "origin", origin == "built-in" ? "mazapan" : origin == "local" ? "local" : "community" },
+                // Here already (its page is plugins show), or only listed (plugins preview fetches it).
+                { "bundled", true },
+                { "enabled", on },
                 { "applies", Applies(p) },
                 { "for_this_machine", p.Hardware != null && p.Hardware.Offered(Hardware.ThisMachine.Get()) },
                 { "source", e?.Source ?? "" },
@@ -463,7 +475,7 @@ public static partial class Program
             });
         }
         foreach (var (id, err) in c.Broken)
-            rows.Add(new Fields { { "id", id }, { "name", id }, { "description", err }, { "state", "broken" }, { "enabled", false } });
+            rows.Add(new Fields { { "id", id }, { "name", id }, { "description", err }, { "state", "broken" }, { "origin", "local" }, { "bundled", true }, { "enabled", false } });
         foreach (var e in entries.Where(x => c.All.All(p => p.Id != x.Id) && !c.Broken.ContainsKey(x.Id)))
             rows.Add(new Fields
             {
@@ -474,6 +486,8 @@ public static partial class Program
                 { "version", "" },
                 { "categories", e.Categories },
                 { "state", "available" },
+                { "origin", "community" },
+                { "bundled", false },
                 { "enabled", false },
                 { "applies", true },
                 { "for_this_machine", false },
@@ -490,7 +504,7 @@ public static partial class Program
         string Field(Fields f, string k) => f.FirstOrDefault(kv => kv.Key == k).Value?.ToString() ?? "";
         if (terms.Length > 0)
             rows = rows.Where(r => terms.All(t =>
-                (Field(r, "id") + " " + Field(r, "name") + " " + Field(r, "description") + " " + string.Join(" ",
+                (Field(r, "id") + " " + Field(r, "name") + " " + Field(r, "description") + " " + Field(r, "origin") + " " + string.Join(" ",
                     (r.FirstOrDefault(kv => kv.Key == "categories").Value as IEnumerable<string>) ?? []))
                 .Contains(t, StringComparison.OrdinalIgnoreCase))).ToList();
         if (json)
@@ -631,8 +645,8 @@ public static partial class Program
         if (commit != "" && st.Commit != commit)
             throw new MazapanException($"{id} is at {st.Commit[..10]} now, not {(commit.Length > 10 ? commit[..10] : commit)} as shown: not installed; look at it again");
         var old = c.Find(id);
-        if (old != null && c.Origin(old) == "built-in")
-            throw new MazapanException($"it's called \"{id}\", like a built-in plugin; it can't replace it");
+        if (old != null && c.Origin(old) is "built-in" or "community")
+            throw new MazapanException($"it's called \"{id}\", like a plugin mazapan ships ({c.Origin(old)}); it can't replace it");
         if (old != null)
             throw new MazapanException($"{id} is already installed ({c.Origin(old)}); update it with: mazapan plugins update {id}");
         if (c.Broken.TryGetValue(id, out var err))
@@ -872,11 +886,11 @@ public static partial class Program
     {
         // A link plugins dev made in a built-in's place: only the link goes,
         // and the built-in (its settings with it) is back.
-        var builtIn = Plugin.Discover([Paths.Join(Root(), "plugins")]).Plugins.Select(p => p.Id).ToHashSet();
+        var builtIn = Plugin.Discover(ShippedPluginDirs()).Plugins.Select(p => p.Id).ToHashSet();
         foreach (var id in ids.Where(id => builtIn.Contains(id) && IsLink(Paths.Join(Git.Dir, id))).ToList())
         {
             RemoveAll(Paths.Join(Git.Dir, id));
-            Console.WriteLine($"unlinked {id}: the built-in {id} is back");
+            Console.WriteLine($"unlinked {id}: the {id} mazapan ships is back");
             ids.Remove(id);
         }
         if (ids.Count == 0) return;

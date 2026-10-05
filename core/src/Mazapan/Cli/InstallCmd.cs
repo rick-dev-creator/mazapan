@@ -221,6 +221,7 @@ public static partial class Program
             Console.WriteLine($"fail archinstall {code}");
             throw new MazapanException($"archinstall stopped ({code}): {InstallLog}");
         }
+        CarryWifi();
         // The account's keyring made now, with its password: one made at the
         // first login isn't seen by apps until the next start (gnome-keyring
         // #137), and it's the first login that saves the Wi-Fi's and the
@@ -237,6 +238,42 @@ public static partial class Program
         }
         Console.WriteLine("done");
         return 0;
+    }
+
+    /// <summary>
+    /// The Wi-Fi joined here (the installer's network step), in the new
+    /// system too: root's alone, as NetworkManager wants them. A failure
+    /// only means joining it again after the restart.
+    /// </summary>
+    static void CarryWifi()
+    {
+        try { CarryWifiFiles(); }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
+    }
+
+    static void CarryWifiFiles()
+    {
+        var carried = 0;
+        foreach (var dir in (string[])[Setup.WifiCarry.Dir, "/run/NetworkManager/system-connections"])
+        {
+            if (!Directory.Exists(dir)) continue;
+            foreach (var f in Directory.GetFiles(dir, "*.nmconnection"))
+            {
+                try
+                {
+                    if (Setup.WifiCarry.Keyfile(File.ReadAllText(f)) is not { } text) continue;
+                    var to = Paths.Join("/mnt" + Setup.WifiCarry.Dir, Paths.Base(f));
+                    Directory.CreateDirectory(Paths.Dir(to));
+                    File.WriteAllText(to, "");
+                    File.SetUnixFileMode(to, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+                    File.WriteAllText(to, text);
+                    carried++;
+                }
+                catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
+            }
+        }
+        using var log = new StreamWriter(InstallLog, append: true);
+        log.WriteLine($"== Wi-Fi carried to the new system: {carried}");
     }
 
     static bool HasBattery()

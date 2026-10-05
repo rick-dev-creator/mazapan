@@ -19,3 +19,5 @@
 "check" = "Bluetooth funktioniert (falls du es nutzt)"
 "off_short" = "aus"
 "on_short" = "an"
+"act.bluetooth" = "Bluetooth ein- oder ausschalten"
+"act.bluetooth.kw" = "bluetooth kopfhörer drahtlos"

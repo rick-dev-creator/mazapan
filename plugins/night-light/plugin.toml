@@ -44,5 +44,6 @@ reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[actions]]
 name = "{{ t \"act.toggle\" }}"
+setting = true
 run = "qs ipc -c mazapan call nightlight toggle"
 keywords = "{{ t \"act.toggle.kw\" }}"

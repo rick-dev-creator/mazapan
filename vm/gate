@@ -9,6 +9,9 @@
 #   vm/gate [encrypted|plain]     encrypted by default, as the installer
 #
 # MAZAPAN_GATE_HIBERNATE=1 installs with hibernation (a VM has no battery).
+# MAZAPAN_GATE_APPS='["lazygit","github-cli"]' chooses apps at the install:
+# at the first login they're installed (the password typed into the polkit
+# agent's dialog, as a person would), and checked there.
 # MAZAPAN_GATE_REPO=DIR also updates the installed system from that
 # repository (pkg/release's out/repo), copied to /srv/mazapan-repo: the ISO
 # has to be built with MAZAPAN_REPO_SERVER='file:///srv/mazapan-repo/$channel/$arch'
@@ -45,7 +48,7 @@ answers="$state/gate-answers.json"
 cat > "$answers" <<EOF
 {"disk":"auto","encrypt":$([[ $mode == encrypted ]] && echo true || echo false),"user":"$user","fullname":"Gate",
  "password":"$pass","timezone":"UTC","language":"en","locale":"en_US.UTF-8","kb_layout":"us","kb_variant":"",
- "theme":"phosphor","apps":[],"after":"none"$([[ ${MAZAPAN_GATE_HIBERNATE:-} == 1 ]] && echo ',"hibernate":true')}
+ "theme":"phosphor","apps":${MAZAPAN_GATE_APPS:-[]},"after":"none"$([[ ${MAZAPAN_GATE_HIBERNATE:-} == 1 ]] && echo ',"hibernate":true')}
 EOF
 
 step "a fresh try VM, the answers on its cidata seed ($mode)"
@@ -114,6 +117,31 @@ if [[ $mode == encrypted ]]; then
   locked=$(as_user 'DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u)/bus busctl --user call org.freedesktop.secrets /org/freedesktop/secrets/collection/login org.freedesktop.DBus.Properties Get ss org.freedesktop.Secret.Collection Locked' 2>&1 || true)
   [[ $locked == "v b false" ]] || fail "the keyring isn't open with the disk's password: $locked"
   pass_ "one password: the keyring is open"
+fi
+
+if [[ -n ${MAZAPAN_GATE_APPS:-} ]]; then
+  step "the apps chosen at the install, at the first login"
+  runlog() { as_user 'cat ~/.local/state/mazapan/apps/run.log' 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | tail -8; }
+  asked=
+  for i in $(seq 1 30); do
+    as_user 'pgrep -x pkexec >/dev/null' 2>/dev/null && { asked=1; break; }
+    as_user 'test -f ~/.local/state/mazapan/first-apps' 2>/dev/null || break
+    pause 12
+  done
+  [[ -n $asked ]] || fail "the apps never asked for the password: $(runlog)"
+  pause 3
+  type_password
+  done_=
+  for i in $(seq 1 40); do
+    pause 30
+    as_user 'grep -q "^DONE " ~/.local/state/mazapan/apps/run.log' 2>/dev/null && { done_=1; break; }
+  done
+  [[ -n $done_ ]] || fail "the apps didn't finish in 20 minutes: $(runlog)"
+  as_user 'grep -q "^DONE 0$" ~/.local/state/mazapan/apps/run.log' 2>/dev/null || fail "the apps failed: $(runlog)"
+  as_user 'test ! -e ~/.local/state/mazapan/first-apps' 2>/dev/null || fail "first-apps is still there after installing them"
+  missing=$(as_user 'mazapan apps list --json' 2>/dev/null | jq -r --argjson want "$MAZAPAN_GATE_APPS" '[.apps[] | select((.id as $i | $want | index($i)) and (.installed | not)) | .id] | join(", ")')
+  [[ -z $missing ]] || fail "not installed: $missing"
+  pass_ "installed at the first login: $(jq -r 'join(", ")' <<<"$MAZAPAN_GATE_APPS")"
 fi
 
 if [[ -n ${MAZAPAN_GATE_REPO:-} ]]; then
