@@ -182,7 +182,7 @@ public static class Packages
 
     /// <summary>
     /// Keyrings brings the keyrings up to date before the rest, as Arch's own
-    /// advice and Omarchy do: packages signed by a key the old keyring
+    /// advice does: packages signed by a key the old keyring
     /// doesn't know would stop the whole upgrade. Upgrade follows at once.
     /// </summary>
     public static void Keyrings(IEnumerable<string> names)

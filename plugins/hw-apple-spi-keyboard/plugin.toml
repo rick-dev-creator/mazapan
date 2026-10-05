@@ -12,8 +12,8 @@ product = ["MacBook8,1", "MacBook9,1", "MacBook10,1", "MacBook12,1", "MacBookPro
 
 # applespi and the SPI controller under it in the initramfs: otherwise the
 # keyboard only comes up once the system has started, after the disk
-# password was asked for. The kernel's own applespi (Omarchy also installs
-# an out-of-tree driver from the AUR, for the Touch Bar: not here).
+# password was asked for. The kernel's own applespi (an
+# out-of-tree driver from the AUR, for the Touch Bar: not here).
 [[targets]]
 template = "modules.conf.tmpl"
 output = "/etc/mkinitcpio.conf.d/mazapan-apple-spi-keyboard.conf"

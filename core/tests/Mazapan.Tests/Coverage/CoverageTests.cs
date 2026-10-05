@@ -99,7 +99,7 @@ public sealed class CoverageTests : IDisposable
     public void Report()
     {
         var dir = TempDir();
-        Write(dir, "yt.desktop", "[Desktop Entry]\nType=Application\nName=YouTube\nExec=omarchy-launch-webapp https://youtube.com/\n");
+        Write(dir, "yt.desktop", "[Desktop Entry]\nType=Application\nName=YouTube\nExec=launch-webapp https://youtube.com/\n");
         Write(dir, "a.desktop", "[Desktop Entry]\nType=Application\nName=A tui\nExec=top\nTerminal=true\n");
         Write(dir, "kitty.desktop", "[Desktop Entry]\nType=Application\nName=kitty\nExec=kitty\n");
         Write(dir, "foot.desktop", "[Desktop Entry]\nType=Application\nName=Foot\nExec=foot\n");

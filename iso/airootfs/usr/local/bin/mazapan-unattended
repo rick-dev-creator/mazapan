@@ -1,5 +1,5 @@
 #!/bin/sh
-# An unattended install, as Omarchy's: a drive labeled cidata (a USB stick,
+# An unattended install: a drive labeled cidata (a USB stick,
 # or a VM's seed) with mazapan.json on it, the installer's answers (the same
 # JSON; "disk": "auto" takes the one disk there is, "after": "poweroff"
 # (default), "reboot" or "none"). Installed with nobody there; the live

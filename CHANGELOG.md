@@ -15,6 +15,9 @@ release (a tag `vX.Y.Z`) names them.
   the brightness, the music playing, your agents, notifications and the
   power buttons. In the theme, as everything; off in Plugins, and the bar
   is as it was.
+- Plugin pages in the Plugins panel are in English in every language (the
+  repository's docs are English only); names, descriptions and settings
+  are still translated.
 - The notification center closes with a click outside it again.
 - Notification banners go away after their time again.
 - .NET: the HTTPS certificate and Aspire's templates are set up until it
@@ -116,7 +119,7 @@ release (a tag `vX.Y.Z`) names them.
   Share), to a device nearby with LocalSend or to one of yours with
   Tailscale. Tailscale from Apps comes ready: no sudo, sign in from the
   palette, files sent to you land in Downloads with a notification. The
-  firewall lets LocalSend in, as Omarchy does.
+  firewall lets LocalSend in.
 - A plugin turned off now undoes what its files' reloads did (a service it
   started is stopped), for your own files as for system ones.
 
@@ -208,9 +211,10 @@ release (a tag `vX.Y.Z`) names them.
   Android Studio, phones over USB). Apps can come from their makers,
   checked against their published checksums and kept up to date by
   mazapan update.
-- 18 hardware fixes from Omarchy as hardware plugins, each offered only
-  on the machines that need it (Apple, ASUS, Surface, Framework, Broadcom,
-  Intel Wi-Fi 7 and lpmd, Vulkan, nouveau).
+- 18 hardware fixes as hardware plugins (credited in
+  THIRD_PARTY_NOTICES.md), each offered only on the machines that need it
+  (Apple, ASUS, Surface, Framework, Broadcom, Intel Wi-Fi 7 and lpmd,
+  Vulkan, nouveau).
 - The agents' views quieter: each agent its own color, the data in
   neutral tones, amber and red only where something needs you.
 - Fixed after an audit: the privacy dots no longer keep a processor busy,
