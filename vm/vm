@@ -78,6 +78,12 @@ running() { [[ -f $pidfile ]] && kill -0 "$(cat "$pidfile")" 2>/dev/null; }
 ssh_opts=(-i "$key" -p "$ssh_port"
   -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
   -o LogLevel=ERROR -o ConnectTimeout=3)
+# The installed system's firewall lets 6 SSH connections in every 30 s and
+# counts the refused ones too (each attempt's retries): one connection,
+# shared by every command (an OpenSSH master), so a test can't shut itself out.
+if [[ $mode == try ]]; then
+  ssh_opts+=(-o ControlMaster=auto -o "ControlPath=$state/try-ssh-%r" -o ControlPersist=300)
+fi
 
 fetch_base() {
   [[ -f $base ]] && return
