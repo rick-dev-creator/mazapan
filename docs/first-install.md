@@ -1,6 +1,6 @@
 # Installing on a real machine (the first time)
 
-Mazapán has been tried in virtual machines; this is the checklist for
+Mazapan has been tried in virtual machines; this is the checklist for
 the first real one. Written for a laptop with hybrid graphics (an AMD or
 Intel GPU and an NVIDIA one, such as the MSI Vector A16 HX), and true
 for most machines.

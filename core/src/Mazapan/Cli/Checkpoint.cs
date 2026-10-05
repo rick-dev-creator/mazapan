@@ -139,7 +139,7 @@ public static partial class Program
         }
         Console.WriteLine("On the main system.");
         if (restored != null) Console.WriteLine($"It was checkpoint {S(restored, "from")}; the system it replaced is kept as {S(restored, "previous")} until {S(restored, "until")}.");
-        Console.WriteLine(!supported ? "Checkpoints need Mazapán's layout (the system in a btrfs subvolume of its own)." :
+        Console.WriteLine(!supported ? "Checkpoints need Mazapan's layout (the system in a btrfs subvolume of its own)." :
             inMenu > 0 ? $"{inMenu} checkpoint{(inMenu == 1 ? "" : "s")} in the boot menu (Checkpoints)." : "No checkpoints in the boot menu yet: one is taken before every package change.");
         return 0;
     }
@@ -200,7 +200,7 @@ public static partial class Program
     /// <summary>
     /// What changed between a checkpoint and the main system, as text for
     /// the person or an agent (read only): the packages that differ,
-    /// Mazapán's last update, and the last starts' errors.
+    /// Mazapan's last update, and the last starts' errors.
     /// </summary>
     static int CheckpointDiagnose(string? id)
     {
@@ -244,7 +244,7 @@ public static partial class Program
         var last = History.List().FirstOrDefault();
         if (last != null)
         {
-            b.Append($"\n## Mazapán's last update ({last.ID})\n\nOutcome: {last.Outcome}");
+            b.Append($"\n## Mazapan's last update ({last.ID})\n\nOutcome: {last.Outcome}");
             if (last.Note != "") b.Append($"; {last.Note}");
             b.Append('\n');
             foreach (var r in Health.Checks.Failed(last.Checks)) b.Append($"- check failed: {r.Name}: {r.Output.Trim()}\n");

@@ -41,7 +41,8 @@ package() {
   # under a new version.
   local built
   built=$("$_repo/bin/mazapan" --version)
-  [[ $built == "mazapan $pkgver" ]] || { echo "bin/mazapan is \"$built\", the package $pkgver: run core/build" >&2; return 1; }
+  # (its release's name may follow the number: "mazapan 0.1.0 (Mazapan)")
+  [[ $built == "mazapan $pkgver" || $built == "mazapan $pkgver ("*")" ]] || { echo "bin/mazapan is \"$built\", the package $pkgver: run core/build" >&2; return 1; }
   # mazapan finds its plugins/, themes/ and catalog/ next to the directory
   # its binary is in (through the symlink); community/ too: plugins others
   # made, shipped so they can be installed offline (off until they are, so
@@ -50,7 +51,7 @@ package() {
   cp -r --no-preserve=ownership "$_repo/plugins" "$_repo/community" "$_repo/themes" "$_repo/catalog" "$pkgdir/usr/lib/mazapan/"
   install -d "$pkgdir/usr/bin"
   ln -s /usr/lib/mazapan/bin/mazapan "$pkgdir/usr/bin/mazapan"
-  # Mazapán's icon: the mazapán alone, and the app's (on its sunset).
+  # Mazapan's icon: the mazapán alone, and the app's (on its sunset).
   install -Dm644 "$_repo/assets/mazapan.svg" "$pkgdir/usr/share/pixmaps/mazapan.svg"
   install -Dm644 "$_repo/assets/mazapan-app.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/mazapan.svg"
   # The password dialog's words for pacman through pkexec.

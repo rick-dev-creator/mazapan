@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Mazapán's icon: a bitten mazapán, tilted to show its thickness, in 80s
+# Mazapan's icon: a bitten mazapán, tilted to show its thickness, in 80s
 # pixel art (40×40). Writes assets/mazapan.svg (the mazapán alone: the bar,
 # the login screen, the installer) and assets/mazapan-app.svg (on a
 # synthwave sunset: the app, the ISO), and the shell's copy.

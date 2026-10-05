@@ -361,7 +361,7 @@ public static partial class Apply
 
     /// <summary>
     /// PruneEmpty takes away the folders a removed file leaves empty, up
-    /// through Mazapán's own (~/.config/quickshell/mazapan/widgets/right…):
+    /// through Mazapan's own (~/.config/quickshell/mazapan/widgets/right…):
     /// never an app's folder.
     /// </summary>
     static void PruneEmpty(string dir)

@@ -14,6 +14,28 @@ public static partial class FirstApps
 {
     public static string Path => Paths.ExpandHome("~/.local/state/mazapan/first-apps");
 
+    /// <summary>The packages the install put in for them (mazapan install writes it, one a line).</summary>
+    public static string PackagesPath => Paths.ExpandHome("~/.local/state/mazapan/first-packages");
+
+    /// <summary>
+    /// What the install put in for the apps, as the Apps menu's own (a
+    /// transaction of its ledger): the apps whose packages are all there, and
+    /// those packages still installed. Null when there's nothing of it.
+    /// </summary>
+    public static AppsTx? Adopted(IEnumerable<App> want, IReadOnlySet<string> packages, string listed, string lang)
+    {
+        var put = listed.Split('\n').Select(l => l.Trim()).Where(l => AppCatalog.IsPackage(l) && packages.Contains(l)).ToHashSet();
+        var apps = want.Where(a => a.Kind == "pacman" && a.Pacman.All(packages.Contains) && a.Pacman.Any(put.Contains)).ToList();
+        if (put.Count == 0) return null;
+        return new AppsTx
+        {
+            Action = "install",
+            Apps = apps.Select(a => a.Id).ToList(),
+            Names = apps.Select(a => a.In(lang).Name).ToList(),
+            Packages = [.. put.Order(StringComparer.Ordinal)],
+        };
+    }
+
     /// <summary>Its ids; other lines (an older "#started" mark) left out.</summary>
     public static List<string> Parse(string text) =>
         text.Split('\n').Select(l => l.Trim()).Where(l => Id().IsMatch(l)).Distinct().ToList();

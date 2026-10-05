@@ -10,6 +10,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs
 
 Singleton {
   id: root
@@ -247,6 +248,12 @@ Singleton {
     running: true
     triggeredOnStart: true
     onTriggered: root.refreshAll()
+  }
+
+  // Back online: the accounts' limits now, not in up to five minutes.
+  Connections {
+    target: Online
+    function onBack() { root.refreshAll() }
   }
 
   IpcHandler {

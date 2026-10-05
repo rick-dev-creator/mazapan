@@ -93,18 +93,18 @@ public static partial class AsRoot
     }
 
     /// <summary>
-    /// Points pacman at Mazapán's own repository (Pacman.Repository): its
+    /// Points pacman at Mazapan's own repository (Pacman.Repository): its
     /// mirrorlist written whole, and pacman.conf given the [mazapan] section
     /// that includes it when it hasn't one. The only root writes outside the
     /// drop-in folders, to fixed paths, with text made here.
     /// </summary>
     public static void UseRepository(string mirrorlist)
     {
-        // Without Mazapán's keys in pacman's keyring, its signed packages
+        // Without Mazapan's keys in pacman's keyring, its signed packages
         // would stop every update, Arch's too.
         if (!File.Exists(Pacman.Repository.Keyring))
-            throw new MazapanException("Mazapán's keys aren't installed (mazapan-keyring): its repository can't be trusted yet");
-        Must("putting Mazapán's keys in pacman's keyring", "pacman-key", "--populate", "mazapan");
+            throw new MazapanException("Mazapan's keys aren't installed (mazapan-keyring): its repository can't be trusted yet");
+        Must("putting Mazapan's keys in pacman's keyring", "pacman-key", "--populate", "mazapan");
         Install(Pacman.Repository.Mirrorlist, Files.Utf8.GetBytes(mirrorlist));
         Must("adding [mazapan] to /etc/pacman.conf", "sh", "-c", Pacman.Repository.EnableScript);
     }

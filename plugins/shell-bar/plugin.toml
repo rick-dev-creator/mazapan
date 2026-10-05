@@ -30,6 +30,13 @@ template = "shell.lua.tmpl"
 output = "~/.config/hypr/mazapan/shell.lua"
 reload = "hyprctl reload >/dev/null"
 
+# Whether the internet is there (import qs: Online.online, Online.back()),
+# for every widget that fetches something.
+[[targets]]
+template = "Online.qml.tmpl"
+output = "~/.config/quickshell/mazapan/Online.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
 # The kit: components every widget can use (import "../../components/kit").
 [[targets]]
 template = "KitBarPopup.qml.tmpl"
@@ -101,7 +108,7 @@ template = "KitGroup.qml.tmpl"
 output = "~/.config/quickshell/mazapan/components/kit/Group.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
-# Mazapán's icon (assets/mazapan.svg, drawn by assets/make-icon.py), for
+# Mazapan's icon (assets/mazapan.svg, drawn by assets/make-icon.py), for
 # the bar and the panels.
 [[targets]]
 template = "mazapan.svg.tmpl"

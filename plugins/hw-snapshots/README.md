@@ -17,6 +17,6 @@ snapshots are of the system, not of your files (where `/home` is inside
 without any rights over the snapshots; each file in them keeps its own
 permissions.
 
-Turned off, Mazapán stops managing it, but snap-pac keeps taking them
+Turned off, Mazapan stops managing it, but snap-pac keeps taking them
 until it's removed (`sudo pacman -R snap-pac`, or `mazapan undo` right
 after turning it on); the ones there stay (`sudo snapper -c root list`).

@@ -61,12 +61,13 @@ public static partial class Program
         List<Store.App> apps;
         try { apps = AppsCatalog(false).Apps; }
         catch (MazapanException) { return out_; }
-        foreach (var a in apps.Where(a => a.Vendor != "" && Store.Vendor.Installed(a.Id) != ""))
+        // One that keeps itself up to date (Claude Code) is left to it.
+        foreach (var a in apps.Where(a => a.Vendor != "" && !Store.Vendor.MakerOf(a.Vendor).SelfInstalls && Store.Vendor.Installed(a.Id, a.Vendor) != ""))
         {
             try
             {
                 var latest = Store.Vendor.Latest(a.Vendor);
-                if (latest.Version != Store.Vendor.Installed(a.Id)) out_.Add((a, latest));
+                if (latest.Version != Store.Vendor.Installed(a.Id, a.Vendor)) out_.Add((a, latest));
             }
             // Its maker unreachable now: next time.
             catch (Exception e) when (e is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException or KeyNotFoundException or InvalidOperationException or IndexOutOfRangeException or MazapanException) { }
@@ -138,7 +139,7 @@ public static partial class Program
             { "flatpaks", flatpaks },
             // Apps from their makers (Rider, VS Code): updated with the rest.
             { "vendor", PendingVendorUpdates().Select(v => (object)new Fields
-                { { "id", v.App.Id }, { "name", v.App.Name }, { "from", Store.Vendor.Installed(v.App.Id) }, { "to", v.Release.Version } }).ToList() },
+                { { "id", v.App.Id }, { "name", v.App.Name }, { "from", Store.Vendor.Installed(v.App.Id, v.App.Vendor) }, { "to", v.Release.Version } }).ToList() },
             // Plugins from git with a newer version: mazapan plugins update brings them.
             { "plugins", PendingPluginUpdates().Select(p => (object)new Fields
                 { { "id", p.Id }, { "from", p.From }, { "to", p.To } }).ToList() },
@@ -209,7 +210,7 @@ public static partial class Program
         var self = pending.FirstOrDefault(p => p.Name == "mazapan");
         // Its version as it calls it, without pacman's release number.
         static string V(string v) => v.Contains('-') ? v[..v.LastIndexOf('-')] : v;
-        if (self != null) summary.Add($"Mazapán {V(self.From)} → {V(self.To)}");
+        if (self != null) summary.Add($"Mazapan {V(self.From)} → {V(self.To)}");
         if (pending.Count > 0) summary.Add(Plural(pending.Count, "package", "packages"));
         if (flatpaks.Count > 0) summary.Add(Plural(flatpaks.Count, "Flatpak app", "Flatpak apps"));
         if (vendor.Count > 0) summary.Add(string.Join(", ", vendor.Select(v => $"{v.App.Name} {v.Release.Version}")));
@@ -234,7 +235,7 @@ public static partial class Program
 
         foreach (var r in WhatsNew(pending))
         {
-            Header("What's new in Mazapán" + (r.Version == "Unreleased" ? "" : " " + r.Version));
+            Header("What's new in Mazapan" + (r.Version == "Unreleased" ? "" : " " + r.Version));
             foreach (var it in r.Items) Console.WriteLine($"  • {it}");
         }
 
@@ -286,7 +287,7 @@ public static partial class Program
         if (vendor.Count > 0)
         {
             Header($"From their makers ({vendor.Count})");
-            foreach (var v in vendor) Console.WriteLine($"    {v.App.Name,-28} {Style.Dim}{Store.Vendor.Installed(v.App.Id)}{Style.Reset} → {v.Release.Version}");
+            foreach (var v in vendor) Console.WriteLine($"    {v.App.Name,-28} {Style.Dim}{Store.Vendor.Installed(v.App.Id, v.App.Vendor)}{Style.Reset} → {v.Release.Version}");
         }
         if (fs.IsSet("check")) return 0;
         if (pending.Count == 0 && fileChanges + orphans.Count == 0)
@@ -428,7 +429,7 @@ public static partial class Program
 
         // Something to put right, or "" if the update is good.
         var problem = upErr != null ? rec.Note : initramfs != null ? "the initramfs failed to build (" + initramfs + ")" : "";
-        // A new Mazapán came with it: the new one writes the configuration and
+        // A new Mazapan came with it: the new one writes the configuration and
         // runs the checks (its plugins may need its own code), and rolls back.
         // This one waits, holding the machine awake.
         if (problem == "" && rec.Changes.Any(c => c.Name == "mazapan" && c.To != "") &&

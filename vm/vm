@@ -28,7 +28,10 @@
 #   vm/vm try start | headless | wait | ssh | run | exec | key | mouse | shot | stop | reset
 # Once installed: MAZAPAN_TRY_USER=<the account> vm/vm try ssh|run|shot…
 # (MAZAPAN_TRY_NOISO=1 vm/vm try headless: the disk alone, the ISO out;
-#  MAZAPAN_TRY_ANSWERS=file vm/vm try reset: an unattended install, see vm/gate)
+#  MAZAPAN_TRY_ANSWERS=file vm/vm try reset: an unattended install, see vm/gate;
+#  MAZAPAN_TRY_OFFLINE=1 vm/vm try headless: no way out to the internet, SSH
+#  still in; vm/vm try plug: then a second network card with the internet,
+#  as a cable plugged in, and vm/vm try unplug to take it out again)
 set -euo pipefail
 
 repo="$(cd "$(dirname "$0")/.." && pwd)"
@@ -143,7 +146,9 @@ boot() {
       -drive "file=$disk,if=virtio,discard=unmap"
       "${cd[@]}"
       -drive "file=$seed,media=cdrom,readonly=on"
-      -nic "user,model=virtio-net-pci,hostfwd=tcp:127.0.0.1:$ssh_port-:22"
+      -nic "user,model=virtio-net-pci,hostfwd=tcp:127.0.0.1:$ssh_port-:22$([[ ${MAZAPAN_TRY_OFFLINE:-} == 1 ]] && echo ,restrict=on || true)"
+      # An empty slot for vm/vm try plug (q35 plugs PCI devices in only there).
+      -device "pcie-root-port,id=hp0,chassis=9"
     )
   else
     machine=(
@@ -237,6 +242,36 @@ time.sleep(0.2)
 s.close()
 PY
   done
+}
+
+# A monitor command (human monitor), its answer printed.
+monitor() {
+  python3 - "$mon_sock" "$1" <<'PY'
+import socket, sys, time
+s = socket.socket(socket.AF_UNIX)
+s.connect(sys.argv[1])
+time.sleep(0.2)
+s.recv(65536)
+s.sendall((sys.argv[2] + "\n").encode())
+time.sleep(0.5)
+print(s.recv(65536).decode(errors="replace").split("\n", 1)[-1].replace("(qemu)", "").strip())
+s.close()
+PY
+}
+
+# The internet, as a cable plugged in and out (see MAZAPAN_TRY_OFFLINE).
+cmd_plug() {
+  running || die "VM is not running"
+  monitor "netdev_add user,id=inet,net=10.0.3.0/24"
+  monitor "device_add virtio-net-pci,netdev=inet,id=inetnic,bus=hp0"
+  log "plugged: a second network card with the internet"
+}
+cmd_unplug() {
+  running || die "VM is not running"
+  monitor "device_del inetnic"
+  sleep 1
+  monitor "netdev_del inet"
+  log "unplugged"
 }
 
 # The guest pointer is an absolute tablet: QMP input-send-event with x/y in
@@ -375,7 +410,7 @@ cmd_destroy() {
 }
 
 case "${1:-}" in
-  create|start|headless|wait|ssh|provision|run|exec|key|mouse|shot|screen|stop|reset|destroy|iso)
+  create|start|headless|wait|ssh|provision|run|exec|key|mouse|shot|screen|stop|reset|destroy|iso|plug|unplug)
     c=$1; shift; "cmd_$c" "$@" ;;
   *) sed -n "2,/^set -e/{/^set -e/d;s/^# \\{0,1\\}//p}" "$0"; exit 1 ;;
 esac

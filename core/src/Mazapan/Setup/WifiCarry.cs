@@ -5,7 +5,9 @@ namespace Mazapan.Setup;
 /// starts online, and the apps chosen are installed right away. Only Wi-Fi
 /// connections with their password in the file (NetworkManager's
 /// keyfiles); a "permissions=" line (the live user's alone) is dropped, the
-/// account is another one.
+/// account is another one, and so is "interface-name=": the live system
+/// calls the card wlan0, the installed one wlp5s0, and a connection tied to
+/// a name that isn't there is never tried.
 /// </summary>
 public static class WifiCarry
 {
@@ -26,7 +28,7 @@ public static class WifiCarry
             var key = eq > 0 ? line[..eq].Trim() : "";
             var value = eq > 0 ? line[(eq + 1)..].Trim() : "";
             if (section == "connection" && key == "type" && value is "wifi" or "802-11-wireless") wifi = true;
-            if (section == "connection" && key == "permissions") continue;
+            if (section == "connection" && key is "permissions" or "interface-name") continue;
             if (section == "wifi-security" && key == "psk" && value != "") psk = true;
             // Kept by an agent (a keyring), not in the file: nothing to carry.
             if (section == "wifi-security" && key == "psk-flags" && value != "0") keptSecret = true;

@@ -75,6 +75,20 @@ fcitx5-hangul
 snapper
 snap-pac
 
+# The Basic profile's apps (catalog/apps.toml, basic = true): chosen in the
+# installer, they go in with the system, offline; a new system has a browser,
+# files, pictures, documents and video without a connection. The other
+# profiles' come from Arch's repositories (Setup.Archinstall.AppPackages).
+chromium
+nautilus
+loupe
+papers
+celluloid
+gnome-text-editor
+file-roller
+gnome-calculator
+mission-center
+btop
 # What hardware plugins install (mazapan hardware --enable, while
 # installing): offline too, a GPU's drivers can't wait for a connection.
 intel-media-driver

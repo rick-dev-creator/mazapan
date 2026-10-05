@@ -6,6 +6,6 @@ if [[ " ${HOOKS[*]} " == *" systemd "* ]]; then
   # kernel line) is done by this service.
   FILES+=(/usr/lib/systemd/system/systemd-volatile-root.service /usr/lib/systemd/systemd-volatile-root)
 elif [[ -e /usr/lib/initcpio/install/grub-btrfs-overlayfs ]]; then
-  # busybox's (a system Mazapán didn't install): grub-btrfs's hook.
+  # busybox's (a system Mazapan didn't install): grub-btrfs's hook.
   HOOKS+=(grub-btrfs-overlayfs)
 fi

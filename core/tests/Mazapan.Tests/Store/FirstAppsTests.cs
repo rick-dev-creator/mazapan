@@ -1,5 +1,6 @@
 using Mazapan.Setup;
 using Mazapan.Store;
+using Mazapan.Tests.Foundation;
 
 namespace Mazapan.Tests.Store;
 
@@ -44,6 +45,7 @@ public class FirstAppsTests
         uuid=1f0e6a7e-0000-4000-8000-000000000001
         type=wifi
         permissions=user:live;
+        interface-name=wlan0
 
         [wifi]
         mode=infrastructure
@@ -62,6 +64,8 @@ public class FirstAppsTests
     {
         var k = WifiCarry.Keyfile(Wifi)!;
         Assert.DoesNotContain("permissions=", k);
+        // The live system's name for the card, not the installed one's.
+        Assert.DoesNotContain("interface-name=", k);
         Assert.Contains("psk=secret123", k);
         Assert.Contains("type=wifi", k);
     }
@@ -75,5 +79,74 @@ public class FirstAppsTests
         Assert.Null(WifiCarry.Keyfile(Wifi.Replace("psk=secret123\n", "")));
         // Open: no [wifi-security] at all, carried.
         Assert.NotNull(WifiCarry.Keyfile(Wifi[..Wifi.IndexOf("[wifi-security]")] + "[ipv4]\nmethod=auto\n"));
+    }
+
+    static List<App> Catalog() => AppCatalog.Load(Path.Join(Repo.Root, "catalog", "apps.toml")).Apps;
+
+    // Basic, chosen in the installer, goes in with the system from the ISO's
+    // own repository: every package of it must be there.
+    [Fact]
+    public void TheIsoCarriesTheBasicProfile()
+    {
+        var carried = File.ReadAllLines(Path.Join(Repo.Root, "iso", "target-packages.txt"))
+            .Select(l => l.Split('#')[0].Trim()).Where(l => l != "").ToHashSet();
+        var (profiles, apps) = AppCatalog.Load(Path.Join(Repo.Root, "catalog", "apps.toml"));
+        var basic = profiles.Single(p => p.Basic);
+        var missing = basic.Apps.Select(id => apps.Single(a => a.Id == id)).SelectMany(a => a.Pacman).Where(p => !carried.Contains(p)).ToList();
+        Assert.Empty(missing);
+    }
+
+    [Fact]
+    public void AppPackagesFromTheIsoFirst()
+    {
+        // Chromium is on the ISO, Steam isn't; Heroic is Flathub's (the first login's).
+        var (offline, online) = Archinstall.AppPackages(["chromium", "steam", "heroic", "nope"], Catalog(), new HashSet<string> { "chromium" });
+        Assert.Equal(["chromium"], offline);
+        Assert.Contains("steam", online);
+        Assert.DoesNotContain("chromium", online);
+        Assert.DoesNotContain(online.Concat(offline), p => p.Contains("heroic", StringComparison.OrdinalIgnoreCase));
+        // Nothing offline: all of it waits for a connection.
+        var (none, all) = Archinstall.AppPackages(["chromium"], Catalog(), new HashSet<string>());
+        Assert.Empty(none);
+        Assert.Equal(["chromium"], all);
+    }
+
+    [Fact]
+    public void AppsGoInWithTheSystem()
+    {
+        var a = Answers.Parse("""
+            {"disk":"/dev/vda","user":"rick","password":"p4ssw0rd","timezone":"UTC","language":"en","theme":"phosphor","apps":["chromium","steam"]}
+            """);
+        a.OfflineAppPackages = ["chromium", "git"];
+        a.AppPackages = ["steam", "lib32-gamemode"];
+        using var doc = System.Text.Json.JsonDocument.Parse(Archinstall.Config(a, 512110190592, "us"));
+        var packages = doc.RootElement.GetProperty("packages").EnumerateArray().Select(x => x.GetString()).ToList();
+        Assert.Contains("chromium", packages);
+        Assert.Single(packages, p => p == "git");
+        var post = Archinstall.Post(a);
+        Assert.Contains("pacman -T -- steam lib32-gamemode", post);
+        Assert.Contains("pacman -S --needed --noconfirm -- $apps", post);
+        // After the first update (the repositories synced), written down for the Apps menu; git is the system's.
+        Assert.True(post.IndexOf("pacman -Syu", StringComparison.Ordinal) < post.IndexOf("pacman -S --needed", StringComparison.Ordinal));
+        Assert.Contains("for p in chromium $apps;", post);
+        Assert.Contains("/home/rick/.local/state/mazapan/first-packages", post);
+        Assert.True(post.IndexOf("first-packages", StringComparison.Ordinal) < post.IndexOf("chown -R", StringComparison.Ordinal));
+        // No apps: nothing of it.
+        a.OfflineAppPackages = [];
+        a.AppPackages = [];
+        Assert.DoesNotContain("first-packages", Archinstall.Post(a));
+    }
+
+    [Fact]
+    public void WhatTheInstallPutInIsTheAppsMenus()
+    {
+        var apps = Catalog().Where(a => a.Id is "chromium" or "steam" or "heroic").ToList();
+        var installed = new HashSet<string> { "chromium", "steam", "base" };
+        var tx = FirstApps.Adopted(apps, installed, "chromium\nsteam\ngone\nBad Name!\n", "en")!;
+        Assert.Equal("install", tx.Action);
+        Assert.Equal(["chromium", "steam"], tx.Packages);
+        Assert.Contains("chromium", tx.Apps);
+        Assert.DoesNotContain("heroic", tx.Apps);
+        Assert.Null(FirstApps.Adopted(apps, installed, "gone\n", "en"));
     }
 }

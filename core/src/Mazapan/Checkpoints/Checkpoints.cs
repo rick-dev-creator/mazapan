@@ -20,7 +20,7 @@ public sealed record Checkpoint(string Id, long Number, DateTimeOffset When, str
 }
 
 /// <summary>
-/// Checkpoints anyone understands, on Mazapán's layout: btrfs with the
+/// Checkpoints anyone understands, on Mazapan's layout: btrfs with the
 /// system in the subvolume @, snapper's snapshots nested in it
 /// (@/.snapshots/N/snapshot). Each one is in the boot menu (started on an
 /// overlay in memory: a snapshot is read-only); started, it says so, and it
@@ -458,7 +458,7 @@ public static partial class Checkpoints
     {
         if (BootOnRoot()) return "kernels: in each snapshot (/boot is on the root filesystem)";
         if (HandsOff() is { } why) return why;
-        if (MainSubvol() is not { } main) return "checkpoints: not on Mazapán's layout (the system in a subvolume of its own)";
+        if (MainSubvol() is not { } main) return "checkpoints: not on Mazapan's layout (the system in a subvolume of its own)";
         var kept = LoadKept();
         kept.Assign(List(Path.Join("/", ".snapshots")));
         // /boot has changed and these kernels can't be told apart: no
@@ -537,7 +537,7 @@ public static partial class Checkpoints
     /// </summary>
     public static string Menu(int entries, int days) => Locked(() =>
         HandsOff() is { } why ? why
-        : MainSubvol() is not { } main ? "checkpoints: not on Mazapán's layout (the system in a subvolume of its own)"
+        : MainSubvol() is not { } main ? "checkpoints: not on Mazapan's layout (the system in a subvolume of its own)"
         : MenuCore(entries, days, main, "/"));
 
     /// <summary>main: the main system's subvolume ("@"), as it's called once a restart is done (a keep renames it first).</summary>
@@ -646,7 +646,7 @@ public static partial class Checkpoints
     static string KeepCore(string id, int entries, int days)
     {
         if (File.Exists(KeptPending)) throw new MazapanException("a checkpoint was made the main system already: restart first");
-        if (MainSubvol() is not { } main) throw new MazapanException("checkpoints: not on Mazapán's layout (the system in a subvolume of its own)");
+        if (MainSubvol() is not { } main) throw new MazapanException("checkpoints: not on Mazapan's layout (the system in a subvolume of its own)");
         var booted = Booted(ReadText("/proc/cmdline")) != null;
         // pacman halfway through on the main system: its files are half changed.
         var db = booted ? Path.Join(MainMount, "var/lib/pacman/db.lck") : "/var/lib/pacman/db.lck";
@@ -856,7 +856,7 @@ public static partial class Checkpoints
                     SaveCore("/boot/grub/grub.cfg");
                 }
             }
-            return MainSubvol() is { } m ? MenuCore(entries, days, m, "/") : "checkpoints: not on Mazapán's layout";
+            return MainSubvol() is { } m ? MenuCore(entries, days, m, "/") : "checkpoints: not on Mazapan's layout";
         }
         // The main system's /boot (the EFI partition): not this start's to change.
         if (!BootOnRoot()) Exec.Run("mount", ["-o", "remount,ro", "/boot"]);

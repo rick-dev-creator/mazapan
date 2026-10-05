@@ -1,5 +1,5 @@
 [Unit]
-Description=Mazapán: an unattended install, when a cidata drive brings mazapan.json
+Description=Mazapan: an unattended install, when a cidata drive brings mazapan.json
 After=local-fs.target
 
 [Service]

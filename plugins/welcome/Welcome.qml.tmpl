@@ -375,8 +375,26 @@ Item {
     }
   }
   onOnlineChanged: installFirst()
+  // Offline, said once: the apps aren't forgotten, they wait for a connection.
+  // Not at once: as the session starts the network takes a few seconds to
+  // come up, and online then is no news.
+  property bool waitingSaid: false
+  Timer {
+    id: waitingTimer
+    interval: 20000
+    onTriggered: {
+      if (root.online || root.firstApps.length === 0 || root.waitingSaid) return
+      root.waitingSaid = true
+      Quickshell.execDetached(["notify-send", "-a", {{ tq "title" }}, "-i", "network-wireless-offline", {{ tq "apps_waiting" }}])
+    }
+  }
   function installFirst() {
-    if (firstApps.length === 0 || !online) return
+    if (firstApps.length === 0) return
+    if (!online) {
+      if (!waitingSaid && !waitingTimer.running) waitingTimer.start()
+      return
+    }
+    waitingTimer.stop()
     firstApps = []
     Quickshell.execDetached(["sh", "-c", firstAppsScript, Quickshell.env("HOME") + "/.local/state/mazapan",
       Quickshell.env("XDG_RUNTIME_DIR") || "/tmp", {{ tq "title" }}, {{ tq "apps_installing" }}, {{ tq "apps_done" }},

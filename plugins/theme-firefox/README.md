@@ -11,5 +11,5 @@ Firefox reads it when it starts: restart it to see a new theme.
 It's a stylesheet in each profile's `chrome` folder, imported from
 userChrome.css and userContent.css, plus the one setting in user.js that
 lets Firefox read them. Those files may be yours (Zen mods, your own CSS,
-arkenfox): only Mazapán's lines are its own, the rest stays as you wrote
+arkenfox): only Mazapan's lines are its own, the rest stays as you wrote
 it. In high contrast mode the browser's colors are left alone.

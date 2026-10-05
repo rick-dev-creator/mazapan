@@ -76,7 +76,7 @@ public static partial class AppCatalog
     public static bool IsWebapp(string s) => s.StartsWith("https://") && s.Length > 8 && !s.Any(c => char.IsWhiteSpace(c) || char.IsControl(c) || c == '\\');
 
     public static readonly string[] Categories =
-        ["internet", "communication", "office", "development", "graphics", "video", "audio", "games", "utilities", "finance"];
+        ["internet", "communication", "office", "development", "agents", "graphics", "video", "audio", "games", "utilities", "finance"];
 
     public static (List<Profile> Profiles, List<App> Apps) Load(string path)
     {
@@ -85,7 +85,7 @@ public static partial class AppCatalog
     }
 
     /// <summary>
-    /// Mazapán's catalog, then others' (config.toml: app_catalogs = [URL or
+    /// Mazapan's catalog, then others' (config.toml: app_catalogs = [URL or
     /// path, …]), as plugin catalogs are added. An id already there stays
     /// the first one's; another catalog's profile can be made of any app
     /// known by then, but only mazapan's has the basic one. A catalog that

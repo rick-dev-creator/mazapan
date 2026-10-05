@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Puts an ISO on SourceForge (sourceforge.net/projects/mazapan): in a folder
+# of its version, with its SHA-256 and, when MAZAPAN_SIGN_KEY is set, its
+# signature. The version is the one iso/build put in its name
+# (mazapan-X.Y.Z-YYYY.MM.DD-x86_64.iso, see docs/versioning.md), never typed
+# by hand; a build between releases (X.Y.Z.rN.gHASH) isn't published. With a Release API key
+# (~/.config/mazapan-sf-api-key, from SourceForge's Account → Preferences),
+# it becomes the "Download Latest" for Linux.
+#
+#   pkg/sourceforge ISO        e.g. vm/.state/iso/mazapan-0.1.0-2026.10.05-x86_64.iso
+#
+# Over SSH as the account in ~/.ssh/config (Host frs.sourceforge.net, its
+# key registered in SourceForge's Account → SSH Settings). An upload cut
+# halfway is picked up where it stopped.
+set -euo pipefail
+
+project=mazapan
+host=frs.sourceforge.net
+log() { printf '\e[1;35m[sourceforge]\e[0m %s\n' "$*"; }
+die() { printf '\e[1;31m[sourceforge]\e[0m %s\n' "$*" >&2; exit 1; }
+
+[[ $# -eq 1 ]] || die "usage: pkg/sourceforge ISO"
+iso=$1
+[[ -f $iso ]] || die "no ISO at $iso"
+name=$(basename "$iso")
+[[ $name =~ ^mazapan-([0-9]+\.[0-9]+\.[0-9]+)-[0-9]{4}\.[0-9]{2}\.[0-9]{2}-x86_64\.iso$ ]] \
+  || die "$name isn't a release's ISO (mazapan-X.Y.Z-YYYY.MM.DD-x86_64.iso, from a tagged commit)"
+version=${BASH_REMATCH[1]}
+
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+# Linked, not copied: 5 GB.
+ln -s "$(realpath "$iso")" "$work/$name"
+log "checksum"
+(cd "$work" && sha256sum "$name" > "$name.sha256")
+if [[ -n ${MAZAPAN_SIGN_KEY:-} ]]; then
+  log "signature ($MAZAPAN_SIGN_KEY)"
+  gpg --batch --yes -u "$MAZAPAN_SIGN_KEY" --detach-sign --output "$work/$name.sig" "$work/$name"
+else
+  log "no signature (MAZAPAN_SIGN_KEY not set)"
+fi
+
+dest="/home/frs/project/$project/$version/"
+log "uploading to $host:$dest"
+rsync -L --partial --progress -e ssh "$work/$name" "$work/$name.sha256" ${MAZAPAN_SIGN_KEY:+"$work/$name.sig"} "$host:$dest" \
+  || die "the upload stopped: run it again to go on where it left off"
+
+keyfile="$HOME/.config/mazapan-sf-api-key"
+if [[ -f $keyfile ]]; then
+  log "the Linux download: $name"
+  curl -fsS -X PUT -H 'Accept: application/json' \
+    --data-urlencode "default=linux" --data-urlencode "api_key=$(cat "$keyfile")" \
+    "https://sourceforge.net/projects/$project/files/$version/$name" >/dev/null \
+    || die "uploaded, but it couldn't be made the default download"
+fi
+log "https://sourceforge.net/projects/$project/files/$version/$name"

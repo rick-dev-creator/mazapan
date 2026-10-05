@@ -357,18 +357,18 @@ public static partial class Program
     }
 
     // What an agent asked from the palette knows about where it is.
-    const string AskContext = "You are answering a question typed into the command palette of Mazapán, an Arch Linux desktop (Hyprland, Quickshell). "
+    const string AskContext = "You are answering a question typed into the command palette of Mazapan, an Arch Linux desktop (Hyprland, Quickshell). "
         + "Answer in the language of the question, briefly: a few sentences or a short list, Markdown. "
-        + "When the question is about this computer, use Mazapán's MCP tools (status, doctor, plugins, themes, history, agents_usage…) to look at its real state. "
+        + "When the question is about this computer, use Mazapan's MCP tools (status, doctor, plugins, themes, history, agents_usage…) to look at its real state. "
         + "Change nothing: when something should change, give the exact command (mazapan apply --set …, mazapan plugins enable …) for the person to run.";
 
-    // Mazapán's tools that only read (and preview): what the answer may use without asking.
+    // Mazapan's tools that only read (and preview): what the answer may use without asking.
     static readonly string[] AskTools = ["status", "doctor", "themes", "plugins", "coverage", "history", "agents_usage", "agents_limits", "agents_spend", "preview_change"];
 
     /// <summary>
     /// mazapan agents ask [--agent ID] [--json] QUESTION: one question to a
     /// coding agent without its interface (the palette's "?"), answered in
-    /// text. Claude with the account that has room and Mazapán's read-only
+    /// text. Claude with the account that has room and Mazapan's read-only
     /// tools; opencode, Codex, Gemini CLI and pi each in their own
     /// non-interactive way. --json gives the answer, and for Claude the
     /// command that continues the conversation in a terminal.

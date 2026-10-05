@@ -18,9 +18,9 @@ public static partial class Program
                  run every plugin's checks now
           history        past updates and how they went
           channel [stable|edge]
-                         where Mazapán's own updates come from: stable, or every
+                         where Mazapan's own updates come from: stable, or every
                          release first (edge); without one, which it is
-          version        this Mazapán's version
+          version        this Mazapan's version
           password       change your password everywhere it is: the disk's (when
                          it's encrypted), the account's, the keyring's
           timeline [--json]
@@ -151,7 +151,9 @@ public static partial class Program
 
     static int PrintVersion()
     {
-        Console.WriteLine("mazapan " + Version);
+        // Its release's name after the number: "mazapan 0.1.0 (Mazapan)".
+        var name = Updates.Codename.For(Version);
+        Console.WriteLine("mazapan " + Version + (name != "" ? $" ({name})" : ""));
         return 0;
     }
 

@@ -47,7 +47,7 @@ works, green when it's done.
 **A question from the palette**: type `?` and the question (`? why is
 my battery draining`). The first coding agent here answers it in a card,
 without opening it: Claude Code with the account that has room and
-Mazapán's read-only tools (it can look at this desktop's state, never
+Mazapan's read-only tools (it can look at this desktop's state, never
 change it), else opencode, Codex, Gemini CLI or pi. The answer can be
 copied, or Claude's conversation continued in a terminal.
 
@@ -80,7 +80,7 @@ its that day" takes them back together.
 
 **Claude Code in the theme**: run `/theme` in Claude Code once and pick
 "Dark mode (ANSI colors only)" (or the light one): it then draws in the
-terminal's palette, so it follows every theme. (Mazapán doesn't set it:
+terminal's palette, so it follows every theme. (Mazapan doesn't set it:
 that choice is yours, in Claude's own settings.)
 
 **Ask an agent about this desktop**, from the palette, opens your agent

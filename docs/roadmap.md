@@ -15,7 +15,7 @@ machine, a published ISO, 1.0.
    [first-install.md](first-install.md). What only real hardware shows:
    hybrid graphics, suspend and hibernate, Wi-Fi, Bluetooth, the battery
    and brightness in the Control Center, night light's warmth.
-2. **mazapan.org and the ISO published.** The domain on Cloudflare, the
+2. **mazapan.dev and the ISO published.** The domain on Cloudflare, the
    site on Cloudflare Pages (what it is, downloads with how to verify them,
    release notes, the manual and Learn on the web, hardware that works,
    privacy, contributing); `os-release`'s URLs pointing there. The ISOs and
@@ -24,7 +24,9 @@ machine, a published ISO, 1.0.
    later Fastly's or OSUOSL's programs for free software. On the way:
    `nvidia-open` instead of `nvidia-open-dkms` (~150 MB less).
 3. **Releases, as a routine.** Mazapan's versions (`vX.Y.Z`, the stable,
-   edge and dev channels) apart from the ISO's: an ISO for each release
+   edge and dev channels), each minor one with a name to remember it by
+   (`mazapan --version`: "0.1.0 (Mazapan)"; see docs/versioning.md),
+   apart from the ISO's: an ISO for each release
    and a fresh one each month (`mazapan-1.0.0-2026.11-x86_64.iso`), each
    with its SHA-256, a signature by the release key and a torrent; built
    here, through the release gate (encrypted and plain), signed, uploaded,

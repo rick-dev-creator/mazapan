@@ -3,7 +3,7 @@
 Audited 2026-10-04: three reviews of the code (what runs as root, what
 listens or keeps secrets, where outside text could become code) and an
 installed system looked at from inside. Nothing found lets someone without
-the password into an encrypted Mazapán; what was found was fixed (see the
+the password into an encrypted Mazapan; what was found was fixed (see the
 roadmap). What follows is the model, so nobody has to guess.
 
 ## Protected
@@ -21,14 +21,14 @@ roadmap). What follows is the model, so nobody has to guess.
   it runs. CUPS and the agents' telemetry receiver on 127.0.0.1 (the
   receiver also wants a token). Docker's published ports on 127.0.0.1
   (`local_only`), since Docker's own rules go around the firewall.
-- **Updates signed**: Arch's packages and Mazapán's own repository, its key
+- **Updates signed**: Arch's packages and Mazapan's own repository, its key
   in mazapan-keyring. Apps from their makers (Rider, VS Code) checked
   against the maker's SHA-256.
 - **Root only when asked**: every file written and command run as root is
   shown in full before sudo (`apply --system`, and `undo` of a root change).
   polkit asks for the password every time pacman runs from a panel.
   Checkpoints' root code never reads the person's home.
-- **Agents**: through Mazapán's MCP tools, an agent can change numbers and
+- **Agents**: through Mazapan's MCP tools, an agent can change numbers and
   switches only (no text settings: those can hold commands), nothing as
   root, and every change goes through the approval card with its diff.
   "Ask an agent" runs them read-only, with no keys, in an empty folder.
@@ -46,7 +46,7 @@ roadmap). What follows is the model, so nobody has to guess.
 - **Programs you run are you**: anything running as your account (a
   project's npm or pip scripts, an agent's shell, a downloaded binary) can
   read your files and your keyring while you're logged in, as on any Linux
-  desktop. Prefer agents' own sandboxes and permission prompts; Mazapán's
+  desktop. Prefer agents' own sandboxes and permission prompts; Mazapan's
   approval card stops agents that use its tools, not ones with a shell of
   their own (they could change files directly).
 - **API keys in the keyring** are readable by those same programs. An

@@ -13,5 +13,5 @@ PCSX2, Dolphin, PPSSPP, melonDS, Azahar, Cemu, RPCS3, xemu…):
   draw the moment they're ready (less delay).
 
 Games and BIOS are yours: copies of cartridges, discs and consoles you
-own. Mazapán installs the emulators, never games or BIOS. Nintendo
+own. Mazapan installs the emulators, never games or BIOS. Nintendo
 Switch emulators aren't offered: Nintendo has had them taken down.

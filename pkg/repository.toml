@@ -1,5 +1,5 @@
-# Where Mazapán's own packages are published (pkg/release makes them):
-# $channel is stable or edge, $arch is pacman's own. Empty while Mazapán
+# Where Mazapan's own packages are published (pkg/release makes them):
+# $channel is stable or edge, $arch is pacman's own. Empty while Mazapan
 # isn't published anywhere: an installed system then has no [mazapan]
 # repository (pacman fails on one it can't reach). A package built with
 # MAZAPAN_REPO_SERVER set says that instead (tests in the VMs).

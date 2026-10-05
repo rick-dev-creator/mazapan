@@ -1,4 +1,4 @@
 "plugin.name" = "Thème Neovim"
 "plugin.description" = "Un jeu de couleurs Neovim issu du thème (syntaxe, Treesitter, LSP, diagnostics, git, Telescope), utilisé si vous n'en avez pas choisi un autre ; les Neovim ouverts changent de couleur à l'application"
 "setting.auto" = "Automatique"
-"setting.auto.help" = "L'utiliser tout seul quand votre configuration ne définit aucun jeu de couleurs. Si elle en définit un (par ex. LazyVim), mettez le vôtre sur \"Mazapán\"."
+"setting.auto.help" = "L'utiliser tout seul quand votre configuration ne définit aucun jeu de couleurs. Si elle en définit un (par ex. LazyVim), mettez le vôtre sur \"Mazapan\"."

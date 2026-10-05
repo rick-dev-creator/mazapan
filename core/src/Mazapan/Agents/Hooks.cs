@@ -5,7 +5,7 @@ using Mazapan.Util;
 namespace Mazapan.Agents;
 
 /// <summary>
-/// Claude Code's hooks that tell Mazapán what each session is doing: one
+/// Claude Code's hooks that tell Mazapan what each session is doing: one
 /// entry per event in each configuration's settings.json, the person's own
 /// hooks left as they are. Recognized by their command, so installing
 /// twice adds nothing and removing takes only these. The first change keeps
@@ -90,7 +90,7 @@ public static class Hooks
         return root.ToJsonString() == before ? null : after + "\n";
     }
 
-    // --- OpenTelemetry: Claude Code's metrics to Mazapán's receiver ---------------------
+    // --- OpenTelemetry: Claude Code's metrics to Mazapan's receiver ---------------------
 
     // The general variables, not the metrics' own: a program Claude runs
     // inherits them, and one Aspire starts gets its own endpoint, which
@@ -114,7 +114,7 @@ public static class Hooks
             return r;
         });
 
-    // Mazapán's mark beside them: without it, telemetry already there is the person's own.
+    // Mazapan's mark beside them: without it, telemetry already there is the person's own.
     const string Mark = "MAZAPAN_OTEL";
 
     public static string? ApplyTelemetry(string json, bool on, int port, out bool theirOwn)
@@ -142,7 +142,7 @@ public static class Hooks
         }
         else if (ours && env != null)
         {
-            // Only what is still as Mazapán wrote it (the endpoint: on this computer).
+            // Only what is still as Mazapan wrote it (the endpoint: on this computer).
             foreach (var (k, v) in TelemetryEnv(port))
                 if (Get(k) is { } now && (now == v || k == "OTEL_EXPORTER_OTLP_ENDPOINT" && now.StartsWith("http://127.0.0.1:", StringComparison.Ordinal)))
                     env.Remove(k);

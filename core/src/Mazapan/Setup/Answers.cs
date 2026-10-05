@@ -30,8 +30,18 @@ public sealed partial class Answers
     public string Theme = "";
     /// <summary>Where the time zone is (ISO 3166 code, "MX"): the mirrors nearby. Not asked: Locales.Country.</summary>
     public string Country = "";
-    /// <summary>Apps from the catalog, installed on the first login.</summary>
+    /// <summary>
+    /// Apps from the catalog. Their packages go in with the system: from the
+    /// ISO's repository those it has, from Arch's when there's a connection;
+    /// what's left (Flathub's, a maker's, sites, plugins) on the first login.
+    /// </summary>
     public List<string> Apps = [];
+    /// <summary>
+    /// The apps' packages, worked out by the installer (not asked): those the
+    /// ISO's repository has for them (installed with the system, offline), and
+    /// the rest (installed after it, when there's a connection).
+    /// </summary>
+    public List<string> OfflineAppPackages = [], AppPackages = [];
     /// <summary>
     /// SSH keys the account lets in (with sshd on): not asked, the live
     /// system's own root keys, which are only there when someone put them
@@ -148,7 +158,7 @@ public sealed partial class Answers
         Need(Apps.All(x => Store.AppCatalog.IsId(x)), "apps: an id that can't be one");
         Need(SshKeys.All(k => SshKeyRe().IsMatch(k)), "an SSH key that isn't one");
         Need(Hardware.All(h => Plugins.Plugin.IdPattern().IsMatch(h)), "a hardware plugin that can't be one");
-        Need(HardwarePackages.All(Store.AppCatalog.IsPackage), "a package that can't be one");
+        Need(HardwarePackages.Concat(OfflineAppPackages).Concat(AppPackages).All(Store.AppCatalog.IsPackage), "a package that can't be one");
     }
 
     static string Quote(string s) => "\"" + (s.Length > 40 ? s[..40] + "…" : s) + "\"";

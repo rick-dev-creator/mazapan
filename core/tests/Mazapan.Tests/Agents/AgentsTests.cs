@@ -358,10 +358,10 @@ public class AgentsTests
         Assert.Contains("\"FOO\": \"1\"", off);
         Assert.Null(Hooks.ApplyTelemetry("""{"env":{"OTEL_EXPORTER_OTLP_ENDPOINT":"https://collector.example:4318"}}""", true, 47318, out theirs));
         Assert.True(theirs);
-        // A collector of the person's own on this computer is theirs too (no mark of Mazapán's).
+        // A collector of the person's own on this computer is theirs too (no mark of Mazapan's).
         Assert.Null(Hooks.ApplyTelemetry("""{"env":{"OTEL_EXPORTER_OTLP_ENDPOINT":"http://127.0.0.1:4318","CLAUDE_CODE_ENABLE_TELEMETRY":"1"}}""", false, 47318, out theirs));
         Assert.True(theirs);
-        // A value the person changed after Mazapán set it stays when it's turned off.
+        // A value the person changed after Mazapan set it stays when it's turned off.
         var edited = on.Replace("\"OTEL_METRICS_INCLUDE_REPOSITORY\": \"1\"", "\"OTEL_METRICS_INCLUDE_REPOSITORY\": \"0\"");
         Assert.Contains("\"OTEL_METRICS_INCLUDE_REPOSITORY\": \"0\"", Hooks.ApplyTelemetry(edited, false, 47318, out _)!);
     }

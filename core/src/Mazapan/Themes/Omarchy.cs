@@ -4,9 +4,9 @@ using Tomlyn.Model;
 namespace Mazapan.Themes;
 
 /// <summary>
-/// An Omarchy theme made a Mazapán one: its palette (colors.toml, or its
+/// An Omarchy theme made a Mazapan one: its palette (colors.toml, or its
 /// alacritty.toml where an older theme has no colors.toml) mapped to
-/// Mazapán's tokens, the accent's own tokens worked out so every contrast
+/// Mazapan's tokens, the accent's own tokens worked out so every contrast
 /// the desktop promises holds, the status colors moved just enough to read,
 /// and its first background as the wallpaper.
 /// </summary>
@@ -49,7 +49,7 @@ public static class Omarchy
         return p.ContainsKey("background") && p.ContainsKey("foreground") ? p : null;
     }
 
-    /// <summary>Mazapán's colors, ansi and suggested accents for that palette (and its mode: Omarchy's, or as its background is).</summary>
+    /// <summary>Mazapan's colors, ansi and suggested accents for that palette (and its mode: Omarchy's, or as its background is).</summary>
     public static (Dictionary<string, string> Colors, Dictionary<string, string> Ansi, List<string> Accents, string Mode) Convert(Dictionary<string, string> o)
     {
         Rgb Get(string k) => Rgb.Parse(o[k]);

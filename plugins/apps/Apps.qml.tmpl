@@ -50,6 +50,7 @@ Item {
   readonly property var categories: [
     ["internet", {{ tq "cat.internet" }}, 0xF059F], ["communication", {{ tq "cat.communication" }}, 0xF0369],
     ["office", {{ tq "cat.office" }}, 0xF0219], ["development", {{ tq "cat.development" }}, 0xF0169],
+    ["agents", {{ tq "cat.agents" }}, 0xF06A9],
     ["graphics", {{ tq "cat.graphics" }}, 0xF03D8], ["video", {{ tq "cat.video" }}, 0xF0567],
     ["audio", {{ tq "cat.audio" }}, 0xF075A], ["games", {{ tq "cat.games" }}, 0xF0297],
     ["utilities", {{ tq "cat.utilities" }}, 0xF0493], ["finance", {{ tq "cat.finance" }}, 0xF0128],
@@ -82,10 +83,15 @@ Item {
   }
 
   // Opened on one app, its install asked for (the palette's "Install …"):
-  // what it brings and its size, then one button.
+  // what it brings and its size, then one button. "profile:ID" opens on
+  // that profile instead (the Control Center's "Install a coding agent").
   function showWith(id) {
     show()
-    if (id !== "") ask([id], false)
+    if (id.startsWith("profile:")) {
+      view = "profiles"
+      query = ""
+      profile = id.slice(8)
+    } else if (id !== "") ask([id], false)
   }
 
   function close() { open = false }

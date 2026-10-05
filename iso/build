@@ -27,7 +27,7 @@ mkdir -p "$work"/{pkg,repo} "$out"
 
 # MAZAPAN_REPO_SERVER and MAZAPAN_KEYS reach the packages (a test
 # repository and its key, in the VMs): see pkg/PKGBUILD.
-# Every package of Mazapán's own: pkg/PKGBUILD, and each pkg/*/PKGBUILD.
+# Every package of Mazapan's own: pkg/PKGBUILD, and each pkg/*/PKGBUILD.
 for p in mazapan $(cd "$repo/pkg" && ls -d */ | tr -d / | while read -r d; do [[ -f $d/PKGBUILD ]] && echo "$d"; done); do
   log "$p package"
   d="$work/pkg/$p"
@@ -88,7 +88,12 @@ cp "$conf" "$p/pacman.conf"
 mkdir -p "$p/airootfs/var/cache/mazapan"
 cp -a "$offline" "$p/airootfs/var/cache/mazapan/offline"
 
+# Its name says what it is: mazapan-VERSION-YYYY.MM.DD-x86_64.iso, the
+# version Mazapan's own (pkg/version, the git tag: docs/versioning.md), the
+# date the day its Arch packages were taken.
+version=$("$repo/pkg/version")
 sed -i -e 's/^iso_name=.*/iso_name="mazapan"/' \
+  -e "s/^iso_version=.*/iso_version=\"$version-\$(date --date=\"@\${SOURCE_DATE_EPOCH:-\$(date +%s)}\" +%Y.%m.%d)\"/" \
   -e 's/^iso_label=.*/iso_label="MAZAPAN_$(date --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y%m)"/' \
   -e 's/^iso_publisher=.*/iso_publisher="mazapan"/' \
   -e 's/^iso_application=.*/iso_application="mazapan live and installer"/' "$p/profiledef.sh"
