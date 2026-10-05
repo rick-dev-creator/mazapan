@@ -12,7 +12,8 @@ A new key goes out in a keyring signed by a key installed systems
 already trust (the old one), and the old one stays in mazapan-trusted
 until every system has the new one.
 
-Empty until the release key is made. A key is made once, kept offline,
-and never committed: only its public half is here.
-
-    gpg --quick-gen-key 'Mazapan release key' ed25519 sign never
+The release key: `Mazapan release key <release@mazapan.dev>`,
+fingerprint `7C05 EB75 B1C5 4AD8 F9E1  61C7 1FCE 814E 8077 F475`
+(ed25519, signing only, made 2026-10-05). Only its public half is here;
+the secret half and its revocation certificate are kept offline, never
+committed.
