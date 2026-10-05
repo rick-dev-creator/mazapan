@@ -37,7 +37,9 @@ Item {
   readonly property var flatpaks: d ? d.flatpaks || [] : []
   // Apps from their makers (Rider, VS Code): updated with the rest.
   readonly property var vendor: d ? d.vendor || [] : []
-  readonly property var news: d ? d.news || [] : []
+  // Arch's news matters before an update: with nothing to update, none.
+  readonly property var news: d && UpdatesService.count > 0 ? d.news || [] : []
+  readonly property string problem: UpdatesService.checkError !== "" ? UpdatesService.checkError : d && d.error ? d.error : ""
   readonly property var whatsNew: d ? d.whats_new || [] : []
   readonly property var firmware: d ? d.firmware || [] : []
   readonly property var pluginUpdates: d ? d.plugins || [] : []
@@ -82,10 +84,18 @@ Item {
           Caption {
             text: UpdatesService.checking ? {{ tq "checking" }}
               : UpdatesService.running ? {{ tq "running" }}
-              : UpdatesService.checkError !== "" ? {{ tq "check_failed" }}.arg(UpdatesService.checkError)
-              : root.d && root.d.error ? root.d.error
+              : root.problem !== "" ? {{ tq "check_failed_short" }}
               : UpdatesService.count === 0 ? {{ tq "up_to_date" }} : {{ tq "count" }}.arg(UpdatesService.count)
           }
+        }
+        // Why it couldn't look: in full, wrapped, under the title (never
+        // running off the card).
+        Label {
+          visible: root.problem !== "" && !UpdatesService.checking && !UpdatesService.running
+          text: root.problem
+          color: Theme.warning
+          wrapMode: Text.Wrap
+          Layout.fillWidth: true
         }
 
         // What the update is doing, or how it went.
@@ -154,37 +164,55 @@ Item {
           }
         }
 
-        // Arch's news since the last update: what asks for something first.
+        // Arch's news since the last update, before updating. One that asks
+        // for a step by hand says so in a sentence; each opens to read.
         ColumnLayout {
-          visible: root.news.length > 0
+          visible: root.news.length > 0 && !UpdatesService.running
           Layout.fillWidth: true
           spacing: 4
           Caption { text: {{ tq "news" }} }
           Repeater {
             model: root.news
-            RowLayout {
+            Rectangle {
+              id: item
               required property var modelData
               Layout.fillWidth: true
-              Label {
-                text: (modelData.action ? "! " : "") + modelData.date + "  " + modelData.title
-                color: modelData.action ? Theme.warning : Theme.fg
-                elide: Text.ElideRight
-                Layout.fillWidth: true
-                MouseArea {
-                  anchors.fill: parent
-                  cursorShape: Qt.PointingHandCursor
-                  // Only the web: a link from the network opens nothing else.
-                  onClicked: if (/^https:\/\//.test(parent.parent.modelData.link)) Quickshell.execDetached(["xdg-open", parent.parent.modelData.link])
+              implicitHeight: itemCol.implicitHeight + 12
+              radius: Theme.radius
+              color: modelData.action ? Qt.alpha(Theme.warning, 0.12) : "transparent"
+              border.width: modelData.action ? 1 : 0
+              border.color: Theme.warning
+              ColumnLayout {
+                id: itemCol
+                anchors.fill: parent
+                anchors.margins: 6
+                spacing: 2
+                Label {
+                  text: item.modelData.title
+                  color: item.modelData.action ? Theme.warning : Theme.fg
+                  wrapMode: Text.Wrap
+                  Layout.fillWidth: true
                 }
+                Caption {
+                  text: item.modelData.date + (item.modelData.action ? "  ·  " + {{ tq "news_action" }} : "")
+                  wrapMode: Text.Wrap
+                  Layout.fillWidth: true
+                }
+              }
+              MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                // Only the web: a link from the network opens nothing else.
+                onClicked: if (/^https:\/\//.test(item.modelData.link)) Quickshell.execDetached(["xdg-open", item.modelData.link])
               }
             }
           }
         }
 
         Label {
-          visible: !!root.d && !!root.d.news_error
+          visible: !!root.d && !!root.d.news_error && UpdatesService.count > 0 && !UpdatesService.running
           text: {{ tq "news_error" }}
-          color: Theme.warning
+          color: Theme.fgMuted
           wrapMode: Text.Wrap
           Layout.fillWidth: true
         }
@@ -234,8 +262,32 @@ Item {
           }
         }
 
+        // Nothing to do: said plainly, and that it keeps looking by itself.
+        ColumnLayout {
+          visible: UpdatesService.count === 0 && !UpdatesService.checking && !UpdatesService.running
+            && root.problem === "" && UpdatesService.exit < 0
+          Layout.fillWidth: true
+          Layout.fillHeight: true
+          spacing: 6
+          Item { Layout.fillHeight: true }
+          Label {
+            text: "✓  " + {{ tq "up_to_date" }}
+            color: Theme.success
+            font.pointSize: 13
+            Layout.alignment: Qt.AlignHCenter
+          }
+          Caption {
+            text: {{ tq "up_to_date_note" }}
+            wrapMode: Text.Wrap
+            horizontalAlignment: Text.AlignHCenter
+            Layout.fillWidth: true
+          }
+          Item { Layout.fillHeight: true }
+        }
+
         // The packages and apps.
         ListView {
+          visible: UpdatesService.count > 0
           Layout.fillWidth: true
           Layout.fillHeight: true
           clip: true
@@ -281,8 +333,10 @@ Item {
           }
           Button {
             primary: true
+            // Only when there's something to update.
+            visible: UpdatesService.count > 0
             text: {{ tq "update" }}
-            enabled: UpdatesService.count > 0 && !UpdatesService.running && !UpdatesService.checking
+            enabled: !UpdatesService.running && !UpdatesService.checking
             opacity: enabled ? 1 : 0.5
             // Out of the way: the password dialog comes next, and the bar
             // (and a notification at the end) says how it goes.

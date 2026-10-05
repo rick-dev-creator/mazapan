@@ -222,6 +222,7 @@ public static partial class Program
                     // A web app's launcher is the one webapps made for it.
                     { "desktop", a.Webapp != "" && now.Webapps.TryGetValue(a.Webapp.TrimEnd('/'), out var wid) ? $"mazapan-webapp-{wid}.desktop"
                         : a.Vendor != "" && now.Has(a) ? Vendor.DesktopName(a.Id) : a.Desktop },
+                    { "command", a.Command },
                     { "installed", now.Has(a) },
                     { "removable", now.Removable(a) },
                     { "plugin", a.Plugin },
