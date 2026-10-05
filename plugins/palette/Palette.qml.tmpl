@@ -109,6 +109,7 @@ Item {
     return {
       kind: kind, glyph: a.glyph || (kind === "setting" ? "󰒓" : kind === "key" ? "󰌌" : "󰘳"), icon: "",
       title: a.name, label: a.label || a.name, detail: a.label ? a.name : "", plugin: a.plugin, setting: a.key_setting || "",
+      place: a.home > 0 && !!a.label,
       command: a.run || "", searchable: true, key: a.key || "", words: a.keywords || "", confirm: !!a.confirm,
       argv: !a.run ? null : a.terminal ? ["sh", "-c", `${terminalHold} sh -c ${word(a.run)}`] : ["sh", "-c", a.run],
     }
@@ -339,7 +340,10 @@ Item {
     for (const c of list) {
       let total = 0
       for (const term of terms) {
-        const best = Math.max(fit(term, c.title), fit(term, c.detail + " " + c.words) * 0.6, (c.searchable ? fit(term, c.command) * 0.5 : -1), fit(term, c.key) * 0.5)
+        // A place's own short name ("Wallpaper" for the wallpaper picker)
+        // counts as its title: typed, the place comes before the actions
+        // that merely start with the same word.
+        const best = Math.max(fit(term, c.title), (c.place ? fit(term, c.label) : -1), fit(term, c.detail + " " + c.words) * 0.6, (c.searchable ? fit(term, c.command) * 0.5 : -1), fit(term, c.key) * 0.5)
         // Letters strewn across a description aren't a match at all.
         if (best < 1.75 * term.length) { total = -1; break }
         total += best

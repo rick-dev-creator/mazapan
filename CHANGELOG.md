@@ -15,6 +15,11 @@ release (a tag `vX.Y.Z`) names them.
   daily goal, minutes focused, the streak of days and the week. In the bar
   while a session is on, in the Control Center, the palette and SUPER +
   ALT + P; every length and switch in its settings.
+- The palette: typing a place's name finds the place first ("wallpaper"
+  opens the wallpaper picker, before the actions that start with the same
+  word). Next wallpaper with no pictures of yours opens the picker, which
+  says where to put them; the theme's own wallpaper when it's already the
+  one says so, instead of nothing.
 
 ## 0.1.0 — Mazapan (2026-10-05)
 
