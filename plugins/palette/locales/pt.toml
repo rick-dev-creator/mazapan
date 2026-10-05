@@ -83,3 +83,8 @@
 "launch.missing" = "O programa dele, “%s”, não está instalado."
 "launch.no_terminal" = "Ele abre em um terminal, e “%s” não está instalado. Escolha outro em Plugins › Paleta de comandos › Terminal."
 "launch.quit" = "Fechou assim que começou (código %s). Para ver por quê, execute em um terminal: %s"
+"f.learn" = "Aprenda"
+"sec.lesson" = "Aprenda"
+"verb.watch" = "Ver"
+"btn.lesson" = "Ver como (lição)"
+"lesson_seconds" = "lição de %1 s"

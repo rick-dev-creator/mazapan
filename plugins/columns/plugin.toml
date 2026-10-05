@@ -11,12 +11,16 @@ requires = ["hypr-base", "shell-bar"]
 pacman = ["hyprland"]
 
 [settings]
+# The keys are letters and arrows, on every keyboard without SHIFT or
+# ALTGR: "=", "[" and "]" aren't, on Spanish or German ones, so a key with
+# them couldn't be pressed there.
+
 # Equal mode: every column of the focused workspace gets the same width,
 # filling the screen.
-key = "SUPER + equal"
+key = "SUPER + W"
 # Phone mode: every column gets a phone's width and the group is centered
 # on the screen. Pressing it again goes back to equal mode.
-phone_key = "SUPER + SHIFT + equal"
+phone_key = "SUPER + P"
 # Width / height of a column in phone mode; 9:19.5 is a phone held upright.
 # The height is the monitor's, so the width adapts to each screen.
 phone_aspect = { default = 0.4615, min = 0.3, max = 0.8, step = 0.01 }
@@ -53,9 +57,9 @@ maximize_key = "SUPER + F"
 fullscreen_key = "SUPER + SHIFT + F"
 # The focused window into the column on its left / right, beside the one
 # there; alone in a column, the same; in one with others, out into its own.
-consume_left_key = "SUPER + bracketleft"
+consume_left_key = "SUPER + CTRL + left"
 # Into the column on its right (or out of its own, to the right).
-consume_right_key = "SUPER + bracketright"
+consume_right_key = "SUPER + CTRL + right"
 # The next / previous workspace on this screen; after the last one with
 # windows, a new empty one. With SHIFT, the window goes along.
 next_workspace_key = "SUPER + Page_Down"
@@ -129,6 +133,12 @@ keywords = "{{ t \"maximize.kw\" }}"
 name = "{{ t \"next_workspace\" }}"
 run = "hyprctl dispatch 'hl.dsp.focus({ workspace = \"r+1\" })'"
 key = "{{ settings.next_workspace_key }}"
+keywords = "{{ t \"workspace.kw\" }}"
+
+[[actions]]
+name = "{{ t \"previous_workspace\" }}"
+run = "hyprctl dispatch 'hl.dsp.focus({ workspace = \"r-1\" })'"
+key = "{{ settings.previous_workspace_key }}"
 keywords = "{{ t \"workspace.kw\" }}"
 
 [[actions]]

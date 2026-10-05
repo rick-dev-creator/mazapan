@@ -193,7 +193,9 @@ PanelWindow {
           ScreencopyView {
             anchors.fill: parent
             anchors.margins: 1
-            captureSource: thumb.modelData.wayland
+            // Released when out of sight (see Overview.qml: a capture kept
+            // for a window that closes later could bring the shell down).
+            captureSource: overlay.visible ? thumb.modelData.wayland : null
             live: overlay.visible
             constraintSize: Qt.size(width, height)
           }
@@ -305,7 +307,7 @@ PanelWindow {
     ScreencopyView {
       anchors.fill: parent
       anchors.margins: 2
-      captureSource: ghost.source ? ghost.source.wayland : null
+      captureSource: ghost.source && ghost.visible ? ghost.source.wayland : null
       live: ghost.visible
       constraintSize: Qt.size(width, height)
     }

@@ -70,3 +70,8 @@
 "launch.missing" = "Its program, “%s”, isn't installed."
 "launch.no_terminal" = "It opens in a terminal, and “%s” isn't installed. Pick another in Plugins › Command palette › Terminal."
 "launch.quit" = "It quit as soon as it started (code %s). To see why, run it in a terminal: %s"
+"f.learn" = "Learn"
+"sec.lesson" = "Learn"
+"verb.watch" = "Watch"
+"btn.lesson" = "Watch how (lesson)"
+"lesson_seconds" = "%1 s lesson"

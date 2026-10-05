@@ -1,0 +1,64 @@
+[plugin]
+id = "learn"
+name = "Learn"
+version = "0.1.0"
+api = 1
+description = "Short lessons on moving around Mazapan (the columns, workspaces, the palette), each a real recording with its keys, then tried for real; and every key on screen while SUPER is held"
+categories = ["panel", "tools"]
+requires = ["shell-bar", "hypr-base"]
+
+[packages]
+# qt6-imageformats: the lessons' animated WebP recordings.
+pacman = ["quickshell", "foot", "jq", "qt6-imageformats"]
+
+[settings]
+# Opens the Learn panel.
+key = "SUPER + F1"
+# Shows every key, and hides it again (as holding SUPER does).
+keys_key = "SUPER + K"
+# Holding SUPER alone for a moment shows every key, until it's let go.
+hold_super = { default = true, label = "Hold SUPER for the keys" }
+# How long SUPER is held before the keys show, in milliseconds.
+hold_ms = { default = 700, min = 300, max = 2000 }
+
+# The lessons, in your language, with the keys you have (the palette reads
+# them too, for its Learn filter).
+[[targets]]
+template = "lessons.json.tmpl"
+output = "~/.config/quickshell/mazapan/learn/lessons.json"
+
+[[targets]]
+template = "Learn.qml.tmpl"
+output = "~/.config/quickshell/mazapan/panels/learn.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
+template = "Keys.qml.tmpl"
+output = "~/.config/quickshell/mazapan/panels/keys.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
+template = "practice.sh.tmpl"
+output = "~/.local/share/mazapan/bin/learn-practice"
+
+[[targets]]
+template = "learn.lua.tmpl"
+output = "~/.config/hypr/mazapan/learn.lua"
+reload = "hyprctl reload >/dev/null"
+
+[[actions]]
+name = "{{ t \"act.open\" }}"
+label = "{{ t \"act.open.label\" }}"
+run = "qs ipc -c mazapan call mazapan panel learn"
+# On the palette's first screen.
+home = 13
+glyph = "󰑴"
+key = "{{ settings.key }}"
+keywords = "{{ t \"act.open.kw\" }}"
+
+[[actions]]
+name = "{{ t \"act.keys\" }}"
+run = "qs ipc -c mazapan call keys toggle"
+glyph = "󰌌"
+key = "{{ settings.keys_key }}"
+keywords = "{{ t \"act.keys.kw\" }}"
