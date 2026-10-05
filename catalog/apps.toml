@@ -15,6 +15,7 @@
 #                                #   (jetbrains:RD Rider, vscode:stable VS Code): checked against the
 #                                #   maker's SHA-256, in ~/.local/share/mazapan/vendor, updated by mazapan update
 # desktop = "gimp.desktop"       # its launcher (to open it, and its icon)
+# command = "lazygit"            # no launcher: the program a terminal runs to open it
 # plugins = ["theme-gimp"]       # mazapan plugins that go with it: turned on with it
 # translations.es.description = "Una línea sobre lo que es"
 #
@@ -420,6 +421,7 @@ name = "GitHub CLI"
 description = "GitHub from the terminal: pull requests, issues, releases"
 category = "development"
 pacman = ["github-cli"]
+command = "gh"
 translations.es.description = "GitHub desde la terminal: pull requests, issues, releases"
 translations.de.description = "GitHub aus dem Terminal: Pull Requests, Issues, Releases"
 translations.fr.description = "GitHub depuis le terminal : pull requests, issues, releases"
@@ -431,6 +433,7 @@ name = "Lazygit"
 description = "Git, simpler, in the terminal"
 category = "development"
 pacman = ["lazygit"]
+command = "lazygit"
 translations.es.description = "Git más sencillo, en la terminal"
 translations.de.description = "Git, einfacher, im Terminal"
 translations.fr.description = "Git, en plus simple, dans le terminal"
@@ -454,6 +457,7 @@ name = "mise"
 description = "Every language's versions (Node, Python, Ruby, Go…), per project"
 category = "development"
 pacman = ["mise"]
+command = "mise"
 translations.es.description = "Las versiones de cada lenguaje (Node, Python, Ruby, Go…), por proyecto"
 translations.de.description = "Die Versionen jeder Sprache (Node, Python, Ruby, Go…), pro Projekt"
 translations.fr.description = "Les versions de chaque langage (Node, Python, Ruby, Go…), par projet"

@@ -180,7 +180,7 @@ Item {
   readonly property bool home: open && query.trim() === "" && filter === "all"
   readonly property int appColumns: 6
   readonly property int tileColumns: 4
-  readonly property var snapshotApps: snapshot.filter(c => c.kind === "app")
+  readonly property var snapshotApps: snapshot.filter(c => c.kind === "app").concat(cliItems)
   // Your apps: the ones opened most; before there are any, the ones you
   // chose (the catalog's), then the everyday kinds (a browser, a terminal,
   // files, an editor…) over the system's own tools and demos.
@@ -230,6 +230,14 @@ Item {
     for (const a of catalog) if (a.installed && a.desktop) m[a.desktop.replace(/\.desktop$/, "")] = a.id
     return m
   }
+  // Installed programs without a launcher (lazygit, gh): opened in a
+  // terminal that stays, so they're found as installed, not missing.
+  readonly property var cliItems: catalog.filter(a => a.installed && a.command).map(a => ({
+    kind: "app", glyph: "󰆍", icon: "", id: "catalog:" + a.id, title: a.name, detail: a.description,
+    terminalApp: true, categories: [], catalogId: a.id,
+    command: terminalHold + " " + a.command, searchable: true, key: "", words: a.name + " " + a.category,
+    argv: ["sh", launcher, a.name, "--in", terminalHold, "--", a.command], cwd: "",
+  }))
   readonly property var installItems: catalog.filter(a => !a.installed).map(a => ({
     kind: "install", glyph: "󰏔", icon: "", title: a.name, detail: a.description, from: a.kind || "",
     command: `qs ipc -c mazapan call mazapan open apps ${a.id}`, searchable: false, key: "", catalogId: a.id,
@@ -356,7 +364,7 @@ Item {
   readonly property string typed: query.startsWith(">") ? query.slice(1).trim() : query.trim()
   readonly property var found: {
     if (!open || typed === "") return []
-    return rank(typed, snapshot.concat(projectItems, installItems))
+    return rank(typed, snapshot.concat(cliItems, projectItems, installItems))
   }
   readonly property var counts: {
     const n = { all: found.length, app: 0, window: 0, action: 0, setting: 0, install: 0 }
@@ -375,7 +383,8 @@ Item {
     if (home) return homeApps.concat(homeWindows, tiles, systemItems)
     if (typed === "") {
       // A filter with nothing typed: all of that kind, by name.
-      const pool = shownFilter === "install" ? installItems : snapshot.filter(c => filterOf(c.kind) === shownFilter)
+      const pool = shownFilter === "install" ? installItems
+        : snapshot.concat(shownFilter === "app" ? cliItems : []).filter(c => filterOf(c.kind) === shownFilter)
       return pool.slice().sort((a, b) => a.title.localeCompare(b.title))
     }
     const list = shownFilter === "all" ? found : found.filter(c => filterOf(c.kind) === shownFilter)
@@ -431,7 +440,7 @@ Item {
   }
 
   function inApps(c) {
-    const id = c.kind === "install" ? c.catalogId : catalogByDesktop[c.id]
+    const id = c.catalogId || catalogByDesktop[c.id]
     if (!id) return
     close()
     Quickshell.execDetached(["qs", "ipc", "-c", "mazapan", "call", "mazapan", "open", "apps", id])
@@ -1213,7 +1222,7 @@ Item {
               }
               Button {
                 Layout.fillWidth: true
-                visible: root.selected !== null && (root.selected.kind === "install" || (root.selected.kind === "app" && !!root.catalogByDesktop[root.selected.id]))
+                visible: root.selected !== null && (!!root.selected.catalogId || (root.selected.kind === "app" && !!root.catalogByDesktop[root.selected.id]))
                 text: root.selected && root.selected.kind === "install" ? {{ tq "btn.details" }} : {{ tq "btn.in_apps" }}
                 onClicked: root.inApps(root.selected)
               }
