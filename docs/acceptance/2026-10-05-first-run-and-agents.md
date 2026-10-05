@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| **Version** | 0.1 |
+| **Version** | 1.0 |
 | **Date** | 2026-10-05 |
-| **Status** | IN PROGRESS |
+| **Status** | ACCEPTED for 0.1.0 (2026-10-06): every AC Met but AC-A2/AC-A4, consciously deferred (see the audit result) |
 | **Covers** | The working tree on top of `67cec8e`: Wi-Fi carried to the installed system, apps at install time (Basic offline), the "apps waiting" notice, `Online` for every plugin, coding agents (profile, vendors, palette, Control Center) |
 | **Purpose** | The testable "done" contract. Each AC is audited against (a) the implementation (file:line) and (b) a non-vacuous test that proves it: a unit test where the behaviour is pure, the real system (an install from the ISO in a VM, or the test laptop) where it isn't. |
 
@@ -62,7 +62,12 @@ and an agentic OS had no way to install an agent.
 - [x] AC-B1 — test laptop: Wi-Fi off 12 s and on → offline ×4, `back` ×1, online; no `back` at start
 - [x] AC-C3 — test laptop: `mazapan apps install -y herdr t3code` (28 MB + 150 MB, checked), `herdr --version` = 0.9.3, T3 Code's window opened (class `com.t3tools.T3Code`)
 - [x] AC-C5 — test laptop: the palette, "codex" → best match "Install… Codex"
-- [x] AC-X2 — `dotnet test`: 577 passed
+- [x] AC-X2 — `dotnet test`: 579 passed; CI green on #14–#18
+- [x] AC-B2 — `vm/gate`'s installed system started with no internet: the bar's weather "--"; a network card plugged in: connectivity full in 10 s, "19°" 16 s after
+- [x] AC-C6 — the VM after the Development install: the Agents section with "More agents"; Apps opened on the profile through `open apps profile:agents` (test laptop)
+- [x] AC-E1 (encrypted) — `vm/gate encrypted` on the published ISO, `mazapan-0.1.0-2026.10.05-x86_64.iso` (its packages from repo.mazapan.dev): PASS — installed in 4 min, 18 checks, no failed units, one password, the Arch packages with the system, lazygit and herdr installed at the first login and answering
+- [x] The release: v0.1.0 tagged; mazapan, mazapan-keyring and pam-fde-boot-pw signed by the release key (7C05 EB75 … 8077 F475) on repo.mazapan.dev's stable and edge, the database's signature checked over HTTPS; the ISO, its .sha256 and .sig on SourceForge
+- [ ] AC-A2, AC-A4 — deferred (below)
 
 ### Findings
 - `vm/gate` waited for the first login to ask the password (pkexec) for the chosen apps; with their Arch packages installed with the system nothing may need root, and it would have failed a correct install. It now types the password only when asked, and checks the packages came with the system and nothing was installed twice.
@@ -73,7 +78,38 @@ and an agentic OS had no way to install an agent.
 - The welcome's "waiting for a connection" notice came at a first login that was online (the network a second late): it now waits 20 s and is said only if still offline. Verified: an online encrypted install's first login gave "Installing…" and "installed", no waiting notice.
 - vm/gate's wait for the first login made 3 SSH connections every 12 s; Mazapan's firewall lets 6 in every 30 s, so the gate shut itself out and reported apps not installed that were (`DONE 0` at 13:06:45). One connection a look now.
 
+- vm/gate's SSH was shut out by the installed firewall (`[UFW LIMIT BLOCK]` ×98 in its journal): every refused attempt's retries counted, so the lock never lifted. vm/vm try now shares one SSH connection (an OpenSSH master).
+- The gate checked commands over SSH, whose PATH lacks ~/.local/bin; the desktop's has it (hypr-base). It now checks with the desktop's PATH. A shell over SSH or on a TTY still lacks ~/.local/bin: worth adding for login shells.
+- `mazapan undo` of an agent's change asks to confirm system steps (mkinitcpio, systemctl) although the agent wrote nothing as root; it should undo the person's files only, without asking.
+- Under `vm/vm try` with MAZAPAN_TRY_OFFLINE, cloud-init on the live ISO waits out network datasources (the restricted network drops packets instead of refusing them), so the seed's SSH key comes too late for the gate: the offline gate never got in.
+
 ### Gaps
 - AC-A1 is proven at NetworkManager's level and in the unit test; the live → installed rename (wlan0 → wlp5s0) only happens on real hardware: the next install on the laptop closes it.
 
 ### Blockers
+
+## Audit result (2026-10-06)
+
+| AC | Proven by | Verdict |
+|---|---|---|
+| AC-A1 | `WifiCarriedWithoutTheLiveUser`; NetworkManager on mac80211_hwsim | Met (the wlan0 → wlp5s0 rename itself only on hardware: the laptop's next install) |
+| AC-A2 | `TheIsoCarriesTheBasicProfile`, `AppPackagesFromTheIsoFirst` | **Deferred**: no offline install got through (the gate's cloud-init, above) |
+| AC-A3 | `AppsGoInWithTheSystem`; vm/gate plain (Development), encrypted (0.1.0 ISO) | Met |
+| AC-A4 | the welcome's 20 s wait; an online first login gave no waiting notice | **Deferred**: the offline half (said once, then installed on connecting) unproven in a VM |
+| AC-A5 | `WhatTheInstallPutInIsTheAppsMenus`; vm/gate plain | Met |
+| AC-B1 | Quickshell with Online, Wi-Fi toggled (laptop) | Met |
+| AC-B2 | vm/gate's system, a cable plugged in: "--" → "19°" in 16 s | Met |
+| AC-C1 | `CodingAgentsAreAProfile`; gate installs | Met |
+| AC-C2 | `ClaudesReleaseFromItsManifest`, `ClaudesManifestIsChecked`, `ClaudeInstalledByHandCounts`; real install in the gate | Met |
+| AC-C3 | `GitHubReleaseForThisMachine`, `GitHubReleaseIsChecked`; laptop and gate installs | Met |
+| AC-C4 | gate: each `--version` | Met |
+| AC-C5 | the palette on the laptop | Met |
+| AC-C6 | the VM's Control Center; Apps on the profile | Met (the "none installed" state seen in code, not on a screen) |
+| AC-X1 | update --check and apps list with makers unreachable caught (Update.cs) | Met in code; no VM run with no route out |
+| AC-X2 | dotnet test, CI | Met |
+| AC-E1 | vm/gate plain (old ISO), encrypted (0.1.0 ISO) | Met |
+| AC-E2 | vm/gate plain, the Development profile | Met |
+
+Deferred to 0.2: AC-A2 and AC-A4 need the offline gate, which needs the live
+ISO's cloud-init limited to the cidata drive (NoCloud) so the seed's key
+comes at once with no network; then `MAZAPAN_GATE_OFFLINE=1 vm/gate plain`.
