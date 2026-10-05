@@ -1,5 +1,8 @@
 # Versions
 
+A release is its number, "Mazapan 0.2.0": no names besides (0.1.0 was
+named Mazapan, before this was settled).
+
 One source: **the git tag `vX.Y.Z`** on `main`. Everything else is derived
 from it by a script, never typed by hand.
 
@@ -27,27 +30,16 @@ While X is 0, a minor version may also change what's there (it's a beta);
 A tag is `vX.Y.Z` only: no `-rc1` or other suffixes (pacman can't order
 them). A version is never tagged twice or moved; a mistake is the next patch.
 
-## Its name
-
-Each minor version has a name, the same for its patches, shown after the
-number (`mazapan --version`: `mazapan 0.1.0 (Mazapan)`). The list is
-`core/src/Mazapan/Updates/Codename.cs`; the next one is added there
-before its version is tagged.
-
-| Version | Name |
-|---|---|
-| 0.1 | Mazapan |
-
 ## Where the version goes
 
 | What | Takes it from | Looks like |
 |---|---|---|
-| `mazapan --version` | core/build ← pkg/version | `mazapan 0.1.0 (Mazapan)` |
+| `mazapan --version` | core/build ← pkg/version | `mazapan 0.2.0` |
 | the package | pkg/PKGBUILD ← pkg/version (checked against the binary) | `mazapan-0.1.0-1-x86_64.pkg.tar.zst` |
 | the repository | pkg/release: every release to `edge`, `promote` to `stable` | `stable/x86_64/mazapan.db` |
 | the ISO | iso/build ← pkg/version, and the day its Arch packages were taken | `mazapan-0.1.0-2026.10.05-x86_64.iso` |
 | SourceForge | pkg/sourceforge ← the ISO's name (refuses anything but a release's) | `files/0.1.0/mazapan-0.1.0-2026.10.05-x86_64.iso` |
-| CHANGELOG.md | the release's section, its title the version, name and date | `## 0.1.0 — Mazapan (2026-10-20)` |
+| CHANGELOG.md | the release's section, its title the version and date | `## 0.2.0 (2026-10-06)` |
 
 ## The ISO
 
@@ -71,9 +63,8 @@ The first release sets it, in the same commit that's tagged.
 
 ## Making a release
 
-1. CHANGELOG.md: "Unreleased" becomes `## X.Y.Z — Name (date)`.
-2. The name in Codename.cs, if it's a new minor version.
-3. `git tag vX.Y.Z` on main, pushed to GitHub.
-4. `core/build test`, `pkg/release` (edge), the ISO (`vm/vm iso`), the gate
+1. CHANGELOG.md: "Unreleased" becomes `## X.Y.Z (date)`.
+2. `git tag vX.Y.Z` on main, pushed to GitHub.
+3. `core/build test`, `pkg/release` (edge), the ISO (`vm/vm iso`), the gate
    (`vm/gate`, encrypted and plain).
-5. `pkg/release promote X.Y.Z` (stable), `pkg/sourceforge` the ISO.
+4. `pkg/release promote X.Y.Z` (stable), `pkg/sourceforge` the ISO.
