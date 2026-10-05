@@ -1,26 +1,30 @@
 ---
-// The mazapan crossing the screen, eating a row of peanuts: the icon's own
-// pixels (assets/mazapan.svg), a bite that opens and closes, crumbs left
-// behind. Still when the system asks for less motion.
+// The mazapan running down an arcade corridor, eating the peanuts in its
+// way: the icon's own pixels (assets/mazapan.svg), a bite that opens and
+// snaps shut, crumbs that bounce, a score. A click or a tap drops another
+// peanut ahead of it. Still when the system asks for less motion.
 import icon from "../../../assets/mazapan.svg?raw";
 
-const pixels = [...icon.matchAll(/x="(\d+)" y="(\d+)"[^>]*fill="(#[0-9a-f]{6})"/g)]
-  .map(([, x, y, c]) => [Number(x), Number(y), c])
-  // The sparkles around it stay in the icon; here it's the mazapan alone.
-  .filter(([, , c]) => c !== "#ffffff");
+const pixels = [...icon.matchAll(/x="(\d+)" y="(\d+)"[^>]*fill="(#[0-9a-f]{6})"/g)].map(
+  ([, x, y, c]) => [Number(x), Number(y), c],
+);
 ---
 
-<div class="chomp" aria-hidden="true">
-  <canvas data-pixels={JSON.stringify(pixels)}></canvas>
+<div class="chomp">
+  <canvas data-pixels={JSON.stringify(pixels)} aria-label="The mazapan eating a row of peanuts" role="img"></canvas>
 </div>
 
 <style>
   .chomp {
-    width: 100%;
-    height: 9rem;
+    /* The whole width of the window, past the page's column. */
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    height: clamp(9rem, 22vw, 13rem);
     overflow: hidden;
+    cursor: pointer;
   }
   canvas {
+    display: block;
     width: 100%;
     height: 100%;
     image-rendering: pixelated;
@@ -30,13 +34,29 @@ const pixels = [...icon.matchAll(/x="(\d+)" y="(\d+)"[^>]*fill="(#[0-9a-f]{6})"/
 <script>
   const canvas = document.querySelector<HTMLCanvasElement>(".chomp canvas")!;
   const ctx = canvas.getContext("2d")!;
-  const pixels: [number, number, string][] = JSON.parse(canvas.dataset.pixels!);
+  const art: [number, number, string][] = JSON.parse(canvas.dataset.pixels!);
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  // One pixel of the art is P screen pixels.
-  const P = 3;
-  const SPRITE = 40;
-  // A peanut, its shell's two lobes and the pinch between them.
+  // The scene is ROWS art pixels tall; a pixel is as many screen pixels as fit.
+  const ROWS = 64;
+  const MID = 33; // the corridor's middle
+  const RAIL = { top: 9, bottom: 58 };
+  const C = {
+    rail: "#7847eb",
+    railDark: "#3a2475",
+    glow: "#a68af9",
+    shadow: "#11100e",
+    text: "#d6a862",
+    textDim: "#6c6558",
+    cut: "#b07a3d",
+    cutDark: "#9c6a33",
+  };
+
+  // The mazapan alone (the icon's sparkles twinkle on their own) and its centre.
+  const body = art.filter(([, , c]) => c !== "#ffffff");
+  const sparkles = art.filter(([, , c]) => c === "#ffffff");
+  const CX = 19, CY = 20;
+
   const PEANUT = [
     "  ####    ####  ",
     " #oooo####oooo# ",
@@ -47,86 +67,173 @@ const pixels = [...icon.matchAll(/x="(\d+)" y="(\d+)"[^>]*fill="(#[0-9a-f]{6})"/
     "  ####    ####  ",
   ];
   const SHELL: Record<string, string> = { "#": "#7a4d24", o: "#c89350", ".": "#9c6a33" };
-  const GAP = 34; // art pixels from one peanut to the next
+  const GAP = 30;
 
-  let W = 0, H = 0, cols = 0, ground = 0;
-  let x = -SPRITE, peanuts: number[] = [], crumbs: { x: number; y: number; v: number; c: string }[] = [];
+  // A 3×5 font for the score.
+  const FONT: Record<string, string> = {
+    "0": "111101101101111", "1": "010110010010111", "2": "111001111100111", "3": "111001111001111",
+    "4": "101101111001001", "5": "111100111001111", "6": "111100111101111", "7": "111001001001001",
+    "8": "111101111101111", "9": "111101111001111", "+": "000010111010000",
+    x: "000101010101000", " ": "000000000000000",
+  };
+
+  type Crumb = { x: number; y: number; vx: number; vy: number; c: string; life: number };
+  type Pop = { x: number; y: number; life: number };
+
+  let P = 3, cols = 0;
+  let x = 0, peanuts: number[] = [], crumbs: Crumb[] = [], pops: Pop[] = [];
+  let score = 0, snap = 0;
 
   function size() {
     const r = canvas.getBoundingClientRect();
-    W = canvas.width = Math.round(r.width);
-    H = canvas.height = Math.round(r.height);
-    cols = Math.ceil(W / P);
-    ground = Math.floor(H / P) - 4;
-    reset();
-    // Still: halfway, the peanuts behind it eaten. Drawn again on each resize
-    // (a canvas resized is a canvas cleared).
+    P = Math.max(2, Math.floor(r.height / ROWS));
+    cols = Math.ceil(r.width / P);
+    canvas.width = cols * P;
+    canvas.height = ROWS * P;
+    ctx.setTransform(P, 0, 0, P, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+    if (!peanuts.length || still) reset();
     if (still) {
-      x = Math.floor(cols / 2) - 20;
-      frame(0);
+      score = 0; crumbs = []; pops = [];
+      x = Math.floor(cols * 0.45) - CX;
+      draw(0);
     }
   }
   function reset() {
-    x = -SPRITE;
+    x = -44;
     peanuts = [];
-    for (let px = 50; px < cols - 10; px += GAP) peanuts.push(px);
-    crumbs = [];
+    for (let px = 36; px < cols - 18; px += GAP) peanuts.push(px);
   }
-  function dot(ax: number, ay: number, c: string) {
+
+  const dot = (ax: number, ay: number, c: string) => {
     ctx.fillStyle = c;
-    ctx.fillRect(Math.round(ax) * P, Math.round(ay) * P, P, P);
+    ctx.fillRect(Math.round(ax), Math.round(ay), 1, 1);
+  };
+  function text(s: string, ax: number, ay: number, c: string) {
+    [...s].forEach((ch, k) => {
+      const g = FONT[ch] ?? FONT[" "];
+      for (let i = 0; i < 15; i++) if (g[i] === "1") dot(ax + k * 4 + (i % 3), ay + Math.floor(i / 3), c);
+    });
   }
-  function peanut(px: number) {
-    const top = ground - PEANUT.length;
-    PEANUT.forEach((row, j) =>
-      [...row].forEach((ch, i) => SHELL[ch] && dot(px + i, top + j, SHELL[ch])));
+
+  function corridor(t: number) {
+    for (const y of [RAIL.top, RAIL.bottom]) {
+      ctx.fillStyle = C.rail;
+      ctx.fillRect(0, y, cols, 1);
+      ctx.fillStyle = C.railDark;
+      ctx.fillRect(0, y + (y === RAIL.top ? -2 : 2), cols, 1);
+    }
+    // A light running along the rails.
+    const run = still ? -1 : Math.floor((t / 12) % (cols + 40)) - 20;
+    for (let k = 0; k < 14; k++) {
+      dot(run - k, RAIL.top, C.glow);
+      dot(cols - run + k, RAIL.bottom, C.glow);
+    }
   }
-  // The bite: a wedge from the middle of its right side, opening and closing.
-  function mouth(t: number) {
-    return still ? 0.35 : 0.08 + 0.32 * Math.abs(Math.sin(t / 140));
+
+  // The bite: a wedge from its centre to the right, open as wide as `open`
+  // (radians); its edges show the inside, a shade darker.
+  function wedge(i: number, j: number, open: number) {
+    if (open <= 0.02) return 0;
+    const a = Math.abs(Math.atan2(j - CY, i - CX));
+    if (i <= CX) return 0;
+    if (a < open) return 2;
+    if (a < open + 0.12) return 1;
+    return 0;
   }
-  function inMouth(i: number, j: number, open: number) {
-    const dx = i - 20, dy = j - 22;
-    return dx > 0 && Math.abs(Math.atan2(dy, dx)) < open;
+  function mazapan(t: number) {
+    const open = still ? 0.42 : snap > 0 ? 0 : 0.05 + 0.5 * Math.abs(Math.sin(t / 110));
+    const top = MID - CY + (snap > 0.5 ? 1 : 0);
+    // Its shadow, just under it.
+    const under = MID - CY + 35;
+    for (let i = 8; i < 32; i++) dot(x + i, under, C.shadow);
+    for (let i = 12; i < 28; i++) dot(x + i, under + 1, C.shadow);
+    for (const [i, j, c] of body) {
+      const w = wedge(i, j, open);
+      if (w === 2) continue;
+      dot(x + i, top + j, w === 1 ? (j < CY ? C.cut : C.cutDark) : c);
+    }
+    // The sparkles blink.
+    if (!still && Math.floor(t / 300) % 3 !== 0) for (const [i, j, c] of sparkles) dot(x + i, top + j, c);
   }
-  function sprite(t: number) {
-    const open = mouth(t);
-    const top = ground - 34;
-    const bob = still ? 0 : Math.round(Math.sin(t / 140) * 0.6);
-    for (const [i, j, c] of pixels) if (!inMouth(i, j, open)) dot(x + i, top + j + bob, c);
+
+  function peanut(px: number, t: number) {
+    // The next one in line gets nervous.
+    const near = px - (x + 34) < 22 && px > x;
+    const jit = !still && near ? (Math.floor(t / 60) % 2 ? -1 : 1) : 0;
+    shell(px, MID - 3 + jit);
   }
-  function frame(t: number) {
-    ctx.clearRect(0, 0, W, H);
-    // What it reaches is eaten, and leaves crumbs.
-    const front = x + 30;
+  function shell(px: number, top: number) {
+    PEANUT.forEach((row, j) => [...row].forEach((ch, i) => SHELL[ch] && dot(px + i, top + j, SHELL[ch])));
+  }
+
+  function eat() {
+    const front = x + 34;
     peanuts = peanuts.filter((px) => {
-      if (px + 8 > front) return true;
-      for (let k = 0; k < 6; k++)
-        crumbs.push({ x: px + 4 + Math.random() * 6, y: ground - 6, v: -0.4 - Math.random() * 0.5, c: k % 2 ? "#c89350" : "#e8c486" });
+      if (px + 6 > front) return true;
+      score++;
+      snap = 1;
+      pops.push({ x: px + 4, y: MID - 12, life: 1 });
+      for (let k = 0; k < 12; k++)
+        crumbs.push({
+          x: px + 8, y: MID,
+          vx: -0.9 + Math.random() * 1.6, vy: -1.6 - Math.random() * 1.2,
+          c: ["#c89350", "#e8c486", "#9c6a33"][k % 3], life: 1,
+        });
       return false;
     });
-    peanuts.forEach(peanut);
-    crumbs = crumbs.filter((c) => c.y < ground);
-    for (const c of crumbs) {
-      dot(c.x, c.y, c.c);
-      c.y += c.v;
-      c.v += 0.12;
-      c.x -= 0.15;
-    }
-    sprite(t);
   }
+
+  function draw(t: number) {
+    ctx.clearRect(0, 0, cols, ROWS);
+    corridor(t);
+    if (still) eat();
+    peanuts.forEach((px) => peanut(px, t));
+    for (const c of crumbs) dot(c.x, c.y, c.c);
+    mazapan(t);
+    for (const p of pops) text("+1", p.x, p.y, p.life > 0.4 ? C.text : C.textDim);
+    // The score: a peanut, and how many.
+    shell(2, 0);
+    text("x" + String(score).padStart(3, "0"), 20, 1, C.text);
+  }
+
+  function update(dt: number) {
+    x += dt * 0.034;
+    if (x > cols + 10) reset();
+    eat();
+    snap = Math.max(0, snap - dt / 140);
+    for (const c of crumbs) {
+      c.vy += dt * 0.006;
+      c.x += c.vx * dt * 0.06;
+      c.y += c.vy * dt * 0.06;
+      // Bounce off the floor, losing most of it.
+      if (c.y > RAIL.bottom - 2) { c.y = RAIL.bottom - 2; c.vy *= -0.35; c.vx *= 0.6; }
+      c.life -= dt / 1600;
+    }
+    crumbs = crumbs.filter((c) => c.life > 0);
+    for (const p of pops) { p.y -= dt * 0.012; p.life -= dt / 900; }
+    pops = pops.filter((p) => p.life > 0);
+  }
+
+  // A click or a tap: one more peanut ahead of it.
+  canvas.addEventListener("pointerdown", () => {
+    if (still) return;
+    const at = Math.max(x + 50, 0);
+    if (at < cols - 16 && !peanuts.some((p) => Math.abs(p - at) < 18)) {
+      peanuts.push(at);
+      peanuts.sort((a, b) => a - b);
+    }
+  });
 
   size();
   addEventListener("resize", size);
   if (!still) {
-    let last = 0;
+    let last = performance.now();
     const step = (t: number) => {
-      if (t - last > 33) {
-        x += 0.6;
-        if (x > cols + SPRITE) reset();
-        frame(t);
-        last = t;
-      }
+      const dt = Math.min(50, t - last);
+      last = t;
+      update(dt);
+      draw(t);
       requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
