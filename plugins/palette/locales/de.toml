@@ -83,3 +83,8 @@
 "launch.missing" = "Ihr Programm, „%s“, ist nicht installiert."
 "launch.no_terminal" = "Sie öffnet sich in einem Terminal, und „%s“ ist nicht installiert. Wähle ein anderes unter Plugins › Befehlspalette › Terminal."
 "launch.quit" = "Sie hat sich sofort wieder beendet (Code %s). Um zu sehen warum, starte sie in einem Terminal: %s"
+"f.learn" = "Lernen"
+"sec.lesson" = "Lernen"
+"verb.watch" = "Ansehen"
+"btn.lesson" = "Zeig mir wie (Lektion)"
+"lesson_seconds" = "%1-s-Lektion"

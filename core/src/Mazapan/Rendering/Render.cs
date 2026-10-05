@@ -166,6 +166,9 @@ public static class Renderer
                 ["user"] = Environment.GetEnvironmentVariable("USER") is { Length: > 0 } u ? u : Environment.UserName,
                 ["lang"] = lang,
                 ["lang_code"] = code,
+                // Where the plugin is, for files it ships as they are
+                // (pictures, animations) that its templates point to.
+                ["plugin_dir"] = p.Dir,
             });
             foreach (var c in p.Checks)
             {

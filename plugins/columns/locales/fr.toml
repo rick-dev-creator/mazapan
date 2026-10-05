@@ -62,3 +62,4 @@
 "setting.wheel.help" = "SUPER et la molette font défiler la bande ; SUPER, SHIFT et la molette changent d'espace de travail."
 "setting.gestures" = "Gestes du pavé tactile"
 "setting.gestures.help" = "Trois doigts de côté font défiler la bande ; vers le haut et le bas, ils changent d'espace de travail."
+"previous_workspace" = "Espaces de travail : le précédent"

@@ -52,6 +52,7 @@ machine, a published ISO, 1.0.
 | Tiling | Niri's way on Hyprland's scrolling layout: columns, workspaces as a strip, the overview |
 | Control Center | One pill on the bar's right, grown into one panel: what needs you, the switches, sound, music, agents, power |
 | Settings | Keyboard, mouse, fonts, keys, default apps, language, password, the Security page |
+| Learn | Lessons recorded from the real moves, tried for real and ticked off; every key while SUPER is held |
 | Security | Encryption, the firewall, privacy dots, app permissions, fingerprint; audited (see [security.md](security.md)) |
 | Plugins | Dependencies, approved capabilities, catalogs, the Plugins panel, tools for authors; hardware fixes offered only where they apply |
 | Look | The login, boot menu and boot splash in the theme; GTK, Qt, browsers, editors and terminals themed |
@@ -69,7 +70,7 @@ After 1.0, roughly in this order:
 - **Less friction:** "where do you come from?" in the welcome (macOS- or
   Windows-like keys and windows), a dock or taskbar with Alt+Tab
   previews, Quick Look, a right click on the desktop, the scale from the
-  screen's density, a key cheat sheet while SUPER is held.
+  screen's density.
 - **Robustness:** an LTS kernel to fall back on, systemd-oomd, the disk's
   and battery's health, btrfs scrub, security advisories (arch-audit),
   reinstall keeping your files, "report this bug" from a crash, a pinned

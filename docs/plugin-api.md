@@ -143,7 +143,7 @@ pacman_nvidia = []         # only where there's such a GPU (also pacman_amd,
                            # pacman_intel): a game's 32-bit driver, say
 
 [settings]                 # knobs with their defaults (string, int, float, bool)
-key = "SUPER + equal"
+key = "SUPER + W"
 auto = false
 
 [[targets]]                # zero or more files to generate
@@ -472,6 +472,7 @@ What templates see:
 | `settings`     | the plugin's settings, defaults merged with config.toml |
 | `lang`         | the language, as a POSIX locale name: `es_MX`, `en` |
 | `lang_code`    | just the language: `es`, `en`                   |
+| `plugin_dir`   | the plugin's folder, for files it ships as they are (pictures, animations): `file://{{ plugin_dir }}/media/x.webp` |
 | `actions`      | every plugin's actions, rendered: `plugin`, `name`, and `run`, `key`, `terminal`, `keywords` when set |
 | `place`        | for a target with `each`: the folder this copy goes into |
 

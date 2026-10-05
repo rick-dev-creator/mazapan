@@ -196,7 +196,7 @@ Hyprland underneath, Niri's ideas on top (the `columns` and
   at its own width; the others never resize. The view follows the focus.
 - **Widths that cycle** (`SUPER + R`: a third, a half, two thirds, all of it), grow and
   shrink (`SUPER + ALT + ← →`), **maximize the column** (`SUPER + F`), and
-  **stack two windows in one column** or take one out (`SUPER + [ ]`).
+  **stack two windows in one column** or take one out (`SUPER + CTRL + ← →`).
 - **Columns that move** (`SUPER + SHIFT + ← →`), workspaces one after
   another (`SUPER + Page Up/Down`), touchpad **gestures** to scroll the strip
   and change workspace.

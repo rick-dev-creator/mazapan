@@ -108,7 +108,7 @@ Item {
     const kind = a.setting ? "setting" : a.run ? "action" : "key"
     return {
       kind: kind, glyph: a.glyph || (kind === "setting" ? "󰒓" : kind === "key" ? "󰌌" : "󰘳"), icon: "",
-      title: a.name, label: a.label || a.name, detail: a.label ? a.name : "", plugin: a.plugin,
+      title: a.name, label: a.label || a.name, detail: a.label ? a.name : "", plugin: a.plugin, setting: a.key_setting || "",
       command: a.run || "", searchable: true, key: a.key || "", words: a.keywords || "", confirm: !!a.confirm,
       argv: !a.run ? null : a.terminal ? ["sh", "-c", `${terminalHold} sh -c ${word(a.run)}`] : ["sh", "-c", a.run],
     }
@@ -244,6 +244,42 @@ Item {
     words: a.name + " " + a.category, argv: ["qs", "ipc", "-c", "mazapan", "call", "mazapan", "open", "apps", a.id],
   }))
 
+  // The Learn plugin's lessons (learn/lessons.json): found as lessons, and
+  // beside the actions they teach (their recording in the panel).
+  property var learn: null
+  FileView {
+    id: lessonsFile
+    path: Quickshell.env("HOME") + "/.config/quickshell/mazapan/learn/lessons.json"
+    printErrors: false
+    watchChanges: true
+    onFileChanged: reload()
+    onLoaded: { try { root.learn = JSON.parse(text()) } catch (e) { root.learn = null } }
+    onLoadFailed: root.learn = null
+  }
+  readonly property var lessons: learn ? learn.lessons || [] : []
+  function mediaOf(l) {
+    return l && learn ? "file://" + learn.media + "/" + l.id + ".webp" : ""
+  }
+  readonly property var lessonItems: lessons.map(l => ({
+    kind: "lesson", glyph: "󰑴", icon: "", title: l.title, detail: l.topic + " · " + {{ tq "lesson_seconds" }}.arg(Math.round(l.length)),
+    command: `qs ipc -c mazapan call mazapan open learn ${l.id}`, searchable: false, key: "", lesson: l.id,
+    words: l.why + " " + l.steps.map(s => s.what + " " + s.keys).join(" "),
+    argv: ["qs", "ipc", "-c", "mazapan", "call", "mazapan", "open", "learn", l.id],
+  }))
+  // The lesson that teaches an action (by the setting its key comes from).
+  function lessonFor(c) {
+    if (!c) return null
+    if (c.kind === "lesson") return lessons.find(l => l.id === c.lesson) ?? null
+    if (!c.setting) return null
+    return lessons.find(l => (l.links || []).some(k => k.plugin === c.plugin && k.setting === c.setting)) ?? null
+  }
+  readonly property var selectedLesson: lessonFor(selected)
+  function openLesson(l) {
+    if (!l) return
+    close()
+    Quickshell.execDetached(["qs", "ipc", "-c", "mazapan", "call", "mazapan", "open", "learn", l.id])
+  }
+
   // Projects agents worked in lately (the agent plugin's): its editor and
   // the agent's last conversation there, again.
   readonly property bool canProjects: {{ if (under "~/.local/share/mazapan/bin/agent-open").size > 0 }}true{{ else }}false{{ end }}
@@ -332,18 +368,19 @@ Item {
   }
 
   // The filters, and the section each kind is shown in (in this order).
-  readonly property var filters: ["all", "app", "window", "action", "setting", "install"]
+  readonly property var filters: ["all", "app", "window", "action", "setting", "install"].concat(lessons.length > 0 ? ["learn"] : [])
   function filterName(f) {
     return ({ all: {{ tq "f.all" }}, app: {{ tq "f.app" }}, window: {{ tq "f.window" }}, action: {{ tq "f.action" }},
-              setting: {{ tq "f.setting" }}, install: {{ tq "f.install" }} })[f]
+              setting: {{ tq "f.setting" }}, install: {{ tq "f.install" }}, learn: {{ tq "f.learn" }} })[f]
   }
   function filterOf(kind) {
-    return kind === "key" || kind === "project" ? "action" : kind
+    return kind === "key" || kind === "project" ? "action" : kind === "lesson" ? "learn" : kind
   }
-  readonly property var sectionOrder: ["app", "window", "action", "key", "project", "setting", "install"]
+  readonly property var sectionOrder: ["app", "window", "action", "key", "project", "setting", "lesson", "install"]
   function sectionName(kind) {
     return ({ best: {{ tq "sec.best" }}, app: {{ tq "sec.app" }}, window: {{ tq "sec.window" }}, action: {{ tq "sec.action" }},
-              key: {{ tq "sec.key" }}, project: {{ tq "sec.project" }}, setting: {{ tq "sec.setting" }}, install: {{ tq "sec.install" }} })[kind]
+              key: {{ tq "sec.key" }}, project: {{ tq "sec.project" }}, setting: {{ tq "sec.setting" }}, lesson: {{ tq "sec.lesson" }},
+              install: {{ tq "sec.install" }} })[kind]
   }
 
   // What ↵ does to it, said on its row, in the footer and on the panel's button.
@@ -355,6 +392,7 @@ Item {
     case "setting": return {{ tq "verb.change" }}
     case "install": return {{ tq "verb.install" }}
     case "ask": return {{ tq "verb.ask" }}
+    case "lesson": return {{ tq "verb.watch" }}
     case "key": return {{ tq "verb.press" }}.arg(pretty(c.key))
     }
     return {{ tq "verb.run" }}
@@ -364,10 +402,10 @@ Item {
   readonly property string typed: query.startsWith(">") ? query.slice(1).trim() : query.trim()
   readonly property var found: {
     if (!open || typed === "") return []
-    return rank(typed, snapshot.concat(cliItems, projectItems, installItems))
+    return rank(typed, snapshot.concat(cliItems, projectItems, lessonItems, installItems))
   }
   readonly property var counts: {
-    const n = { all: found.length, app: 0, window: 0, action: 0, setting: 0, install: 0 }
+    const n = { all: found.length, app: 0, window: 0, action: 0, setting: 0, install: 0, learn: 0 }
     for (const c of found) n[filterOf(c.kind)]++
     return n
   }
@@ -383,9 +421,9 @@ Item {
     if (home) return homeApps.concat(homeWindows, tiles, systemItems)
     if (typed === "") {
       // A filter with nothing typed: all of that kind, by name.
-      const pool = shownFilter === "install" ? installItems
+      const pool = shownFilter === "install" ? installItems : shownFilter === "learn" ? lessonItems
         : snapshot.concat(shownFilter === "app" ? cliItems : []).filter(c => filterOf(c.kind) === shownFilter)
-      return pool.slice().sort((a, b) => a.title.localeCompare(b.title))
+      return shownFilter === "learn" ? pool : pool.slice().sort((a, b) => a.title.localeCompare(b.title))
     }
     const list = shownFilter === "all" ? found : found.filter(c => filterOf(c.kind) === shownFilter)
     if (list.length === 0) return []
@@ -1136,6 +1174,24 @@ Item {
               anchors.margins: 16
               spacing: 12
 
+              // The move it makes, recorded (its lesson's), looping.
+              Rectangle {
+                visible: root.selectedLesson !== null
+                Layout.fillWidth: true
+                Layout.preferredHeight: width * 9 / 16
+                color: Theme.bg
+                border.width: 1
+                border.color: Theme.border
+                AnimatedImage {
+                  anchors.fill: parent
+                  anchors.margins: 1
+                  fillMode: Image.PreserveAspectFit
+                  source: root.mediaOf(root.selectedLesson)
+                  playing: root.open && root.selectedLesson !== null
+                  cache: false
+                }
+              }
+
               RowLayout {
                 spacing: 12
                 Pic { item: root.selected; size: 44 }
@@ -1228,7 +1284,13 @@ Item {
               }
               Button {
                 Layout.fillWidth: true
-                visible: root.selected !== null && root.selected.command !== "" && root.selected.kind !== "install"
+                visible: root.selectedLesson !== null && root.selected.kind !== "lesson"
+                text: {{ tq "btn.lesson" }}
+                onClicked: root.openLesson(root.selectedLesson)
+              }
+              Button {
+                Layout.fillWidth: true
+                visible: root.selected !== null && root.selected.command !== "" && root.selected.kind !== "install" && root.selected.kind !== "lesson"
                 text: {{ tq "btn.copy" }}
                 onClicked: root.copy(root.current)
               }
