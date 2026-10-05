@@ -238,8 +238,18 @@ Singleton {
   // qs ipc -c mazapan call wallpaper next
   IpcHandler {
     target: "wallpaper"
-    function next(): void { root.next() }
+    // From a key or the palette: never nothing at all. With no pictures to
+    // go through, the picker (it says where to put them); already the
+    // theme's own, said.
+    function next(): void {
+      if (root.order().length === 0) Quickshell.execDetached(["qs", "ipc", "-c", "mazapan", "call", "mazapan", "panel", "wallpapers"])
+      else root.next()
+    }
     function set(path: string): void { root.choose(path, "") }
-    function theme(): void { root.choose("", "") }
+    function theme(): void {
+      if (root.image === "" && Object.keys(root.screens).length === 0)
+        Quickshell.execDetached(["notify-send", "-a", {{ tq "title" }}, "-i", "preferences-desktop-wallpaper", {{ tq "already_theme" }}])
+      else root.choose("", "")
+    }
   }
 }
