@@ -340,6 +340,7 @@ static class Model
             if (a.Label != "") o["label"] = a.Label;
             if (a.Confirm) o["confirm"] = true;
             if (a.KeySetting != "") o["key_setting"] = a.KeySetting;
+            if (a.Setting) o["setting"] = true;
             list.Add(Frozen(o));
         }
         return Frozen(list);

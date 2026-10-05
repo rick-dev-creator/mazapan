@@ -87,6 +87,11 @@ output = "~/.config/quickshell/mazapan/components/kit/TextField.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
+template = "KitPasswordPrompt.qml.tmpl"
+output = "~/.config/quickshell/mazapan/components/kit/PasswordPrompt.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
 template = "KitTile.qml.tmpl"
 output = "~/.config/quickshell/mazapan/components/kit/Tile.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"

@@ -19,3 +19,5 @@
 "check" = "O Bluetooth funciona (se você usa)"
 "off_short" = "desligado"
 "on_short" = "ligado"
+"act.bluetooth" = "Ligar ou desligar o Bluetooth"
+"act.bluetooth.kw" = "bluetooth fones sem fio"

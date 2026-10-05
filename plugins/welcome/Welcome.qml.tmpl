@@ -355,8 +355,11 @@ Item {
   }
 
   // The apps chosen in the installer (mazapan install leaves them in
-  // first-apps): installed as soon as there's a connection, once (the file
-  // is then marked "#started", and still says the installer asked).
+  // first-apps): installed as soon as there's a connection, by mazapan
+  // apps first, which keeps the list until they're all there. Detached, and
+  // once a session (a theme's reload doesn't start it again): it says it's
+  // started, and a failure or a cancelled password offers to try again
+  // (the next login tries again too).
   readonly property string firstAppsFile: Quickshell.env("HOME") + "/.local/state/mazapan/first-apps"
   property var firstApps: []
   property bool fromInstaller: false
@@ -364,21 +367,36 @@ Item {
     path: root.firstAppsFile
     printErrors: false
     onLoaded: {
-      const lines = text().split("\n")
-      const ids = lines.filter(x => /^[a-z0-9][a-z0-9-]*$/.test(x))
+      const ids = text().split("\n").filter(x => /^[a-z0-9][a-z0-9-]*$/.test(x))
       root.fromInstaller = ids.length > 0
-      root.firstApps = lines[0] === "#started" ? [] : ids
+      root.firstApps = ids
       root.installFirst()
     }
   }
   onOnlineChanged: installFirst()
   function installFirst() {
-    if (firstApps.length === 0 || !online || installing) return
-    const ids = firstApps
+    if (firstApps.length === 0 || !online) return
     firstApps = []
-    Quickshell.execDetached(["sh", "-c", '{ echo "#started"; cat "$0"; } > "$0.new" && mv "$0.new" "$0"', firstAppsFile])
-    installIds(ids)
+    Quickshell.execDetached(["sh", "-c", firstAppsScript, Quickshell.env("HOME") + "/.local/state/mazapan",
+      Quickshell.env("XDG_RUNTIME_DIR") || "/tmp", {{ tq "title" }}, {{ tq "apps_installing" }}, {{ tq "apps_done" }},
+      {{ tq "apps_failed" }}, {{ tq "apps_cancelled" }}, {{ tq "apps_retry" }}])
   }
+  // One at a time (flock), once a session (a mark in the runtime directory,
+  // gone at logout); the run in the Apps menu's log, as its own are. Said
+  // when it starts (the password is asked for next).
+  readonly property string firstAppsScript: 'st=$0; run=$1; title=$2; busy=$3; ok=$4; bad=$5; no=$6; again=$7; '
+    + 'mkdir -p "$st/apps"; exec 9> "$run/mazapan-first-apps.lock"; flock -n 9 || exit 0; '
+    + '[ -e "$run/mazapan-first-apps.tried" ] && exit 0; : > "$run/mazapan-first-apps.tried"; '
+    + 'said=0; while [ -f "$st/first-apps" ]; do '
+    + '[ "$said" = 1 ] || notify-send -a "$title" -i system-software-install "$busy"; said=1; '
+    + 'echo "START welcome" > "$st/apps/run.log"; mazapan apps first --gui >> "$st/apps/run.log" 2>&1; code=$?; '
+    + 'echo "DONE $code" >> "$st/apps/run.log"; '
+    + 'if [ "$code" = 0 ]; then notify-send -a "$title" -i system-software-install "$ok"; break; fi; '
+    // No connection to the repositories yet: tried again in a while, quietly.
+    + 'if grep -q "^fail offline" "$st/apps/run.log"; then sleep 30; continue; fi; said=0; '
+    + 'msg=$bad; grep -q "^fail cancelled" "$st/apps/run.log" && msg=$no; '
+    + 'a=$(notify-send -a "$title" -u critical -i dialog-warning -A retry="$again" -w -- "$msg"); '
+    + '[ "$a" = retry ] || break; done'
 
   // While it's open, whether pkexec is waiting for a password (the apps it
   // started installing, even before a reload): the polkit agent's dialog is
@@ -645,9 +663,11 @@ Item {
             visible: root.step === "network"
             anchors.fill: parent
             spacing: 8
-            property var asking: null
+            property var asking: null   // the network its password is asked for
+            property var joining: null  // the one a password was just given to
+            property var chosen: null   // the one last picked: only its failures are said
             property string failed: ""
-            onAskingChanged: if (asking) Qt.callLater(() => pass.focusInput())
+            function cancel() { asking = null; joining = null; chosen = null; failed = "" }
 
             // Looking for networks while this is shown.
             Binding {
@@ -655,11 +675,6 @@ Item {
               when: !!root.wifi
               property: "scannerEnabled"
               value: root.open && root.step === "network"
-            }
-            Connections {
-              target: root.wifi
-              ignoreUnknownSignals: true
-              function onConnectionFailed() { netStep.failed = {{ tq "net.failed" }} }
             }
 
             RowLayout {
@@ -677,7 +692,9 @@ Item {
               Layout.fillHeight: true
               clip: true
               spacing: 2
-              model: root.wifi && Networking.wifiEnabled ? root.wifi.networks.values.slice().sort((a, b) => b.signalStrength - a.signalStrength) : []
+              // While a password is asked, only that network.
+              model: !root.wifi || !Networking.wifiEnabled ? [] : netStep.asking ? [netStep.asking]
+                : root.wifi.networks.values.slice().sort((a, b) => b.signalStrength - a.signalStrength)
               delegate: Choice {
                 required property var modelData
                 width: ListView.view.width
@@ -685,10 +702,36 @@ Item {
                 detail: modelData.connected ? {{ tq "net.connected" }} : ""
                 selected: modelData.connected
                 onPicked: {
+                  if (netStep.asking) return
                   netStep.failed = ""
+                  netStep.chosen = modelData
                   if (modelData.connected) return
                   if (modelData.known || modelData.security === WifiSecurityType.Open || modelData.security === WifiSecurityType.Unknown) modelData.connect()
                   else netStep.asking = modelData
+                }
+                Connections {
+                  target: modelData
+                  function onConnectedChanged() {
+                    if (!modelData.connected) return
+                    netStep.failed = ""
+                    if (netStep.asking === modelData) netStep.cancel()
+                  }
+                  function onConnectionFailed(reason) {
+                    // One given up on (Cancel, another picked): its late failure isn't news.
+                    if (netStep.chosen !== modelData) return
+                    const auth = reason === ConnectionFailReason.NoSecrets || reason === ConnectionFailReason.WifiClientDisconnected
+                      || reason === ConnectionFailReason.WifiAuthTimeout
+                    const mine = netStep.joining === modelData
+                    // A password just typed that was refused: NetworkManager
+                    // kept it, so it's forgotten and asked again.
+                    if (mine && auth && reason !== ConnectionFailReason.NoSecrets) modelData.forget()
+                    netStep.failed = {{ tq "net.failed" }}
+                    if (mine || auth) {
+                      netStep.asking = modelData
+                      netStep.joining = null
+                      Qt.callLater(pass.focusField)
+                    }
+                  }
                 }
               }
             }
@@ -699,21 +742,28 @@ Item {
               color: Theme.fgSubtle
             }
             Caption {
-              visible: netStep.failed !== ""
+              visible: netStep.failed !== "" && !netStep.asking
               text: netStep.failed
               color: Theme.danger
             }
-            TextField {
+            PasswordPrompt {
               id: pass
               visible: !!netStep.asking
               Layout.fillWidth: true
-              echoMode: TextInput.Password
-              placeholder: netStep.asking ? {{ tq "net.password" }}.arg(netStep.asking.name) : ""
-              onAccepted: {
-                if (netStep.asking && text !== "") netStep.asking.connectWithPsk(text)
-                netStep.asking = null
-                text = ""
+              label: netStep.asking ? {{ tq "net.password" }}.arg(netStep.asking.name) : ""
+              actionText: {{ tq "net.join" }}
+              cancelText: {{ tq "net.cancel" }}
+              busyText: netStep.asking ? {{ tq "net.joining" }}.arg(netStep.asking.name) : ""
+              busy: !!netStep.joining && netStep.joining === netStep.asking
+              error: netStep.failed
+              minLength: netStep.asking && netStep.asking.security === WifiSecurityType.StaticWep ? 5 : 8
+              onVisibleChanged: if (visible) Qt.callLater(start)
+              onSubmitted: password => {
+                netStep.failed = ""
+                netStep.joining = netStep.asking
+                netStep.asking.connectWithPsk(password)
               }
+              onCancelled: netStep.cancel()
             }
           }
 

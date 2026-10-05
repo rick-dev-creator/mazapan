@@ -6,6 +6,29 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- The command palette, redesigned: your apps first, with their icons;
+  results in sections (best match, apps, windows, actions, settings, not
+  installed) and filters you can see; every row says what Enter does, and
+  a panel beside it says what it is and where it opens. Settings pages and
+  switches (Wi-Fi, Bluetooth, night light…) are found there too. An app
+  that doesn't open says why instead of doing nothing, and terminal apps
+  such as Neovim open in a terminal, from Apps too.
+- Joining a Wi-Fi: the password is asked right under the network, with an
+  eye to see what you type, Connect and Cancel, "Connecting…" while it
+  tries, and the error in place with what you typed kept to fix it. Esc
+  cancels only the password. The same in the bar, the welcome and the
+  installer.
+- Plugins says who made each one: Mazapan, or the Community. Community
+  plugins (Markets, to start) come with Mazapan and install from the panel
+  even offline; a search finds them, installed or not, whatever the tab,
+  and the tabs show how many each holds.
+- The apps chosen in the installer are installed for sure: at the first
+  login once the repositories answer, and the list is kept until they're
+  all there. A cancelled password or a failure offers to try again (and
+  the next login tries again); one app that can't be installed (its
+  maker unreachable, a package gone from the repositories) no longer
+  stops the others. The Wi-Fi joined in the installer comes with the
+  installed system, so it starts online.
 - A Control Center: the icons on the bar's right become one status pill
   that says when something needs you (an agent waiting, a recording, the
   battery low, an update ready), in its color. A click or SUPER + A grows

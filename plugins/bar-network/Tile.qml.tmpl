@@ -25,7 +25,9 @@ Tile {
   readonly property bool wiredUp: wired.some(d => d.connected)
   readonly property bool listing: ControlService.detail === list
 
-  property var asking: null
+  property var asking: null     // the network its password is asked for
+  property var joining: null    // the one a password was just given to
+  property var chosen: null     // the one last picked: only its failures are said
   property string problem: ""
   readonly property string wifiGlyph: !Networking.wifiEnabled ? "󰤮" : current ? glyphFor(strength(current)) : "󰤯"
   readonly property string pillGlyph: wiredUp ? "󰈀" : wifi ? wifiGlyph : "󰲛"
@@ -39,13 +41,24 @@ Tile {
   }
   function choose(n) {
     problem = ""
+    chosen = n
     if (n.connected) n.disconnect()
     else if (n.known || n.security === WifiSecurityType.Open || n.security === WifiSecurityType.Unknown) n.connect()
-    else asking = n
+    else ask(n)
+  }
+  function ask(n) {
+    asking = n
+    joining = null
+  }
+  function cancel() {
+    asking = null
+    joining = null
+    chosen = null
+    problem = ""
   }
   onListingChanged: {
     if (wifi) wifi.scannerEnabled = listing
-    if (!listing) { asking = null; problem = "" }
+    if (!listing) cancel()
   }
 
   glyph: wifi ? wifiGlyph : "󰈀"
@@ -63,14 +76,17 @@ Tile {
   }
   onOpened: ControlService.detail = listing ? null : list
 
-  // The networks, below the switches.
+  // The networks, below the switches. While a password is asked, only
+  // that network and its password: right under the switches, never
+  // scrolled away below the others.
   Component {
     id: list
     Group {
       title: {{ tq "tile.wifi" }}
       Repeater {
-        model: root.networks.slice().sort((a, b) =>
-          (b.connected - a.connected) || (b.known - a.known) || (root.strength(b) - root.strength(a))).slice(0, 8)
+        model: root.asking ? [root.asking]
+          : root.networks.slice().sort((a, b) =>
+              (b.connected - a.connected) || (b.known - a.known) || (root.strength(b) - root.strength(a))).slice(0, 8)
         ListRow {
           id: net
           required property var modelData
@@ -85,15 +101,59 @@ Tile {
             : secured ? {{ tq "secured" }} : {{ tq "open" }}
           trailing: secured ? "󰌾" : ""
           active: modelData.connected
-          onClicked: root.choose(modelData)
-          Connections {
-            target: net.modelData
-            function onConnectionFailed(reason) {
-              const wrong = reason === ConnectionFailReason.NoSecrets
-              root.problem = (wrong ? {{ tq "wrong_password" }} : {{ tq "failed" }}).arg(net.modelData.name)
-              if (wrong) root.asking = net.modelData
+          // Right click forgets a saved network (its password asked again).
+          onClicked: mouse => {
+            if (root.asking) return
+            if (mouse.button === Qt.RightButton) {
+              if (modelData.known) modelData.forget()
+            } else {
+              root.choose(modelData)
             }
           }
+          Connections {
+            target: net.modelData
+            function onConnectedChanged() {
+              if (!net.modelData.connected) return
+              root.problem = ""
+              if (root.asking === net.modelData) root.cancel()
+            }
+            function onConnectionFailed(reason) {
+              // One given up on (Cancel, another picked): its late failure isn't news.
+              if (root.chosen !== net.modelData) return
+              const auth = reason === ConnectionFailReason.NoSecrets || reason === ConnectionFailReason.WifiClientDisconnected
+                || reason === ConnectionFailReason.WifiAuthTimeout
+              const mine = root.joining === net.modelData
+              // A password just typed that was refused: NetworkManager kept
+              // it, so it's forgotten. Asked again, the field still open,
+              // also after a failure that wasn't the password (to try again).
+              if (mine && auth && reason !== ConnectionFailReason.NoSecrets) net.modelData.forget()
+              root.problem = (auth ? {{ tq "wrong_password" }} : {{ tq "failed" }}).arg(net.modelData.name)
+              if (auth || mine) { root.ask(net.modelData); Qt.callLater(prompt.focusField) }
+            }
+          }
+        }
+      }
+      PasswordPrompt {
+        id: prompt
+        visible: root.asking !== null
+        Layout.fillWidth: true
+        label: root.asking ? {{ tq "password_label" }}.arg(root.asking.name) : ""
+        actionText: {{ tq "join" }}
+        cancelText: {{ tq "cancel" }}
+        busyText: root.asking ? {{ tq "joining" }}.arg(root.asking.name) : ""
+        busy: root.joining !== null && root.joining === root.asking
+        error: root.problem
+        minLength: root.asking && root.asking.security === WifiSecurityType.StaticWep ? 5 : 8
+        onVisibleChanged: if (visible) Qt.callLater(start)
+        onSubmitted: password => {
+          root.problem = ""
+          root.joining = root.asking
+          root.asking.connectWithPsk(password)
+        }
+        onCancelled: root.cancel()
+        Connections {
+          target: root
+          function onAskingChanged() { if (root.asking && !root.joining) Qt.callLater(prompt.start) }
         }
       }
       // Nothing found yet: it's looking (the list fills in as it does).
@@ -102,21 +162,12 @@ Tile {
         text: {{ tq "scanning" }}
         font.letterSpacing: 0
       }
-      TextField {
-        visible: root.asking !== null
-        Layout.fillWidth: true
-        placeholder: root.asking ? {{ tq "password_for" }}.arg(root.asking.name) : ""
-        echoMode: TextInput.Password
-        onVisibleChanged: if (visible) { text = ""; focusInput() }
-        onAccepted: {
-          if (root.asking && text !== "") root.asking.connectWithPsk(text)
-          root.asking = null
-        }
-      }
       Caption {
-        visible: root.problem !== ""
+        visible: root.problem !== "" && root.asking === null
+        Layout.fillWidth: true
         text: root.problem
         color: Theme.danger
+        wrapMode: Text.Wrap
         font.letterSpacing: 0
       }
     }

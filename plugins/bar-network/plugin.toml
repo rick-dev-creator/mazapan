@@ -26,3 +26,10 @@ reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 [[checks]]
 name = "{{ t \"check\" }}"
 run = "systemctl is-active -q NetworkManager && test \"$(nmcli -t networking connectivity)\" != none"
+
+[[actions]]
+name = "{{ t \"act.wifi\" }}"
+run = "if [ \"$(nmcli -t radio wifi)\" = enabled ]; then nmcli radio wifi off; else nmcli radio wifi on; fi"
+glyph = "󰖩"
+setting = true
+keywords = "{{ t \"act.wifi.kw\" }}"

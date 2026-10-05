@@ -175,7 +175,10 @@ public static partial class Program
     }
 
     /// <summary>Search paths: the user's directory first, so it can shadow built-ins.</summary>
-    static string[] PluginDirs() => [Install.Git.Dir, Paths.Join(Root(), "plugins")];
+    static string[] PluginDirs() => [Install.Git.Dir, .. ShippedPluginDirs()];
+
+    /// <summary>The plugins mazapan ships: its own (plugins/), then the community's (community/, off until installed).</summary>
+    static string[] ShippedPluginDirs() => [Paths.Join(Root(), "plugins"), Paths.Join(Root(), "community")];
 
     static string[] ThemeDirs() => [Paths.ExpandHome("~/.local/share/mazapan/themes"), Paths.Join(Root(), "themes")];
 }

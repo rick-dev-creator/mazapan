@@ -28,8 +28,14 @@ public sealed partial class Plugin
         public bool Optional;
     }
 
+    /// <summary>
+    /// Community: shipped with mazapan, but made by others (community/ next
+    /// to plugins/): off until someone installs it from the Plugins panel.
+    /// </summary>
+    public bool Community { get; set; }
+
     /// <summary>Off until turned on (enabled_plugins), rather than on until turned off (disabled_plugins).</summary>
-    public bool OffByDefault => Hardware != null || Meta.Optional;
+    public bool OffByDefault => Hardware != null || Meta.Optional || Community;
 
     public MetaTable Meta { get; } = new();
 
@@ -269,6 +275,7 @@ public sealed partial class Plugin
                     var p = LoadManifest(path);
                     if (p.Id != id)
                         throw new MazapanException($"{path}: id \"{p.Id}\", but its folder is \"{id}\": they must match");
+                    p.Community = Paths.Base(Paths.Clean(d)) == "community";
                     byId[id] = p;
                 }
                 catch (MazapanException e)
@@ -370,6 +377,7 @@ public sealed partial class Plugin
                 Glyph = a.String("glyph"),
                 Label = a.String("label"),
                 Confirm = a.Bool("confirm"),
+                Setting = a.Bool("setting"),
                 KeySetting = KeyFromSetting().Match(a.String("key")) is { Success: true } km ? km.Groups[1].Value : "",
             });
         var cov = r.Sub("coverage");
@@ -609,6 +617,8 @@ public sealed class Action
     public string Label = "";
     /// <summary>Confirm: done only when asked twice (power off, reboot): one stray ↵ doesn't.</summary>
     public bool Confirm;
+    /// <summary>Setting: a setting more than a thing to do (a switch, a Settings page): the palette lists it under Settings.</summary>
+    public bool Setting;
     /// <summary>
     /// KeySetting: the setting the key comes from (key = "{{ settings.X }}"),
     /// so Settings › Keys can change it; "" for a key that's fixed.

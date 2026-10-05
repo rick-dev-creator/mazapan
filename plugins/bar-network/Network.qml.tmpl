@@ -59,24 +59,36 @@ BarItem {
     onVisibleChanged: {
       if (root.wifi) root.wifi.scannerEnabled = visible
       if (!visible) {
-        asking = null
-        problem = ""
+        cancel()
         hideQr()
       }
     }
 
-    property var asking: null // secured network waiting for its password
+    property var asking: null  // secured network waiting for its password
+    property var joining: null // the one a password was just given to
+    property var chosen: null  // the one last picked: only its failures are said
     property string problem: ""
 
     function choose(n) {
       problem = ""
+      chosen = n
       if (n.connected) {
         n.disconnect()
       } else if (n.known || n.security === WifiSecurityType.Open || n.security === WifiSecurityType.Unknown) {
         n.connect()
       } else {
-        asking = n
+        ask(n)
       }
+    }
+    function ask(n) {
+      asking = n
+      joining = null
+    }
+    function cancel() {
+      asking = null
+      joining = null
+      chosen = null
+      problem = ""
     }
 
     // --- wired ------------------------------------------------------------
@@ -135,9 +147,10 @@ BarItem {
       }
 
       Repeater {
-        // Connected first, then saved ones, then by signal.
-        model: Networking.wifiEnabled ? root.wifiNetworks.slice().sort((a, b) =>
-          (b.connected - a.connected) || (b.known - a.known) || (root.strength(b) - root.strength(a))) : []
+        // Connected first, then saved ones, then by signal; while a
+        // password is asked, only that network, its password right below.
+        model: !Networking.wifiEnabled ? [] : popup.asking ? [popup.asking] : root.wifiNetworks.slice().sort((a, b) =>
+          (b.connected - a.connected) || (b.known - a.known) || (root.strength(b) - root.strength(a)))
 
         ListRow {
           id: net
@@ -156,6 +169,7 @@ BarItem {
           trailing: secured ? "󰌾" : ""
           active: modelData.connected
           onClicked: mouse => {
+            if (popup.asking) return
             if (mouse.button === Qt.RightButton) {
               if (modelData.known) modelData.forget()
             } else {
@@ -166,63 +180,55 @@ BarItem {
           Connections {
             target: net.modelData
             function onConnectedChanged() {
-              if (net.modelData.connected) popup.problem = ""
+              if (!net.modelData.connected) return
+              popup.problem = ""
+              if (popup.asking === net.modelData) popup.cancel()
             }
             function onConnectionFailed(reason) {
-              const wrong = reason === ConnectionFailReason.NoSecrets
-              popup.problem = (wrong ? {{ tq "wrong_password" }} : {{ tq "failed" }}).arg(net.modelData.name)
-              // NetworkManager kept the profile with the bad password: ask
-              // again right away instead of retrying it on the next click.
-              if (wrong) popup.asking = net.modelData
+              // One given up on (Cancel, another picked): its late failure isn't news.
+              if (popup.chosen !== net.modelData) return
+              const auth = reason === ConnectionFailReason.NoSecrets || reason === ConnectionFailReason.WifiClientDisconnected
+                || reason === ConnectionFailReason.WifiAuthTimeout
+              const mine = popup.joining === net.modelData
+              // A password just typed that was refused: NetworkManager kept
+              // it, so it's forgotten. Asked again, the field still open,
+              // also after a failure that wasn't the password (to try again).
+              if (mine && auth && reason !== ConnectionFailReason.NoSecrets) net.modelData.forget()
+              popup.problem = (auth ? {{ tq "wrong_password" }} : {{ tq "failed" }}).arg(net.modelData.name)
+              if (auth || mine) { popup.ask(net.modelData); Qt.callLater(prompt.focusField) }
             }
           }
         }
       }
 
       // Password for a secured network joined for the first time.
-      ColumnLayout {
+      PasswordPrompt {
+        id: prompt
         visible: popup.asking !== null
         Layout.fillWidth: true
         Layout.topMargin: 4
-        spacing: 4
-
-        Caption { text: popup.asking ? {{ tq "password_for" }}.arg(popup.asking.name).toUpperCase() : "" }
-
-        Rectangle {
-          Layout.fillWidth: true
-          implicitHeight: 28
-          color: Theme.bg
-          border.width: 1
-          border.color: password.activeFocus ? Theme.accent : Theme.border
-
-          TextInput {
-            id: password
-            anchors.fill: parent
-            anchors.margins: 6
-            verticalAlignment: TextInput.AlignVCenter
-            echoMode: TextInput.Password
-            color: Theme.fg
-            selectionColor: Theme.selection
-            font.family: Theme.fontMono
-            font.pointSize: 9.5
-            clip: true
-            onVisibleChanged: if (visible) { text = ""; forceActiveFocus() }
-            Connections {
-              target: popup
-              function onAskingChanged() {
-                if (popup.asking) { password.text = ""; password.forceActiveFocus() }
-              }
-            }
-            onAccepted: {
-              if (popup.asking && text !== "") popup.asking.connectWithPsk(text)
-              popup.asking = null
-            }
-          }
+        label: popup.asking ? {{ tq "password_label" }}.arg(popup.asking.name) : ""
+        actionText: {{ tq "join" }}
+        cancelText: {{ tq "cancel" }}
+        busyText: popup.asking ? {{ tq "joining" }}.arg(popup.asking.name) : ""
+        busy: popup.joining !== null && popup.joining === popup.asking
+        error: popup.problem
+        minLength: popup.asking && popup.asking.security === WifiSecurityType.StaticWep ? 5 : 8
+        onVisibleChanged: if (visible) Qt.callLater(start)
+        onSubmitted: password => {
+          popup.problem = ""
+          popup.joining = popup.asking
+          popup.asking.connectWithPsk(password)
+        }
+        onCancelled: popup.cancel()
+        Connections {
+          target: popup
+          function onAskingChanged() { if (popup.asking && !popup.joining) Qt.callLater(prompt.start) }
         }
       }
 
       Caption {
-        visible: popup.problem !== ""
+        visible: popup.problem !== "" && popup.asking === null
         text: popup.problem
         color: Theme.danger
       }

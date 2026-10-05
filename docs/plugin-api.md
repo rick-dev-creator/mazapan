@@ -294,6 +294,7 @@ home = 4                       # on the first screen, in this order (0: not)
 glyph = "󰸌"                    # its icon there (a Nerd Font glyph)
 label = "{{ t \"home\" }}"     # its name there, short ("Theme"); default: name
 confirm = true                 # done only on a second ↵ (power off, reboot)
+setting = true                 # a setting (a switch, a Settings page): under Settings
 ```
 
 A `key` written as one of the plugin's settings (`key = "{{ settings.key }}"`)
@@ -593,7 +594,8 @@ back), `mazapan widgets` lists them; `notifications setMode NAME QUIET
 | `Slider`   | `value`, `to`, `step`, `moved(real)`                           |
 | `ListRow`  | a row in a list: `glyph`, `title`, `detail`, `trailing`, `active`, `clicked(mouse)` |
 | `Button`   | `text`, `primary`, `clicked`                                   |
-| `TextField`| `text`, `placeholder`, `echoMode`, `accepted`, `focusInput()`  |
+| `TextField`| `text`, `placeholder`, `echoMode`, `accepted`, `focusInput()`; `revealable` (an eye that shows a password), `takesEscape` + `escaped` |
+| `PasswordPrompt` | a password asked in place: `label`, `actionText`, `cancelText`, `busyText`, `busy`, `error`, `minLength`, `start()`, `submitted(password)`, `cancelled` |
 | `Tile`     | a big switch for the Control Center: `glyph`, `title`, `detail`, `checked`, `more` (an arrow that opens what's behind it), `expanded`, `toggled`, `opened` |
 | `Group`    | a group of controls (a Control Center section): `title`, `trailing` (a word at its right), `trailingClicked`, what's put in it stacked |
 
