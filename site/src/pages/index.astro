@@ -1,0 +1,189 @@
+---
+import Chomp from "../components/Chomp.astro";
+
+const github = "https://github.com/rick-dev-creator/mazapan";
+const downloads = "https://sourceforge.net/projects/mazapan/files/";
+
+const features = [
+  ["Your agents, part of the desktop", "Every coding agent's live sessions in the bar, each account's limits and spend in one place, a built-in MCP server, and changes to the system only through previewed steps you approve."],
+  ["Updates you can undo", "Arch's news before updating, an automatic rollback when a check fails, and checkpoints you can start from the boot menu."],
+  ["Safe from the first boot", "Full-disk encryption with a recovery key, one password for the disk and the account, and a firewall that lets nothing in."],
+  ["Made for developers", "Profiles for development, .NET and mobile, Claude Code, Codex, OpenCode and Gemini CLI ready, containers without root, databases in one click."],
+  ["One look, everywhere", "One theme for the whole system, from the boot menu to your editor, picked live or made from any picture."],
+  ["A desktop that flows", "Scrolling columns, an overview of every workspace, a command palette that finds apps, windows and settings, and a Control Center."],
+];
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mazapan · An agentic desktop OS on Arch Linux</title>
+    <meta name="description" content="Mazapan is an agentic desktop OS on Arch Linux: your coding agents in the desktop, updates you can undo, one theme across the system." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta property="og:title" content="Mazapan" />
+    <meta property="og:description" content="An agentic desktop OS on Arch Linux." />
+  </head>
+  <body>
+    <header class="top">
+      <a class="brand" href="/"><img src="/favicon.svg" alt="" width="28" height="28" />Mazapan</a>
+      <nav>
+        <a href="#features">Features</a>
+        <a href="#download">Download</a>
+        <a href={github}>GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <h1>Mazapan</h1>
+        <p class="tagline">An agentic desktop OS on Arch Linux.</p>
+        <p class="lede">
+          Your coding agents are part of the desktop, every change to the system can be
+          undone, and one theme runs from the boot menu to your editor.
+        </p>
+        <div class="actions">
+          <a class="button primary" href="#download">Download</a>
+          <a class="button" href={github}>Source on GitHub</a>
+        </div>
+      </section>
+
+      <Chomp />
+
+      <section id="features" class="features">
+        {features.map(([title, text]) => (
+          <article>
+            <h2>{title}</h2>
+            <p>{text}</p>
+          </article>
+        ))}
+      </section>
+
+      <section id="download" class="download">
+        <h2>Download</h2>
+        <p class="soon">The first release, <strong>0.1 “Mazapan”</strong>, is on its way.</p>
+        <ol>
+          <li>Get the ISO from <a href={downloads}>SourceForge</a>, with its <code>.sha256</code> file.</li>
+          <li>Check it: <code>sha256sum -c mazapan-*.iso.sha256</code> says <code>OK</code>.</li>
+          <li>Write it to a USB stick of 8 GB or more and start the computer from it.</li>
+          <li>The installer guides you: language, disk, account, and the apps you want.</li>
+        </ol>
+        <p class="note">x86_64, UEFI. NVIDIA, AMD and Intel graphics.</p>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        MIT licensed · <a href={github}>GitHub</a> · <a href={downloads}>SourceForge</a>
+      </p>
+      <p class="fine">Mazapan is built on Arch Linux and is not affiliated with or endorsed by it.</p>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    color-scheme: dark;
+    --bg: #1a1917;
+    --bg-alt: #141311;
+    --surface: #232220;
+    --border: #3b3833;
+    --fg: #dcd3bf;
+    --muted: #9a917e;
+    --accent: #7847eb;
+    --accent-text: #a68af9;
+    --gold: #d6a862;
+    --mono: ui-monospace, "JetBrains Mono", "Cascadia Code", "Fira Code", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 1rem/1.6 var(--sans);
+  }
+  a { color: var(--accent-text); }
+  code {
+    font-family: var(--mono);
+    font-size: 0.9em;
+    background: var(--surface);
+    padding: 0.1em 0.35em;
+  }
+  .top, main, footer {
+    max-width: 68rem;
+    margin: 0 auto;
+    padding-inline: 1.25rem;
+  }
+  .top {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 1rem;
+  }
+  .brand {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    color: var(--fg);
+    text-decoration: none;
+    font: 700 1.1rem var(--mono);
+  }
+  .brand img { image-rendering: pixelated; }
+  nav { display: flex; gap: 1.25rem; }
+  nav a { color: var(--muted); text-decoration: none; }
+  nav a:hover { color: var(--fg); }
+
+  .hero { padding-block: 4rem 1rem; text-align: center; }
+  h1 {
+    margin: 0;
+    font: 700 clamp(2.75rem, 9vw, 5.5rem)/1 var(--mono);
+    color: var(--gold);
+    letter-spacing: -0.02em;
+  }
+  .tagline { font: 600 1.25rem var(--mono); margin: 1rem 0 0.5rem; }
+  .lede { color: var(--muted); max-width: 38rem; margin: 0 auto; }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin-top: 2rem; }
+  .button {
+    font: 600 1rem var(--mono);
+    padding: 0.7rem 1.4rem;
+    border: 2px solid var(--border);
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .button:hover { border-color: var(--muted); }
+  .button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .button.primary:hover { filter: brightness(1.12); }
+
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    gap: 1rem;
+    padding-block: 3rem;
+  }
+  .features article {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.25rem 1.4rem;
+  }
+  .features h2 { font: 700 1.05rem var(--mono); margin: 0 0 0.5rem; color: var(--fg); }
+  .features p { margin: 0; color: var(--muted); }
+
+  .download {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    padding: 2rem clamp(1.25rem, 4vw, 2.5rem);
+    margin-bottom: 3rem;
+  }
+  .download h2 { font: 700 1.6rem var(--mono); margin: 0 0 0.5rem; color: var(--gold); }
+  .download ol { padding-left: 1.25rem; }
+  .download li { margin-block: 0.4rem; }
+  .soon { margin-top: 0; }
+  .note { color: var(--muted); margin-bottom: 0; }
+
+  footer { padding-block: 2rem 3rem; color: var(--muted); text-align: center; border-top: 1px solid var(--border); }
+  footer p { margin: 0.25rem 0; }
+  .fine { font-size: 0.85rem; }
+</style>

@@ -1,0 +1,134 @@
+---
+// The mazapan crossing the screen, eating a row of peanuts: the icon's own
+// pixels (assets/mazapan.svg), a bite that opens and closes, crumbs left
+// behind. Still when the system asks for less motion.
+import icon from "../../../assets/mazapan.svg?raw";
+
+const pixels = [...icon.matchAll(/x="(\d+)" y="(\d+)"[^>]*fill="(#[0-9a-f]{6})"/g)]
+  .map(([, x, y, c]) => [Number(x), Number(y), c])
+  // The sparkles around it stay in the icon; here it's the mazapan alone.
+  .filter(([, , c]) => c !== "#ffffff");
+---
+
+<div class="chomp" aria-hidden="true">
+  <canvas data-pixels={JSON.stringify(pixels)}></canvas>
+</div>
+
+<style>
+  .chomp {
+    width: 100%;
+    height: 9rem;
+    overflow: hidden;
+  }
+  canvas {
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+  }
+</style>
+
+<script>
+  const canvas = document.querySelector<HTMLCanvasElement>(".chomp canvas")!;
+  const ctx = canvas.getContext("2d")!;
+  const pixels: [number, number, string][] = JSON.parse(canvas.dataset.pixels!);
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // One pixel of the art is P screen pixels.
+  const P = 3;
+  const SPRITE = 40;
+  // A peanut, its shell's two lobes and the pinch between them.
+  const PEANUT = [
+    "  ####    ####  ",
+    " #oooo####oooo# ",
+    "#oo.ooooooo.ooo#",
+    "#ooooo.ooooooo.#",
+    "#o.ooooooo.oooo#",
+    " #oooo####oooo# ",
+    "  ####    ####  ",
+  ];
+  const SHELL: Record<string, string> = { "#": "#7a4d24", o: "#c89350", ".": "#9c6a33" };
+  const GAP = 34; // art pixels from one peanut to the next
+
+  let W = 0, H = 0, cols = 0, ground = 0;
+  let x = -SPRITE, peanuts: number[] = [], crumbs: { x: number; y: number; v: number; c: string }[] = [];
+
+  function size() {
+    const r = canvas.getBoundingClientRect();
+    W = canvas.width = Math.round(r.width);
+    H = canvas.height = Math.round(r.height);
+    cols = Math.ceil(W / P);
+    ground = Math.floor(H / P) - 4;
+    reset();
+    // Still: halfway, the peanuts behind it eaten. Drawn again on each resize
+    // (a canvas resized is a canvas cleared).
+    if (still) {
+      x = Math.floor(cols / 2) - 20;
+      frame(0);
+    }
+  }
+  function reset() {
+    x = -SPRITE;
+    peanuts = [];
+    for (let px = 50; px < cols - 10; px += GAP) peanuts.push(px);
+    crumbs = [];
+  }
+  function dot(ax: number, ay: number, c: string) {
+    ctx.fillStyle = c;
+    ctx.fillRect(Math.round(ax) * P, Math.round(ay) * P, P, P);
+  }
+  function peanut(px: number) {
+    const top = ground - PEANUT.length;
+    PEANUT.forEach((row, j) =>
+      [...row].forEach((ch, i) => SHELL[ch] && dot(px + i, top + j, SHELL[ch])));
+  }
+  // The bite: a wedge from the middle of its right side, opening and closing.
+  function mouth(t: number) {
+    return still ? 0.35 : 0.08 + 0.32 * Math.abs(Math.sin(t / 140));
+  }
+  function inMouth(i: number, j: number, open: number) {
+    const dx = i - 20, dy = j - 22;
+    return dx > 0 && Math.abs(Math.atan2(dy, dx)) < open;
+  }
+  function sprite(t: number) {
+    const open = mouth(t);
+    const top = ground - 34;
+    const bob = still ? 0 : Math.round(Math.sin(t / 140) * 0.6);
+    for (const [i, j, c] of pixels) if (!inMouth(i, j, open)) dot(x + i, top + j + bob, c);
+  }
+  function frame(t: number) {
+    ctx.clearRect(0, 0, W, H);
+    // What it reaches is eaten, and leaves crumbs.
+    const front = x + 30;
+    peanuts = peanuts.filter((px) => {
+      if (px + 8 > front) return true;
+      for (let k = 0; k < 6; k++)
+        crumbs.push({ x: px + 4 + Math.random() * 6, y: ground - 6, v: -0.4 - Math.random() * 0.5, c: k % 2 ? "#c89350" : "#e8c486" });
+      return false;
+    });
+    peanuts.forEach(peanut);
+    crumbs = crumbs.filter((c) => c.y < ground);
+    for (const c of crumbs) {
+      dot(c.x, c.y, c.c);
+      c.y += c.v;
+      c.v += 0.12;
+      c.x -= 0.15;
+    }
+    sprite(t);
+  }
+
+  size();
+  addEventListener("resize", size);
+  if (!still) {
+    let last = 0;
+    const step = (t: number) => {
+      if (t - last > 33) {
+        x += 0.6;
+        if (x > cols + SPRITE) reset();
+        frame(t);
+        last = t;
+      }
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+</script>
