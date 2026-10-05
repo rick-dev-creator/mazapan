@@ -1,7 +1,7 @@
-# Mazapán's signing keys
+# Mazapan's signing keys
 
 What `mazapan-keyring` puts in pacman's keyring, as archlinux-keyring
-does: every package in Mazapán's repository is signed by one of these.
+does: every package in Mazapan's repository is signed by one of these.
 
 - `mazapan.gpg`: the public keys (`pkg/release keys KEYID pkg/keys`
   exports them).
@@ -15,4 +15,4 @@ until every system has the new one.
 Empty until the release key is made. A key is made once, kept offline,
 and never committed: only its public half is here.
 
-    gpg --quick-gen-key 'Mazapán release key' ed25519 sign never
+    gpg --quick-gen-key 'Mazapan release key' ed25519 sign never

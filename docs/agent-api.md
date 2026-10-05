@@ -1,8 +1,8 @@
-# Mazapán for agents
+# Mazapan for agents
 
 An agent (Claude Code, Codex, any MCP client) can read this desktop's state
-and change it the way a person would: through Mazapán, previewed with the
-exact diff, and undoable. Never by editing generated files: Mazapán would take
+and change it the way a person would: through Mazapan, previewed with the
+exact diff, and undoable. Never by editing generated files: Mazapan would take
 the edit for a conflict and stop managing the file.
 
 ## The MCP server
@@ -70,7 +70,7 @@ mazapan report                    # what's wrong, as Markdown
 `--set` takes a TOML value (`true`, `480`, `0.5`, `"text"`, `["a", "b"]`);
 anything that isn't one is taken as text.
 
-Every apply is undoable: before writing, Mazapán keeps what it will touch
+Every apply is undoable: before writing, Mazapan keeps what it will touch
 (each file as it was, or that it wasn't there, owned.json, config.toml) in
 `~/.local/state/mazapan/applies/` (private: 0600 copies in 0700 folders);
 `mazapan undo` puts the latest back. A file changed since (edited by hand, or
@@ -107,7 +107,7 @@ values; numbers and switches are checked against their default's type.
 
 - `origin`: `built-in`, `local` (a folder you put in the plugin folder) or
   `git` (then `source` and `commit` too).
-- `files.changes[].state`: `new`, `changed` (Mazapán would rewrite it),
+- `files.changes[].state`: `new`, `changed` (Mazapan would rewrite it),
   `conflict` (someone edited it: apply stops unless `--adopt`), `busy` (its
   app is running), `unreadable` (not plain JSON: left alone).
 - `checks` only with `--checks` (they run commands). `theme` and `files` are

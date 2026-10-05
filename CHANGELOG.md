@@ -6,6 +6,34 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- The apps chosen in the installer go in with the system: Basic's (the
+  browser, files, pictures, documents, video) from the ISO itself, no
+  connection needed; the other profiles' packages right after, when the
+  installer is online. The first start has them; only apps from Flathub,
+  their makers or the web are left for the first login. The Apps menu
+  counts them as its own, to remove them later.
+- The Wi-Fi joined in the installer connects by itself after the restart:
+  it was kept tied to the live system's name for the card, so it was never
+  tried and its password was asked again.
+- Without a connection at the first login, a notification says the apps you
+  chose will be installed as soon as you connect, instead of nothing.
+- Coding agents in Apps, the installer and the welcome: a Coding agents
+  profile with Claude Code (from Anthropic itself, checked, and it keeps
+  itself up to date; one installed by hand counts as there), Codex,
+  OpenCode, Gemini CLI and Qwen Code, and two ways to run several at once:
+  T3 Code (a window for them, each on its own branch) and Herdr (side by
+  side in the terminal), both from their makers' releases on GitHub,
+  checked against the checksum GitHub keeps, updated by mazapan update.
+  The Development, .NET and Mobile profiles bring them too (all but Qwen
+  Code). Found in the palette too ("codex", "agents"). With none installed, the
+  Control Center's Agents section offers to install one; with some, "More
+  agents".
+- The weather, market prices, the check for updates and the agents' limits
+  are fetched again as soon as the internet comes back, not at their next
+  turn hours or minutes later; a forecast that failed online is tried again
+  in a minute. Plugins can follow the connection too (Online, in the plugin
+  API).
+
 - The columns' keys work on every keyboard: equal widths is SUPER + W,
   phone width SUPER + P, a window into the next column SUPER + CTRL + ←/→
   (`=`, `[` and `]` need SHIFT or ALTGR on Spanish, Latin American or
@@ -182,7 +210,7 @@ release (a tag `vX.Y.Z`) names them.
   your time and the agent's, in the dashboard.
 
 - Agents: Claude Code's hooks can't block a prompt even with an older
-  Mazapán (they never fail), and say when work goes on after a permission;
+  Mazapan (they never fail), and say when work goes on after a permission;
   a minute idle after an answer no longer reads as "waiting for you".
   Limits at 1 % no longer read as full. The dashboard ends when closed,
   keeps a day's bar on its day in any time zone and shows 30 and 90 days
@@ -195,13 +223,13 @@ release (a tag `vX.Y.Z`) names them.
   MacBooks and Broadcom wl machines (their checks look at every installed
   kernel), and the installer no longer stops there.
 
-- Mazapán updates itself: its own signed repository, in two channels
+- Mazapan updates itself: its own signed repository, in two channels
   (stable, and edge with every release first): `mazapan channel` says which
   one and switches, `mazapan version` says the version.
 - Updates in a few steps, each with its ✓, from the terminal or the panel:
   room and power checked and the machine kept awake, the keyrings first,
   a failed initramfs rolled back, what needs a restart offered, what's new
-  in Mazapán shown. A new Mazapán finishes the update it came in.
+  in Mazapan shown. A new Mazapan finishes the update it came in.
 - The disk encrypted by default, with a recovery key (shown as text and a
   code to photograph) and one password: typed as the computer starts, it
   logs in and opens the keyring.
@@ -242,7 +270,7 @@ release (a tag `vX.Y.Z`) names them.
   in the clipboard history); text read in your language.
 - Every built-in plugin has its page in the Plugins panel.
 - Installing an app works before a repository was ever fetched (installed
-  offline, or Mazapán's repository newly added).
+  offline, or Mazapan's repository newly added).
 - Agents: every coding agent and account found by itself (Claude Code with
   each of its accounts, opencode, pi, Codex); in the bar, which session
   works and which waits for you (a click goes to its window), each

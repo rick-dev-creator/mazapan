@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Publishes Mazapán to its own repository: the packages (mazapan and
+# Publishes Mazapan to its own repository: the packages (mazapan and
 # mazapan-keyring) built, signed, and added to a channel's database, in
 # out/repo/<channel>/x86_64/: what's uploaded to where pkg/repository.toml
 # says. Every release goes to edge first; promote takes one to stable.
@@ -116,13 +116,13 @@ case "${1:-}" in
     v=$("$repo/pkg/version")
     [[ -x $repo/bin/mazapan ]] || die "no bin/mazapan: core/build first"
     built=$("$repo/bin/mazapan" --version)
-    [[ $built == "mazapan $v" ]] || die "bin/mazapan is \"$built\", this checkout $v: core/build"
+    [[ $built == "mazapan $v" || $built == "mazapan $v ("*")" ]] || die "bin/mazapan is \"$built\", this checkout $v: core/build"
     # A release is a commit (MAZAPAN_RELEASE_DIRTY=1 only for tests in the VMs).
     st=$(git -C "$repo" status --porcelain) || die "git can't read the checkout"
     [[ -z $st || ${MAZAPAN_RELEASE_DIRTY:-} == 1 ]] || die "the checkout has changes not committed: a release is a commit"
     work=$(mktemp -d)
     trap 'rm -rf "$work"' EXIT
-    # Every package of Mazapán's own: pkg/PKGBUILD, and each pkg/*/PKGBUILD.
+    # Every package of Mazapan's own: pkg/PKGBUILD, and each pkg/*/PKGBUILD.
     for p in mazapan $(cd "$repo/pkg" && ls -d */ | tr -d / | while read -r d; do [[ -f $d/PKGBUILD ]] && echo "$d"; done); do
       mkdir -p "$work/$p"
       if [[ $p == mazapan ]]; then cp "$repo/pkg/PKGBUILD" "$work/$p/"; else cp "$repo/pkg/$p"/* "$work/$p/"; fi

@@ -14,7 +14,7 @@ BarItem {
   shown: {{ settings.bar }}
   onClicked: Quickshell.execDetached(["qs", "ipc", "-c", "mazapan", "call", "mazapan", "panel", "palette"])
 
-  // Mazapán's icon (shell-bar's), crisp: it's pixel art.
+  // Mazapan's icon (shell-bar's), crisp: it's pixel art.
   Image {
     anchors.verticalCenter: parent.verticalCenter
     source: Qt.resolvedUrl("../../assets/mazapan.svg")

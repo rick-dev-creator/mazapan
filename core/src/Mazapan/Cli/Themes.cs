@@ -313,7 +313,7 @@ public static partial class Program
     const string OmarchyRepo = "https://github.com/basecamp/omarchy";
 
     /// <summary>
-    /// themes import-omarchy [DIR|URL]…: Omarchy's themes made Mazapán's
+    /// themes import-omarchy [DIR|URL]…: Omarchy's themes made Mazapan's
     /// (omarchy-NAME), from a folder of them, one theme's folder, or a git
     /// repository over https (a theme's, or Omarchy's own, whose themes/
     /// alone is fetched). With nothing named: the Omarchy themes on this

@@ -115,7 +115,7 @@ public static partial class Program
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
             };
-            foreach (var a in new[] { "--what=sleep:idle:handle-lid-switch", "--who=Mazapán", "--why=Updating the system", "--mode=block", "cat" })
+            foreach (var a in new[] { "--what=sleep:idle:handle-lid-switch", "--who=Mazapan", "--why=Updating the system", "--mode=block", "cat" })
                 psi.ArgumentList.Add(a);
             try
             {
@@ -195,7 +195,7 @@ public static partial class Program
     static readonly HttpClient ChangelogHttp = new() { Timeout = TimeSpan.FromSeconds(8) };
 
     /// <summary>
-    /// What's new in Mazapán, when the update brings it: the changelog of the
+    /// What's new in Mazapan, when the update brings it: the changelog of the
     /// channel this system follows, from the version installed on. Empty
     /// (never an error) when it can't be read: it's only words.
     /// </summary>

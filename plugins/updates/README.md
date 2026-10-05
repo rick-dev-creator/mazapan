@@ -11,4 +11,4 @@ checks after, rolled back if they fail.
 While it runs, the panel shows its steps, each with its ✓ (getting ready,
 the keys, the packages, the configuration, the checks), and offers a
 restart when the kernel or Hyprland changed. When the update brings a new
-Mazapán, what's new in it comes first, from its changelog.
+Mazapan, what's new in it comes first, from its changelog.

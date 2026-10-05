@@ -11,6 +11,6 @@ Qt 5 apps aren't reached.
 Qt apps read all this when they start: open ones keep their colors until
 they're opened again. qt6ct and KDE apps write to the same files
 (`~/.config/qt6ct/qt6ct.conf`, `~/.config/kdeglobals`): only the keys
-Mazapán writes are its own, the rest stay theirs and yours.
+Mazapan writes are its own, the rest stay theirs and yours.
 
 It needs qt6ct; its check says so when it isn't installed.

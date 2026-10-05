@@ -12,15 +12,16 @@
 # webapp = "https://…"           # …a site as an app of its own (the webapps plugin), or…
 # plugin = "markets"             # …a mazapan plugin (from a catalog), or…
 # vendor = "jetbrains:RD"        # …from its maker, when neither of those can give it as it should be
-#                                #   (jetbrains:RD Rider, vscode:stable VS Code): checked against the
+#                                #   (jetbrains:RD Rider, vscode:stable VS Code, anthropic:claude-code
+#                                #   Claude Code, which then keeps itself up to date): checked against the
 #                                #   maker's SHA-256, in ~/.local/share/mazapan/vendor, updated by mazapan update
 # desktop = "gimp.desktop"       # its launcher (to open it, and its icon)
 # command = "lazygit"            # no launcher: the program a terminal runs to open it
 # plugins = ["theme-gimp"]       # mazapan plugins that go with it: turned on with it
 # translations.es.description = "Una línea sobre lo que es"
 #
-# Categories: internet, communication, office, development, graphics,
-# video, audio, games, utilities, finance.
+# Categories: internet, communication, office, development, agents,
+# graphics, video, audio, games, utilities, finance.
 #
 # [[profile]] is a set of apps for a use ("Gaming"), offered as one card.
 # No AUR: the repositories, Flathub or the web.
@@ -52,43 +53,58 @@ translations.pt.description = "O que todo computador precisa: navegador, arquivo
 [[profile]]
 id = "development"
 name = "Development"
-description = "Code editors, git, containers, languages and the command-line tools developers reach for"
+description = "Code editors, git, containers, languages and the command-line tools developers reach for, and coding agents (Claude Code, Codex, OpenCode, Gemini CLI) with T3 Code and Herdr to run them"
 glyph = 0xF0169
-apps = ["vscode", "neovim", "git", "github-cli", "lazygit", "podman", "podman-desktop", "dev-databases", "mise", "cli-tools", "zed"]
+apps = ["vscode", "neovim", "git", "github-cli", "lazygit", "podman", "podman-desktop", "dev-databases", "mise", "cli-tools", "zed", "claude-code", "openai-codex", "opencode", "gemini-cli", "t3code", "herdr"]
 translations.es.name = "Desarrollo"
 translations.de.name = "Entwicklung"
 translations.fr.name = "Développement"
 translations.pt.name = "Desenvolvimento"
-translations.es.description = "Editores de código, git, contenedores, lenguajes y las herramientas de terminal de todo desarrollador"
-translations.de.description = "Code-Editoren, git, Container, Sprachen und die Kommandozeilen-Tools, zu denen Entwickler greifen"
-translations.fr.description = "Éditeurs de code, git, conteneurs, langages et les outils en ligne de commande qu'utilisent les développeurs"
-translations.pt.description = "Editores de código, git, contêineres, linguagens e as ferramentas de terminal que todo desenvolvedor usa"
+translations.es.description = "Editores de código, git, contenedores, lenguajes y las herramientas de terminal de todo desarrollador, y agentes de código (Claude Code, Codex, OpenCode, Gemini CLI) con T3 Code y Herdr para llevarlos"
+translations.de.description = "Code-Editoren, git, Container, Sprachen und die Kommandozeilen-Tools, zu denen Entwickler greifen, dazu Coding-Agents (Claude Code, Codex, OpenCode, Gemini CLI) mit T3 Code und Herdr, um sie zu führen"
+translations.fr.description = "Éditeurs de code, git, conteneurs, langages et les outils en ligne de commande qu'utilisent les développeurs, et des agents de code (Claude Code, Codex, OpenCode, Gemini CLI) avec T3 Code et Herdr pour les mener"
+translations.pt.description = "Editores de código, git, contêineres, linguagens e as ferramentas de terminal que todo desenvolvedor usa, e agentes de código (Claude Code, Codex, OpenCode, Gemini CLI) com T3 Code e Herdr para conduzi-los"
+
+[[profile]]
+id = "agents"
+name = "Coding agents"
+description = "AI agents that write and change code with you: Claude Code, Codex, OpenCode, Gemini CLI and Qwen Code, and T3 Code and Herdr to run several at once. Each agent needs its own account or key"
+glyph = 0xF06A9
+apps = ["claude-code", "openai-codex", "opencode", "gemini-cli", "qwen-code", "t3code", "herdr"]
+translations.es.name = "Agentes de código"
+translations.de.name = "Coding-Agenten"
+translations.fr.name = "Agents de code"
+translations.pt.name = "Agentes de código"
+translations.es.description = "Agentes de IA que escriben y cambian código contigo: Claude Code, Codex, OpenCode, Gemini CLI y Qwen Code, y T3 Code y Herdr para llevar varios a la vez. Cada agente necesita su propia cuenta o clave"
+translations.de.description = "KI-Agenten, die mit dir Code schreiben und ändern: Claude Code, Codex, OpenCode, Gemini CLI und Qwen Code, dazu T3 Code und Herdr, um mehrere gleichzeitig zu führen. Jeder Agent braucht ein eigenes Konto oder einen Schlüssel"
+translations.fr.description = "Des agents IA qui écrivent et modifient du code avec vous : Claude Code, Codex, OpenCode, Gemini CLI et Qwen Code, et T3 Code et Herdr pour en mener plusieurs à la fois. Chaque agent demande son propre compte ou sa clé"
+translations.pt.description = "Agentes de IA que escrevem e mudam código com você: Claude Code, Codex, OpenCode, Gemini CLI e Qwen Code, e T3 Code e Herdr para conduzir vários ao mesmo tempo. Cada agente precisa da própria conta ou chave"
 
 [[profile]]
 id = "dotnet"
 name = ".NET"
-description = "ASP.NET Core and Aspire, ready: the SDK set up (its HTTPS certificate trusted, Aspire's templates), containers for Aspire, Rider and Visual Studio Code from their makers"
+description = "ASP.NET Core and Aspire, ready: the SDK set up (its HTTPS certificate trusted, Aspire's templates), containers for Aspire, Rider and Visual Studio Code from their makers, and the coding agents"
 glyph = 0xF0AAE
-apps = ["dotnet-sdk", "podman", "podman-desktop", "dev-databases", "rider", "vscode-microsoft", "git"]
-translations.es.description = "ASP.NET Core y Aspire, listos: el SDK configurado (su certificado HTTPS de confianza, las plantillas de Aspire), contenedores para Aspire, Rider y Visual Studio Code de sus fabricantes"
-translations.de.description = "ASP.NET Core und Aspire, bereit: das SDK eingerichtet (sein HTTPS-Zertifikat vertrauenswürdig, die Aspire-Vorlagen), Container für Aspire, Rider und Visual Studio Code von ihren Herstellern"
-translations.fr.description = "ASP.NET Core et Aspire, prêts : le SDK configuré (son certificat HTTPS approuvé, les modèles Aspire), des conteneurs pour Aspire, Rider et Visual Studio Code de leurs éditeurs"
-translations.pt.description = "ASP.NET Core e Aspire, prontos: o SDK configurado (seu certificado HTTPS confiável, os modelos do Aspire), contêineres para o Aspire, Rider e Visual Studio Code de seus fabricantes"
+apps = ["dotnet-sdk", "podman", "podman-desktop", "dev-databases", "rider", "vscode-microsoft", "git", "claude-code", "openai-codex", "opencode", "gemini-cli", "t3code", "herdr"]
+translations.es.description = "ASP.NET Core y Aspire, listos: el SDK configurado (su certificado HTTPS de confianza, las plantillas de Aspire), contenedores para Aspire, Rider y Visual Studio Code de sus fabricantes, y los agentes de código"
+translations.de.description = "ASP.NET Core und Aspire, bereit: das SDK eingerichtet (sein HTTPS-Zertifikat vertrauenswürdig, die Aspire-Vorlagen), Container für Aspire, Rider und Visual Studio Code von ihren Herstellern, und die Coding-Agents"
+translations.fr.description = "ASP.NET Core et Aspire, prêts : le SDK configuré (son certificat HTTPS approuvé, les modèles Aspire), des conteneurs pour Aspire, Rider et Visual Studio Code de leurs éditeurs, et les agents de code"
+translations.pt.description = "ASP.NET Core e Aspire, prontos: o SDK configurado (seu certificado HTTPS confiável, os modelos do Aspire), contêineres para o Aspire, Rider e Visual Studio Code de seus fabricantes, e os agentes de código"
 
 [[profile]]
 id = "mobile"
 name = "Mobile (Expo)"
-description = "Expo apps on Android from the first try: Node.js, Java 17, Android Studio with its SDK and emulators, phones over USB, Visual Studio Code"
+description = "Expo apps on Android from the first try: Node.js, Java 17, Android Studio with its SDK and emulators, phones over USB, Visual Studio Code and the coding agents"
 glyph = 0xF011C
-apps = ["nodejs", "jdk17", "android-studio", "expo", "vscode-microsoft", "git"]
+apps = ["nodejs", "jdk17", "android-studio", "expo", "vscode-microsoft", "git", "claude-code", "openai-codex", "opencode", "gemini-cli", "t3code", "herdr"]
 translations.es.name = "Móvil (Expo)"
 translations.de.name = "Mobil (Expo)"
 translations.fr.name = "Mobile (Expo)"
 translations.pt.name = "Celular (Expo)"
-translations.es.description = "Apps de Expo en Android a la primera: Node.js, Java 17, Android Studio con su SDK y emuladores, teléfonos por USB, Visual Studio Code"
-translations.de.description = "Expo-Apps auf Android beim ersten Versuch: Node.js, Java 17, Android Studio mit SDK und Emulatoren, Handys über USB, Visual Studio Code"
-translations.fr.description = "Des apps Expo sur Android du premier coup : Node.js, Java 17, Android Studio avec son SDK et ses émulateurs, les téléphones en USB, Visual Studio Code"
-translations.pt.description = "Apps Expo no Android de primeira: Node.js, Java 17, Android Studio com seu SDK e emuladores, celulares por USB, Visual Studio Code"
+translations.es.description = "Apps de Expo en Android a la primera: Node.js, Java 17, Android Studio con su SDK y emuladores, teléfonos por USB, Visual Studio Code y los agentes de código"
+translations.de.description = "Expo-Apps auf Android beim ersten Versuch: Node.js, Java 17, Android Studio mit SDK und Emulatoren, Handys über USB, Visual Studio Code und die Coding-Agents"
+translations.fr.description = "Des apps Expo sur Android du premier coup : Node.js, Java 17, Android Studio avec son SDK et ses émulateurs, les téléphones en USB, Visual Studio Code et les agents de code"
+translations.pt.description = "Apps Expo no Android de primeira: Node.js, Java 17, Android Studio com seu SDK e emuladores, celulares por USB, Visual Studio Code e os agentes de código"
 
 [[profile]]
 id = "gaming"
@@ -438,6 +454,89 @@ translations.es.description = "Git más sencillo, en la terminal"
 translations.de.description = "Git, einfacher, im Terminal"
 translations.fr.description = "Git, en plus simple, dans le terminal"
 translations.pt.description = "Git mais simples, no terminal"
+
+[[app]]
+id = "claude-code"
+name = "Claude Code"
+description = "Anthropic's coding agent, in the terminal: from Anthropic itself, checked, and it keeps itself up to date"
+category = "agents"
+vendor = "anthropic:claude-code"
+command = "claude"
+translations.es.description = "El agente de código de Anthropic, en la terminal: de Anthropic directamente, verificado, y se mantiene actualizado solo"
+translations.de.description = "Der Coding-Agent von Anthropic, im Terminal: direkt von Anthropic, geprüft, und er hält sich selbst aktuell"
+translations.fr.description = "L'agent de code d'Anthropic, dans le terminal : directement d'Anthropic, vérifié, et il se tient à jour tout seul"
+translations.pt.description = "O agente de código da Anthropic, no terminal: direto da Anthropic, verificado, e se mantém atualizado sozinho"
+
+[[app]]
+id = "openai-codex"
+name = "Codex"
+description = "OpenAI's coding agent, in the terminal"
+category = "agents"
+pacman = ["openai-codex"]
+command = "codex"
+translations.es.description = "El agente de código de OpenAI, en la terminal"
+translations.de.description = "Der Coding-Agent von OpenAI, im Terminal"
+translations.fr.description = "L'agent de code d'OpenAI, dans le terminal"
+translations.pt.description = "O agente de código da OpenAI, no terminal"
+
+[[app]]
+id = "opencode"
+name = "OpenCode"
+description = "The open-source coding agent, in the terminal: works with many providers' models"
+category = "agents"
+pacman = ["opencode"]
+command = "opencode"
+translations.es.description = "El agente de código libre, en la terminal: funciona con modelos de muchos proveedores"
+translations.de.description = "Der quelloffene Coding-Agent, im Terminal: arbeitet mit Modellen vieler Anbieter"
+translations.fr.description = "L'agent de code open source, dans le terminal : fonctionne avec les modèles de nombreux fournisseurs"
+translations.pt.description = "O agente de código aberto, no terminal: funciona com modelos de muitos provedores"
+
+[[app]]
+id = "gemini-cli"
+name = "Gemini CLI"
+description = "Google's coding agent, in the terminal"
+category = "agents"
+pacman = ["gemini-cli"]
+command = "gemini"
+translations.es.description = "El agente de código de Google, en la terminal"
+translations.de.description = "Der Coding-Agent von Google, im Terminal"
+translations.fr.description = "L'agent de code de Google, dans le terminal"
+translations.pt.description = "O agente de código do Google, no terminal"
+
+[[app]]
+id = "qwen-code"
+name = "Qwen Code"
+description = "Alibaba's open-source coding agent, in the terminal, made for the Qwen models"
+category = "agents"
+pacman = ["qwen-code"]
+command = "qwen"
+translations.es.description = "El agente de código libre de Alibaba, en la terminal, hecho para los modelos Qwen"
+translations.de.description = "Der quelloffene Coding-Agent von Alibaba, im Terminal, gemacht für die Qwen-Modelle"
+translations.fr.description = "L'agent de code open source d'Alibaba, dans le terminal, conçu pour les modèles Qwen"
+translations.pt.description = "O agente de código aberto da Alibaba, no terminal, feito para os modelos Qwen"
+
+[[app]]
+id = "t3code"
+name = "T3 Code"
+description = "A window for your coding agents (Claude Code, Codex, OpenCode): several at once, each on its own branch, their changes side by side. Uses the agents you have installed; from its makers, checked, kept up to date by mazapan update"
+category = "agents"
+vendor = "github:pingdotgg/t3code"
+translations.es.description = "Una ventana para tus agentes de código (Claude Code, Codex, OpenCode): varios a la vez, cada uno en su rama, sus cambios lado a lado. Usa los agentes que tengas instalados; de sus creadores, verificado, actualizado con mazapan update"
+translations.de.description = "Ein Fenster für deine Coding-Agents (Claude Code, Codex, OpenCode): mehrere gleichzeitig, jeder auf seinem Branch, ihre Änderungen nebeneinander. Nutzt die installierten Agents; von seinen Machern, geprüft, aktuell gehalten von mazapan update"
+translations.fr.description = "Une fenêtre pour vos agents de code (Claude Code, Codex, OpenCode) : plusieurs à la fois, chacun sur sa branche, leurs changements côte à côte. Utilise les agents installés ; de ses auteurs, vérifié, tenu à jour par mazapan update"
+translations.pt.description = "Uma janela para seus agentes de código (Claude Code, Codex, OpenCode): vários ao mesmo tempo, cada um em seu branch, as mudanças lado a lado. Usa os agentes instalados; dos seus criadores, verificado, atualizado pelo mazapan update"
+
+[[app]]
+id = "herdr"
+name = "Herdr"
+description = "Your coding agents side by side in the terminal: each in its own pane, which are working, waiting for you or done, and agents that start and prompt other agents. From its makers, checked, kept up to date by mazapan update"
+category = "agents"
+vendor = "github:herdrdev/herdr"
+command = "herdr"
+translations.es.description = "Tus agentes de código lado a lado en la terminal: cada uno en su panel, cuáles trabajan, te esperan o terminaron, y agentes que abren y dirigen a otros. De sus creadores, verificado, actualizado con mazapan update"
+translations.de.description = "Deine Coding-Agents nebeneinander im Terminal: jeder in seinem Bereich, welche arbeiten, auf dich warten oder fertig sind, und Agents, die andere starten und anleiten. Von seinen Machern, geprüft, aktuell gehalten von mazapan update"
+translations.fr.description = "Vos agents de code côte à côte dans le terminal : chacun dans son volet, lesquels travaillent, vous attendent ou ont fini, et des agents qui lancent et guident d'autres agents. De ses auteurs, vérifié, tenu à jour par mazapan update"
+translations.pt.description = "Seus agentes de código lado a lado no terminal: cada um em seu painel, quais estão trabalhando, esperando por você ou prontos, e agentes que abrem e conduzem outros. Dos seus criadores, verificado, atualizado pelo mazapan update"
 
 [[app]]
 id = "docker"

@@ -2,7 +2,8 @@
 //
 // The sessions open now (which agent, where, what it's doing; a click goes
 // to its window), and each account's limits with when they reset. The
-// dashboard, one click away. A dot in the pill while one works.
+// dashboard, one click away. A dot in the pill while one works. With no
+// agent installed yet, the way to one (Apps, on its Coding agents profile).
 
 import QtQuick
 import QtQuick.Layouts
@@ -15,12 +16,12 @@ import "../../components/control"
 Group {
   id: root
 
-  property bool shown: AgentsService.any
+  property bool shown: true
   readonly property string pillGlyph: AgentsService.working > 0 ? "󱙺 " + AgentsService.working : ""
   readonly property var stateText: ({ working: {{ tq "s.working" }}, waiting: {{ tq "s.waiting" }}, done: {{ tq "s.done" }}, idle: {{ tq "s.idle" }}, running: {{ tq "s.running" }} })
 
   title: {{ tq "title" }}
-  trailing: {{ tq "dashboard" }}
+  trailing: AgentsService.any ? {{ tq "dashboard" }} : ""
   onTrailingClicked: {
     ControlService.close()
     Quickshell.execDetached(["sh", Quickshell.env("HOME") + "/.local/share/mazapan/bin/agents-dashboard"])
@@ -63,9 +64,28 @@ Group {
     }
   }
   Caption {
-    visible: AgentsService.sessions.length === 0
+    visible: AgentsService.any && AgentsService.sessions.length === 0
     text: {{ tq "no_sessions" }}
     font.letterSpacing: 0
+  }
+
+  // Apps, on the Coding agents profile.
+  function moreAgents() {
+    ControlService.close()
+    Quickshell.execDetached(["qs", "ipc", "-c", "mazapan", "call", "mazapan", "open", "apps", "profile:agents"])
+  }
+  Caption {
+    visible: !AgentsService.any
+    text: {{ tq "no_agents" }}
+    font.letterSpacing: 0
+    wrapMode: Text.WordWrap
+    Layout.fillWidth: true
+  }
+  Button {
+    visible: !AgentsService.any
+    primary: true
+    text: {{ tq "install_agent" }}
+    onClicked: root.moreAgents()
   }
 
   Repeater {
@@ -100,5 +120,11 @@ Group {
         horizontalAlignment: Text.AlignRight
       }
     }
+  }
+
+  Button {
+    visible: AgentsService.any
+    text: {{ tq "more_agents" }}
+    onClicked: root.moreAgents()
   }
 }

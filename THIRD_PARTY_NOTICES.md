@@ -1,6 +1,6 @@
 # Third-party notices
 
-Mazapán is written from scratch, but some of what it knows comes from
+Mazapan is written from scratch, but some of what it knows comes from
 others' work. Their licenses ask for their notices to travel with it.
 
 ## Omarchy
@@ -13,9 +13,9 @@ settings for specific laptops), ported from Omarchy's scripts.
 Its themes: `mazapan themes import-omarchy` ("Themes: import Omarchy's"
 in the palette) reads Omarchy's theme format and, when asked, downloads
 Omarchy's themes from its repository (or uses the ones of an Omarchy
-install) and turns them into Mazapán themes on that computer. None of
+install) and turns them into Mazapan themes on that computer. None of
 them ships in this repository or on the ISO; the ones imported keep their
-own authors and licenses. Mazapán's own themes (Amber, Gruvbox, Paper,
+own authors and licenses. Mazapan's own themes (Amber, Gruvbox, Paper,
 Phosphor) don't come from Omarchy.
 
 ```
@@ -53,7 +53,7 @@ LICENSE with the package.
 
 ## Packages and apps
 
-Everything Mazapán installs (Arch's packages, Flatpaks from Flathub, apps
+Everything Mazapan installs (Arch's packages, Flatpaks from Flathub, apps
 from their makers) comes from where it's published, under its own license;
-none of it is part of this repository. Mazapán never ships games, ROMs or
+none of it is part of this repository. Mazapan never ships games, ROMs or
 consoles' BIOS.

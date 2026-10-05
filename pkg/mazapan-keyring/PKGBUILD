@@ -1,11 +1,11 @@
-# Mazapán's signing keys in pacman's keyring (as archlinux-keyring), from
+# Mazapan's signing keys in pacman's keyring (as archlinux-keyring), from
 # pkg/keys, or MAZAPAN_KEYS (a throwaway key, for tests in the VMs).
 #   cd pkg/mazapan-keyring && makepkg
 
 pkgname=mazapan-keyring
 pkgver=0
 pkgrel=1
-pkgdesc="Mazapán's package signing keys"
+pkgdesc="Mazapan's package signing keys"
 arch=(any)
 license=(MIT)
 install=$pkgname.install
@@ -29,7 +29,7 @@ package() {
   local d="$pkgdir/usr/share/pacman/keyrings"
   install -d "$d"
   install -Dm644 "$_repo/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
-  # Without keys yet (Mazapán not published), an empty keyring: installed
+  # Without keys yet (Mazapan not published), an empty keyring: installed
   # all the same, so the install's package list never depends on it.
   [[ -f $_keys/mazapan.gpg ]] || return 0
   install -m644 "$_keys/mazapan.gpg" "$d/mazapan.gpg"

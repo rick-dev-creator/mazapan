@@ -78,7 +78,7 @@ public static partial class Program
             "The system as it was before each package change (snapper snapshots, in the boot menu): whether this start is from one (and which), and every checkpoint with what it was before (JSON). Read only.",
             Obj([]), true, _ => [], _ => { CmdCheckpoint(["status", "--json"]); return CmdCheckpoint(["list", "--json"]); }),
         new("checkpoint_diagnose", "What changed since a checkpoint",
-            "What differs between a checkpoint and the main system: packages (versions on each side), Mazapán's last update, and the errors and failed services of the last starts (on a checkpoint, the start before it: the one that broke). Read only. Making a checkpoint the main system is the person's: `sudo mazapan checkpoint keep` on it, or `sudo mazapan checkpoint restore N` (then a restart); tell them, with why.",
+            "What differs between a checkpoint and the main system: packages (versions on each side), Mazapan's last update, and the errors and failed services of the last starts (on a checkpoint, the start before it: the one that broke). Read only. Making a checkpoint the main system is the person's: `sudo mazapan checkpoint keep` on it, or `sudo mazapan checkpoint restore N` (then a restart); tell them, with why.",
             Obj(new Fields { { "id", Prop("string", "the checkpoint to compare with the running system (when not started from one; default the newest)") } }), true,
             a => a.TryGetProperty("id", out var id) && id.GetString() is { Length: > 0 } s ? ["diagnose", s] : ["diagnose"], CmdCheckpoint),
         new("preview_change", "Preview a change",

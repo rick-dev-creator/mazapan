@@ -6,7 +6,7 @@ GTK theme (plugin GTK theme). Other apps built on Chromium keep their own
 look.
 
 That setting lives in each profile's Preferences, a file the browser
-rewrites all the time: only that one key is Mazapán's. While the browser
+rewrites all the time: only that one key is Mazapan's. While the browser
 is open its file is left alone (it would write its own copy back), and
 it's set the next time, with the browser closed.
 

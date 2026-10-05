@@ -35,6 +35,36 @@ public static class Archinstall
     /// </summary>
     static string[] Snapshots(Answers a) => ["snapper", "snap-pac"];
 
+    /// <summary>What archinstall installs for the system itself, from the ISO's repository.</summary>
+    static List<string> SystemPackages(Answers a) =>
+        Packages.Concat(Snapshots(a)).Concat(a.HardwarePackages).Concat(["greetd", "pam-fde-boot-pw"]).Concat(a.SshKeys.Count > 0 ? ["openssh"] : [])
+            .Concat(NeedsCjk(a) ? ["noto-fonts-cjk"] : [])
+            .Concat(TypesCjk(a) ? ["fcitx5", "fcitx5-gtk", "fcitx5-qt", "fcitx5-configtool", "fcitx5-mozc", "fcitx5-chinese-addons", "fcitx5-hangul"] : [])
+            .ToList();
+
+    /// <summary>The apps' packages the ISO's repository has, that the system doesn't already take: the apps', with them.</summary>
+    static List<string> OwnAppPackages(Answers a) => a.OfflineAppPackages.Except(SystemPackages(a)).ToList();
+
+    /// <summary>
+    /// The chosen apps' packages: those of an app the ISO's repository has
+    /// whole (installed with the system, no connection needed), and the rest
+    /// (from Arch's repositories after it, when there's a connection). Apps
+    /// from elsewhere (Flathub, their maker, a site, a plugin) aren't
+    /// packages: the first login's.
+    /// </summary>
+    public static (List<string> Offline, List<string> Online) AppPackages(IEnumerable<string> ids, IReadOnlyList<Store.App> catalog, IReadOnlySet<string> offlineRepository)
+    {
+        List<string> offline = [], online = [];
+        foreach (var id in ids)
+            if (catalog.FirstOrDefault(x => x.Id == id) is { Kind: "pacman" } app)
+            {
+                var to = app.Pacman.All(offlineRepository.Contains) ? offline : online;
+                to.AddRange(app.Pacman.Where(p => !to.Contains(p)));
+            }
+        online.RemoveAll(offline.Contains);
+        return (offline, online);
+    }
+
     /// <summary>The main partition's size on a disk (whole MiBs, after the EFI partition, one MiB left for GPT's backup table).</summary>
     static long MainSize(long diskBytes, bool encrypt) => diskBytes / MiB * MiB - (MiB + (encrypt ? 2048 * MiB : 512 * MiB)) - MiB;
 
@@ -112,10 +142,7 @@ public static class Archinstall
             } },
             { "network_config", new Fields { { "type", "nm" } } },
             { "ntp", true },
-            { "packages", Packages.Concat(Snapshots(a)).Concat(a.HardwarePackages).Concat(["greetd", "pam-fde-boot-pw"]).Concat(a.SshKeys.Count > 0 ? ["openssh"] : [])
-                .Concat(NeedsCjk(a) ? ["noto-fonts-cjk"] : [])
-                .Concat(TypesCjk(a) ? ["fcitx5", "fcitx5-gtk", "fcitx5-qt", "fcitx5-configtool", "fcitx5-mozc", "fcitx5-chinese-addons", "fcitx5-hangul"] : [])
-                .Cast<object>().ToList() },
+            { "packages", SystemPackages(a).Concat(OwnAppPackages(a)).Cast<object>().ToList() },
             { "parallel_downloads", 8 },
             // avahi: printers (and other devices) on the network found by themselves.
             { "services", new List<object> { "power-profiles-daemon", "avahi-daemon" }.Concat(a.SshKeys.Count > 0 ? ["sshd"] : []).ToList() },
@@ -230,7 +257,7 @@ public static class Archinstall
             Write("/etc/pacman.conf", PacmanConf).TrimEnd('\n') + "; fi\n");
         s.Append("sed -i -e '/^#\\[multilib\\]/,/^#Include/ s/^#//' -e 's/^#Color/Color/' /etc/pacman.conf\n");
         s.Append("rm -f /var/lib/pacman/sync/offline.*\n");
-        // Mazapán's own repository, so it updates itself: the stable channel,
+        // Mazapan's own repository, so it updates itself: the stable channel,
         // its keys in pacman's keyring. Not while it isn't published (server
         // empty): pacman fails on a repository it can't reach.
         // Only with its keys in pacman's keyring: without them its packages
@@ -238,7 +265,7 @@ public static class Archinstall
         if (server != "")
             s.Append($"if [ -f {Pacman.Repository.Keyring} ] && pacman-key -l >/dev/null 2>&1 && pacman-key --populate mazapan >/dev/null 2>&1; then " +
                 Write(Pacman.Repository.Mirrorlist, Pacman.Repository.MirrorlistText(server, "stable")).TrimEnd('\n') + "; " +
-                Pacman.Repository.EnableScript + "; else echo \"Mazapán's repository not added: its keys aren't there\"; fi\n");
+                Pacman.Repository.EnableScript + "; else echo \"Mazapan's repository not added: its keys aren't there\"; fi\n");
         // pacman's cache pruned weekly, three versions of each package kept:
         // what a rollback takes the previous one from (pacman-contrib).
         s.Append("systemctl enable paccache.timer\n");
@@ -278,7 +305,20 @@ public static class Archinstall
         // Online too: text in pictures read in the language (capture's OCR;
         // English is on the ISO, the others aren't).
         var ocr = OcrData(a.Language) is { } data ? $" && pacman -S --needed --noconfirm {data} >> /var/log/mazapan-first-update.log 2>&1" : "";
-        s.Append($"if curl -fsS --max-time 5 -o /dev/null https://geo.mirror.pkgbuild.com/; then {{ pacman -Syu --noconfirm > /var/log/mazapan-first-update.log 2>&1{ocr}; }} || echo \"the first update failed: /var/log/mazapan-first-update.log\"; fi\n");
+        s.Append("online=0; curl -fsS --max-time 5 -o /dev/null https://geo.mirror.pkgbuild.com/ && online=1\n");
+        s.Append($"if [ \"$online\" = 1 ]; then {{ pacman -Syu --noconfirm > /var/log/mazapan-first-update.log 2>&1{ocr}; }} || echo \"the first update failed: /var/log/mazapan-first-update.log\"; fi\n");
+        // The apps' packages the ISO didn't have, now too, online: the first
+        // start has them. Offline, or failing, the first login installs them
+        // (first-apps keeps every app). What went in for the apps is written
+        // down, so the Apps menu takes them as its own (to remove them, undo).
+        var own = OwnAppPackages(a);
+        if (a.AppPackages.Count > 0)
+        {
+            s.Append($"apps=\"$(pacman -T -- {string.Join(' ', a.AppPackages)} || true)\"\n");
+            s.Append("if [ \"$online\" = 1 ] && [ -n \"$apps\" ]; then pacman -S --needed --noconfirm -- $apps > /var/log/mazapan-first-apps.log 2>&1 || echo \"the apps' packages didn't all go in (the first login tries again): /var/log/mazapan-first-apps.log\"; fi\n");
+        }
+        if (own.Count > 0 || a.AppPackages.Count > 0)
+            s.Append($"for p in {string.Join(' ', own)}{(a.AppPackages.Count > 0 ? " $apps" : "")}; do pacman -Qq -- \"$p\" >/dev/null 2>&1 && echo \"$p\"; done > {home}/.local/state/mazapan/first-packages || true\n");
         // Its desktop, now (reloads fail here, nothing runs yet: warnings only).
         s.Append($"HOME={home} USER={a.User} mazapan apply --system -y > /var/log/mazapan-first-apply.log 2>&1 || echo \"mazapan apply failed: /var/log/mazapan-first-apply.log\"\n");
         s.Append($"chown -R {a.User}:{a.User} {home}\n");
@@ -345,7 +385,7 @@ public static class Archinstall
 
     const string BashProfile = """
 
-        # mazapan: the desktop on tty1. The first time, and whenever Mazapán
+        # mazapan: the desktop on tty1. The first time, and whenever Mazapan
         # changed since (an update by hand), mazapan writes it.
         # Not exec'd: if Hyprland stops there's a shell here, not a loop.
         if [[ -z $WAYLAND_DISPLAY && $(tty) == /dev/tty1 ]]; then

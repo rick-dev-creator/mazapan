@@ -8,7 +8,7 @@ theme sets.
 The colors go in your settings.json as customizations of VS Code's default
 theme (whatever it's called in your version: "Dark 2026", "Dark Modern"…).
 Pick another theme in VS Code and they simply don't apply to it. Only
-those keys are Mazapán's; the rest of the file stays yours, as formatted.
+those keys are Mazapan's; the rest of the file stays yours, as formatted.
 A settings.json with comments is left alone.
 
 Open windows follow a new theme at once; going from dark to light, or

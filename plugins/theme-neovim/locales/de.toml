@@ -1,6 +1,6 @@
 "plugin.name" = "Neovim-Theme"
 "plugin.description" = "Ein Neovim-Farbschema aus dem Theme (Syntax, Treesitter, LSP, Diagnosen, git, Telescope), genutzt, wenn du kein anderes gewählt hast; offene Neovims werden beim Anwenden umgefärbt"
 "setting.auto" = "Automatisch"
-"setting.auto.help" = "Von selbst nutzen, wenn deine Konfiguration kein Farbschema setzt. Setzt sie eins (z. B. LazyVim), stell deins auf \"Mazapán\"."
+"setting.auto.help" = "Von selbst nutzen, wenn deine Konfiguration kein Farbschema setzt. Setzt sie eins (z. B. LazyVim), stell deins auf \"Mazapan\"."
 
 # Nichts zu übersetzen.

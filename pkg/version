@@ -1,5 +1,5 @@
 #!/bin/sh
-# Mazapán's version, from git: the last tag vX.Y.Z (a release), or with
+# Mazapan's version, from git: the last tag vX.Y.Z (a release), or with
 # what came after it (X.Y.Z.rN.gHASH, between releases), in the form pacman
 # takes as a pkgver (no hyphens; a tag like v1.0.0-rc1 isn't one). Before the
 # first tag: 0.0.0.rN.gHASH, older than any release (v0.1.0 included).

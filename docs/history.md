@@ -98,7 +98,7 @@ where they fit Hyprland.
      unencrypted install (/boot on the root filesystem) gets them, through
      grub-btrfs. With the disk encrypted, each checkpoint's kernel and
      initramfs go to the ESP (2 GiB there), the last few kept, with
-     Mazapán's own menu entries; the disk's password asked once, as ever.
+     Mazapan's own menu entries; the disk's password asked once, as ever.
    - Booted into one, it says so, at once and while it lasts (a card, and
      a mark in the bar): "You're on the checkpoint from before Sunday's
      update; your system is as it was then; what you change here is lost
@@ -186,7 +186,7 @@ Order: 2 (done), 1, then 3, then 4.
 
 ## Next: what matters most (decided 2026-10-03)
 
-An evaluation (2026-10-03) of where Mazapán stands, and what it takes to
+An evaluation (2026-10-03) of where Mazapan stands, and what it takes to
 say it's technically better, before it's been tried on real hardware.
 
 **Strong already:** the foundation. Installs encrypted with one password
@@ -206,7 +206,7 @@ in a terminal with a prompt; a skill that tells the agent to edit
 `~/.config/hypr/` and the rest directly, with no preview and no undo; a
 crash that offers a diagnosis prompt; usage widgets that read one
 account's credentials, however many the person has. A launcher and
-instructions, not an agentic desktop. Mazapán's MCP server (state, exact previews, apply, undo, the
+instructions, not an agentic desktop. Mazapan's MCP server (state, exact previews, apply, undo, the
 person's approval for root) is the foundation that can be.
 
 **The must-haves, by impact:**
@@ -230,7 +230,7 @@ person's approval for root) is the foundation that can be.
      OpenRouter's balance). A small OpenTelemetry receiver on localhost:
      agents that speak it (Claude Code, Codex, Gemini CLI) send tokens,
      cost, sessions, active time, lines changed and commits, and the ones
-     Mazapán launches come set up for it. Cost: tokens by each model's
+     Mazapan launches come set up for it. Cost: tokens by each model's
      prices (input, output, cache writes and reads; a price table kept
      current, LiteLLM's), and for a subscription what it would have cost
      through the API against what it costs: whether each one pays off. The
@@ -275,7 +275,7 @@ person's approval for root) is the foundation that can be.
    `battery` and a DMI `family` rule would let thermald, lpmd and older ROG
    models match exactly; all of them need trying on their hardware.
 
-Order: 2 and 3 first (the person's problem today, and what sets Mazapán
+Order: 2 and 3 first (the person's problem today, and what sets Mazapan
 apart), then 4, with 5 alongside; 1 whenever the person can.
 
 **Where they stand (2026-10-04, audited):** 2, 3, 4 and 5 done and tried in
@@ -310,14 +310,14 @@ Niri's scrolling tiling.
 
 Decided on 2026-10-03. Most of what a desktop needs is done (the
 progress below); what's missing is what makes it a system someone can
-install and keep: an installed Mazapán never updates itself today (the
+install and keep: an installed Mazapan never updates itself today (the
 installer takes the package from the ISO's own repository, and the
 installed system has no `[mazapan]` repository), nothing protects the
 disk, nothing has run on real hardware, and nothing is published. Until
 1.0, work goes in this order; everything else waits.
 
 **A. It updates itself** (blocks everything else)
-1. Mazapán's own signed package repository: `mazapan` and a
+1. Mazapan's own signed package repository: `mazapan` and a
    `mazapan-keyring` package (pacman-key, as archlinux-keyring), in
    channels: `stable`, `edge` (every release first), and `dev` (a
    checkout, the dev VM's). The installed system has it from the install
@@ -337,7 +337,7 @@ installed (the [mazapan] section, the mirrorlist on stable, the key in
 pacman's keyring, paccache.timer); then 0.1 → 0.2 → 0.3 → 0.4 from the
 terminal and 0.4 → 0.5 from the panel (signatures checked, snapper's
 pair, the new mazapan finishing the update, the panel's steps, "what's
-new"); channels switched; a login applying a changed Mazapán. Learned:
+new"); channels switched; a login applying a changed Mazapan. Learned:
 a repository pacman can't reach stops every update, Arch's too, so it
 has to be hosted somewhere that stays up; repo-add makes symlinks
 (`mazapan.db`), which uploading to GitHub has to copy as files.
@@ -352,7 +352,7 @@ has to be hosted somewhere that stays up; repo-add makes symlinks
    install), and the keyring opens with the disk's password through
    pam_fde_boot_pw (by greetd's author: greetd's autologin skips PAM's
    auth step, where pam_systemd_loadkey works; it injects it in the
-   session step), packaged in Mazapán's own repository. No
+   session step), packaged in Mazapan's own repository. No
    keyring without a password any more. What it took, found in the VM:
    systemd's initramfs (archinstall makes the older `encrypt` one unless
    there's a security key: the post-install switches it to sd-encrypt and
@@ -441,11 +441,11 @@ rollback without a reboot, the history, no migrations (an update is an
 apply), the panel with pkexec, Flatpak apps.
 
 ```
-Update Mazapán                          34 packages · reboot (kernel)
+Update Mazapan                          34 packages · reboot (kernel)
   ✓ Getting ready      free space, on power, kept awake
   ✓ Keys               archlinux-keyring, mazapan-keyring
   ✓ Snapshot           (snap-pac: bootable from the menu)
-  ✓ Packages           Arch, Mazapán, Flatpak apps
+  ✓ Packages           Arch, Mazapan, Flatpak apps
   ✓ Configuration      mazapan apply
   ✓ Checks             one breaks → rolled back on its own
   Done. The kernel changed: [Reboot now] [Later]
@@ -457,11 +457,11 @@ Hyprland, the shell restarted on its own). Better than it:
 - A failed initramfs is a failed update: rolled back, and no reboot
   offered (not only a warning).
 - "What's new" in the panel, from the changelog, not a link.
-- `pacman -Syu` by hand: each account remembers the Mazapán that last
+- `pacman -Syu` by hand: each account remembers the Mazapan that last
   wrote its desktop, and a login with another one applies it (`mazapan
   apply --if-updated`). No hook
   in pacman.
-- When the update brings a new Mazapán, the new one writes the
+- When the update brings a new Mazapan, the new one writes the
   configuration, runs the checks and, if needed, rolls back (`update
   --continue`): its plugins may need its own code.
 - Orphans offered, never removed alone; the cache keeps three versions
@@ -488,7 +488,7 @@ Hyprland, the shell restarted on its own). Better than it:
 | 8 | Capture | **Done** (2026-09-29); follow-ups listed below |
 | — | Plugin ecosystem (catalogs, Plugins panel, author tools) | **Done** (2026-09-29), under 7 |
 | — | Notifications | **Done** (2026-09-29) |
-| — | The name: Mazapán, and its icon | **Done** (2026-09-30): was myarch; a bitten mazapán in pixel art, in the bar, the installer and the login screen |
+| — | The name: Mazapan, and its icon | **Done** (2026-09-30): was myarch; a bitten mazapán in pixel art, in the bar, the installer and the login screen |
 | 9 | Wallpapers, and a theme from any picture | **Done** (2026-09-29) |
 | 10 | The essentials still missing | **Done** (2026-09-29) |
 | 11 | Modes | **Done** (2026-09-29) |
@@ -692,7 +692,7 @@ that every `hl.bind` has its action.
   kdeglobals. Both files are shared with their apps (`merge = "ini"`: the
   core manages only its keys), since qt6ct and KDE apps write there too:
   a person's own values for those keys are a conflict the first time
-  (--adopt backs them up), a rollback puts back only Mazapán's keys and
+  (--adopt backs them up), a rollback puts back only Mazapan's keys and
   never deletes the file, symlinked dotfiles stay links. On a real machine
   it took coverage from 19 to 27 of 61 apps. Audited (6 findings, all
   fixed).
@@ -712,7 +712,7 @@ that every `hl.bind` has its action.
     mode.
   - Audited (12 findings, all fixed): a JSON file that doesn't parse is
     never rewritten; keys with dots; an @import only counts at the head of
-    the file; taking Mazapán's line out of your own file is respected, and
+    the file; taking Mazapan's line out of your own file is respected, and
     its lines leave with the plugin; profiles linked twice count once;
     rollbacks don't bring back deleted profiles; permissions kept (0600
     Preferences); contrast of Firefox's buttons and links; high contrast
@@ -724,7 +724,7 @@ that every `hl.bind` has its action.
     (syntax, Treesitter, LSP, diagnostics, diff, git, Telescope, which-key,
     its terminal's 16 colors), see-through when the terminals are; in
     Neovim's data folder, never in your ~/.config/nvim; used on its own
-    when your config sets no colorscheme (else set yours to "Mazapán");
+    when your config sets no colorscheme (else set yours to "Mazapan");
     running Neovims recolor on apply.
   - VS Code, Code - OSS, VSCodium, and their Flatpaks (plugin
     `theme-vscode`): the theme as color customizations in settings.json
@@ -739,7 +739,7 @@ that every `hl.bind` has its action.
   - Audited (10 findings, all fixed): a rollback never rewrites a
     settings.json it can't read; reload commands time out (a Neovim
     suspended with ctrl-z hung apply); busy and unreadable files aren't
-    counted as an update; JSON keeps its layout; Mazapán's JSON keys leave
+    counted as an update; JSON keeps its layout; Mazapan's JSON keys leave
     with the plugin; readable fuzzy matches on VS Code's selected rows;
     colors with alpha trimmed for Neovim and btop.
 
@@ -799,7 +799,7 @@ Chromium accent through its policy (the system files are there now).
   config.toml, never over what changed since.
 - `mazapan mcp`: the same as an MCP server (status, doctor, themes, plugins,
   coverage, history, preview_change, apply_change, undo), so any agent uses
-  Mazapán the way a person does. Installing plugins and updating the system
+  Mazapan the way a person does. Installing plugins and updating the system
   stay the person's.
 - `mazapan report` and the `agent` plugin: "Ask an agent about this desktop"
   in the palette opens one with the state, failing checks, recent crashes
@@ -823,7 +823,7 @@ whole, as before, so comments in it don't survive a change).
 
 **Next (2026-10-03, the must-haves above).** The usual "agentic" is
 a launcher and a skill that edits files directly (see "Next: what matters
-most"). Mazapán's:
+most"). Mazapan's:
 - *Agents and accounts:* an Agents panel that finds every agent and every
   account by itself (Claude configurations, opencode's providers, pi and
   other API keys from the keyring), with each one's limits and spend, and
@@ -861,7 +861,7 @@ update|remove|sync`:
   needs more than approved.
 - Audited (17 findings, all fixed): commands were approved as raw
   templates, so a changed define or default ran unasked; a plugin could
-  write into Mazapán's own folders (plugins.lock, a decoy plugin); symlinks
+  write into Mazapan's own folders (plugins.lock, a decoy plugin); symlinks
   and submodules in a repo; index flags and ignored files hid edits; git
   ran with the user's hooks and config; the lock's values reached git
   arguments; an update was checked out before it was approved; a broken
@@ -1105,7 +1105,7 @@ terminal.
   update, bootable from the boot menu (as openSUSE), shown in
   the same timeline. Closes 1's pending safety net.
 
-Only what goes through Mazapán is in the desktop's timeline: a file it
+Only what goes through Mazapan is in the desktop's timeline: a file it
 doesn't manage, edited by hand or by its app, isn't. The system snapshots
 cover the rest.
 
@@ -1145,7 +1145,7 @@ workspaces, arranged so) and brought back with one key. Dropped on
 
 ## 15. The CLI in your language (dropped)
 
-The plugins are localized; Mazapán's own messages (apply, update, doctor)
+The plugins are localized; Mazapan's own messages (apply, update, doctor)
 are English only. Dropped on 2026-09-30: the CLI stays in English, as
 most command-line tools do; everything with a window is localized.
 
@@ -1171,7 +1171,7 @@ undoable.
   the full list with checkboxes, for whoever wants it. The profiles'
   apps are in the offline mirror too; the few too big for it arrive in
   the background after the first boot, with progress in the bar.
-- Apps arrive configured and in the theme: each comes with its Mazapán
+- Apps arrive configured and in the theme: each comes with its Mazapan
   plugin (a theme, its integration) where there's one.
 - Built in steps, each usable on its own: the catalog and the Apps menu
   (17) first, on any Arch; then a first-boot welcome (language, keyboard,
@@ -1189,7 +1189,7 @@ shows the keys as they are on that machine. Where it was is kept across
 the reloads it causes; Esc closes it until the next login.
 
 *The ISO* (2026-09-30): `iso/build` (in the dev VM: `vm/vm iso`) makes it
-from archiso's own profile, with Mazapán as a package (`pkg/PKGBUILD`) and
+from archiso's own profile, with Mazapan as a package (`pkg/PKGBUILD`) and
 an offline repository inside (everything an install puts on the disk,
 ~550 packages): an install downloads nothing and takes a minute or two.
 It starts into the live desktop, in the theme, and the installer (plugin
@@ -1226,10 +1226,10 @@ are shown and keys-only. Snapshots from the install on (2026-09-30):
 hw-snapshots and, with `/boot` on btrfs, hw-snapshots-grub turned on
 while installing, with a first snapshot of the system as installed,
 already in the boot menu; every package change adds its pair (the
-History panel lists them). Mazapán speaks Portuguese, French and German
+History panel lists them). Mazapan speaks Portuguese, French and German
 too (every plugin, the app catalog, the emoji names, the password
 dialog), and the installer offers the world's main languages, in
-English where Mazapán isn't translated yet. Next: unattended installs
+English where Mazapan isn't translated yet. Next: unattended installs
 with `cidata`, and trying it on real hardware.
 
 ## 17. Apps: install and remove
@@ -1363,7 +1363,7 @@ Order: 1, then 2, 3, 4, 5.
      first. Never pam-fprint-grosshack.
    - The password always after a reboot (the keyring needs it), as macOS.
    - The system's PAM files are never rewritten (Arch keeps edited ones
-     and leaves .pacnew: the 2020 pam_tally2 lockout). Mazapán's own
+     and leaves .pacnew: the 2020 pam_tally2 lockout). Mazapan's own
      services, owned by its package; sudo and polkit-1 get one marked
      line pointing to them. polkit-1 starts from the /usr/lib/pam.d copy
      polkit ships now (a short one drops faillock and more).
@@ -1586,7 +1586,7 @@ docs/security.md. Next for security: Secure Boot with signed images.
 
 - Graphical plugins in .NET (Avalonia), for others to write in C#: whole
   windows (a dashboard for Aspire projects, a container manager), not the
-  bar or overlays, which are layer-shell and stay Quickshell. Mazapán's
+  bar or overlays, which are layer-shell and stay Quickshell. Mazapan's
   own apps stay Quickshell (one interface, native on Wayland; the agents
   dashboard included). Built at install or shipped built;
   a small Mazapan.Avalonia library giving them the theme (colors, fonts,

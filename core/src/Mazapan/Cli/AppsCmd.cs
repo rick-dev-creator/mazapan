@@ -149,7 +149,7 @@ public static partial class Program
             "pacman" => a.Pacman.All(Packages.Contains),
             "flatpak" => UserFlatpaks.Contains(a.Flatpak) || SystemFlatpaks.Contains(a.Flatpak),
             "webapp" => Webapps.ContainsKey(a.Webapp.TrimEnd('/')),
-            "vendor" => Vendor.Installed(a.Id) != "",
+            "vendor" => Vendor.Installed(a.Id, a.Vendor) != "",
             _ => Found.FirstOrDefault(p => p.Id == a.Plugin) is { } p && Cfg != null && Cfg.IsOn(p),
         };
 
@@ -159,7 +159,7 @@ public static partial class Program
             "pacman" => a.Pacman.Any(p => Packages.Contains(p) && Owned.Packages.Contains(p) && !Protected.Contains(p)),
             "flatpak" => UserFlatpaks.Contains(a.Flatpak) && Owned.Flatpaks.Contains(a.Flatpak),
             "webapp" => Webapps.ContainsKey(a.Webapp.TrimEnd('/')) && Owned.Webapps.Contains(a.Webapp.TrimEnd('/')),
-            "vendor" => Vendor.Installed(a.Id) != "" && OwnedVendor.Contains(a.Id),
+            "vendor" => Vendor.Installed(a.Id, a.Vendor) != "" && OwnedVendor.Contains(a.Id),
             _ => false, // a plugin: the Plugins panel's
         };
     }
@@ -221,7 +221,7 @@ public static partial class Program
                     { "category", a.Category }, { "kind", a.Kind }, { "from", a.From }, { "flatpak", a.Flatpak },
                     // A web app's launcher is the one webapps made for it.
                     { "desktop", a.Webapp != "" && now.Webapps.TryGetValue(a.Webapp.TrimEnd('/'), out var wid) ? $"mazapan-webapp-{wid}.desktop"
-                        : a.Vendor != "" && now.Has(a) ? Vendor.DesktopName(a.Id) : a.Desktop },
+                        : a.Vendor != "" && now.Has(a) && Vendor.MakerOf(a.Vendor).HasLauncher ? Vendor.DesktopName(a.Id) : a.Desktop },
                     { "command", a.Command },
                     { "installed", now.Has(a) },
                     { "removable", now.Removable(a) },
@@ -545,7 +545,7 @@ public static partial class Program
     /// <summary>No repository database yet: a system installed offline, from the ISO.</summary>
     /// <summary>
     /// A repository whose database pacman never fetched (installed offline,
-    /// or Mazapán's added since): pacman -S refuses every package until a
+    /// or Mazapan's added since): pacman -S refuses every package until a
     /// -Sy, so the install is a -Syu then.
     /// </summary>
     static bool NeverSynced()
@@ -676,11 +676,21 @@ public static partial class Program
         var known = ids.Where(id => apps.Any(a => a.Id == id) || profiles.Any(p => p.Id == id)).ToList();
         foreach (var id in ids.Except(known)) Console.Error.WriteLine($"warning: {id}: not in the catalog any more, left out");
         var want = known.Count > 0 ? Pick(profiles, apps, known) : [];
+        // What the install already put in for them: the Apps menu's, as if it had.
+        if (File.Exists(FirstApps.PackagesPath))
+        {
+            var now = AppsNow.Read();
+            var lang = Locale.Languages.Detect(now.Cfg?.Language ?? "");
+            if (FirstApps.Adopted(want, now.Packages, File.ReadAllText(FirstApps.PackagesPath), lang) is { } tx) AppsLedger.Save(AppsState(), tx);
+            File.Delete(FirstApps.PackagesPath);
+        }
         if (want.All(AppsNow.Read().Has))
         {
+            // All there (the install put them in): what goes with them still
+            // turned on (their plugins: a theme, a setup), nothing downloaded.
+            var code = AppsInstall(want, gui, yes: true);
             File.Delete(path);
-            Console.WriteLine("already installed");
-            return 0;
+            return code;
         }
         if (!Reachable(TimeSpan.FromMinutes(2)))
         {

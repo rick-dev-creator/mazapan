@@ -10,6 +10,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs
 
 Singleton {
   id: root
@@ -19,6 +20,8 @@ Singleton {
   property bool checking: false
   // The last look failed (checkupdates missing, the config broken…): said, not "up to date".
   property string checkError: ""
+  // When the last look went through (Date.now()); 0: not yet.
+  property real checkedAt: 0
   // What `mazapan update` installs: the bar's number and the Update button.
   // Firmware and plugin updates have their own sections and buttons.
   readonly property int count: data ? (data.packages || []).length + (data.flatpaks || []).length + (data.vendor || []).length : 0
@@ -56,6 +59,7 @@ Singleton {
     onExited: code => {
       root.checking = false
       root.checkError = code === 0 ? "" : (probeErr.text.trim().replace(/^mazapan: /, "") || "exit " + code)
+      if (code === 0) root.checkedAt = Date.now()
     }
   }
   FileView {
@@ -67,7 +71,15 @@ Singleton {
   }
 
   // A little after the desktop is up, then every so often.
-  Timer { interval: 90000; running: true; onTriggered: root.check() }
+  Timer { id: first; interval: 90000; running: true; onTriggered: root.check() }
+  // Back online after that: looked again when the last look failed or is
+  // old, rather than hours later.
+  Connections {
+    target: Online
+    function onBack() {
+      if (!first.running && (root.checkError !== "" || Date.now() - root.checkedAt > 10 * 60 * 1000)) root.check()
+    }
+  }
   Timer { interval: {{ settings.every }} * 3600000; repeat: true; running: true; onTriggered: root.check() }
 
   function update() {

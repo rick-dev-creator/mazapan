@@ -1,6 +1,6 @@
 # Plugin API v1
 
-Everything Mazapán does is a plugin, built-ins included: they use exactly
+Everything Mazapan does is a plugin, built-ins included: they use exactly
 the API described here. If something can't be expressed with it, the API
 grows; built-ins never get a private path.
 
@@ -56,7 +56,7 @@ without a terminal there is no other yes).
 
 `~/.config/mazapan/plugins.lock` keeps, for each one, its source, the branch
 or tag it follows, the exact commit, and what you approved. With
-config.toml, it's all another machine needs: `mazapan plugins sync && Mazapán
+config.toml, it's all another machine needs: `mazapan plugins sync && Mazapan
 apply`.
 
 `update` looks at the new version beside the installed one, shows its
@@ -67,7 +67,7 @@ with any file edited or added (even ignored ones: every `*.tmpl` in the
 folder is parsed), needing more than was approved, or a checkout the lock
 doesn't list. git runs without your git config or hooks.
 
-No plugin writes into Mazapán's own folders (`~/.config/mazapan`,
+No plugin writes into Mazapan's own folders (`~/.config/mazapan`,
 `~/.local/share/mazapan` but its `bin/`, `~/.local/state/mazapan`); outputs
 start with `~/` or `/` and never go up with `..`. Approving "full access"
 is trusting its author, like any extension: that code runs with your
@@ -80,7 +80,7 @@ Your own plugins (a folder you put there, not a git checkout, or a link
 
 A catalog lists plugins one can add: only where each lives and what it is.
 Adding one is still `plugins add`, with what it can do shown and approved.
-Mazapán ships one (`catalog/index.toml`); config.toml adds others, paths or
+Mazapan ships one (`catalog/index.toml`); config.toml adds others, paths or
 https URLs (fetched at most once a day, `--refresh` to fetch now):
 
 ```toml
@@ -158,7 +158,7 @@ version, numbers and dots. A plugin that doesn't load is listed as broken
 and blocks apply (unless disabled), but never the other commands.
 
 `requires` lists plugins this one needs, with an optional version (`>=`,
-`>`, `=`, `<=`, `<`; `1.2` is `1.2.0`). Mazapán refuses to apply while an
+`>`, `=`, `<=`, `<`; `1.2` is `1.2.0`). Mazapan refuses to apply while an
 enabled plugin needs one that is missing, disabled or at a version that
 doesn't do; `enable` and `disable` say what else they'd need to take along.
 A bar widget requires `shell-bar`; a Hyprland fragment, `hypr-base`.
@@ -227,7 +227,7 @@ before the first sudo (`-y` to skip the question; without a terminal it's
 required). Then, in order: packages (a driver before the files that load
 it), checks marked `before_system = true` (kernel headers before a module
 built from them), files, and their reloads — also those of files it
-removes, and of files undo puts back, which Mazapán remembers. `mazapan undo`
+removes, and of files undo puts back, which Mazapan remembers. `mazapan undo`
 takes it all back: system files as they were, packages it installed
 uninstalled unless something else needs them by now.
 
@@ -406,8 +406,8 @@ That gives three guarantees:
   at the head of the file, missing ones go on top: an `@import`); `json`
   (the template's leaves in a JSON object; one that doesn't parse is a
   conflict, never rewritten). `prefs` and `lines` are the person's own
-  files: taking one of Mazapán's lines out is an edit (a conflict, not put
-  back), and Mazapán's lines leave with the plugin (or when a newer version
+  files: taking one of Mazapan's lines out is an edit (a conflict, not put
+  back), and Mazapan's lines leave with the plugin (or when a newer version
   stops writing them).
 - **In every place.** `each = ["~/.config/mozilla/firefox/*/prefs.js"]`
   writes the target into every directory holding a file those patterns
@@ -449,7 +449,7 @@ what it runs (see `theme-gtk`). A function can take parameters:
 `{{ func roles(role) }}…{{ end }}`, called as `{{ roles "fg" }}`.
 
 Each template gets 10 seconds, then the render fails: a plugin from git
-whose template loops forever can't hang Mazapán. A template gets the data
+whose template loops forever can't hang Mazapan. A template gets the data
 made anew: what it changes (an item of `actions`, say) no other template,
 plugin or command sees. A template is a `*.tmpl` file in the plugin's own
 folder, never a path out of it. Scriban's functions are all there but those
@@ -605,6 +605,25 @@ They all take their colors, font and shape from the theme. A
 text does: what they accept (the arrows of a list, Delete for an entry,
 Esc) never reaches the text; the rest is typed.
 
+### Online
+
+What fetches from the internet (a forecast, prices, a check for updates)
+follows `Online`, a singleton `shell-bar` ships beside `Theme` (`import qs`):
+`Online.online` says whether the internet is there (NetworkManager's own
+check, so a Wi-Fi joined but not yet through isn't), and its `back()` signal
+comes each time it returns after being gone. Fetch again then, rather than
+waiting for the next turn of a timer:
+
+```qml
+Connections {
+  target: Online
+  function onBack() { root.refresh() }
+}
+```
+
+A fetch that failed while `Online.online` is true is worth trying again in
+a minute or so; while it's false, `back()` will say when.
+
 ### The Control Center
 
 The `control-center` plugin replaces the icons on the bar's right with a
@@ -663,6 +682,6 @@ the copy goes back. `fork ID NEW` copies any plugin under a new id, to start
 from.
 
 To share it: a git repository with plugin.toml at its root, tagged, and an
-entry in a catalog (a pull request to Mazapán's `catalog/index.toml`, or
+entry in a catalog (a pull request to Mazapan's `catalog/index.toml`, or
 your own catalog file).
 

@@ -6,7 +6,7 @@ api = 1
 description = "The system as it was before every change, in the boot menu (encrypted disks too): started from one, it says so, and it can become your system; an agent can tell what broke"
 categories = ["hardware"]
 
-# btrfs (the snapshots are hw-snapshots') and GRUB. Mazapán's layout, the
+# btrfs (the snapshots are hw-snapshots') and GRUB. Mazapan's layout, the
 # system in a subvolume of its own (@), is what `mazapan checkpoint` works
 # on; anything else, it says so and leaves the menu alone.
 [hardware]

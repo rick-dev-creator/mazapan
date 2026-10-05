@@ -18,7 +18,7 @@ plugin makes them **checkpoints** anyone can use:
     too, then deleted.
   - **Back to my system**: a restart.
   - **What broke?**: an agent gets what differs between the checkpoint and
-    the main system (packages, Mazapán's last update, the errors of the
+    the main system (packages, Mazapan's last update, the errors of the
     start that failed), read only, and says what broke and how to fix it.
 - **From History**, on the running system: "Restore this checkpoint"
   (from the next start), no boot menu needed.
@@ -28,7 +28,7 @@ From a terminal: `mazapan checkpoint` (where you are), `list`,
 restore N`. Agents (MCP) read `checkpoints` and `checkpoint_diagnose`;
 keeping or restoring is yours.
 
-Needs Mazapán's layout, the one its installer makes: btrfs with the
+Needs Mazapan's layout, the one its installer makes: btrfs with the
 system in a subvolume of its own (`@`, snapper's snapshots nested in it),
 GRUB, and mkinitcpio with systemd's initramfs (busybox's works through
 grub-btrfs's hook, when it's installed). On another layout `mazapan

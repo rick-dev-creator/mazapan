@@ -2,7 +2,7 @@
 
 Where you find, install and set up plugins, like an editor's extensions
 view (`SUPER + SHIFT + P`, or Plugins on the palette's first screen).
-Every plugin Mazapán knows about, each marked by who made it:
+Every plugin Mazapan knows about, each marked by who made it:
 **Mazapan** (its own, in `plugins/`), **Community** (made by others:
 shipped with Mazapan in `community/`, so they install offline, or listed
 in a catalog and fetched from git), or yours. Tabs for the installed

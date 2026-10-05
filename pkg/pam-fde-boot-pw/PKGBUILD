@@ -4,7 +4,7 @@
 # itself that boot (its autologin skips PAM's auth step, so
 # pam_systemd_loadkey can't), and this module, in the session step, gives
 # gnome-keyring the password it unlocks with. Not in Arch's repositories:
-# built here, from a pinned commit, into Mazapán's own.
+# built here, from a pinned commit, into Mazapan's own.
 
 pkgname=pam-fde-boot-pw
 _commit=49bf498fd8d13f73e4a24221818a8a5d2af20088

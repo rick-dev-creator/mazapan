@@ -178,6 +178,10 @@ public static partial class Program
                 a.Hardware.Add(p.Id);
                 a.HardwarePackages.AddRange(p.Pacman.Where(x => !a.HardwarePackages.Contains(x)));
             }
+        // The chosen apps' packages: with the system those the ISO's repository
+        // has (no connection needed), the rest right after when there's one.
+        var (_, catalog) = Store.AppCatalog.Load(Paths.Join(Root(), "catalog", "apps.toml"));
+        (a.OfflineAppPackages, a.AppPackages) = Archinstall.AppPackages(a.Apps, catalog, OfflineRepository());
         // Hibernation where there's a battery, unless the answers say; the swap
         // file as big as the memory (what a hibernation writes, at most).
         a.Hibernate ??= HasBattery();
@@ -274,6 +278,13 @@ public static partial class Program
         }
         using var log = new StreamWriter(InstallLog, append: true);
         log.WriteLine($"== Wi-Fi carried to the new system: {carried}");
+    }
+
+    /// <summary>The packages in the ISO's own repository (none when it can't be read: they all wait for a connection).</summary>
+    static HashSet<string> OfflineRepository()
+    {
+        var (code, out_, _) = AppsCapture("pacman", "-Slq", "offline");
+        return code == 0 ? [.. out_.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)] : [];
     }
 
     static bool HasBattery()

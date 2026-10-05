@@ -4,7 +4,7 @@ using Mazapan.Util;
 namespace Mazapan.Pacman;
 
 /// <summary>
-/// Repository is Mazapán's own package repository: `mazapan` and
+/// Repository is Mazapan's own package repository: `mazapan` and
 /// `mazapan-keyring`, published by pkg/release, in channels: stable, and
 /// edge (every release, before it reaches stable). Where it's published
 /// is pkg/repository.toml (next to the plugins, in the package too); an
@@ -26,12 +26,12 @@ public static partial class Repository
     public const string EnableScript =
         "grep -q '^[[:space:]]*\\[mazapan\\]' /etc/pacman.conf || printf '\\n[mazapan]\\nSigLevel = Required\\nInclude = /etc/pacman.d/mazapan-mirrorlist\\n' >> /etc/pacman.conf";
 
-    /// <summary>Mazapán's keys, as mazapan-keyring installs them: without them its packages can't be trusted.</summary>
+    /// <summary>Mazapan's keys, as mazapan-keyring installs them: without them its packages can't be trusted.</summary>
     public const string Keyring = "/usr/share/pacman/keyrings/mazapan.gpg";
 
     /// <summary>
     /// The server pkg/repository.toml names, $channel still in it: "" when
-    /// Mazapán isn't published anywhere yet (then nothing adds the
+    /// Mazapan isn't published anywhere yet (then nothing adds the
     /// repository: pacman would fail on one it can't reach).
     /// </summary>
     public static string Server(string root)
@@ -56,7 +56,7 @@ public static partial class Repository
     {
         if (!Channels.Contains(channel)) throw new MazapanException($"no channel \"{channel}\": {string.Join(" or ", Channels)}");
         return $"# mazapan channel: {channel}\n" +
-            "# Mazapán's own packages. `mazapan channel stable|edge` rewrites this file.\n" +
+            "# Mazapan's own packages. `mazapan channel stable|edge` rewrites this file.\n" +
             $"Server = {server.Replace("$channel", channel)}\n";
     }
 
