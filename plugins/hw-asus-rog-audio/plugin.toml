@@ -7,8 +7,8 @@ description = "Volume on ASUS ROG laptops set in software (WirePlumber's soft mi
 categories = ["hardware"]
 
 [hardware]
-# ROG models carry it in their name (Omarchy looks at the product family,
-# which isn't read here).
+# ROG models carry it in their name (the product family would be more
+# exact, but isn't read here).
 vendor = ["ASUSTeK COMPUTER INC."]
 product = ["*ROG*"]
 

@@ -41,7 +41,7 @@ roadmap). What follows is the model, so nobody has to guess.
 - **Someone with the laptop in their hands for a while** (an "evil maid"):
   `/boot` is the unencrypted EFI partition and there's no Secure Boot yet,
   so a changed initramfs could capture the password the next time it's
-  typed. As in Omarchy and stock Arch. Secure Boot with signed images
+  typed. As in stock Arch. Secure Boot with signed images
   (sbctl) is on the roadmap.
 - **Programs you run are you**: anything running as your account (a
   project's npm or pip scripts, an agent's shell, a downloaded binary) can

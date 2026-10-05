@@ -7,8 +7,8 @@ description = "asusctl on ASUS ROG laptops: performance profiles, fan curves, a 
 categories = ["hardware"]
 
 [hardware]
-# ROG models carry it in their name (Omarchy looks at the product family,
-# which isn't read here: a ROG whose name lacks it isn't offered this).
+# ROG models carry it in their name (the product family would be more
+# exact, but isn't read here: a ROG whose name lacks it isn't offered this).
 vendor = ["ASUSTeK COMPUTER INC."]
 product = ["*ROG*"]
 

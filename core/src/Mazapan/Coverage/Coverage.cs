@@ -258,7 +258,7 @@ public static class Apps
             else if (k == "Exec")
             {
                 (a.Exec, a.Terminal, a.Flatpak) = ExecLine.Program(v);
-                // omarchy-launch-webapp https://…, xdg-open http://…
+                // a web app launcher with https://…, xdg-open http://…
                 a.WebApp = v.Contains("http://") || v.Contains("https://");
             }
             else if (k == "TryExec") tryExec = v;

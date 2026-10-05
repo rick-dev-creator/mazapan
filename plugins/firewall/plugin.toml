@@ -19,12 +19,12 @@ pacman = ["ufw"]
 ssh = false
 # Let LocalSend in (port 53317, TCP and UDP) from the local network only
 # (private addresses, never the internet): devices nearby find this one and
-# send to it, as on Omarchy. On a shared Wi-Fi, others on it can too, as
+# send to it. On a shared Wi-Fi, others on it can too, as
 # LocalSend means. Nothing listens there without LocalSend running.
 localsend = true
 
 # ufw on, at every start, with nothing coming in that wasn't asked for and
-# everything going out (as Omarchy and CachyOS). Only while this file is
+# everything going out (as CachyOS). Only while this file is
 # there: taken off, ufw is turned off and not started any more. ufw's own
 # rules already let in the answers to what this computer asked, and mDNS
 # and SSDP (printers and devices found on the network). SSH only when

@@ -86,7 +86,7 @@ nvidia-prime
 linux-headers
 dkms
 
-# Hardware plugins ported from Omarchy: offered on the machines that need
+# Hardware plugins (see THIRD_PARTY_NOTICES.md): offered on the machines that need
 # them, turned on by the installer there, from this offline repository.
 vulkan-intel
 vulkan-radeon

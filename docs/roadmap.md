@@ -1,9 +1,8 @@
-# Roadmap: what Omarchy has, and how to do it much better
+# Roadmap
 
-Not a list of features to copy. Omarchy (4.0.4, 441 bash commands) already
-ships most of these in some form, including a plugin system and an AI
-agent for crashes; each item says what it does today and what "much better"
-means here. Ordered by impact.
+What a desktop like this needs, and what doing it "much better" means
+here: each item says what it takes and how far it has come. Ordered by
+impact.
 
 ## Next: the real laptop, then the bar's other half (decided 2026-10-05)
 
@@ -75,7 +74,7 @@ Next, in order:
 
 ## Next: checkpoints anyone understands, and Niri's workspaces (decided 2026-10-04)
 
-The person's words: a checkpoint they once booted on Omarchy never said it
+The person's words: a checkpoint they once booted on another distro never said it
 was one, nor how to repair the main system or keep the checkpoint as the
 main one; "it should be easy to understand, and agents should diagnose and
 repair it". And Niri's tiling, which they liked: its workspaces, taken
@@ -150,7 +149,7 @@ where they fit Hyprland.
    The person's next steps: when the audit says it can be tried on real
    hardware, the GitHub repository, then a laptop: an **MSI Vector A16 HX
    A8W** (Ryzen 9 HX with its Radeon, and an NVIDIA GeForce: hybrid
-   graphics; Omarchy's installer didn't draw properly on it). Noted for
+   graphics). Noted for
    it so far:
    - The live session on that hardware: Hyprland on the AMD side (or
      nouveau), and a way to install from text if it doesn't start.
@@ -178,38 +177,34 @@ where they fit Hyprland.
      guard, /boot read only, kept, pacman after, the first one whole), and
      the installer in text (installed, encrypted, recovery key, the desktop
      in Spanish). Ready for the laptop.*
-   - A THIRD_PARTY_NOTICES crediting Omarchy (MIT) for the hardware
-     fixes taken from it, with the repository.
+   - A THIRD_PARTY_NOTICES crediting where the hardware fixes come
+     from, with the repository.
 
 Order: 2 (done), 1, then 3, then 4.
 
 ## Next: what matters most (decided 2026-10-03)
 
-An evaluation against Omarchy (read from its installed code, 2026-10-03)
-and what it takes to say Mazapán is technically better, before it's been
-tried on real hardware.
+An evaluation (2026-10-03) of where Mazapán stands, and what it takes to
+say it's technically better, before it's been tried on real hardware.
 
-**Ahead already:** the foundation. Installs encrypted with one password
+**Strong already:** the foundation. Installs encrypted with one password
 and a recovery key; updates in steps that roll back; every change on a
 timeline that undoes it; settings with a face (keyboard, mouse, fonts,
-keys, monitors) where Omarchy edits files; plugins that say what they
+keys, monitors) instead of files to edit; plugins that say what they
 can do and are approved; five languages throughout; the firewall,
 privacy dots, per-app permissions; an unattended release gate.
 
-**Behind:** breadth and miles. Omarchy has 22 themes (Mazapán 4), about
-40 fixes for specific hardware (Framework, ASUS ROG and Zenbook, Surface,
-Mac T2, Dell XPS, Intel lpmd/thermald/IPU7/Wi-Fi 7…; Mazapán 8 hardware
-plugins), launchers for 13 coding agents, Tailscale and LocalSend, and
-thousands of machines running it.
+**Thin:** breadth and miles. 4 themes; 8 hardware plugins, where about
+40 fixes for specific hardware are known (Framework, ASUS ROG and Zenbook,
+Surface, Mac T2, Dell XPS, Intel lpmd/thermald/IPU7/Wi-Fi 7…); no
+Tailscale or LocalSend yet; no machine running it but the VMs.
 
-**Its "agentic" side, as it is:** `omarchy agent` opens the chosen agent
-in a terminal with a prompt (13 known); a skill tells the agent to edit
+**The usual "agentic" desktop:** a launcher that opens the chosen agent
+in a terminal with a prompt; a skill that tells the agent to edit
 `~/.config/hypr/` and the rest directly, with no preview and no undo; a
-crash offers a diagnosis prompt; usage widgets read one
-`~/.claude/.credentials.json` (one Claude subscription, however many the
-person has), Codex and Fireworks. Opencode, pi through an API, a second
-Claude account: not seen. A launcher and instructions, not an agentic
-desktop. Mazapán's MCP server (state, exact previews, apply, undo, the
+crash that offers a diagnosis prompt; usage widgets that read one
+account's credentials, however many the person has. A launcher and
+instructions, not an agentic desktop. Mazapán's MCP server (state, exact previews, apply, undo, the
 person's approval for root) is the foundation that can be.
 
 **The must-haves, by impact:**
@@ -261,16 +256,16 @@ person's approval for root) is the foundation that can be.
 4. **The .NET and Mobile (Expo) profiles** (item 17): from install to ASP.NET
    Core + Aspire with Rider or VS Code, and to an Expo app in the
    emulator, with nothing done by hand.
-5. **Omarchy's hardware fixes as hardware plugins** (item 5): its ~40, each
-   offered only on the machine that needs it, said and undoable (Omarchy
-   runs them once at install). *Done (2026-10-04):* 18 ported (Apple Wi-Fi, SPI keyboard and NVMe
+5. **Known hardware fixes as hardware plugins** (item 5; credited in
+   THIRD_PARTY_NOTICES.md): about 40, each offered only on the machine
+   that needs it, said and undoable (not run once at install). *Done (2026-10-04):* 18 ported (Apple Wi-Fi, SPI keyboard and NVMe
    suspend; ASUS panel replay, Panther Lake backlight, Z13 touchpad, ROG
    (asusctl) and its audio; Surface keyboard and Wi-Fi; Framework 16
    keyboard access and 13 AMD microphone; Broadcom wl; Intel Wi-Fi 7 EHT and
    lpmd; Vulkan for Intel and AMD; nouveau's cursor), every one tied to
-   the machines its Omarchy script names, its packages on the ISO (a test
-   holds it). Left out, said why: the T2 kernel, Omarchy's or the AUR's
-   own packages (Dell haptics, Tuxedo, YT6801, qmk-hid, IPU7 camera), the
+   the machines its original script names, its packages on the ISO (a test
+   holds it). Left out, said why: the T2 kernel, packages only in other
+   repositories or the AUR (Dell haptics, Tuxedo, YT6801, qmk-hid, IPU7 camera), the
    B9406 touchpad (libinput reads one fixed file), the ASUS mic levels
    (alsactl's one state file), FRED on GRUB (no drop-in for the kernel's
    line), thermald (no CPU or battery rule yet), speaker tuning and the
@@ -296,10 +291,9 @@ pull requests and active time in the dashboard). Item 2 is complete. Untried unt
 limits endpoint with the person's accounts, Rider's first start, Android
 Studio and the emulator, each hardware plugin on its machine.
 
-**After those:** ~~an importer for Omarchy's themes (its 22 at once)~~
-*done 2026-10-04: `mazapan themes import-omarchy` (the ones installed,
-Omarchy's repository, or any theme's git repository; all 22 pass every
-contrast)*; ~~LocalSend (22)~~ *done*; ~~"ask an agent about this" from a capture, a
+**After those:** ~~an importer for other themes' format (22 at once)~~
+*done 2026-10-04 (the ones installed, their repository, or any theme's
+git repository; all 22 pass every contrast)*; ~~LocalSend (22)~~ *done*; ~~"ask an agent about this" from a capture, a
 selection, a file, a notification~~ *done*, and ~~`? question` in the palette
 answered in a card~~ *done 2026-10-04 (`mazapan agents ask`)*;
 ~~an agent's changes approved with their diff, marked on the timeline, all
@@ -356,7 +350,7 @@ has to be hosted somewhere that stays up; repo-add makes symlinks
    install), and the keyring opens with the disk's password through
    pam_fde_boot_pw (by greetd's author: greetd's autologin skips PAM's
    auth step, where pam_systemd_loadkey works; it injects it in the
-   session step), packaged in Mazapán's own repository. Not Omarchy's
+   session step), packaged in Mazapán's own repository. No
    keyring without a password any more. What it took, found in the VM:
    systemd's initramfs (archinstall makes the older `encrypt` one unless
    there's a security key: the post-install switches it to sd-encrypt and
@@ -388,7 +382,7 @@ configuration rolled back on its own, the next one went through.
    it's published. Built (2026-10-03): a drive labeled cidata (a USB
    stick, a VM's seed) with `mazapan.json` on it, the installer's own
    answers (`"disk": "auto"` takes the one disk there is; `"after"`:
-   poweroff, reboot or none), installs with nobody there, as Omarchy's;
+   poweroff, reboot or none), installs with nobody there;
    the live desktop's installer shows how it goes; on a writable drive the
    recovery key and the log are left on it. `vm/gate [encrypted|plain]`
    is the gate: a fresh VM installs itself from the newest ISO, starts
@@ -408,10 +402,11 @@ configuration rolled back on its own, the next one went through.
 9. The ISO published, with its checksum and signature, and an install
    guide.
 10. ~~A license (the package says `unknown`).~~ *Done (2026-10-04): MIT,
-    THIRD_PARTY_NOTICES.md crediting Omarchy; the repository on GitHub,
+    THIRD_PARTY_NOTICES.md crediting what it learned from; the repository on GitHub,
     github.com/rick-dev-creator/mazapan (public).*
 11. ~~The 34 built-in plugins without a README.~~ Done (2026-10-03): every
-    built-in plugin has its page, in English and Spanish.
+    built-in plugin has its page (in English since 2026-10-05: the
+    repository's docs are English only).
 
 Then 1.0. After it, in this order: the rest of 18 (fonts, keybindings),
 21 (the boot splash and menu in the theme), the rest of 19 (fingerprint,
@@ -421,21 +416,21 @@ ahead), 13, then 22–24.
 Pending decisions (the person's): where the repository and the ISO are
 hosted (GitHub Releases if the project is public, the Gitea's Arch
 package registry if not), public or private, and the license. A pinned
-Arch snapshot (Omarchy's stable mirror) waits until after 1.0: it needs
+Arch snapshot (a stable mirror) waits until after 1.0: it needs
 hosting and someone to move it forward, and the checks, rollback and
 snapshots already cover a bad update.
 
-### The updater: Omarchy's, as simple, and more
+### The updater: as simple as it gets, and more
 
-Omarchy's (`omarchy-update`, 4.0.4) is one confirmation and a short
+A good Arch updater is one confirmation and a short
 sequence: free space checked, the package cache pruned, a snapshot, the
 machine kept awake, the keyrings first (a stale `archlinux-keyring` is
 the most common reason an Arch update fails), `pacman -Syu`, migrations,
 AUR, orphans offered, the log searched for a failed initramfs, then a
 reboot offered when the kernel changed or Hyprland's binary was replaced,
-and the shell restarted. Its own repository has channels (stable, rc,
-edge, dev), and stable also pins Arch itself to a tested date
-(`stable-mirror.omarchy.org`).
+and the shell restarted. A distro's own repository can have channels
+(stable, rc, edge, dev), and stable can also pin Arch itself to a tested
+date (a stable mirror).
 
 Done (2026-10-03). Ours keeps that shape (one button or one command, one confirmation, a few
 lines with a ✓ each) and what it already does better: the preview with
@@ -454,15 +449,15 @@ Update Mazapán                          34 packages · reboot (kernel)
   Done. The kernel changed: [Reboot now] [Later]
 ```
 
-New, from Omarchy: the free space, kept awake (systemd-inhibit), the
+New: the free space, kept awake (systemd-inhibit), the
 keyrings first, what needs a restart after (the kernel, a replaced
 Hyprland, the shell restarted on its own). Better than it:
 - A failed initramfs is a failed update: rolled back, and no reboot
-  offered (Omarchy only warns).
+  offered (not only a warning).
 - "What's new" in the panel, from the changelog, not a link.
 - `pacman -Syu` by hand: each account remembers the Mazapán that last
   wrote its desktop, and a login with another one applies it (`mazapan
-  apply --if-updated`; Omarchy runs its migrations at login too). No hook
+  apply --if-updated`). No hook
   in pacman.
 - When the update brings a new Mazapán, the new one writes the
   configuration, runs the checks and, if needed, rolls back (`update
@@ -479,8 +474,8 @@ Hyprland, the shell restarted on its own). Better than it:
 |---|------|-------|
 | — | Toward 1.0, C7: unattended installs, the release gate | **Done** (2026-10-03): `cidata` + mazapan.json installs by itself; `vm/gate` passes encrypted and plain. C8 (the live USB on real hardware) needs the person |
 | — | Toward 1.0, B: safe to install | **Done** (2026-10-03): encrypted by default with a recovery key, one password (keyring included), locked before sleep, firewall on |
-| — | Toward 1.0, A: it updates itself | **Done** (2026-10-03): its own signed repository with channels, versions and releases, the updater after Omarchy's. Pending, the person's: the release key, hosting, uploading |
-| — | Next: the must-haves (agents and accounts with observability, live sessions, .NET and Expo profiles, hardware fixes from Omarchy) | In progress: agents and accounts, their use, limits and the next account taken, live sessions in the bar, the dashboard; the .NET and Mobile (Expo) profiles, with apps from their makers (Rider, VS Code) checked and kept current; 18 of Omarchy's hardware fixes as hardware plugins, 13 left out with their reasons (2026-10-04). What's left is the person's: trying it on their PC |
+| — | Toward 1.0, A: it updates itself | **Done** (2026-10-03): its own signed repository with channels, versions and releases, the updater. Pending, the person's: the release key, hosting, uploading |
+| — | Next: the must-haves (agents and accounts with observability, live sessions, .NET and Expo profiles, hardware fixes) | In progress: agents and accounts, their use, limits and the next account taken, live sessions in the bar, the dashboard; the .NET and Mobile (Expo) profiles, with apps from their makers (Rider, VS Code) checked and kept current; 18 hardware fixes as hardware plugins, 13 left out with their reasons (2026-10-04). What's left is the person's: trying it on their PC |
 | 1 | Updates you can trust | **Done** (2026-09-28); follow-ups listed below |
 | 2 | Monitors | **Done** (2026-09-28); follow-ups listed below |
 | 3 | One command palette | **Done** (2026-09-28): first version; follow-ups listed below |
@@ -503,19 +498,19 @@ Hyprland, the shell restarted on its own). Better than it:
 | 17 | Apps: install and remove | **Done** (2026-09-29), next: .NET (ASP.NET Core + Aspire, Rider and/or VS Code) and Mobile (Expo, Android emulator) profiles that work out of the box; catalog, `mazapan apps`, the Apps menu with profiles (several at once); Flatpak apps show without a new login (2026-09-30); audited; catalogs from others (`app_catalogs` in config.toml, their apps saying whose they are, 2026-10-03) |
 | 18 | Settings with a face | **Done**: the Settings panel (keyboard, touchpad and mouse, default apps, language and time zone) done (2026-09-30); Text (the fonts, each shown in itself, and the size; `font_ui`, `font_mono`, `font_size` over the theme's, on the timeline), Keys (every keybinding, changed by pressing the new keys, the desktop's own resting in a submap meanwhile, a key already taken said) and Security (the password) done (2026-10-03). A keyboard picked is tried: the one before comes back after 20 s unless kept (2026-10-03) |
 | 19 | Security | In progress: researched (2026-09-30); the disk encrypted with a recovery key and one password, locked before sleep, the firewall (1.0's B), the password changed in one place, the privacy dots, hibernation, Flatpak apps' permissions and portal grants, an app asking before it sees the screen (2026-10-03), the fingerprint reader (2026-10-04). To do: security keys (FIDO2); TPM later |
-| 20 | Updates, visible | **Done** (2026-09-30): the bar says when there are, a panel shows them (news, restart), updated with a click (pkexec), Flatpak apps too; the updater redone after Omarchy's; firmware (fwupd) and plugin updates in the same panel, downloaded ahead on power and unmetered (`update-ahead`) (2026-10-03) |
+| 20 | Updates, visible | **Done** (2026-09-30): the bar says when there are, a panel shows them (news, restart), updated with a click (pkexec), Flatpak apps too; the updater redone; firmware (fwupd) and plugin updates in the same panel, downloaded ahead on power and unmetered (`update-ahead`) (2026-10-03) |
 | 21 | Boot and login in the theme | **Done** (2026-10-03): the login screen (plugin `login`, greetd); the boot menu (`theme-grub`) and the boot splash with the disk's password (`theme-plymouth`) in the theme's colors, turned on by the installer |
 | 22 | Sharing | **Done** (2026-10-04): Wi-Fi as a QR and a speed test in the network card; the Share panel (LocalSend, Taildrop) from the clipboard, Files, a capture, the clipboard history; the tailscale plugin; LocalSend's port to the local network |
 | 23 | More capture | **Done** (2026-10-04): text read in the desktop's language, QR codes copied as secrets, the camera in a corner while recording, Ask and Share from the capture's bar |
 | 24 | Extras | **Done** (2026-10-03): optional plugins; reminders, the crash watcher (to the agent), the screensaver in the theme, dictation on the computer itself (whisper.cpp), asking an agent by voice. The Windows VM: the last of the list (2026-10-04's plan) |
 | 25 | A Control Center | **Done** (2026-10-05): a status pill that says what needs you, grown into one panel with the bar's right side; every part from its own plugin; audited control by control. Next: the time as one button (the bar's center) |
 
-Part two (items 9–15, 2026-09-29): what's still missing next to Omarchy,
-and what would set this apart from it. 9–12 done; 13 left; 14 and 15
+Part two (items 9–15, 2026-09-29): what was still missing, and what
+would set this apart. 9–12 done; 13 left; 14 and 15
 dropped.
 
-Part three (items 16–24, 2026-09-29): what Omarchy (4.0 "Quattro", read
-from its scripts) has that this still doesn't, each done better. Without
+Part three (items 16–24, 2026-09-29): what an Arch desktop is expected
+to have that this still didn't, each done better. Without
 16 nobody else can use this, so it came first; 16, 17 and 20 done.
 Next: the road to 1.0, above.
 
@@ -538,10 +533,6 @@ rewritten with their bytes changed; config.toml could be written in a form
 that didn't read back; duplicated TOML keys silently won.
 
 ## 1. Updates you can trust
-
-**Omarchy today.** 106 migration scripts run once, in order. `refresh-config`
-copies a shipped config over yours (with a backup). Updates take a snapper
-snapshot first and grep the log for known failures afterwards.
 
 **Much better.** *Done* — `mazapan update`, `doctor`, `history`, `rollback`:
 - No config migrations: config is declarative and `mazapan` knows which
@@ -581,9 +572,6 @@ localized like the plugins.
 
 ## 2. Monitors
 
-**Omarchy today.** About 15 scripts: clamshell, external active, scaling,
-mirror, recover the internal monitor, a watcher for removed monitors.
-
 **Much better.** *Done* — plugin `monitors`:
 - Profiles matched by EDID (`~/.config/mazapan/monitors.json`), applied by
   a Hyprland Lua engine at startup and on every hotplug: mode, position,
@@ -610,7 +598,7 @@ mirror, recover the internal monitor, a watcher for removed monitors.
   screen visible is never applied, and the manager won't try or save one.
 - Chosen over reusing nwg-displays or wdisplays: they look out of place
   and don't adapt to the screen.
-- The desk's 4-screen layout from Omarchy turned into the first profile.
+- The desk's 4-screen layout turned into the first profile.
 - Tested in the dev VM with Hyprland's headless outputs as hotplugged
   screens: arrange, try, auto-revert, keep, save, unplug/replug after a
   reload (the engine re-applies), a screen turned off by a profile, the
@@ -627,9 +615,6 @@ without an HDR screen). Notifications: *done* (2026-09-29), the
 `notifications` plugin, below.
 
 ## 3. One command palette
-
-**Omarchy today.** 14 separate menus (keybindings, clipboard, emoji, share,
-capture…); the keybinding list is parsed out of the config.
 
 **Much better.** *Done* — plugin `palette` (`SUPER + Space`, or the Arch
 logo at the start of the bar):
@@ -648,11 +633,9 @@ logo at the start of the bar):
   the key, search, run an action, launch a terminal app, launch
   an app, run a terminal action, copy a command, close with SUPER + Q.
 
-*The menu* (2026-10-03), against Omarchy's: its menu has ten entries and
-some 360 below them, up to four deep (install › development › javascript ›
-node), grouped by verb (the same app in Install and in Remove), most
-opening a terminal, and Update mixing the system's update with the time
-zone, the password and restarting processes. Ours is the palette itself,
+*The menu* (2026-10-03): not a tree of menus up to four deep, grouped by
+verb (the same app in Install and in Remove), most opening a terminal.
+Ours is the palette itself,
 not a second search: opened with nothing typed, a tile for each place
 (Apps, Updates with how many, Settings, Theme, Wallpaper, Screens, Modes,
 History, Plugins, Notifications, Capture, Clipboard; what plugins mark
@@ -667,10 +650,6 @@ remembering what you pick often; plugin actions with arguments; a check
 that every `hl.bind` has its action.
 
 ## 4. Themes
-
-**Omarchy today.** 34 theme commands and one `theme-set-*` per app; palettes
-centered on the 16 ANSI colors. Its own theme preview shows the file
-manager unthemed.
 
 **Much better.**
 - Semantic tokens that include shape and motion. *Done.*
@@ -727,7 +706,7 @@ manager unthemed.
     toolbar and font follow the theme (through theme-gtk). Left alone
     while the browser runs (it would write its copy back): "busy", applied
     next time. Their accent stays theirs: only a system policy (/etc)
-    sets it, and one that sets a theme color (Omarchy's) wins over GTK
+    sets it, and one that sets a theme color wins over GTK
     mode.
   - Audited (12 findings, all fixed): a JSON file that doesn't parse is
     never rewritten; keys with dots; an @import only counts at the head of
@@ -770,9 +749,6 @@ without restarting them.
 
 ## 5. Hardware
 
-**Omarchy today.** 26 scripts for specific models (ASUS ROG, Dell XPS,
-Framework 16, Surface…), matched on the DMI product name.
-
 **Much better.** *Done* — hardware plugins ([plugin-api](plugin-api.md#hardware-plugins)):
 - Declarative match rules in the manifest (`[hardware]`: DMI maker, model
   and board; PCI and USB ids; a GPU's name from the PCI database; input
@@ -804,14 +780,11 @@ Framework 16, Surface…), matched on the DMI product name.
   took its fix away; Intel and Synaptics rules misfired; NVIDIA's variables
   were global on hybrid laptops; a literal [ never matched.
 
-**Follow-ups.** More of Omarchy's fixes (Surface, Framework, ASUS ROG
+**Follow-ups.** More hardware fixes (Surface, Framework, ASUS ROG
 through asusctl, T2 Macs); AUR packages; sharing fixes in a catalog; the
 Chromium accent through its policy (the system files are there now).
 
 ## 6. An agent-native system
-
-**Omarchy today.** `omarchy-agent-crash` opens a coding agent in a terminal
-on a crash.
 
 **Much better.** *Done* — [docs/agent-api.md](agent-api.md):
 - State an agent can read: `mazapan status --json` (theme, plugins and where
@@ -846,7 +819,7 @@ on a crash.
 update or the shell crashes; edit config.toml in place (today it's rewritten
 whole, as before, so comments in it don't survive a change).
 
-**Next (2026-10-03, the must-haves above).** What Omarchy calls agentic is
+**Next (2026-10-03, the must-haves above).** The usual "agentic" is
 a launcher and a skill that edits files directly (see "Next: what matters
 most"). Mazapán's:
 - *Agents and accounts:* an Agents panel that finds every agent and every
@@ -867,10 +840,7 @@ most"). Mazapán's:
 
 ## 7. Plugins
 
-**Omarchy today.** Shell plugins from git, with a catalog and a manifest
-schema.
-
-**Already better.** Ours cover everything (Hyprland, themes, app configs,
+**Already.** Plugins here cover everything (Hyprland, themes, app configs,
 bar widgets), with typed settings, localization, and clean removal that
 never touches files you edited.
 
@@ -896,11 +866,10 @@ update|remove|sync`:
   manifest broke every command; a checkout without its lock entry passed
   as your own; ref switches that were lost; updates in the wrong order.
 
-**The ecosystem.** *Done* (2026-09-29), after studying Omarchy's: its
-plugins are QML only (bar widgets, panels, overlays), `manifest.json`, git
-add/update, hot reload, `clone` of a built-in, `validate`, a settings
-schema for widgets; its "catalog" lists only what's installed; no lock, no
-dependencies, no permissions. Ours:
+**The ecosystem.** *Done* (2026-09-29), after studying what shell plugin
+systems usually offer (QML widgets, git add/update, hot reload, `clone`
+of a built-in, `validate`; no lock, no dependencies, no permissions).
+Ours:
 - Settings with a schema: the comment above a setting is its description;
   `{ default, choices, min, max, step, kind, label }` for more; enforced by
   apply, shown as controls, translated (`setting.KEY`).
@@ -914,7 +883,8 @@ dependencies, no permissions. Ours:
   back), install only of the commit it showed; the panel survives the shell
   reloading under it.
 - Every plugin's name and description translated (`plugin.name`,
-  `plugin.description`, `README.es.md`); all built-ins in Spanish, tested.
+  `plugin.description`; a `README.es.md` beside the README); all
+  built-ins' names and descriptions in Spanish, tested.
 - Tools for authors: `plugins new --kind bar|panel|window|theme|tools`
   (working, described, in en and es), `dev` (applied on every save, template
   and QML errors in the terminal, a repo elsewhere linked in), `check`
@@ -927,16 +897,7 @@ updates too; signed tags; screenshots in catalog entries.
 
 ## Notifications
 
-**Omarchy today.** Its own server in its shell: themed colors, updates in
-place, Do Not Disturb that survives restarts. But the actions it
-advertises aren't drawn (only a click's default), links don't open,
-banners show on every monitor at once, the app's timeout is ignored below
-5 s, urgent ones from other apps are silenced by Do Not Disturb, the stack
-has no limit, fonts are hardcoded, and there's no center: "history" is the
-last 10 replayed as banners. A notification that says it's Omarchy's gets
-through Do Not Disturb and runs a command when clicked.
-
-**Ours.** *Done* (2026-09-29), the `notifications` plugin, after macOS:
+*Done* (2026-09-29), the `notifications` plugin, after macOS:
 - Banners on the focused screen, three at most then "+N", in from the
   right; the pointer stops them all and shows their actions (and Reply);
   the app's timeout honored, urgent ones stay with a red edge; progress
@@ -957,9 +918,6 @@ through Do Not Disturb and runs a command when clicked.
 events (an update done, a check failing) as notifications; per-app sounds.
 
 ## 8. Capture
-
-**Omarchy today.** Screenshot, region, screen recording (with webcam), OCR
-text and QR as separate scripts.
 
 **Much better.** *Done* — plugin `capture` (`Print`, or the palette):
 - One overlay on every screen, over a frozen picture of it (grim, at each
@@ -994,13 +952,8 @@ recording.
 
 ## 9. Wallpapers, and a theme from any picture
 
-**Omarchy today.** Each theme ships three or four pictures; yours go in a
-folder per theme; a key cycles them, a picker shows thumbnails, the
-change is animated. The picture and the colors know nothing of each
-other: a photo of your own doesn't change the rest.
-
 **Here today.** The wallpaper is drawn from the theme's colors (or is the
-theme's picture). Your own pictures can't be used: behind Omarchy.
+theme's picture). Your own pictures can't be used.
 
 **Much better.**
 - A wallpaper picker like the theme picker: your pictures
@@ -1048,7 +1001,7 @@ theme's picture). Your own pictures can't be used: behind Omarchy.
 
 ## 10. The essentials still missing
 
-What Omarchy has and this doesn't yet, in order of need:
+What a desktop is expected to have and this didn't yet, in order of need:
 - **A polkit agent**: the password prompt apps need to ask for rights
   (mount a disk, change the time). Without one those fail silently.
 - **An on-screen display** for volume and brightness keys.
@@ -1103,8 +1056,6 @@ panel's keys go first (arrows, Delete, Esc).
 
 ## 11. Modes
 
-**Omarchy today.** Nothing like it: Do Not Disturb, by hand.
-
 **Much better.** A mode changes the whole desktop at once, as macOS's
 Focus does for notifications: the theme and wallpaper, Do Not Disturb and
 which apps may still notify, the power profile, what the bar shows.
@@ -1134,8 +1085,7 @@ for presentations.
 config change one, listed in the boot menu), openSUSE's Snapper on btrfs
 (before and after every install, bootable, YaST lists the files),
 Fedora Silverblue / Bazzite / Vanilla OS (the previous image, booted),
-Linux Mint's Timeshift. Omarchy too: a Snapper snapshot before each
-update, bootable from Limine. Here, today: packages and files rolled
+Linux Mint's Timeshift. Here, today: packages and files rolled
 back (1), every apply undoable (6), but a system that no longer boots
 can't be saved. macOS's Time Machine is the visual timeline, for files.
 
@@ -1150,7 +1100,7 @@ terminal.
   back, at once, no reboot (NixOS and Snapper take the whole system back
   to a point).
 - **System snapshots** where the disk is btrfs: Snapper before every
-  update, bootable from the boot menu (as Omarchy and openSUSE), shown in
+  update, bootable from the boot menu (as openSUSE), shown in
   the same timeline. Closes 1's pending safety net.
 
 Only what goes through Mazapán is in the desktop's timeline: a file it
@@ -1197,27 +1147,15 @@ The plugins are localized; Mazapán's own messages (apply, update, doctor)
 are English only. Dropped on 2026-09-30: the CLI stays in English, as
 most command-line tools do; everything with a window is localized.
 
-## Part three: what Omarchy has that this doesn't yet
+## Part three: what an Arch desktop is expected to have
 
-Omarchy today, in general: some 440 bash scripts behind one menu (a
-declarative tree, good), but almost everything that changes the system
-opens a terminal with gum prompts, keyboard, input, monitors and
-keybindings are hand-edited Lua, package operations run `--noconfirm`,
-nothing is localized, and there's no undo but the bootloader's snapshots.
-What follows keeps its good ideas and fixes those.
+What follows: none of it in a terminal, all of it localized and
+undoable.
 
 ## 16. Installation and first boot
 
-**Omarchy today.** An ISO, the only supported way: a configurator (gum
-forms on a TTY: keyboard, user, one password, hostname, timezone) writes
-archinstall's JSON, and archinstall installs from an offline mirror
-inside the ISO, so nothing is downloaded and it's fast. The whole disk,
-only which one is asked: btrfs, LUKS optional, Limine with UKIs. A drive
-labeled `cidata` makes it unattended. Opinionated: its whole app
-selection is installed, and you remove what you don't want.
-
-**Much better.** Its base (it works), a better experience on top:
-- The same foundations: an ISO with an offline mirror, archinstall
+**Much better.** A base that works, a better experience on top:
+- The foundations: an ISO with an offline mirror, archinstall
   behind it driven by a JSON, the whole disk with only which one asked,
   btrfs (with `/boot` on it, so the snapshots of 12 boot from day one),
   encryption optional, unattended with `cidata`.
@@ -1294,12 +1232,6 @@ with `cidata`, and trying it on real hardware.
 
 ## 17. Apps: install and remove
 
-**Omarchy today.** Menu branches (Install / Remove) whose rows hide when
-the app is already there or not (good), each opening a terminal that
-runs `pacman -S --noconfirm`; fzf over raw package names for anything
-else; AUR through yay; a hardcoded list of preinstalls and its removal;
-Remove offers every explicit package, core ones included.
-
 **Much better.** An Apps menu that already knows how to install what it
 offers, from the same catalog as the installer's profiles:
 - The catalog is data, not code: apps (what they are, their packages
@@ -1354,12 +1286,6 @@ service). Not tried yet: Android Studio's first start and the emulator
 
 ## 18. Settings with a face
 
-**Omarchy today.** Font (monospace, sed into each terminal's config) and
-one text-size knob across shell, GTK and terminals (good); timezone from
-a picker; touchpad and touchscreen toggles; everything else (keyboard
-layout, repeat, natural scroll, monitors, keybindings) is opening a Lua
-file in the editor.
-
 **Much better.**
 - A Settings panel with a page per thing, each one a plugin's settings
   shown with their kinds (the Plugins panel already renders them):
@@ -1375,12 +1301,6 @@ file in the editor.
 
 ## 19. Security
 
-**Omarchy today.** Fingerprint set up only after enrolling and verifying
-works (good), with a closed-lid gate; FIDO2 keys for sudo and polkit;
-passwordless sudo for N minutes with an expiry timer (good); hibernation
-(CLI, Limine only); change the disk password; all through sed on PAM
-files, in a terminal, one finger only.
-
 **Much better: what a macOS user expects, built the way it's already
 proven.** Touch ID, FileVault, a lock that's there before the lid opens,
 the orange and green dots, a firewall switch, no work lost when the
@@ -1394,7 +1314,7 @@ Order: 1, then 2, 3, 4, 5.
 
 1. **The disk, like FileVault.**
    - Encrypted by default in the installer (a switch turns it off), the
-     person's password as the disk's (as Omarchy). LUKS2 (argon2id) on the
+     person's password as the disk's. LUKS2 (argon2id) on the
      root only; the ESP unencrypted at /boot, GRUB never opening LUKS
      (as archinstall, Fedora, Ubuntu). Not an encrypted /boot, as the
      Calamares distros do: GRUB can't open argon2id, and in 2026 Garuda
@@ -1408,8 +1328,8 @@ Order: 1, then 2, 3, 4, 5.
    - One password: typed once at boot, then straight into the desktop
      (greetd logs in by itself that boot), the keyring opened by the same
      password through pam_systemd_loadkey (systemd 255+; what GDM has
-     long done). Not Omarchy's keyring without a password: its secrets
-     sit in plain text, and it has broken for them more than once.
+     long done). Not a keyring without a password: its secrets
+     sit in plain text.
      greetd's autologin may skip PAM's auth step: checked in the VM
      first.
    - Changing the password: one place for the disk, the account and the
@@ -1436,7 +1356,7 @@ Order: 1, then 2, 3, 4, 5.
      Hyprland's permissions.
 3. **Fingerprint, like Touch ID.**
    - Password and fingerprint at the same time, each in its own PAM
-     stack (GNOME's gdm-fingerprint, KDE's kscreenlocker, Omarchy's lock):
+     stack (GNOME's gdm-fingerprint, KDE's kscreenlocker):
      the lock screen and the polkit agent run both, whichever comes
      first. Never pam-fprint-grosshack.
    - The password always after a reboot (the keyring needs it), as macOS.
@@ -1444,20 +1364,19 @@ Order: 1, then 2, 3, 4, 5.
      and leaves .pacnew: the 2020 pam_tally2 lockout). Mazapán's own
      services, owned by its package; sudo and polkit-1 get one marked
      line pointing to them. polkit-1 starts from the /usr/lib/pam.d copy
-     polkit ships now (Omarchy's short one dropped faillock and more).
+     polkit ships now (a short one drops faillock and more).
    - On only after enrolling and verifying; `max-tries=3 timeout=10`; not
      with the lid closed, not over SSH (polkit 127+ can't tell); no
      faillock in the fingerprint stack (it counts successes as failures).
    - FIDO2 keys the same way: a root-owned file in /etc, `cue`, never
      `nouserok`.
 4. **The firewall, one switch.** ufw on, nothing in, everything out (as
-   Omarchy and CachyOS); what a plugin needs (LocalSend) opened only to
-   the local network (Omarchy's is open to the internet over IPv6, their
-   #11560); no SSH port; ufw-docker only when Docker is there; ufw's
+   CachyOS); what a plugin needs (LocalSend) opened only to the local
+   network (never to the internet over IPv6); no SSH port; ufw-docker only when Docker is there; ufw's
    own rules keep printers and mDNS discovery working.
 5. **Nothing lost when the battery dies.** A swap file the size of RAM in
    its own top-level @swap subvolume (inside root, a snapshot rollback
-   takes it: Omarchy's), below zram; the lid suspends, then hibernates
+   takes it), below zram; the lid suspends, then hibernates
    after a while or at 5 % (suspend-then-hibernate), and at critical
    battery (UPower); resume found by systemd, with resume= on GRUB's
    line as well.
@@ -1504,18 +1423,12 @@ Sources: Arch Wiki (dm-crypt, systemd-cryptenroll, Fprint, Session lock,
 Universal 2nd Factor, Suspend and hibernate, Uncomplicated Firewall),
 systemd-cryptenroll(1), pam_fprintd(8), sleep.conf.d(5); Lennart
 Poettering, "Brave New Trusted Boot World" (2022); oddlama, TPM unlock
-bypass (2025); Omarchy's scripts and issues; Calamares' LUKS wiki;
+bypass (2025); Calamares' LUKS wiki;
 EndeavourOS, Manjaro, Garuda and CachyOS forums and wikis; GNOME
 gnome-shell !2840, KDE kscreenlocker !15; Waybar's privacy module;
 chaifeng/ufw-docker; Yubico pam-u2f and YSA-2025-01.
 
 ## 20. Updates, visible
-
-**Omarchy today.** A bar icon only when Omarchy's own package is behind
-(checked every 6 hours); the update is one terminal flow (snapshot,
-keyring, `pacman -Syu --noconfirm`, migrations, AUR, mise, orphans, a
-reboot prompt); channels (stable, rc, edge); firmware through fwupd in a
-terminal.
 
 **Much better.** Built on `mazapan update` (1) and the snapshots (12):
 - The bar says there are updates (the whole system's, not only ours),
@@ -1530,11 +1443,6 @@ terminal.
   and restarted for you where it can be.
 
 ## 21. Boot and login in the theme
-
-**Omarchy today.** One "unlock" look per theme for the boot splash
-(Plymouth) and the login screen (SDDM), recolored with ImageMagick and
-installed as root with an initramfs rebuild each time; the boot menu
-(Limine) keeps its own colors.
 
 **Much better.**
 - The boot splash, the login screen and the boot menu (GRUB, Limine,
@@ -1556,10 +1464,6 @@ installer; the release gate checks them.
 
 ## 22. Sharing
 
-**Omarchy today.** LocalSend send from a menu (clipboard, file, folder)
-and its app to receive; Taildrop send and a race-free receive into
-Downloads (good); Wi-Fi shared as a QR on screen; a speed test.
-
 **Much better.**
 - Share from anywhere: the clipboard history, a capture, the file
   manager's selection, to a device nearby (LocalSend) or on your tailnet
@@ -1575,29 +1479,18 @@ device nearby (LocalSend, opened with them) or one of yours on the
 tailnet (Taildrop, sent at once); the tailscale plugin (Apps' Tailscale
 turns it on): its service, you its operator (no sudo), signing in from
 the palette, Taildrop received into Downloads with a notification; the
-firewall lets LocalSend in (53317), as Omarchy does. Also from a capture
+firewall lets LocalSend in (53317). Also from a capture
 ("Share" in its bar) and the clipboard history (Ctrl+S).
 
 ## 23. More capture
 
-**Omarchy today.** Text from a region (OCR, English unless an
-environment variable says otherwise); a QR decoded from a region and
-copied as a secret, never shown (good); a webcam overlay while
-recording.
-
 **Much better.**
 - In the capture panel (8): text (OCR in your language, and the
-  document's), QR (copied as a secret, as Omarchy does), and the webcam
+  document's), QR (copied as a secret, never shown), and the webcam
   in a corner while recording, moved and resized with the mouse.
 - Text captures kept in the clipboard history; a capture shared (22).
 
 ## 24. Extras
-
-**Omarchy today.** A screensaver (text effects in a terminal per
-monitor); dictation (voxtype, hold F9); reminders as systemd timers,
-with a bar indicator; a crash watcher that offers an AI diagnosis
-(good); a Windows VM (docker + RDP); a media converter; tmux/herdr
-cheatsheets.
 
 **Much better.**
 - Each one a plugin, off until wanted, in the catalog: screensaver in
@@ -1620,10 +1513,10 @@ time on the theme's background with its colors drifting, moved each
 minute against burn-in; the idle inhibitors (a video, a call, "keep
 awake") keep it away; still with the theme's motion off.
 
-## Next: Omarchy's that matter, and what working people need (decided 2026-10-04)
+## Next: what matters, and what working people need (decided 2026-10-04)
 
-From Omarchy's 441 commands, only what's worth having (games, branding,
-tmux/herdr menus and niche tools left out):
+Only what's worth having (games, branding, tmux/herdr menus and niche
+tools left out):
 
 1. ~~A development environment per language in one click (mise: Node,
    Python, Go, Rust, Ruby, PHP, Java), beside .NET and Expo~~ *done: Python
@@ -1650,7 +1543,7 @@ tmux/herdr menus and niche tools left out):
 8. ~~Screen recording with the webcam over it~~ *done: "Record with
    camera" in the capture's bar*.
 
-And what neither has, for people at work: backups of your files (Time
+And for people at work: backups of your files (Time
 Machine-like), printers and scanners working when plugged in, files found
 from the palette, the calendar and the next meeting in the bar, the phone
 linked (notifications, SMS, clipboard, files).

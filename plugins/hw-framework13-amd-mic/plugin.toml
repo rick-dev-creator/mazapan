@@ -12,7 +12,7 @@ product = ["*Laptop 13*"]
 gpu = ["Advanced Micro Devices*"]
 
 # The profile preferred by WirePlumber whenever it has none stored for the
-# card; and set now (pactl), which stores it, as Omarchy does.
+# card; and set now (pactl), which stores it.
 [[targets]]
 template = "mic.conf.tmpl"
 output = "~/.config/wireplumber/wireplumber.conf.d/mazapan-framework13-amd-mic.conf"

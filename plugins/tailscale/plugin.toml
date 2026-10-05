@@ -15,8 +15,8 @@ pacman = ["tailscale", "libnotify", "xdg-user-dirs", "xdg-utils"]
 # Files sent to you with Taildrop received into Downloads, with a notification.
 receive = true
 
-# tailscaled at every start, you its operator (Omarchy does `tailscale up
-# --operator` once; this keeps it so).
+# tailscaled at every start, you its operator (`tailscale up --operator`
+# once wouldn't keep it so).
 [[targets]]
 template = "tailscaled.conf.tmpl"
 output = "/etc/systemd/system/tailscaled.service.d/mazapan.conf"

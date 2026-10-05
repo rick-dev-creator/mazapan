@@ -8,9 +8,15 @@ others' work. Their licenses ask for their notices to travel with it.
 https://github.com/basecamp/omarchy — the idea of a ready, opinionated Arch
 + Hyprland desktop, and in particular the hardware fixes the `hw-*`
 plugins carry (kernel parameters, module options, udev rules and similar
-settings for specific laptops), learned from Omarchy's scripts. Its theme
-format is what `mazapan themes import-omarchy` reads (the themes imported
-keep their own authors and licenses; none is shipped here).
+settings for specific laptops), ported from Omarchy's scripts.
+
+Its themes: `mazapan themes import-omarchy` ("Themes: import Omarchy's"
+in the palette) reads Omarchy's theme format and, when asked, downloads
+Omarchy's themes from its repository (or uses the ones of an Omarchy
+install) and turns them into Mazapán themes on that computer. None of
+them ships in this repository or on the ISO; the ones imported keep their
+own authors and licenses. Mazapán's own themes (Amber, Gruvbox, Paper,
+Phosphor) don't come from Omarchy.
 
 ```
 Copyright (c) David Heinemeier Hansson
@@ -34,6 +40,11 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
+
+## Gruvbox
+
+https://github.com/morhetz/gruvbox (MIT, Pavel Pertsev) — the palette of
+the Gruvbox theme (`themes/gruvbox`).
 
 ## pam_fde_boot_pw
 
