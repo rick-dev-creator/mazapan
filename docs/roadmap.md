@@ -15,17 +15,50 @@ machine, a published ISO, 1.0.
    [first-install.md](first-install.md). What only real hardware shows:
    hybrid graphics, suspend and hibernate, Wi-Fi, Bluetooth, the battery
    and brightness in the Control Center, night light's warmth.
-2. **The ISO published.** On Cloudflare R2 behind the official site, its
-   checksum and signature in the GitHub release; the release key and
-   the package repository hosted. On the way: `nvidia-open` instead of
-   `nvidia-open-dkms` (~150 MB less).
-3. **The time as one button.** The bar's center grows into a panel (the
+2. **mazapan.org and the ISO published.** The domain on Cloudflare, the
+   site on Cloudflare Pages (what it is, downloads with how to verify them,
+   release notes, the manual and Learn on the web, hardware that works,
+   privacy, contributing); `os-release`'s URLs pointing there. The ISOs and
+   the signed package repository on Cloudflare R2 (no charge per
+   download), a torrent with R2 as its web seed, SourceForge as a mirror;
+   later Fastly's or OSUOSL's programs for free software. On the way:
+   `nvidia-open` instead of `nvidia-open-dkms` (~150 MB less).
+3. **Releases, as a routine.** Mazapan's versions (`vX.Y.Z`, the stable,
+   edge and dev channels) apart from the ISO's: an ISO for each release
+   and a fresh one each month (`mazapan-1.0.0-2026.11-x86_64.iso`), each
+   with its SHA-256, a signature by the release key and a torrent; built
+   here, through the release gate (encrypted and plain), signed, uploaded,
+   announced. The last two or three on R2, older ones by torrent; the
+   repository never pruned of what installed systems need.
+4. **Knowing it works out there, without spying.**
+   - How many: Fedora's "countme": once a week the update check says its
+     version and rough age, no identifier; counted from the repository's
+     logs, with the ISO's downloads.
+   - Hardware and errors, **only if the person says yes** (a step in the
+     welcome, off by default, with "see exactly what's sent"): the
+     machine's model, CPU, GPU and driver, the hardware fixes it took; and
+     signatures of what failed where Mazapan is in charge (an install, an
+     update rolled back, first-login apps, doctor's checks, a crash of the
+     shell or of mazapan). No serials, names or addresses; kept 90 days;
+     the totals published (a hardware page on the site). A Cloudflare
+     Worker with D1 to receive them.
+   - "Report this bug" from a crash (crash-watch, as Omarchy does): the
+     issue shown before it's sent, duplicates looked for first, sent only
+     with a yes.
+5. **Known as a distribution, and upstream told.** DistroWatch's
+   submission and the ArchWiki's list of Arch-based distributions, Arch's
+   rules kept (its name and logo not used as if official; support on
+   Mazapan's own channels). Bugs found here reported where they belong:
+   Quickshell 0.3 (a kept window capture brings the shell down after a
+   screen recording) and Hyprland 0.56 (a Lua timer stopped mid-countdown
+   never fires again).
+6. **The time as one button.** The bar's center grows into a panel (the
    clock, the calendar, the weather by the hour, reminders), as the
    Control Center does on the right.
    [Concept](https://claude.ai/artifact/7Enp3ALZNNp1UAvFTaEjQG).
-4. **VS Code ready for C#.** The C# Dev Kit and its extensions in the
+7. **VS Code ready for C#.** The C# Dev Kit and its extensions in the
    .NET profile, so F5 runs a backend and Aspire on Linux.
-5. **1.0.** Once 1 and 2 are done: tagged `v1.0.0`, from the stable
+8. **1.0.** Once 1 and 2 are done: tagged `v1.0.0`, from the stable
    channel.
 
 ## Road to 1.0
