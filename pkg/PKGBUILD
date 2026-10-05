@@ -41,8 +41,7 @@ package() {
   # under a new version.
   local built
   built=$("$_repo/bin/mazapan" --version)
-  # (its release's name may follow the number: "mazapan 0.1.0 (Mazapan)")
-  [[ $built == "mazapan $pkgver" || $built == "mazapan $pkgver ("*")" ]] || { echo "bin/mazapan is \"$built\", the package $pkgver: run core/build" >&2; return 1; }
+  [[ $built == "mazapan $pkgver" ]] || { echo "bin/mazapan is \"$built\", the package $pkgver: run core/build" >&2; return 1; }
   # mazapan finds its plugins/, themes/ and catalog/ next to the directory
   # its binary is in (through the symlink); community/ too: plugins others
   # made, shipped so they can be installed offline (off until they are, so

@@ -25,7 +25,7 @@ machine, a published ISO, 1.0.
    `nvidia-open` instead of `nvidia-open-dkms` (~150 MB less).
 3. **Releases, as a routine.** Mazapan's versions (`vX.Y.Z`, the stable,
    edge and dev channels), each minor one with a name to remember it by
-   (`mazapan --version`: "0.1.0 (Mazapan)"; see docs/versioning.md),
+   (see docs/versioning.md),
    apart from the ISO's: an ISO for each release
    and a fresh one each month (`mazapan-1.0.0-2026.11-x86_64.iso`), each
    with its SHA-256, a signature by the release key and a torrent; built

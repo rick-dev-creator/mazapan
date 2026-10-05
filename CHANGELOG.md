@@ -4,8 +4,9 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
-## Unreleased
+## 0.2.0 (2026-10-06)
 
+- A version is its number: `mazapan --version` says "mazapan 0.2.0", no name beside it.
 - Pomodoro, a community plugin: focus in sessions with breaks between them.
   A ring that fills as the time goes, the time left and when it ends, the
   sessions of each set, what you're working on; start, pause, skip, five

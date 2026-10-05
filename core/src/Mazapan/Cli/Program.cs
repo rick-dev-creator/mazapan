@@ -151,9 +151,7 @@ public static partial class Program
 
     static int PrintVersion()
     {
-        // Its release's name after the number: "mazapan 0.1.0 (Mazapan)".
-        var name = Updates.Codename.For(Version);
-        Console.WriteLine("mazapan " + Version + (name != "" ? $" ({name})" : ""));
+        Console.WriteLine("mazapan " + Version);
         return 0;
     }
 
