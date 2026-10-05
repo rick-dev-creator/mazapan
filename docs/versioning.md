@@ -73,7 +73,7 @@ The first release sets it, in the same commit that's tagged.
 
 1. CHANGELOG.md: "Unreleased" becomes `## X.Y.Z — Name (date)`.
 2. The name in Codename.cs, if it's a new minor version.
-3. `git tag vX.Y.Z` on main, pushed to Gitea and GitHub.
+3. `git tag vX.Y.Z` on main, pushed to GitHub.
 4. `core/build test`, `pkg/release` (edge), the ISO (`vm/vm iso`), the gate
    (`vm/gate`, encrypted and plain).
 5. `pkg/release promote X.Y.Z` (stable), `pkg/sourceforge` the ISO.

@@ -169,7 +169,7 @@ if [[ -n ${MAZAPAN_GATE_APPS:-} ]]; then
   # shut the gate out (each look failing, as if the apps never finished).
   asked=
   for i in $(seq 1 30); do
-    look=$(as_user 'pgrep -x pkexec >/dev/null && echo asked; test -f ~/.local/state/mazapan/first-apps || echo gone; grep -q "^DONE " ~/.local/state/mazapan/apps/run.log 2>/dev/null && echo done' 2>/dev/null)
+    look=$(as_user 'pgrep -x pkexec >/dev/null && echo asked; test -f ~/.local/state/mazapan/first-apps || echo gone; grep -q "^DONE " ~/.local/state/mazapan/apps/run.log 2>/dev/null && echo done; true' 2>/dev/null || true)
     grep -q asked <<<"$look" && { asked=1; break; }
     grep -qE 'gone|done' <<<"$look" && break
     pause 12
