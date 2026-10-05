@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Puts the package repository pkg/release made (out/repo/<channel>/x86_64)
+# where installed systems read it: https://repo.mazapan.dev, GitHub Pages
+# of rick-dev-creator/mazapan-repo. What's there is replaced by out/repo
+# whole (pkg/release keeps every version: nothing a system needs is lost).
+#
+#   pkg/publish-repo
+#
+# Pushes with gh's login (gh auth login).
+set -euo pipefail
+
+repo="$(cd "$(dirname "$0")/.." && pwd)"
+out="${MAZAPAN_RELEASE_OUT:-$repo/out/repo}"
+pages="${MAZAPAN_REPO_PAGES:-rick-dev-creator/mazapan-repo}"
+log() { printf '\e[1;35m[publish-repo]\e[0m %s\n' "$*"; }
+die() { printf '\e[1;31m[publish-repo]\e[0m %s\n' "$*" >&2; exit 1; }
+
+# Only a signed repository: an unsigned one is refused by every system.
+for ch in stable edge; do
+  db="$out/$ch/x86_64/mazapan.db.tar.gz"
+  [[ -f $db ]] || continue
+  [[ -f $db.sig ]] || die "$ch's database isn't signed: pkg/release signs it"
+done
+ls "$out"/*/x86_64/mazapan.db.tar.gz >/dev/null 2>&1 || die "nothing in $out: pkg/release first"
+
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+log "cloning $pages"
+gh repo clone "$pages" "$work/pages" -- -q --depth 1
+for ch in stable edge; do
+  [[ -d $out/$ch ]] || continue
+  rm -rf "${work:?}/pages/$ch"
+  cp -a "$out/$ch" "$work/pages/$ch"
+done
+cd "$work/pages"
+git add -A
+if git diff --cached --quiet; then
+  log "already up to date"
+  exit 0
+fi
+git -c user.name="$(git -C "$repo" config user.name)" -c user.email="$(git -C "$repo" config user.email)" \
+  commit -q -m "$(cd "$repo" && pkg/version): $(git diff --cached --name-only | grep -c '\.pkg\.tar\.zst$') package files"
+git -c credential.helper= -c credential.helper='!gh auth git-credential' push -q origin HEAD
+log "https://repo.mazapan.dev (GitHub Pages takes a minute)"
