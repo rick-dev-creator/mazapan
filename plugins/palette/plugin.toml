@@ -3,12 +3,12 @@ id = "palette"
 name = "Command palette"
 version = "0.3.0"
 api = 1
-description = "One palette for apps, open windows, every plugin's actions and keybindings, each showing the command it runs"
+description = "One palette for your apps, open windows, every plugin's actions and settings, and apps to install: in sections, each saying what Enter does"
 categories = ["panel", "tools"]
 requires = ["shell-bar", "hypr-base"]
 
 [packages]
-pacman = ["quickshell", "wl-clipboard", "foot"]
+pacman = ["quickshell", "wl-clipboard", "foot", "libnotify", "util-linux"]
 
 [settings]
 # Opens the palette.
@@ -33,6 +33,11 @@ reload = "hyprctl reload >/dev/null"
 template = "Widget.qml.tmpl"
 output = "~/.config/quickshell/mazapan/widgets/left/05-palette.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+# Starts the apps it opens, and says when one didn't open.
+[[targets]]
+template = "launch.sh.tmpl"
+output = "~/.local/share/mazapan/bin/palette-launch"
 
 [[targets]]
 template = "Palette.qml.tmpl"

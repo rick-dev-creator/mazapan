@@ -200,6 +200,16 @@ Item {
     if (open) close()
     else show()
   }
+  // Opened on one page (the palette's Settings: "Keyboard", "Security"…).
+  function showWith(page) {
+    if (pages.indexOf(page) >= 0) {
+      if (capturing) endCapture()
+      session.page = page
+      problem = ""
+      if (page === "text" && uiFonts.length === 0) fontsProbe.running = true
+    }
+    if (!open) show()
+  }
   function show() {
     screenAtOpen = Quickshell.screens.find(s => Hyprland.focusedMonitor && s.name === Hyprland.focusedMonitor.name) ?? Quickshell.screens[0]
     session.reopen = false

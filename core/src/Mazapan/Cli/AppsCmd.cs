@@ -19,7 +19,8 @@ namespace Mazapan.Cli;
 ///
 /// For the panel, besides what it says: "step NAME" as it goes, "fail
 /// KIND DETAIL" when something didn't go through (cancelled, pacman,
-/// flatpak, plugins, webapp, busy).
+/// missing, vendor, flatpak, plugins, webapp, busy, offline). One app that
+/// can't be installed never stops the others: what failed is said at the end.
 /// </summary>
 public static partial class Program
 {
@@ -55,7 +56,8 @@ public static partial class Program
             "install" => AppsInstall(Pick(profiles, apps, fs.Rest), fs.IsSet("gui"), yes),
             "remove" => AppsRemove(Pick(profiles, apps, fs.Rest), fs.IsSet("gui"), yes),
             "undo" => AppsUndo(fs.Rest, apps, fs.IsSet("gui"), yes),
-            _ => throw new MazapanException("usage: mazapan apps [list|plan|plan-remove|install|remove|undo|permissions|permit] [ID...] [--json] [--gui] [-y]"),
+            "first" => AppsFirst(profiles, apps, fs.IsSet("gui")),
+            _ => throw new MazapanException("usage: mazapan apps [list|plan|plan-remove|install|remove|undo|first|permissions|permit] [ID...] [--json] [--gui] [-y]"),
         };
     }
 
@@ -240,6 +242,7 @@ public static partial class Program
         public List<string> Flatpaks = [];
         public List<(string Name, string Url)> Webapps = [];
         public List<(App App, VendorRelease Release)> Vendor = []; // from their makers
+        public List<(App App, string Why)> Unreachable = [];      // their makers couldn't be asked: left out
         public List<string> Enable = [];  // mazapan plugins turned on
         public long Download, Installed;
     }
@@ -249,6 +252,18 @@ public static partial class Program
         var p = new AppsPlanned();
         foreach (var a in apps.Where(a => !now.Has(a)))
         {
+            // From its maker: its latest release first. A maker that can't be
+            // reached leaves that app out, not the others.
+            VendorRelease? release = null;
+            if (a.Vendor != "")
+            {
+                try { release = Mazapan.Store.Vendor.Latest(a.Vendor); }
+                catch (Exception e) when (e is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException or KeyNotFoundException or InvalidOperationException or IndexOutOfRangeException)
+                {
+                    p.Unreachable.Add((a, e.Message));
+                    continue;
+                }
+            }
             if (a.Plugin != "")
             {
                 var pl = now.Found.FirstOrDefault(x => x.Id == a.Plugin);
@@ -260,14 +275,7 @@ public static partial class Program
             p.Targets.AddRange(a.Pacman.Where(x => !now.Packages.Contains(x)));
             if (a.Flatpak != "") p.Flatpaks.Add(a.Flatpak);
             if (a.Webapp != "") p.Webapps.Add((a.In(lang).Name, a.Webapp));
-            if (a.Vendor != "")
-            {
-                try { p.Vendor.Add((a, Mazapan.Store.Vendor.Latest(a.Vendor))); }
-                catch (Exception e) when (e is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException or KeyNotFoundException or InvalidOperationException or IndexOutOfRangeException)
-                {
-                    throw new MazapanException($"{a.In(lang).Name}: its maker can't be reached ({e.Message})");
-                }
-            }
+            if (release != null) p.Vendor.Add((a, release));
         }
         // Flatpaks need flatpak; sites as apps, the webapps plugin and a
         // Chromium-based browser (only those open a site as an app).
@@ -432,6 +440,7 @@ public static partial class Program
                 { "webapps", plan.Webapps.Select(w => new Fields { { "name", w.Name }, { "url", w.Url } }).ToList() },
                 { "vendor", plan.Vendor.Select(v => new Fields { { "id", v.App.Id }, { "name", v.App.In(lang).Name }, { "version", v.Release.Version }, { "download", v.Release.Size } }).ToList() },
                 { "enable", plan.Enable }, { "review", plan.Review },
+                { "unreachable", plan.Unreachable.Select(u => new Fields { { "id", u.App.Id }, { "name", u.App.In(lang).Name }, { "why", u.Why } }).ToList() },
             }));
             return 0;
         }
@@ -450,6 +459,7 @@ public static partial class Program
         foreach (var (a, rel) in plan.Vendor) Console.WriteLine($"  from its maker  {a.In(lang).Name} {rel.Version}" + (rel.Size > 0 ? $" ({Mazapan.Store.Vendor.Size(rel.Size)})" : ""));
         foreach (var e in plan.Enable) Console.WriteLine($"  plugin   {e} turned on");
         foreach (var r in plan.Review) Console.WriteLine($"  {Style.Amber}plugin   {r}: add it from the Plugins panel (it shows what it can do){Style.Reset}");
+        foreach (var (a, why) in plan.Unreachable) Console.WriteLine($"  {Style.Amber}left out  {a.In(lang).Name}: its maker can't be reached ({why}){Style.Reset}");
     }
 
     static void PrintRemovePlan(AppsRemoval r, string lang)
@@ -466,15 +476,58 @@ public static partial class Program
 
     // --- doing it --------------------------------------------------------------------------
 
-    /// <summary>As root: pkexec (the polkit agent asks) from the panel, sudo in a terminal.</summary>
-    static int AsRootRun(bool gui, params string[] args)
+    /// <summary>
+    /// As root: pkexec (the polkit agent asks) from the panel, sudo in a
+    /// terminal. From the panel what it says is passed on (to the panel's
+    /// log) and kept, to tell why it failed; pkexec finding no polkit agent
+    /// yet (the shell just starting) waits for it and asks again.
+    /// </summary>
+    static (int Code, string Said) AsRootRun(bool gui, params string[] args)
     {
-        if (!gui) return AsRoot.Sudo(args);
-        var psi = new ProcessStartInfo("pkexec") { UseShellExecute = false };
+        if (!gui) return (AsRoot.Sudo(args), "");
+        for (var tries = 0; ; tries++)
+        {
+            var (code, said) = PassedOn("pkexec", args);
+            if (code != 127 || tries >= 12 || !PacmanTrouble.Read(said).NoAgent) return (code, said);
+            Console.WriteLine("note waiting for the password dialog");
+            Thread.Sleep(5000);
+        }
+    }
+
+    /// <summary>A command whose output goes on as it comes, and is kept.</summary>
+    static (int Code, string Said) PassedOn(string file, string[] args)
+    {
+        var psi = new ProcessStartInfo(file) { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true };
         foreach (var a in args) psi.ArgumentList.Add(a);
-        using var p = Process.Start(psi)!;
-        p.WaitForExit();
-        return p.ExitCode;
+        // What it says is read (PacmanTrouble): in English, whatever the
+        // system's language (pkexec passes LC_ALL on).
+        psi.Environment["LC_ALL"] = "C";
+        var said = new System.Text.StringBuilder();
+        var gate = new object();
+        void Line(string? l, TextWriter to)
+        {
+            if (l == null) return;
+            lock (gate)
+            {
+                to.WriteLine(l);
+                said.AppendLine(l);
+            }
+        }
+        try
+        {
+            using var p = Process.Start(psi)!;
+            p.OutputDataReceived += (_, e) => Line(e.Data, Console.Out);
+            p.ErrorDataReceived += (_, e) => Line(e.Data, Console.Error);
+            p.BeginOutputReadLine();
+            p.BeginErrorReadLine();
+            p.WaitForExit();
+            return (p.ExitCode, said.ToString());
+        }
+        catch (System.ComponentModel.Win32Exception e)
+        {
+            Console.Error.WriteLine($"{file}: {e.Message}");
+            return (127, e.Message);
+        }
     }
 
     /// <summary>
@@ -504,16 +557,84 @@ public static partial class Program
     /// <summary>pacman as root; a password refused or the dialog closed is "cancelled", not a failure.</summary>
     static void Pacman(bool gui, string[] args, string what)
     {
-        var code = AsRootRun(gui, ["pacman", .. args]);
+        var (code, _) = PacmanRun(gui, args, what);
         if (code == 0) return;
+        Console.WriteLine($"fail pacman {code}");
+        throw new MazapanException($"pacman stopped (exit {code}): nothing {what}");
+    }
+
+    /// <summary>pacman as root: its exit and what it said; cancelled (said, and thrown) when the password was.</summary>
+    static (int Code, string Said) PacmanRun(bool gui, string[] args, string what)
+    {
+        var (code, said) = AsRootRun(gui, ["pacman", .. args]);
+        // No polkit agent to ask even after waiting, or no pkexec at all:
+        // nobody said no, so it isn't "cancelled".
+        if (gui && code == 127 && (PacmanTrouble.Read(said).NoAgent || !said.Contains('\n')))
+        {
+            Console.WriteLine("fail polkit");
+            throw new MazapanException("no password dialog could be shown: nothing " + what);
+        }
         // pkexec: 126 the person said no (or closed it), 127 not authorized.
         if (gui && code is 126 or 127)
         {
             Console.WriteLine("fail cancelled");
             throw new MazapanException("cancelled: nothing " + what);
         }
-        Console.WriteLine($"fail pacman {code}");
-        throw new MazapanException($"pacman stopped (exit {code}): nothing {what}");
+        return (code, said);
+    }
+
+    /// <summary>
+    /// The packages, installed: one transaction (one password). What the
+    /// repositories don't have is left out and the rest tried again; a
+    /// keyring older than the signatures is brought up to date first, as
+    /// Arch says (pacman -Sy archlinux-keyring, then -Syu). What still
+    /// didn't go in is returned.
+    /// </summary>
+    /// <summary>Packages this run found the repositories don't have.</summary>
+    static readonly HashSet<string> Missing = [];
+
+    static HashSet<string> InstallPackages(bool gui, List<string> targets, bool upgrade, List<string> failed, out List<string> installed)
+    {
+        var lost = new HashSet<string>();
+        var bar = gui ? new[] { "--noprogressbar" } : [];
+        var keyring = false;
+        installed = [];
+        while (targets.Count > 0)
+        {
+            var (code, said) = PacmanRun(gui, [upgrade ? "-Syu" : "-S", "--needed", "--noconfirm", .. bar, "--", .. targets], "installed");
+            if (code == 0)
+            {
+                installed = targets;
+                break;
+            }
+            var why = PacmanTrouble.Read(said);
+            var gone = targets.Where(why.Missing.Contains).ToList();
+            if (gone.Count > 0)
+            {
+                Missing.UnionWith(gone);
+                foreach (var g in gone) Console.WriteLine("fail missing " + g);
+                failed.Add("not in the repositories: " + string.Join(", ", gone));
+                lost.UnionWith(gone);
+                targets = targets.Where(t => !why.Missing.Contains(t)).ToList();
+                continue;
+            }
+            if (why.Keyring && !keyring)
+            {
+                keyring = true;
+                Step("keyring");
+                if (PacmanRun(gui, ["-Sy", "--needed", "--noconfirm", .. bar, "archlinux-keyring"], "installed").Code == 0)
+                {
+                    // Synced now: the rest only with the upgrade (no partial upgrades).
+                    upgrade = true;
+                    continue;
+                }
+            }
+            Console.WriteLine($"fail pacman {code}");
+            failed.Add($"pacman stopped (exit {code})");
+            lost.UnionWith(targets);
+            break;
+        }
+        return lost;
     }
 
     static int AppsRun(string file, params string[] args)
@@ -536,13 +657,74 @@ public static partial class Program
     /// <summary>A step, said so the panel can show it (lines starting "step ").</summary>
     static void Step(string what) => Console.WriteLine("step " + what);
 
-    static int AppsInstall(List<App> apps, bool gui, bool yes)
+    /// <summary>
+    /// mazapan apps first: the apps the installer was asked for, what of
+    /// them is still missing, once the repositories can be reached. The
+    /// list goes only once they're all there: a failed or cancelled try is
+    /// tried again (the welcome's notification, the next login).
+    /// </summary>
+    static int AppsFirst(List<Profile> profiles, List<App> apps, bool gui)
+    {
+        var path = FirstApps.Path;
+        if (!File.Exists(path))
+        {
+            Console.WriteLine("nothing asked for at the install");
+            return 0;
+        }
+        var ids = FirstApps.Parse(File.ReadAllText(path));
+        var known = ids.Where(id => apps.Any(a => a.Id == id) || profiles.Any(p => p.Id == id)).ToList();
+        foreach (var id in ids.Except(known)) Console.Error.WriteLine($"warning: {id}: not in the catalog any more, left out");
+        var want = known.Count > 0 ? Pick(profiles, apps, known) : [];
+        if (want.All(AppsNow.Read().Has))
+        {
+            File.Delete(path);
+            Console.WriteLine("already installed");
+            return 0;
+        }
+        if (!Reachable(TimeSpan.FromMinutes(2)))
+        {
+            Console.WriteLine("fail offline");
+            throw new MazapanException("the repositories can't be reached: the apps are installed once they can");
+        }
+        // A system installed offline is as old as its ISO: brought up to date with them.
+        try
+        {
+            var code = AppsInstall(want, gui, yes: true, upgrade: true);
+            File.Delete(path);
+            return code;
+        }
+        finally
+        {
+            // One whose packages the repositories don't have any more is never
+            // asked for again (each login would): the rest stays.
+            if (File.Exists(path) && want.Where(a => a.Pacman.Any(Missing.Contains)).Select(a => a.Id).ToHashSet() is { Count: > 0 } drop)
+            {
+                var keep = ids.Where(id => !drop.Contains(id)).ToList();
+                if (keep.Count == 0) File.Delete(path);
+                else Files.WriteAtomic(path, string.Join('\n', keep) + "\n");
+            }
+        }
+    }
+
+    /// <summary>Arch's mirrors answer (a connection said up can still have no DNS for a while).</summary>
+    static bool Reachable(TimeSpan wait)
+    {
+        var until = DateTime.UtcNow + wait;
+        while (true)
+        {
+            if (AppsCapture("curl", "-fsS", "--max-time", "5", "-o", "/dev/null", "https://geo.mirror.pkgbuild.com/").Code == 0) return true;
+            if (DateTime.UtcNow >= until) return false;
+            Thread.Sleep(5000);
+        }
+    }
+
+    static int AppsInstall(List<App> apps, bool gui, bool yes, bool upgrade = false)
     {
         var now = AppsNow.Read();
         var lang = Locale.Languages.Detect(now.Cfg?.Language ?? "");
         var plan = PlanInstall(apps, now, lang);
         foreach (var r in plan.Review) Console.WriteLine($"{r}: add it from the Plugins panel (it shows what it can do first)");
-        if (plan.Apps.Count == 0 && plan.Enable.Count == 0)
+        if (plan.Apps.Count == 0 && plan.Enable.Count == 0 && plan.Unreachable.Count == 0)
         {
             Console.WriteLine(plan.Review.Count > 0 ? "nothing else to install" : "already installed");
             return 0;
@@ -556,15 +738,30 @@ public static partial class Program
         var tx = new AppsTx { Action = "install" };
         var failed = new List<string>();
         var okApps = new HashSet<string>();
+        foreach (var (a, why) in plan.Unreachable)
+        {
+            Console.WriteLine("fail vendor " + a.Id);
+            failed.Add($"{a.In(lang).Name}: its maker can't be reached ({why})");
+        }
+        var lost = new HashSet<string>();
         if (plan.Targets.Count > 0)
         {
             Step("packages");
             // A system that never synced gets the repositories and the updates
             // with them: -Syu, never -Sy alone (Arch has no partial upgrades).
-            Pacman(gui, [NeverSynced() ? "-Syu" : "-S", "--needed", "--noconfirm", .. gui ? new[] { "--noprogressbar" } : [], "--", .. plan.Targets], "installed");
-            tx.Packages = plan.Targets;
+            lost = InstallPackages(gui, plan.Targets, upgrade || NeverSynced(), failed, out var installed);
+            tx.Packages = installed;
         }
-        foreach (var a in plan.Apps.Where(a => a.Kind == "pacman")) okApps.Add(a.Id);
+        foreach (var a in plan.Apps.Where(a => a.Kind == "pacman"))
+        {
+            if (!a.Pacman.Any(lost.Contains)) okApps.Add(a.Id);
+            else failed.Add(a.In(lang).Name);
+        }
+        // An app whose packages didn't go in doesn't get its plugins either
+        // (unless another app asked for them too).
+        bool Needs(App a, string id) => a.Plugin == id || a.Plugins.Contains(id);
+        var lostApps = plan.Apps.Where(a => a.Kind == "pacman" && a.Pacman.Any(lost.Contains)).ToList();
+        plan.Enable.RemoveAll(e => lostApps.Any(a => Needs(a, e)) && !apps.Except(lostApps).Any(a => Needs(a, e)));
         if (plan.Flatpaks.Count > 0)
         {
             Step("flatpaks");

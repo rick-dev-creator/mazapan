@@ -36,7 +36,7 @@ public static partial class Program
             throw new MazapanException($"{Tilde(to)} is already there");
         if (inPlace && Plugin.Discover(PluginDirs()).Plugins.FirstOrDefault(p => p.Id == id) is { } there)
             throw new MazapanException($"there's a plugin {id} already ({Tilde(there.Dir)})" +
-                (Paths.Dir(there.Dir) == Paths.Join(Root(), "plugins") ? $": to change it, mazapan plugins fork {id}" : ""));
+                (ShippedPluginDirs().Contains(Paths.Dir(there.Dir)) ? $": to change it, mazapan plugins fork {id}" : ""));
         var name = Humanize(id);
         foreach (var (rel, text) in Scaffold(kind, id))
         {
@@ -529,7 +529,7 @@ public static partial class Program
         // System files only where they stay off until turned on: a hardware
         // plugin, or a built-in optional one (Docker, Tailscale), which is
         // only ever on when someone picks it (the Apps menu, or by hand).
-        var builtIn = Paths.Dir(Paths.Real(dir) ?? dir) == (Paths.Real(Paths.Join(Root(), "plugins")) ?? Paths.Join(Root(), "plugins"));
+        var builtIn = ShippedPluginDirs().Any(d => Paths.Dir(Paths.Real(dir) ?? dir) == (Paths.Real(d) ?? d));
         if (p.Targets.Any(t => t.System) && p.Hardware == null && !(builtIn && p.Meta.Optional))
             errors.Add("writes system files, but has no [hardware] rules");
 
@@ -568,7 +568,7 @@ public static partial class Program
         var dir = PluginDirOf(arg);
         var p = Plugin.Load(dir);
         var place = Paths.Join(Git.Dir, p.Id);
-        if (Paths.Dir(dir) == Paths.Join(Root(), "plugins"))
+        if (ShippedPluginDirs().Contains(Paths.Dir(dir)))
             throw new MazapanException($"{p.Id} is built in: to change it, mazapan plugins fork {p.Id}, then mazapan plugins dev {p.Id}");
         if (PluginsLock.Load().Get(p.Id) != null)
             throw new MazapanException($"{p.Id} is installed from git: work on your clone of it (mazapan plugins dev ~/src/{p.Id}), after mazapan plugins remove {p.Id}");
@@ -585,7 +585,7 @@ public static partial class Program
                 throw new MazapanException($"there's a plugin {p.Id} in {Tilde(place)} already");
             else
             {
-                if (Plugin.Discover([Paths.Join(Root(), "plugins")]).Plugins.Any(b => b.Id == p.Id))
+                if (Plugin.Discover(ShippedPluginDirs()).Plugins.Any(b => b.Id == p.Id))
                     Console.WriteLine($"{Style.Amber}it takes the built-in {p.Id}'s place while linked{Style.Reset}");
                 Files.CreateDirectory(Git.Dir);
                 Directory.CreateSymbolicLink(place, dir);
@@ -717,7 +717,7 @@ public static partial class Program
     {
         var c = Catalog.Load();
         var p = c.Find(id) ?? throw new MazapanException(c.Broken.GetValueOrDefault(id) ?? $"no plugin \"{id}\"");
-        var builtIn = c.Origin(p) == "built-in";
+        var builtIn = c.Origin(p) is "built-in" or "community";
         if (newId == "")
         {
             if (!builtIn) throw new MazapanException($"{id} is {c.Origin(p)}: it's yours to change already, or give the copy a new id: mazapan plugins fork {id} NEW");
@@ -774,7 +774,7 @@ public static partial class Program
     {
         if (!Plugin.IdPattern().IsMatch(id)) throw new MazapanException($"plugin id \"{id}\": lowercase letters, digits and dashes");
         var mine = Paths.Join(Git.Dir, id);
-        var theirs = Paths.Join(Root(), "plugins", id);
+        var theirs = ShippedPluginDirs().Select(d => Paths.Join(d, id)).FirstOrDefault(Directory.Exists) ?? Paths.Join(Root(), "plugins", id);
         if (!Directory.Exists(mine) || !Directory.Exists(theirs))
             throw new MazapanException($"{id} isn't a fork of a built-in plugin (mazapan plugins fork {id})");
         static IEnumerable<string> Rel(string root) => Directory.Exists(root)

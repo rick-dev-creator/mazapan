@@ -15,3 +15,5 @@
 "check" = "Bluetooth works (if you use it)"
 "off_short" = "off"
 "on_short" = "on"
+"act.bluetooth" = "Turn Bluetooth on or off"
+"act.bluetooth.kw" = "bluetooth headphones wireless"

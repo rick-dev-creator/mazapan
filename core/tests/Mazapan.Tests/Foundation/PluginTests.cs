@@ -159,6 +159,41 @@ public class PluginTests
     }
 
     [Fact]
+    public void CommunityPluginsShipOffUntilInstalled()
+    {
+        // community/ ships with mazapan (installable offline) but each stays
+        // off until someone installs it from the Plugins panel; the ones in
+        // plugins/ are mazapan's own.
+        var (all, problems) = Plugin.Discover([Path.Join(Repo.Root, "plugins"), Path.Join(Repo.Root, "community")]);
+        Assert.Empty(problems);
+        var community = all.Where(p => p.Community).ToList();
+        Assert.Contains(community, p => p.Id == "markets");
+        Assert.Equal(Directory.GetDirectories(Path.Join(Repo.Root, "community")).Count(d => File.Exists(Path.Join(d, "plugin.toml"))), community.Count);
+        foreach (var p in community)
+        {
+            Assert.True(p.OffByDefault, p.Id);
+            Assert.True(p.Meta.Categories.Count > 0, $"{p.Id}: categories");
+            var c = Mazapan.Locale.Catalog.Load(p.Id, p.Dir, "es");
+            Assert.True(c.TryT("plugin.name") != null && c.TryT("plugin.description") != null, p.Id);
+        }
+        Assert.DoesNotContain(all, p => !p.Community && Paths.Dir(p.Dir).EndsWith("/community"));
+        Assert.All(all.Where(p => Paths.Dir(p.Dir).EndsWith("/plugins")), p => Assert.False(p.Community, p.Id));
+    }
+
+    [Fact]
+    public void CommunityPluginsDontTakeABuiltInKey()
+    {
+        // Installed next to every built-in: a key of theirs would fire both.
+        var (all, _) = Plugin.Discover([Path.Join(Repo.Root, "plugins"), Path.Join(Repo.Root, "community")]);
+        static IEnumerable<(string Key, string Who)> Keys(Plugin p) => p.Settings
+            .Where(kv => (kv.Key == "key" || kv.Key.EndsWith("_key")) && kv.Value is string s && s != "")
+            .Select(kv => (string.Join("+", ((string)kv.Value).Split('+', StringSplitOptions.TrimEntries).Select(x => x.ToUpperInvariant()).Order()), $"{p.Id}.{kv.Key}"));
+        var builtIn = all.Where(p => !p.Community && p.Hardware == null).SelectMany(Keys).ToLookup(x => x.Key);
+        foreach (var (key, who) in all.Where(p => p.Community).SelectMany(Keys))
+            Assert.False(builtIn.Contains(key), $"{who} and {string.Join(", ", builtIn[key].Select(x => x.Who))}");
+    }
+
+    [Fact]
     public void BuiltInPluginsHaveTheirNameInSpanish()
     {
         // The Plugins panel shows each plugin's name and description in the

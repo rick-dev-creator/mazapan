@@ -66,5 +66,6 @@ reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[actions]]
 name = "{{ t \"act.awake\" }}"
+setting = true
 run = "sh ~/.local/share/mazapan/bin/idle awake toggle"
 keywords = "{{ t \"act.awake.kw\" }}"

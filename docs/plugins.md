@@ -41,7 +41,7 @@ says what each needs, what it can do, and its settings.
 | [`settings`](../plugins/settings) | The settings everyone needs, a page each: keyboard, touchpad and mouse, default apps, language and time zone, the screens and the look; every other one in the Plugins panel |
 | [`history`](../plugins/history) | What changed on the desktop, in words (a theme, a setting, a plugin on or off, an update), newest first, each with its own undo |
 | [`welcome`](../plugins/welcome) | The first login's welcome: language, keyboard, time zone, Wi-Fi, the look and apps by profile, a screen each; again from the palette any time |
-| [`plugin-manager`](../plugins/plugin-manager) | Find, install and set up plugins: the built-in ones, yours and the catalogs', each with its page (README, what it can do, settings) |
+| [`plugin-manager`](../plugins/plugin-manager) | Find, install and set up plugins: Mazapan's own, the community's (shipped or from catalogs) and yours, each marked by who made it and with its page (README, what it can do, settings) |
 | [`login`](../plugins/login) | The login screen in the theme: the clock, your name, your password (greetd, with a Hyprland of its own and a Quickshell greeter). The installer turns it on; on a system with another login manager, it takes its place |
 
 ## Windows, workspaces and screens

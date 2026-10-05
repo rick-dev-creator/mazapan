@@ -19,3 +19,5 @@
 "check" = "El Bluetooth funciona (si lo usas)"
 "off_short" = "apagado"
 "on_short" = "encendido"
+"act.bluetooth" = "Encender o apagar el Bluetooth"
+"act.bluetooth.kw" = "bluetooth auriculares inalámbrico"

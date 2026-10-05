@@ -6,24 +6,32 @@ and keybindings. `SUPER + Space`, or the button at the start of the bar
 
 ## The first screen
 
-Opened with nothing typed, it's the desktop's menu: a tile for each place
-(Apps, Updates, Settings, Screens, Capture…; Updates says how many are
-waiting), the computer's power (a second ↵ confirms power off, reboot and
-the like), and the open windows below. The arrow keys move across them.
+Opened with nothing typed: your apps first (the ones you open most, with
+their icons), the open windows, a tile for each place (Apps, Updates,
+Settings, Screens, Capture…; Updates says how many are waiting) and the
+computer's power (a second ↵ confirms power off, reboot and the like). The
+arrow keys move across them.
 
 ## Finding
 
-Type to find apps, windows (by title, app or workspace), actions and
-keybindings. Letters needn't be together: "vsc" finds Visual Studio Code.
-Apps that aren't installed yet are found too, as "Install …", which opens
-them in the Apps panel. Start with `> ` to find only actions and keys; with `? ` to ask a coding
-agent (with the Agents plugin: the answer comes in a card).
+Type to find everything, in sections: the best match, Apps, Windows,
+Actions, Settings (a Settings page, a switch such as Wi-Fi or night
+light) and Not installed (the catalog's apps, which open in the Apps
+panel to install). Letters needn't be together: "vsc" finds Visual Studio
+Code. The filters above the list narrow it (a click, or Ctrl ←→); the
+Apps filter with nothing typed shows every app. `> ` is the Actions
+filter; `? ` asks a coding agent (with the Agents plugin: the answer comes
+in a card).
 
-↑ ↓ (or Tab) pick, ↵ runs, Ctrl+C copies the command, Esc closes. A
-keybinding that's only a key says which keys to press.
+Every row says what ↵ does to it: Open, Switch to, Run, Change,
+Install…. Beside the list, the chosen one: installed or not, where it
+opens (its own window, or a terminal), the command it runs
+(`show_commands`, on), and buttons for the same. ↑ ↓ pick, Tab goes to the
+next section, ↵ runs, Ctrl+C copies the command, Esc closes.
 
-Every result shows the command it runs (`show_commands`, on): you start
-by clicking and end up knowing the command.
+An app that doesn't open says why, in a notification: its program isn't
+installed, the terminal it opens in isn't, or it quit at once with an
+error.
 
 ## Its own actions
 

@@ -32,3 +32,10 @@ reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 [[checks]]
 name = "{{ t \"check\" }}"
 run = "[ -z \"$(ls /sys/class/bluetooth 2>/dev/null)\" ] || ! systemctl is-enabled -q bluetooth || systemctl is-active -q bluetooth"
+
+[[actions]]
+name = "{{ t \"act.bluetooth\" }}"
+run = "rfkill toggle bluetooth"
+glyph = "󰂯"
+setting = true
+keywords = "{{ t \"act.bluetooth.kw\" }}"

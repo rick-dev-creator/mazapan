@@ -345,12 +345,19 @@ Item {
       : s === "vendor" ? {{ tq "step.vendor" }} : {{ tq "step.start" }}
   }
 
+  // An app opened as the palette opens it: a terminal app (Neovim, btop…)
+  // in a terminal, since DesktopEntry.execute() would start it with none
+  // and nothing would show.
+  readonly property string terminal: {{ json settings.terminal }}.trim() || "foot"
+  function word(s) {
+    return /^[\w@%+=:,./-]+$/.test(s) ? s : "'" + s.replace(/'/g, "'\\''") + "'"
+  }
   function launch(a) {
     const e = a.desktop ? DesktopEntries.byId(a.desktop.replace(/\.desktop$/, "")) : null
-    if (e) {
-      close()
-      e.execute()
-    }
+    if (!e) return
+    close()
+    const cmd = (e.runInTerminal ? terminal + " " : "") + Array.from(e.command || []).map(word).join(" ")
+    Quickshell.execDetached(e.workingDirectory ? { command: ["sh", "-c", cmd], workingDirectory: e.workingDirectory } : ["sh", "-c", cmd])
   }
 
   function review(pluginId) {
