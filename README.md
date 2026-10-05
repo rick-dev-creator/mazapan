@@ -541,6 +541,7 @@ mazapan apply --theme phosphor   # write it; mazapan undo takes it back
 | [docs/first-install.md](docs/first-install.md) | The first install on real hardware |
 | [docs/security.md](docs/security.md) | What's protected, and what isn't |
 | [docs/roadmap.md](docs/roadmap.md) | Where it's going |
+| [docs/history.md](docs/history.md) | How each part was decided, built and audited |
 
 ## Contributing
 
