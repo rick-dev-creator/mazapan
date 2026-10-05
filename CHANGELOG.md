@@ -4,7 +4,7 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
-## Unreleased
+## 0.1.0 — Mazapan (2026-10-05)
 
 - The apps chosen in the installer go in with the system: Basic's (the
   browser, files, pictures, documents, video) from the ISO itself, no
