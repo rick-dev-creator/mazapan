@@ -6,6 +6,29 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- A Control Center: the icons on the bar's right become one status pill
+  that says when something needs you (an agent waiting, a recording, the
+  battery low, an update ready), in its color. A click or SUPER + A grows
+  it into one panel: what needs you now, each with its action; Wi-Fi and
+  Bluetooth with their lists right there, Do Not Disturb, night light, keep
+  awake, power saver and displays as switches; the sound and where it goes,
+  the brightness, the music playing, your agents, notifications and the
+  power buttons. In the theme, as everything; off in Plugins, and the bar
+  is as it was.
+- The notification center closes with a click outside it again.
+- Notification banners go away after their time again.
+- .NET: the HTTPS certificate and Aspire's templates are set up until it
+  works (an SDK installed later, or no connection the first time).
+- Settings › Default apps lists the apps you have.
+- Copying a capture's text takes a second, not twenty.
+- Databases: Redis's connection URL logs in.
+- History says what an entry changed, in words; undoing your last change
+  no longer asks for a password when nothing of the system's changed.
+- Updates name the apps they updated besides packages.
+- The market ticker no longer moves the icons beside it; reminders show
+  an alarm clock, not the notifications' bell.
+- The welcome's last step fits in its card.
+
 - Gaming: Steam from Arch (on the system's drivers), and on hybrid laptops
   Steam, Lutris and Heroic on the NVIDIA card by themselves; the 32-bit
   drivers for this computer's GPUs (AMD, Intel, NVIDIA); games drawn with
