@@ -26,6 +26,7 @@
 "details" = "Details"
 "can" = "What it can do"
 "settings" = "Settings"
+"settings_n" = "%1 settings"
 "no_readme" = "No README."
 "no_settings" = "No settings."
 "install_note" = "Installing it allows all of this."
