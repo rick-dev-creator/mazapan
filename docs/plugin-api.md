@@ -354,6 +354,38 @@ else, including a `[plugins.<id>]` section for a plugin that doesn't exist,
 stops `apply` with an error naming the section. `mazapan plugins` prints each
 plugin's effective settings and marks the ones set in config.toml.
 
+### Settings read live
+
+A setting written into a QML template (`{{ settings.focus_minutes }}`)
+changes that file, so changing it reloads the whole shell: every panel,
+the bar, what was open. For settings people tune often, write them to a
+file of their own, with no `reload`, and read it live; only that file
+changes, and nothing reloads:
+
+```toml
+[[targets]]
+template = "settings.json.tmpl"          # {{ json settings }}
+output = "~/.config/quickshell/mazapan/components/pomodoro/settings.json"
+```
+
+```qml
+readonly property var settings: Object.assign({ focus_minutes: 25 }, stored)
+property var stored: ({})
+FileView {
+  path: Quickshell.shellPath("components/pomodoro/settings.json")
+  blockLoading: true
+  watchChanges: true
+  printErrors: false
+  onFileChanged: reload()
+  onLoaded: { try { root.stored = JSON.parse(text()) } catch (e) {} }
+}
+```
+
+The defaults in the QML hold until the file is read (and if it isn't
+there). Keys bound in Hyprland and settings that change what's built
+(which files there are) still go in the templates. The Pomodoro plugin
+(`community/pomodoro`) does it this way.
+
 ## Localization
 
 Plugins never hardcode user-facing text in their templates. It lives in

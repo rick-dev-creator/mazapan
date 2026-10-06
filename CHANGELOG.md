@@ -9,6 +9,8 @@ release (a tag `vX.Y.Z`) names them.
 - Plugins: changing a plugin's settings keeps the list where it was and the
   plugin selected, instead of jumping back to it; quick changes in a row are
   applied together, once, instead of one reload each.
+- Pomodoro: changing its settings doesn't reload the shell any more; the
+  timer, the panel and the bar follow them as they change.
 
 ## 0.2.0 (2026-10-06)
 

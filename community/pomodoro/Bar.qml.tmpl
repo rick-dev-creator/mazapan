@@ -19,7 +19,7 @@ BarItem {
   readonly property var pom: PomodoroService
   readonly property color tone: pom.phase === "short" ? Theme.success : pom.phase === "long" ? Theme.info : Theme.accent
 
-  shown: {{ settings.bar }} && pom.active
+  shown: pom.inBar && pom.active
   // The digits change every second: the icons beside it stay put.
   steady: true
   acceptedButtons: Qt.LeftButton | Qt.RightButton

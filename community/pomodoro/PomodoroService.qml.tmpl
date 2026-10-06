@@ -16,16 +16,35 @@ Singleton {
 
   readonly property string file: Quickshell.env("HOME") + "/.local/state/mazapan/pomodoro.json"
 
-  // The settings.
-  readonly property int focusMinutes: {{ settings.focus_minutes }}
-  readonly property int shortMinutes: {{ settings.short_break }}
-  readonly property int longMinutes: {{ settings.long_break }}
-  readonly property int sessionsPerSet: {{ settings.sessions_before_long }}
-  readonly property bool autoBreaks: {{ settings.auto_start_breaks }}
-  readonly property bool autoFocus: {{ settings.auto_start_focus }}
-  readonly property int dailyGoal: {{ settings.daily_goal }}
-  readonly property bool quietFocus: {{ settings.do_not_disturb }}
-  readonly property bool sound: {{ settings.sound }}
+  // The settings, from the file mazapan writes when they change: read live,
+  // so a change doesn't reload the shell. The defaults hold until it's read.
+  readonly property var settings: Object.assign({
+    focus_minutes: 25, short_break: 5, long_break: 15, sessions_before_long: 4,
+    auto_start_breaks: true, auto_start_focus: false, daily_goal: 8,
+    do_not_disturb: true, sound: true, bar: true
+  }, stored)
+  property var stored: ({})
+  readonly property int focusMinutes: settings.focus_minutes
+  readonly property int shortMinutes: settings.short_break
+  readonly property int longMinutes: settings.long_break
+  readonly property int sessionsPerSet: settings.sessions_before_long
+  readonly property bool autoBreaks: settings.auto_start_breaks
+  readonly property bool autoFocus: settings.auto_start_focus
+  readonly property int dailyGoal: settings.daily_goal
+  readonly property bool quietFocus: settings.do_not_disturb
+  readonly property bool sound: settings.sound
+  readonly property bool inBar: settings.bar
+
+  FileView {
+    path: Quickshell.shellPath("components/pomodoro/settings.json")
+    blockLoading: true
+    watchChanges: true
+    printErrors: false
+    onFileChanged: reload()
+    onLoaded: {
+      try { root.stored = JSON.parse(text()) } catch (e) {}
+    }
+  }
 
   // The state: "idle", "focus", "short" or "long"; running or paused (with
   // what's left); the focus sessions done in this set; what it's for.
@@ -181,6 +200,7 @@ Singleton {
   // (its notifications still come). Only when no other mode is on: one the
   // person set is left as it is.
   property bool quietOn: false
+  onQuietFocusChanged: if (loaded) quiet()
   function quiet() {
     const want = quietFocus && phase === "focus" && running
     if (want === quietOn) return

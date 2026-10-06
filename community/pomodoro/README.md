@@ -27,3 +27,6 @@ starts over, Esc closes.
 The timer keeps when each phase ends, not a count: a reload of the shell or
 a restart picks it up where it was. Sessions and minutes are kept by day in
 `~/.local/state/mazapan/pomodoro.json`, on this computer only.
+
+Its settings are read as they change: changing one doesn't reload the
+shell, and a running session goes on.
