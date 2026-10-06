@@ -1,7 +1,7 @@
 [plugin]
 id = "pomodoro"
 name = "Pomodoro"
-version = "0.1.0"
+version = "0.1.1"
 api = 1
 description = "Focus in sessions with breaks between them: a ring that fills as the time goes, the sessions of each set, what you're working on, Do Not Disturb while you focus, and today's and the week's focus at a glance"
 requires = ["shell-bar", "hypr-base"]
@@ -30,6 +30,12 @@ daily_goal = { default = 8, min = 1, max = 24 }
 do_not_disturb = true
 # A sound when a phase ends.
 sound = true
+
+# The settings, read live by the timer: changing one doesn't reload the
+# shell (no reload command), the timer follows the file.
+[[targets]]
+template = "settings.json.tmpl"
+output = "~/.config/quickshell/mazapan/components/pomodoro/settings.json"
 
 # The timer, its ring, kept for the whole shell.
 [[targets]]
