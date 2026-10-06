@@ -33,6 +33,7 @@
 "details" = "Detalles"
 "can" = "Qué puede hacer"
 "settings" = "Ajustes"
+"settings_n" = "%1 ajustes"
 "no_readme" = "Sin README."
 "no_settings" = "Sin ajustes."
 "install_note" = "Al instalarlo permites todo esto."

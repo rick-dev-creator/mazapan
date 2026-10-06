@@ -93,6 +93,7 @@ Item {
   }
 
   function show() {
+    settled = false
     screenAtOpen = Quickshell.screens.find(s => Hyprland.focusedMonitor && s.name === Hyprland.focusedMonitor.name) ?? Quickshell.screens[0]
     open = true
     loading = {{ tq "loading" }}
@@ -223,12 +224,62 @@ Item {
     return JSON.stringify(String(v))
   }
 
+  // Where the list and the page were scrolled to, kept across the reload an
+  // apply causes (a setting changed reloads the shell, this panel with it):
+  // back where they were, not jumping to the selected row's place.
+  PersistentProperties {
+    id: kept
+    reloadableId: "mazapan-plugins"
+    property real listY: -1
+    property real pageY: -1
+    property string pageOf: "" // the plugin and section pageY is for
+    property string selected: ""
+    property string section: ""
+  }
+  // Kept only once the panel is back as it was: the view going to the top
+  // as its rows come in isn't where the person left it.
+  property bool settled: false
+  function restoreList() {
+    if (kept.listY >= 0) list.contentY = Math.max(0, Math.min(kept.listY, list.contentHeight - list.height))
+    settled = true
+  }
+  onSelectedIdChanged: if (selectedId !== "") kept.selected = selectedId
+  onSectionChanged: kept.section = section
+
+  // Settings changed one after another (a number stepped, switches
+  // flipped) go in one apply, a moment after the last: each apply that
+  // writes the shell's files reloads it, so one each would make the screen
+  // blink as fast as they're changed. While one runs, the next waits.
+  property var queued: ({}) // "plugin.key" → TOML value, or null to reset
+  property var queuedLabels: []
+  function queue(key, value, label) {
+    const next = Object.assign({}, queued)
+    next[key] = value
+    queued = next
+    if (!queuedLabels.includes(label)) queuedLabels = queuedLabels.concat([label])
+    settle.restart()
+  }
+  Timer {
+    id: settle
+    interval: 700
+    onTriggered: {
+      if (root.busy) { restart(); return }
+      const keys = Object.keys(root.queued)
+      if (keys.length === 0) return
+      const flags = keys.map(k => root.queued[k] === null ? "--reset " + root.q(k) : "--set " + root.q(k + "=" + root.queued[k])).join(" ")
+      const label = root.queuedLabels.length === 1 ? root.queuedLabels[0] : {{ tq "settings_n" }}.arg(root.queuedLabels.length)
+      root.queued = ({})
+      root.queuedLabels = []
+      root.applying({ label: label, flags: flags })
+    }
+  }
+
   function set(s, v) {
-    applying({ label: s.label, flags: "--set " + q(selectedId + "." + s.key + "=" + toml(s, v)) })
+    queue(selectedId + "." + s.key, toml(s, v), s.label)
   }
 
   function reset(s) {
-    applying({ label: s.label, flags: "--reset " + q(selectedId + "." + s.key) })
+    queue(selectedId + "." + s.key, null, s.label)
   }
 
   // A README from anyone, shown: no images (fetched from anywhere, before
@@ -343,10 +394,15 @@ Item {
         root.wanted = ""
         // On the tab it's in (one to add is on Available).
         if (wanted !== "") root.tab = root.rows.find(r => r.id === wanted).state === "available" ? "available" : "installed"
-        const id = wanted !== "" ? wanted : root.selectedId !== "" && root.rows.some(r => r.id === root.selectedId) ? root.selectedId
+        const had = root.selectedId !== "" ? root.selectedId : kept.selected
+        const id = wanted !== "" ? wanted : had !== "" && root.rows.some(r => r.id === had) ? had
           : (root.shown[0] ? root.shown[0].id : "")
+        // The section it was on, when it's the same plugin as before.
+        if (wanted === "" && id === kept.selected && kept.section !== "") root.section = kept.section
         root.selectedId = ""
         if (id !== "") root.select(id, true)
+        // After the rows are laid out (and the view has followed the selected one).
+        Qt.callLater(() => Qt.callLater(root.restoreList))
       }
     }
     onExited: code => {
@@ -366,6 +422,9 @@ Item {
           if (d.id === root.selectedId) {
             root.detail = d
             root.loading = ""
+            // The same page as before the reload: where it was read to.
+            if (kept.pageOf === root.selectedId + "/" + root.section && kept.pageY > 0)
+              Qt.callLater(() => scroller.contentY = Math.max(0, Math.min(kept.pageY, scroller.contentHeight - scroller.height)))
           }
         } catch (e) {}
       }
@@ -498,6 +557,7 @@ Item {
             currentIndex: Math.max(0, root.shown.findIndex(r => r.id === root.selectedId))
             boundsBehavior: Flickable.StopAtBounds
             focus: true
+            onContentYChanged: if (root.open && root.settled) kept.listY = contentY
 
             Keys.onPressed: event => {
               const n = root.shown.length
@@ -743,6 +803,7 @@ Item {
                 contentWidth: width
                 contentHeight: pageBody.implicitHeight
                 boundsBehavior: Flickable.StopAtBounds
+                onContentYChanged: if (root.open && root.detail) { kept.pageY = contentY; kept.pageOf = root.selectedId + "/" + root.section }
 
                 ColumnLayout {
                   id: pageBody

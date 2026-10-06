@@ -32,6 +32,7 @@
 "details" = "Détails"
 "can" = "Ce qu'il peut faire"
 "settings" = "Paramètres"
+"settings_n" = "%1 réglages"
 "no_readme" = "Pas de README."
 "no_settings" = "Aucun paramètre."
 "install_note" = "L'installer autorise tout cela."
