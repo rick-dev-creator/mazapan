@@ -4,7 +4,7 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
-## Unreleased
+## 0.2.1 (2026-10-06)
 
 - Plugins: changing a plugin's settings keeps the list where it was and the
   plugin selected, instead of jumping back to it; quick changes in a row are
