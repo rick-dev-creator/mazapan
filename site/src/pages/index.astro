@@ -5,10 +5,9 @@ const github = "https://github.com/rick-dev-creator/mazapan";
 const downloads = "https://sourceforge.net/projects/mazapan/files/";
 // The release's ISO (pkg/sourceforge puts it there, with its .sha256 and .sig).
 const release = {
-  version: "0.1.0",
-  name: "Mazapan",
-  iso: "mazapan-0.1.0-2026.10.05-x86_64.iso",
-  sha256: "f29f501ffb5c1fe9ac3a77abb5a637351c483061c25779bb79c25edfe3b1bc28",
+  version: "0.2.0",
+  iso: "mazapan-0.2.0-2026.10.06-x86_64.iso",
+  sha256: "ccdc213b87f16a68b7e3bbbcc674a457bfef6957741cf8b71714446e06429cd5",
 };
 const isoUrl = `${downloads}${release.version}/${release.iso}`;
 const key = "7C05 EB75 B1C5 4AD8 F9E1  61C7 1FCE 814E 8077 F475";
@@ -71,7 +70,8 @@ const features = [
       <section id="download" class="download">
         <h2>Download</h2>
         <p class="soon">
-          <strong>{release.version} “{release.name}”</strong>, the first release.
+          <strong>Mazapan {release.version}</strong>, the latest release
+          (<a href={`${github}/releases/tag/v${release.version}`}>what's new</a>).
         </p>
         <p><a class="button primary" href={`${isoUrl}/download`}>Download {release.iso}</a></p>
         <ol>
