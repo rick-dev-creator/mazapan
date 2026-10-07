@@ -4,7 +4,7 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
-## Unreleased
+## 0.4.0 (2026-10-07)
 
 - The plugin registry: plugins others make live in their own repositories,
   and [mazapan-plugins](https://github.com/rick-dev-creator/mazapan-plugins)

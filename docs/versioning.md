@@ -64,10 +64,7 @@ The first release sets it, in the same commit that's tagged.
 ## Making a release
 
 1. CHANGELOG.md: "Unreleased" becomes `## X.Y.Z (date)`; `catalog/refresh`
-   (the copy of the plugin registry's catalog the release ships). The
-   first release with the plugin registry also sets `since` in
-   site/src/lib/plugins.ts (the gallery says which Mazapan its plugins
-   need) and the same in docs/publishing-plugins.md.
+   (the copy of the plugin registry's catalog the release ships).
 2. `git tag vX.Y.Z` on main, pushed to GitHub.
 3. `core/build test`, `pkg/release` (edge), the ISO (`vm/vm iso`), the gate
    (`vm/gate`, encrypted and plain).
