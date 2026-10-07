@@ -1,0 +1,32 @@
+---
+// The front page's way into the plugin gallery: the newest few.
+import { media, plugins } from "../lib/plugins";
+const shown = plugins.slice(0, 3);
+---
+
+<section id="plugins" class="plugins-teaser">
+  <div class="teaser-head">
+    <h2>Plugins</h2>
+    <p>
+      Everything in Mazapan is a plugin, its own included. Others make theirs in their own
+      repositories; the registry lists them, and the Plugins panel installs them, showing what
+      each can do first.
+    </p>
+  </div>
+  <div class="plugin-grid">
+    {shown.map((p) => (
+      <a class="plugin-card" href={`/plugins/${p.id}/`}>
+        {p.screenshots[0] && <img class="shot" src={media(p.screenshots[0])} alt="" loading="lazy" />}
+        <div class="card-body">
+          {p.icon && <img class="icon" src={media(p.icon)} alt="" width="40" height="40" />}
+          <div>
+            <h3>{p.name}</h3>
+            <p class="by">by {p.author} · {p.version}</p>
+          </div>
+        </div>
+        <p class="what">{p.description}</p>
+      </a>
+    ))}
+  </div>
+  <p class="teaser-more"><a class="button" href="/plugins/">Every plugin</a> <a class="button" href="https://github.com/rick-dev-creator/mazapan-plugins#listing-your-plugin">Make your own</a></p>
+</section>

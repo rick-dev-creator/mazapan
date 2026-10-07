@@ -1,11 +1,14 @@
 # mazapan.dev: the site in site/ (Astro), built and put on GitHub Pages when
-# main changes it.
+# main changes it, and every hour for the plugin registry (its catalog,
+# mazapan.dev/plugins/index.toml, and the gallery come from it).
 name: Site
 
 on:
   push:
     branches: [main]
     paths: ["site/**", "assets/mazapan.svg", ".github/workflows/site.yml"]
+  schedule:
+    - cron: "41 * * * *"
   workflow_dispatch:
 
 permissions:

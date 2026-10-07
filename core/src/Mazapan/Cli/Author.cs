@@ -406,9 +406,13 @@ public static partial class Program
     /// check: what a plugin's author should know before sharing it. It must
     /// load and render with every theme, in every language it has, with its
     /// settings' defaults; and it should say what it is, in the languages it
-    /// has. Errors make it fail; warnings are advice.
+    /// has. Errors make it fail; warnings are advice. json: the same, and
+    /// what the plugin says it is (the plugin registry reads it).
     /// </summary>
-    internal static int PluginsCheck(string arg)
+    /// <summary>The biggest pictures the plugin gallery takes.</summary>
+    const long IconMax = 256 << 10, ScreenshotMax = 2 << 20;
+
+    internal static int PluginsCheck(string arg, bool json = false)
     {
         var dir = PluginDirOf(arg);
         var errors = new List<string>();
@@ -420,10 +424,12 @@ public static partial class Program
         }
         catch (MazapanException e)
         {
-            Console.WriteLine($"{Style.Red}✗{Style.Reset} {e.Message}");
+            if (json) Console.WriteLine(GoJson.Marshal(new Fields { { "ok", false }, { "errors", new List<string> { e.Message } }, { "warnings", new List<string>() } }));
+            else Console.WriteLine($"{Style.Red}✗{Style.Reset} {e.Message}");
             return 1;
         }
-        if (Paths.Base(dir) != p.Id && !IsLink(dir))
+        // A repository of its own is named as its author likes (mazapan-pomodoro).
+        if (Paths.Base(dir) != p.Id && !IsLink(dir) && !IsCheckout(dir))
             warnings.Add($"its folder is {Paths.Base(dir)}, its id {p.Id}: installed, the folder is named after the id");
 
         var caps = p.Capabilities();
@@ -523,6 +529,10 @@ public static partial class Program
             warnings.Add($"no categories: taken for {string.Join(", ", p.CategoriesOrGuess())}; say it (categories = [\"{p.CategoriesOrGuess()[0]}\"])");
         if (!Directory.GetFiles(dir).Any(f => Paths.Base(f).Equals("README.md", StringComparison.OrdinalIgnoreCase)))
             warnings.Add("no README.md: its page in the Plugins panel is empty");
+        // Pictures the gallery can take: small enough to load at once.
+        foreach (var (file, max) in new[] { (p.Gallery.Icon, IconMax) }.Where(x => x.Item1 != "").Concat(p.Gallery.Screenshots.Select(f => (f, ScreenshotMax))))
+            if (new FileInfo(Paths.Join(dir, file)).Length is var size && size > max)
+                errors.Add($"[gallery] {file} is {size / 1024} KB: up to {max / 1024} KB");
         foreach (var k in p.Settings.Keys.Order(StringComparer.Ordinal))
             if ((p.SettingsInfo.GetValueOrDefault(k)?.Description ?? "") == "")
                 warnings.Add($"setting {k}: no description (a # comment above it in plugin.toml)");
@@ -530,9 +540,60 @@ public static partial class Program
         // plugin, or a built-in optional one (Docker, Tailscale), which is
         // only ever on when someone picks it (the Apps menu, or by hand).
         var builtIn = ShippedPluginDirs().Any(d => Paths.Dir(Paths.Real(dir) ?? dir) == (Paths.Real(d) ?? d));
+        // What the plugin gallery shows of one others can add: who made it, and how it looks.
+        if (!builtIn)
+        {
+            // Installed next to every built-in: a key of theirs would fire both.
+            foreach (var (key, who) in KeyClashes(p, all.Where(x => ShippedPluginDirs().Any(d => Paths.Dir(x.Dir) == d))))
+                errors.Add($"its key {key} is {who}'s too: both would do their thing");
+            if (p.Meta.Author == "") warnings.Add("no author: [plugin] author = \"…\", who made it (the plugin gallery says)");
+            if (p.Meta.License == "") warnings.Add("no license: [plugin] license = \"MIT\" (or another), so others know what they may do with it");
+            if (p.Gallery.Icon == "") warnings.Add("no icon: [gallery] icon = \"media/icon.svg\" (SVG or PNG), for the plugin gallery");
+            if (p.Gallery.Screenshots.Count == 0) warnings.Add("no screenshots: [gallery] screenshots = [\"media/panel.png\"], what it looks like, for the plugin gallery");
+        }
         if (p.Targets.Any(t => t.System) && p.Hardware == null && !(builtIn && p.Meta.Optional))
             errors.Add("writes system files, but has no [hardware] rules");
 
+        if (json)
+        {
+            // Its name and description in each language it has.
+            var translations = new Fields();
+            foreach (var lang in langs.Skip(1))
+            {
+                try
+                {
+                    var cat = Mazapan.Locale.Catalog.Load(p.Id, dir, lang);
+                    var t = new Fields();
+                    if (cat.TryT("plugin.name") is { } n) t.Add("name", n);
+                    if (cat.TryT("plugin.description") is { } d) t.Add("description", d);
+                    translations.Add(lang, t);
+                }
+                catch (MazapanException) { } // said in errors
+            }
+            Console.WriteLine(GoJson.Marshal(new Fields
+            {
+                { "ok", errors.Count == 0 },
+                { "errors", errors.Distinct().ToList() },
+                { "warnings", warnings.Distinct().ToList() },
+                { "id", p.Id },
+                { "name", p.Meta.Name },
+                { "version", p.Meta.Version },
+                { "description", p.Meta.Description },
+                { "categories", p.CategoriesOrGuess() },
+                { "requires", p.Meta.Requires },
+                { "author", p.Meta.Author },
+                { "homepage", p.Meta.Homepage },
+                { "license", p.Meta.License },
+                { "icon", p.Gallery.Icon },
+                { "screenshots", p.Gallery.Screenshots },
+                { "languages", langs },
+                { "translations", translations },
+                { "capabilities", caps },
+                { "settings", p.Settings.Count },
+                { "renders", renders },
+            }));
+            return errors.Count > 0 ? 1 : 0;
+        }
         foreach (var e in errors.Distinct()) Console.WriteLine($"{Style.Red}✗{Style.Reset} {e}");
         foreach (var w in warnings.Distinct()) Console.WriteLine($"{Style.Amber}!{Style.Reset} {w}");
         Console.WriteLine($"{p.Id} {p.Meta.Version}: {Plural(renders, "render", "renders")} ({themes.Count} themes × {string.Join(", ", langs)}), " +
@@ -543,6 +604,21 @@ public static partial class Program
             foreach (var cap in caps) Console.WriteLine($"  - {cap}");
         }
         return errors.Count > 0 ? 1 : 0;
+    }
+
+    /// <summary>A plugin's keys (settings named key or *_key): the combination, its keys sorted, and its setting.</summary>
+    static IEnumerable<(string Key, string Setting)> KeysOf(Plugin p) => p.Settings
+        .Where(kv => (kv.Key == "key" || kv.Key.EndsWith("_key")) && kv.Value is string s && s.Trim() != "")
+        .Select(kv => (string.Join(" + ", ((string)kv.Value).Split('+', StringSplitOptions.TrimEntries).Select(x => x.ToUpperInvariant()).Order(StringComparer.Ordinal)), $"{p.Id}.{kv.Key}"));
+
+    /// <summary>
+    /// KeyClashes: p's keys that a built-in plugin for every machine (on, or
+    /// turned on as one is) binds too, with whose they are.
+    /// </summary>
+    internal static List<(string Key, string Who)> KeyClashes(Plugin p, IEnumerable<Plugin> builtIns)
+    {
+        var taken = builtIns.Where(b => b.Id != p.Id && b.Hardware == null).SelectMany(KeysOf).ToLookup(x => x.Key, x => x.Setting);
+        return [.. KeysOf(p).Where(k => taken.Contains(k.Key)).Select(k => (k.Key, string.Join(", ", taken[k.Key])))];
     }
 
     /// <summary>A plugin's folder: DIR (with a plugin.toml), or an installed plugin's id; "" is the current folder.</summary>
@@ -717,7 +793,7 @@ public static partial class Program
     {
         var c = Catalog.Load();
         var p = c.Find(id) ?? throw new MazapanException(c.Broken.GetValueOrDefault(id) ?? $"no plugin \"{id}\"");
-        var builtIn = c.Origin(p) is "built-in" or "community";
+        var builtIn = c.Origin(p) == "built-in";
         if (newId == "")
         {
             if (!builtIn) throw new MazapanException($"{id} is {c.Origin(p)}: it's yours to change already, or give the copy a new id: mazapan plugins fork {id} NEW");

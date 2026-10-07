@@ -1,0 +1,61 @@
+---
+// mazapan.dev/plugins/ID: a plugin's page, as the registry lists it.
+import Page from "../../layouts/Page.astro";
+import { categoryNames, date, languageNames, media, plugins, readme, type Plugin } from "../../lib/plugins";
+
+export function getStaticPaths() {
+  return plugins.map((p) => ({ params: { id: p.id }, props: { p } }));
+}
+const { p } = Astro.props as { p: Plugin };
+const repo = p.source;
+---
+
+<Page title={`${p.name} · Mazapan plugins`} description={p.description} feed>
+  <p class="crumbs"><a href="/plugins/">Plugins</a> / {p.name}</p>
+  <section class="plugin-head">
+    {p.icon && <img class="icon big" src={media(p.icon)} alt="" width="72" height="72" />}
+    <div>
+      <h1>{p.name}</h1>
+      <p class="by">by {p.author} · version {p.version} · {p.license || "no license given"}</p>
+      <p class="what">{p.description}</p>
+      <p class="tags">{p.categories.map((c) => <a href={`/plugins/?category=${c}`}>{categoryNames[c] ?? c}</a>)}</p>
+    </div>
+  </section>
+
+  <section class="install">
+    <h2>Install</h2>
+    <p>In Mazapan, the Plugins panel (<kbd>SUPER</kbd> + <kbd>SHIFT</kbd> + <kbd>P</kbd>) has it under the community's. Or:</p>
+    <pre><code>mazapan plugins add {p.id}
+mazapan apply</code></pre>
+    <p class="note">Either way you see what it can do and approve it before anything is installed.</p>
+  </section>
+
+  {p.screenshots.length > 0 && (
+    <section class="shots">
+      {p.screenshots.map((s) => (
+        <a href={media(s)}><img src={media(s)} alt={`${p.name}: a screenshot`} loading="lazy" /></a>
+      ))}
+    </section>
+  )}
+
+  <div class="plugin-columns">
+    <article class="readme" set:html={readme(p)} />
+    <aside>
+      <h2>What it can do</h2>
+      <ul class="caps">
+        {p.capabilities.map((c) => <li class={c.startsWith("full access") || c.startsWith("runs") ? "risky" : ""}>{c}</li>)}
+      </ul>
+      <h2>About</h2>
+      <dl>
+        <dt>Repository</dt><dd><a href={repo}>{repo.replace("https://", "")}</a></dd>
+        {p.homepage && p.homepage !== repo && (<><dt>Homepage</dt><dd><a href={p.homepage}>{p.homepage.replace("https://", "")}</a></dd></>)}
+        <dt>Version</dt><dd>{p.version}, <a href={`${repo}/tree/${p.commit}`}><code>{p.commit.slice(0, 10)}</code></a></dd>
+        <dt>Updated</dt><dd>{date(p.updated)}</dd>
+        <dt>Listed</dt><dd>{date(p.added)}</dd>
+        <dt>Languages</dt><dd>{p.languages.map((l) => languageNames[l] ?? l).join(", ")}</dd>
+        {p.requires.length > 0 && (<><dt>Needs</dt><dd>{p.requires.join(", ")}</dd></>)}
+        {p.settings > 0 && (<><dt>Settings</dt><dd>{p.settings}, in the Plugins panel</dd></>)}
+      </dl>
+    </aside>
+  </div>
+</Page>

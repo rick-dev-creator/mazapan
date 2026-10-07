@@ -45,7 +45,7 @@ Item {
   readonly property var pluginUpdates: d ? d.plugins || [] : []
   readonly property var stepNames: ({
     ready: {{ tq "step.ready" }}, keys: {{ tq "step.keys" }}, packages: {{ tq "step.packages" }},
-    config: {{ tq "step.config" }}, checks: {{ tq "step.checks" }}, rollback: {{ tq "step.rollback" }}
+    plugins: {{ tq "step.plugins" }}, config: {{ tq "step.config" }}, checks: {{ tq "step.checks" }}, rollback: {{ tq "step.rollback" }}
   })
 
   PanelWindow {

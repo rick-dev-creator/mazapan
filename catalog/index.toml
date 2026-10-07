@@ -1,17 +1,46 @@
-# mazapan's plugin catalog: plugins from other people, in their own git
-# repositories. Each entry is only where a plugin lives and what it is:
-# adding one (the Plugins panel, or mazapan plugins add ID) still shows what
-# it can do, and nothing is installed until you approve it.
-#
-# To list yours, add an entry and open a pull request:
-#
-# [[plugin]]
-# id = "hello"                 # its plugin.toml's id
-# name = "Hello"
-# description = "One line on what it does"
-# author = "You"
-# source = "https://github.com/you/mazapan-hello"
-# ref = "v1.0"                 # a tag or branch; none: the default branch
-# categories = ["bar"]         # bar, panel, theme, window, hardware, tools, agent
-# homepage = "https://…"
-# translations.es.description = "Una línea sobre lo que hace"  # other languages
+# The Mazapan plugin registry: plugins from others, each in its own
+# repository, at the commit the registry looked at. Generated from
+# https://github.com/rick-dev-creator/mazapan-plugins; don't edit.
+# 2026-10-07T03:59:43+00:00
+
+[[plugin]]
+id = "markets"
+name = "Markets"
+description = "Crypto and stock prices with trend charts: a watchlist where each symbol has its own timeframe (BTC 4H, BTC 1W, SOL 1D), the top 20 coins, your stocks, and a ticker in the bar"
+author = "rickdev"
+source = "https://github.com/rick-dev-creator/mazapan-markets"
+ref = "v0.2.0"
+commit = "8389e6db4efdc45e8fd7ed05f577fc7206baca27"
+version = "0.2.0"
+license = "MIT"
+homepage = "https://github.com/rick-dev-creator/mazapan-markets"
+categories = ["panel", "bar"]
+translations.de.name = "Märkte"
+translations.de.description = "Krypto- und Aktienkurse mit Trendcharts: eine Watchlist, in der jedes Symbol seinen eigenen Zeitraum hat (BTC 4H, BTC 1W, SOL 1D), die Top 20 Coins, deine Aktien und ein Ticker in der Leiste"
+translations.es.name = "Mercados"
+translations.es.description = "Precios de crypto y acciones con gráficos de tendencia: una lista donde cada símbolo tiene su temporalidad (BTC 4H, BTC 1W, SOL 1D), el top 20 de monedas, tus acciones y un ticker en la barra"
+translations.fr.name = "Marchés"
+translations.fr.description = "Cours des cryptos et des actions avec graphiques de tendance : une liste où chaque symbole a sa propre période (BTC 4H, BTC 1W, SOL 1D), le top 20 des cryptos, vos actions et un défilant dans la barre"
+translations.pt.name = "Mercados"
+translations.pt.description = "Preços de cripto e ações com gráficos de tendência: uma lista em que cada símbolo tem seu próprio período (BTC 4H, BTC 1W, SOL 1D), as 20 maiores moedas, suas ações e um ticker na barra"
+
+[[plugin]]
+id = "pomodoro"
+name = "Pomodoro"
+description = "Focus in sessions with breaks between them: a ring that fills as the time goes, the sessions of each set, what you're working on, Do Not Disturb while you focus, and today's and the week's focus at a glance"
+author = "rickdev"
+source = "https://github.com/rick-dev-creator/mazapan-pomodoro"
+ref = "v0.2.0"
+commit = "cc221978e23e3c6ec40bc0883952da265e75bb41"
+version = "0.2.0"
+license = "MIT"
+homepage = "https://github.com/rick-dev-creator/mazapan-pomodoro"
+categories = ["panel", "bar", "tools"]
+translations.de.name = "Pomodoro"
+translations.de.description = "Konzentriert in Sitzungen mit Pausen dazwischen: ein Ring, der sich mit der Zeit füllt, die Sitzungen jedes Satzes, woran du arbeitest, Nicht stören beim Fokussieren, und der Fokus von heute und der Woche auf einen Blick"
+translations.es.name = "Pomodoro"
+translations.es.description = "Enfócate en sesiones con descansos entre ellas: un anillo que se llena con el tiempo, las sesiones de cada ciclo, en qué estás trabajando, No molestar mientras te enfocas, y el enfoque de hoy y de la semana de un vistazo"
+translations.fr.name = "Pomodoro"
+translations.fr.description = "Concentrez-vous par sessions, avec des pauses entre elles : un anneau qui se remplit avec le temps, les sessions de chaque cycle, ce sur quoi vous travaillez, Ne pas déranger pendant la concentration, et la concentration du jour et de la semaine en un coup d'œil"
+translations.pt.name = "Pomodoro"
+translations.pt.description = "Foque em sessões com pausas entre elas: um anel que se enche com o tempo, as sessões de cada ciclo, no que você está trabalhando, Não perturbe enquanto foca, e o foco de hoje e da semana num relance"

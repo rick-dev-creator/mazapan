@@ -3,11 +3,15 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "registry": "node scripts/registry.mjs",
+    "predev": "node scripts/registry.mjs",
     "dev": "astro dev",
+    "prebuild": "node scripts/registry.mjs",
     "build": "astro build",
     "preview": "astro preview"
   },
   "dependencies": {
-    "astro": "7.3.5"
+    "astro": "7.3.5",
+    "marked": "18.1.0"
   }
 }

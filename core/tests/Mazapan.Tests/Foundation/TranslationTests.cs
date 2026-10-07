@@ -21,7 +21,7 @@ public partial class TranslationTests
     }
 
     static IEnumerable<string> LocaleDirs() =>
-        Directory.GetDirectories(Path.Join(Repo.Root, "plugins")).Concat(Directory.GetDirectories(Path.Join(Repo.Root, "community")))
+        Directory.GetDirectories(Path.Join(Repo.Root, "plugins"))
             .Select(d => Path.Join(d, "locales")).Where(Directory.Exists);
 
     // The boot screen's text is drawn before anything but the initramfs is

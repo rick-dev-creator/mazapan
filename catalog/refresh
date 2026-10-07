@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# catalog/index.toml: the copy of the plugin registry's catalog that ships
+# with Mazapan, read only when mazapan.dev/plugins/index.toml can't be (never
+# reached, nothing cached). Brought up to date before each release.
+#
+#   catalog/refresh     from github.com/rick-dev-creator/mazapan-plugins
+set -euo pipefail
+here="$(cd "$(dirname "$0")" && pwd)"
+url=https://raw.githubusercontent.com/rick-dev-creator/mazapan-plugins/main/generated/index.toml
+tmp="$(mktemp)"
+trap 'rm -f "$tmp"' EXIT
+curl -fsSL "$url" -o "$tmp"
+grep -q '^\[\[plugin\]\]' "$tmp" || { echo "catalog/refresh: $url lists no plugins" >&2; exit 1; }
+mv "$tmp" "$here/index.toml"
+trap - EXIT
+echo "catalog/index.toml: $(grep -c '^\[\[plugin\]\]' "$here/index.toml") plugins"

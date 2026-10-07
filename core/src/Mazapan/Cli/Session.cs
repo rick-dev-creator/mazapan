@@ -33,7 +33,7 @@ public static partial class Program
             // like orphans and go. Kept until it reads again (or is turned off).
             if (BrokenNotOff.Count > 0 && orphans.Count > 0)
             {
-                Console.Error.WriteLine($"warning: {orphans.Count} file(s) no plugin wrote are kept while {string.Join(", ", BrokenNotOff)} can't be read");
+                Console.Error.WriteLine($"warning: {orphans.Count} file(s) no plugin wrote are kept while {string.Join(", ", BrokenNotOff)} can't be read or aren't installed yet");
                 orphans = [];
             }
             return (changes, orphans, owned);

@@ -16,7 +16,7 @@ public static partial class Program
     /// <summary>Plugins that can't be read and aren't turned off: their files aren't orphans while they are.</summary>
     internal static List<string> BrokenNotOff = [];
 
-    static List<Plugin> EnabledPlugins(Settings cfg)
+    internal static List<Plugin> EnabledPlugins(Settings cfg)
     {
         var (all, broken) = Plugin.Discover(PluginDirs());
         var lck = PluginsLock.Load();
@@ -31,6 +31,13 @@ public static partial class Program
         BrokenNotOff = [.. broken.Keys.Where(id => !cfg.IsDisabled(id))];
         foreach (var (id, err) in broken)
             if (!cfg.IsDisabled(id)) Console.Error.WriteLine($"warning: plugin {id} left out, it can't be read: {err.Replace('\n', ' ')}");
+        // One Mazapan used to ship, on here, not installed from its own
+        // repository yet: its files stay, as a broken one's, until it is.
+        foreach (var id in MovedMissing(cfg, all, broken, lck))
+        {
+            BrokenNotOff.Add(id);
+            Console.Error.WriteLine($"warning: plugin {id} now comes from its own repository; it's installed at the next update, or now with: mazapan plugins sync");
+        }
         var found = new HashSet<string>();
         foreach (var p in all)
         {
@@ -96,11 +103,11 @@ public static partial class Program
     }
 
     /// <summary>CheckOverrides rejects [plugins.&lt;id&gt;] sections for plugins that don't exist, so a misspelled id doesn't silently do nothing.</summary>
-    static void CheckOverrides(Settings cfg)
+    internal static void CheckOverrides(Settings cfg)
     {
         var (all, broken) = Plugin.Discover(PluginDirs());
         foreach (var id in cfg.Plugins.Keys)
-            if (!broken.ContainsKey(id) && all.All(p => p.Id != id))
+            if (!broken.ContainsKey(id) && all.All(p => p.Id != id) && !Moved.Plugins.ContainsKey(id))
                 throw new MazapanException($"{Settings.Path}: [plugins.{id}]: no such plugin");
     }
 
@@ -193,7 +200,7 @@ public static partial class Program
                 break;
             case "check":
                 Need(0, 1, "[ID|DIR]");
-                return PluginsCheck(rest.Count > 0 ? rest[0] : "");
+                return PluginsCheck(rest.Count > 0 ? rest[0] : "", json);
             case "dev":
                 Need(0, 1, "[ID|DIR]");
                 PluginsDev(rest.Count > 0 ? rest[0] : "");
@@ -238,14 +245,13 @@ public static partial class Program
         }
 
         /// <summary>
-        /// Origin: built-in, community (shipped, made by others), local (a
-        /// folder someone put in the plugin folder), or the git source it was
-        /// added from.
+        /// Origin: built-in, local (a folder someone put in the plugin
+        /// folder), or the git source it was added from.
         /// </summary>
         public string Origin(Plugin p)
         {
             if (LockedEntry(lck, p) is { } e) return "git " + e.Source + " @ " + e.Commit[..10];
-            return Paths.Dir(p.Dir) == Git.Dir ? "local" : p.Community ? "community" : "built-in";
+            return Paths.Dir(p.Dir) == Git.Dir ? "local" : "built-in";
         }
     }
 
@@ -348,7 +354,7 @@ public static partial class Program
         // What the plugin doesn't translate, its catalog entry may: the entry
         // for the repository it's from (not another catalog's words for a
         // built-in plugin, or for another plugin of that id).
-        (string Name, string Description) listed = e == null ? ("", "") : CatalogIndex.Load(Catalogs(c.Cfg), false).Entries
+        (string Name, string Description) listed = e == null ? ("", "") : Listed(c.Cfg, false).Entries
             .FirstOrDefault(x => x.Id == p.Id && SameSource(x.Source, e.Source))?.TranslatedTo(lang) ?? (Name: "", Description: "");
         var installed = previewCommit == "";
         IReadOnlyDictionary<string, object> values;
@@ -375,6 +381,9 @@ public static partial class Program
             { "name", cat.TryT("plugin.name") ?? NonEmpty(listed.Name) ?? p.Meta.Name },
             { "version", p.Meta.Version },
             { "description", cat.TryT("plugin.description") ?? NonEmpty(listed.Description) ?? p.Meta.Description },
+            { "author", p.Meta.Author },
+            { "homepage", p.Meta.Homepage },
+            { "license", p.Meta.License },
             { "categories", p.CategoriesOrGuess() },
             { "origin", origin.StartsWith("git ") ? "git" : origin },
             { "source", e?.Source ?? "" },
@@ -423,8 +432,12 @@ public static partial class Program
         };
     }
 
-    /// <summary>The catalogs to read: mazapan's own, then config.toml's.</summary>
-    static List<string> Catalogs(Config.Settings cfg) => [Paths.Join(Root(), "catalog", "index.toml"), .. cfg.Catalogs];
+    /// <summary>
+    /// What the catalogs list: mazapan's own (the plugin registry's, or the
+    /// copy shipped with mazapan when it can't be reached), then config.toml's.
+    /// </summary>
+    static (List<CatalogEntry> Entries, List<string> Problems) Listed(Config.Settings cfg, bool refresh) =>
+        CatalogIndex.Load([CatalogIndex.Official, .. cfg.Catalogs], refresh, Paths.Join(Root(), "catalog", "index.toml"));
 
     /// <summary>
     /// Every plugin one can see: built in, installed, and in the catalogs, each
@@ -432,7 +445,7 @@ public static partial class Program
     /// </summary>
     static (List<Fields> Rows, List<string> Problems) CatalogRows(Catalog c, bool refresh)
     {
-        var (entries, problems) = CatalogIndex.Load(Catalogs(c.Cfg), refresh);
+        var (entries, problems) = Listed(c.Cfg, refresh);
         var rows = new List<Fields>();
         var lang = Locale.Languages.Detect(c.Cfg.Language);
         foreach (var p in c.All)
@@ -456,14 +469,11 @@ public static partial class Program
                 { "id", p.Id },
                 { "name", cat?.TryT("plugin.name") ?? NonEmpty(tr.Name) ?? p.Meta.Name },
                 { "description", cat?.TryT("plugin.description") ?? NonEmpty(tr.Description) ?? p.Meta.Description },
-                { "author", listed?.Author ?? (origin == "built-in" ? "mazapan" : "") },
+                { "author", NonEmpty(p.Meta.Author) ?? listed?.Author ?? (origin == "built-in" ? "mazapan" : "") },
                 { "version", p.Meta.Version },
                 { "categories", p.CategoriesOrGuess() },
-                // A community plugin shipped with mazapan is to install until
-                // it's on (installing it is turning it on).
-                { "state", origin.StartsWith("git ") ? "installed" : origin == "local" ? "local"
-                    : origin == "community" ? (on ? "installed" : "available") : "built-in" },
-                // Who made it: mazapan, the community (shipped or from git), or you.
+                { "state", origin.StartsWith("git ") ? "installed" : origin == "local" ? "local" : "built-in" },
+                // Who made it: mazapan, the community (from git), or you.
                 { "origin", origin == "built-in" ? "mazapan" : origin == "local" ? "local" : "community" },
                 // Here already (its page is plugins show), or only listed (plugins preview fetches it).
                 { "bundled", true },
@@ -471,7 +481,7 @@ public static partial class Program
                 { "applies", Applies(p) },
                 { "for_this_machine", p.Hardware != null && p.Hardware.Offered(Hardware.ThisMachine.Get()) },
                 { "source", e?.Source ?? "" },
-                { "homepage", listed?.Homepage ?? "" },
+                { "homepage", NonEmpty(p.Meta.Homepage) ?? listed?.Homepage ?? "" },
             });
         }
         foreach (var (id, err) in c.Broken)
@@ -483,7 +493,7 @@ public static partial class Program
                 { "name", e.In(lang).Name },
                 { "description", e.In(lang).Description },
                 { "author", e.Author },
-                { "version", "" },
+                { "version", e.Version },
                 { "categories", e.Categories },
                 { "state", "available" },
                 { "origin", "community" },
@@ -517,22 +527,26 @@ public static partial class Program
         foreach (var pr in problems) Console.Error.WriteLine($"warning: {pr}");
     }
 
-    /// <summary>A catalog id's source (url#ref), or the argument as it is.</summary>
-    static (string Arg, string? CatalogId) FromCatalog(Catalog c, string arg)
+    /// <summary>
+    /// A catalog id's source (url#ref) and the commit it lists ("": whatever
+    /// the ref is), or the argument as it is.
+    /// </summary>
+    static (string Arg, string? CatalogId, string Commit) FromCatalog(Catalog c, string arg)
     {
-        if (!Plugin.IdPattern().IsMatch(arg) || Directory.Exists(arg)) return (arg, null);
-        var e = CatalogIndex.Load(Catalogs(c.Cfg), false).Entries.FirstOrDefault(x => x.Id == arg)
+        if (!Plugin.IdPattern().IsMatch(arg) || Directory.Exists(arg)) return (arg, null, "");
+        var e = Listed(c.Cfg, false).Entries.FirstOrDefault(x => x.Id == arg)
             ?? throw new MazapanException($"no plugin \"{arg}\" in the catalogs (mazapan plugins search)");
-        return (e.Source + (e.Ref != "" ? "#" + e.Ref : ""), e.Id);
+        return (e.Source + (e.Ref != "" ? "#" + e.Ref : ""), e.Id, e.Commit);
     }
 
     /// <summary>preview: a plugin fetched to look at, not installed: its page as the panel shows it.</summary>
     static void PluginsPreview(string arg, bool json)
     {
         var c = Catalog.Load();
-        var (src, catalogId) = FromCatalog(c, arg);
+        var (src, catalogId, listedCommit) = FromCatalog(c, arg);
         var (source, @ref) = Git.ParseSource(src);
-        using var st = Git.Clone(source, @ref, "");
+        // What the catalog lists, exactly: the commit its maintainers looked at.
+        using var st = Git.Clone(source, @ref, listedCommit);
         if (catalogId != null && st.Plugin.Id != catalogId)
             throw new MazapanException($"the catalog's {catalogId} is plugin \"{st.Plugin.Id}\" at {source}");
         var f = Detail(c, st.Plugin, new Entry { Id = st.Plugin.Id, Source = source, Ref = @ref, Commit = st.Commit }, st.Commit);
@@ -633,11 +647,11 @@ public static partial class Program
     static void PluginsAdd(string arg, bool yes, string commit = "")
     {
         var c = Catalog.Load();
-        var (src, catalogId) = FromCatalog(c, arg);
+        var (src, catalogId, listedCommit) = FromCatalog(c, arg);
         var (source, @ref) = Git.ParseSource(src);
         if (Directory.Exists(source)) source = Path.GetFullPath(source);
         Console.WriteLine($"fetching {source}…");
-        using var st = Git.Clone(source, @ref, "");
+        using var st = Git.Clone(source, @ref, listedCommit);
         var p = st.Plugin;
         var id = p.Id;
         if (catalogId != null && id != catalogId)
@@ -645,7 +659,7 @@ public static partial class Program
         if (commit != "" && st.Commit != commit)
             throw new MazapanException($"{id} is at {st.Commit[..10]} now, not {(commit.Length > 10 ? commit[..10] : commit)} as shown: not installed; look at it again");
         var old = c.Find(id);
-        if (old != null && c.Origin(old) is "built-in" or "community")
+        if (old != null && c.Origin(old) == "built-in")
             throw new MazapanException($"it's called \"{id}\", like a plugin mazapan ships ({c.Origin(old)}); it can't replace it");
         if (old != null)
             throw new MazapanException($"{id} is already installed ({c.Origin(old)}); update it with: mazapan plugins update {id}");
@@ -711,16 +725,16 @@ public static partial class Program
                 return;
             }
         }
-        // Installed from a catalog that pins a version (ref = "v1.0"): its
-        // newer pin is the update. A ref given here wins.
-        var (listed, _) = CatalogIndex.Load(Catalogs(c.Cfg), false);
-        var following = new HashSet<string>();
+        // Installed from a catalog that pins a version (ref = "v1.0", and
+        // the commit it was looked at): its newer pin is the update. A ref
+        // given here wins.
+        var (listed, _) = Listed(c.Cfg, false);
+        var following = new Dictionary<string, string>();
         foreach (var id in ids)
-            if (!refs.ContainsKey(id) && c.Lock.Get(id) is { Catalog: true } le
-                && listed.FirstOrDefault(x => x.Id == id) is { Ref: not "" } ce && SameSource(ce.Source, le.Source) && ce.Ref != le.Ref)
+            if (!refs.ContainsKey(id) && CatalogMove(c.Lock.Get(id), listed) is { } ce)
             {
                 refs[id] = ce.Ref;
-                following.Add(id);
+                following[id] = ce.Commit;
             }
         // What others require first, so a newer version they need is there
         // when they're looked at.
@@ -730,7 +744,7 @@ public static partial class Program
         {
             try
             {
-                UpdateOne(c, id, refs.TryGetValue(id, out var r) ? r : null, yes, following.Contains(id));
+                UpdateOne(c, id, refs.TryGetValue(id, out var r) ? r : null, yes, following.ContainsKey(id), following.GetValueOrDefault(id, ""));
             }
             catch (Exception e) when (e is MazapanException or IOException or UnauthorizedAccessException)
             {
@@ -742,6 +756,18 @@ public static partial class Program
     }
 
     static string? NonEmpty(string s) => s != "" ? s : null;
+
+    /// <summary>
+    /// The catalog entry a plugin installed from a catalog moves to, when its
+    /// catalog lists another version of it (another ref, or another commit
+    /// for it); null when it doesn't, or the plugin doesn't follow a catalog.
+    /// </summary>
+    internal static CatalogEntry? CatalogMove(Entry? le, List<CatalogEntry> listed)
+    {
+        if (le is not { Catalog: true }) return null;
+        if (listed.FirstOrDefault(x => x.Id == le.Id) is not { Ref: not "" } ce || !SameSource(ce.Source, le.Source)) return null;
+        return ce.Ref != le.Ref || (ce.Commit != "" && ce.Commit != le.Commit) ? ce : null;
+    }
 
     /// <summary>Two ways of writing one repository: …/x, …/x/, …/x.git.</summary>
     internal static bool SameSource(string a, string b)
@@ -783,9 +809,10 @@ public static partial class Program
     /// <summary>
     /// UpdateOne moves one plugin from git to its ref's newest commit, or to
     /// newRef. followingCatalog: newRef is its catalog's (not the person's
-    /// pick): it stays the catalog's, and never goes back a version.
+    /// pick): it stays the catalog's, and never goes back a version;
+    /// listedCommit, the commit the catalog lists for it, is where it goes.
     /// </summary>
-    static void UpdateOne(Catalog c, string id, string? newRef, bool yes, bool followingCatalog = false)
+    static void UpdateOne(Catalog c, string id, string? newRef, bool yes, bool followingCatalog = false, string listedCommit = "")
     {
         var e = c.Lock.Get(id);
         if (e == null)
@@ -812,7 +839,7 @@ public static partial class Program
             }
         }
         var before = ProblemKeys(Dependencies.Unmet(c.Enabled(), c.All, c.Broken));
-        using var m = Git.Update(e, next.Ref);
+        using var m = Git.Update(e, next.Ref, followingCatalog ? listedCommit : "");
         if (m == null)
         {
             if (next.Ref != e.Ref || next.Catalog != e.Catalog)
@@ -948,8 +975,8 @@ public static partial class Program
     /// </summary>
     static void PluginsSync()
     {
+        var failed = InstallMoved(e => Console.WriteLine($"{e,-18} installed from its own repository (Mazapan used to ship it)"));
         var c = Catalog.Load();
-        var failed = new List<string>();
         foreach (var e in c.Lock.Plugins)
         {
             try
@@ -977,6 +1004,59 @@ public static partial class Program
             }
         if (c.Lock.Plugins.Count == 0 && failed.Count == 0) Console.WriteLine("plugins.lock lists no plugins");
         if (failed.Count > 0) throw new MazapanException(string.Join("\n", failed));
+    }
+
+    /// <summary>
+    /// MovedMissing: the plugins Mazapan used to ship that are on here (turned
+    /// on, as they were off until installed) and not installed from their own
+    /// repositories yet.
+    /// </summary>
+    internal static List<string> MovedMissing(Settings cfg, List<Plugin> all, SortedDictionary<string, string> broken, PluginsLock lck) =>
+        [.. Moved.Plugins.Keys.Order(StringComparer.Ordinal).Where(id => cfg.Enabled.Contains(id) && !cfg.IsDisabled(id)
+            && all.All(p => p.Id != id) && !broken.ContainsKey(id) && lck.Get(id) == null)];
+
+    /// <summary>
+    /// InstallMoved installs, from their own repositories, the plugins Mazapan
+    /// used to ship that are on here: at the commit that is what Mazapan
+    /// shipped, so what they can do is what was already on (nothing to
+    /// approve again); then they follow the plugin registry. installed is
+    /// told each one; the problems are returned, one per plugin.
+    /// </summary>
+    internal static List<string> InstallMoved(Action<string> installed)
+    {
+        var failed = new List<string>();
+        var c = Catalog.Load();
+        foreach (var id in MovedMissing(c.Cfg, c.All, c.Broken, c.Lock))
+        {
+            var w = Moved.Plugins[id];
+            try
+            {
+                using var st = Git.Clone(w.Source, w.Ref, w.Commit);
+                if (st.Plugin.Id != id) throw new MazapanException($"{w.Source} at {Git.Short(w.Commit)} is plugin \"{st.Plugin.Id}\"");
+                c.Lock.Put(new Entry { Id = id, Source = w.Source, Ref = w.Ref, Commit = st.Commit, Approved = st.Plugin.Capabilities(), Catalog = true });
+                c.Lock.Save();
+                try
+                {
+                    st.Accept();
+                }
+                catch (Exception)
+                {
+                    c.Lock.Delete(id);
+                    try
+                    {
+                        c.Lock.Save();
+                    }
+                    catch (Exception) { } // the error that matters is Accept's
+                    throw;
+                }
+                installed(id);
+            }
+            catch (Exception e) when (e is MazapanException or IOException or UnauthorizedAccessException)
+            {
+                failed.Add($"{id}: not installed from its own repository: {e.Message}");
+            }
+        }
+        return failed;
     }
 
     static string SyncOne(Entry e)

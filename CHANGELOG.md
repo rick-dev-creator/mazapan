@@ -4,6 +4,29 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
+## Unreleased
+
+- The plugin registry: plugins others make live in their own repositories,
+  and [mazapan-plugins](https://github.com/rick-dev-creator/mazapan-plugins)
+  lists them, each by its tag and the commit that was looked at. The
+  Plugins panel and `mazapan plugins add` read it from
+  mazapan.dev/plugins/index.toml (a copy ships for when it can't be
+  reached), install exactly that commit even if the tag moves, and follow
+  the registry's newer versions (the Updates panel says when there's one),
+  asking again for anything new they'd be able to do.
+- mazapan.dev/plugins: every plugin with its icon, screenshots, README and
+  what it can do, a page each, and a feed of what's new.
+- Markets and Pomodoro moved to their own repositories
+  ([mazapan-markets](https://github.com/rick-dev-creator/mazapan-markets),
+  [mazapan-pomodoro](https://github.com/rick-dev-creator/mazapan-pomodoro)),
+  listed in the registry. Where one was on, the next update installs it
+  from there, exactly as it was (its settings and history kept); until
+  then its files stay as they are.
+- plugin.toml says who made a plugin, where it lives and its license, and
+  how it looks (`[gallery]`: an icon, screenshots). `mazapan plugins
+  check` asks for them in a plugin to share, refuses a key a built-in
+  plugin uses, and says it all as JSON (`--json`).
+
 ## 0.3.2 (2026-10-07)
 
 - Apps from their makers: their download is tried again too when the

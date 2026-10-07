@@ -80,8 +80,20 @@ Your own plugins (a folder you put there, not a git checkout, or a link
 
 A catalog lists plugins one can add: only where each lives and what it is.
 Adding one is still `plugins add`, with what it can do shown and approved.
-Mazapan ships one (`catalog/index.toml`); config.toml adds others, paths or
-https URLs (fetched at most once a day, `--refresh` to fetch now):
+
+Mazapan's own is the **plugin registry**'s
+([rick-dev-creator/mazapan-plugins](https://github.com/rick-dev-creator/mazapan-plugins)),
+served at `https://mazapan.dev/plugins/index.toml`: the plugins others made,
+each in its own repository, listed by tag and the commit the registry
+looked at, everything else read from the plugin's plugin.toml at that
+commit. The same list is the gallery at [mazapan.dev/plugins](https://mazapan.dev/plugins/).
+A copy ships with Mazapan (`catalog/index.toml`, `catalog/refresh` before a
+release), read only when the registry has never been reached;
+`MAZAPAN_PLUGIN_CATALOG` puts another catalog in the registry's place (a
+mirror, a test).
+
+config.toml adds others, paths or https URLs (fetched at most once a day,
+`--refresh` to fetch now; the last good copy when they can't be reached):
 
 ```toml
 catalogs = ["https://example.com/mazapan/index.toml"]
@@ -95,16 +107,26 @@ description = "How long the machine has been up, in the bar"
 author = "Ana"
 source = "https://github.com/ana/mazapan-uptime"
 ref = "v1.3"                     # tag or branch; none: the default branch
+commit = "4f1c…"                 # optional: exactly this commit (the full id)
+version = "1.3.0"                # optional, shown before it's fetched
+license = "MIT"
 categories = ["bar"]             # bar, panel, theme, window, hardware, tools, agent
 homepage = "https://…"
 translations.es.description = "Cuánto tiempo lleva encendido el equipo, en la barra"
 ```
 
+With `commit`, that commit is what gets installed (and shown first), even
+if the tag has moved since: what a catalog's maintainers looked at is what
+you get. Keys a catalog has that this Mazapan doesn't know are left alone
+(a catalog is read by older Mazapans too), and so are categories it
+doesn't know.
+
 An id in two catalogs is the first one's. A plugin installed from a catalog
-entry (`plugins add ID`) follows its `ref`: when the catalog moves it
-(`v1.3` to `v1.4`), `plugins update` goes there, still asking before
-anything new, and never to a lower version. A ref you pick yourself
-(`plugins update ID#REF`) ends that.
+entry (`plugins add ID`) follows it: when the catalog lists another version
+(another `ref`, or another `commit`), `plugins update` goes there, and the
+Updates panel says there's one; still asking before anything new, and never
+to a lower version. A ref you pick yourself (`plugins update ID#REF`) ends
+that.
 
 ```sh
 mazapan plugins catalog [--json]    # every plugin: built in, yours, installed, available
@@ -136,6 +158,13 @@ requires = ["shell-bar", "hypr-base >= 0.1"]   # other plugins it needs
 categories = ["theme"]     # bar, panel, theme, window, hardware, tools, agent
 optional = false           # true: off until turned on (an extra, not everyone's);
                            # its packages are installed then, not with mazapan
+author = "Ana"             # who made it, where it lives (https) and its license:
+homepage = "https://…"     # the Plugins panel and the plugin gallery say them
+license = "MIT"
+
+[gallery]                  # how it looks, for the plugin gallery (mazapan.dev/plugins)
+icon = "media/icon.svg"    # SVG, PNG, JPEG or WebP, in the plugin's folder
+screenshots = ["media/panel.webp"]   # PNG, JPEG or WebP, up to 8
 
 [packages]
 pacman = ["foot"]          # checked on apply, warned about if missing
@@ -384,7 +413,7 @@ FileView {
 The defaults in the QML hold until the file is read (and if it isn't
 there). Keys bound in Hyprland and settings that change what's built
 (which files there are) still go in the templates. The Pomodoro plugin
-(`community/pomodoro`) does it this way.
+([mazapan-pomodoro](https://github.com/rick-dev-creator/mazapan-pomodoro)) does it this way.
 
 ## Localization
 
@@ -713,7 +742,18 @@ the built-in's place; `plugins diff ID` shows what you changed, and deleting
 the copy goes back. `fork ID NEW` copies any plugin under a new id, to start
 from.
 
-To share it: a git repository with plugin.toml at its root, tagged, and an
-entry in a catalog (a pull request to Mazapan's `catalog/index.toml`, or
-your own catalog file).
+`check` also says what the plugin gallery needs of a plugin others can
+add (an author, a license, an icon, screenshots: up to 256 KB for the icon,
+2 MB a screenshot), and fails when one of the plugin's keys is one a
+built-in plugin uses: both would fire. `--json` says it all as JSON, with
+what the plugin says it is (the registry reads it).
+
+To share it: a public git repository with plugin.toml, a README.md and a
+LICENSE at its root, a tag for each version (`vX.Y.Z`, the version in
+plugin.toml), and a pull request listing it in the
+[plugin registry](https://github.com/rick-dev-creator/mazapan-plugins#listing-your-plugin).
+The registry checks it at that commit, a person looks at what it can do,
+and from then on new tags are listed by themselves (those that would be
+able to do more, after a person looks again). Or keep a catalog file of
+your own.
 
