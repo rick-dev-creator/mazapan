@@ -29,8 +29,7 @@ Two people meet in the store, and each is known differently:
 | Shown | Their public GitHub profile: picture, name, @login, bio, company, location, website, since when; never their email | Their nickname, the version they have and how long they've had it |
 
 **The developer.** `author` in plugin.toml is shown next to the GitHub
-profile as a display name, never instead of it. The profile is read every
-hour: changed there, changed here. An answer to a review is marked as the
+profile as a display name, never instead of it. An answer to a review is marked as the
 developer's by itself, since they sign in with the account that owns the
 repository.
 
@@ -41,6 +40,28 @@ vote or a review is signed with it. The first review asks for a nickname;
 linking a GitHub account is optional and adds a ✓. One vote per computer
 and plugin (a new one replaces it), and it counts once the computer has
 had the plugin for 7 days, as the weekly install count says.
+
+### Developer profiles, kept
+
+The store never asks GitHub for a profile while it's being looked at, nor
+on every build: profiles barely change.
+
+- **One copy per developer**, not per plugin, in the registry
+  (`generated/authors/<id>.json`): the public fields above, when they were
+  read, and GitHub's ETag. The hourly build reads only these.
+- **Read again** when the developer lists their first plugin or releases a
+  version (the registry looks at tags every 6 hours anyway); when the copy
+  is older than 7 days (a daily job, oldest first, up to 50 a day); or
+  when they ask, signed in with GitHub, at most once a day.
+- **Asked with the ETag**: unchanged, GitHub answers 304, which doesn't
+  count against its limits.
+- **By the account's number**, not its @login: a renamed account is still
+  found, and shown with its new name.
+- **The picture downloaded once**, made a 256 px WebP and served by the
+  store, again only when it changed: people looking at the store ask
+  GitHub nothing.
+- **An account gone** (404): the last copy shown for 30 days, then the
+  profile hidden; the plugins stay, under their repository's address.
 
 ## The listing
 
