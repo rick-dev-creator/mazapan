@@ -39,7 +39,9 @@ install, even if the tag is moved later.
 ## What you need
 
 - Mazapan, to write and test the plugin (a computer with it, or the dev
-  VM: [development.md](development.md)).
+  VM: [development.md](development.md)): one that reads the plugin
+  registry, the release after 0.3.2 or a build of main. So do the people
+  who install it.
 - git, and an account on GitHub, or any host that serves public
   repositories over `https://`.
 

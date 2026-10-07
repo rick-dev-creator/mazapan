@@ -1,7 +1,7 @@
 ---
 // mazapan.dev/plugins: every plugin in the registry, newest first, to filter and search.
 import Page from "../../layouts/Page.astro";
-import { categoryNames, media, plugins } from "../../lib/plugins";
+import { categoryNames, guide, media, needs, plugins } from "../../lib/plugins";
 
 const categories = Object.keys(categoryNames).filter((c) => plugins.some((p) => p.categories.includes(c)));
 ---
@@ -14,6 +14,7 @@ const categories = Object.keys(categoryNames).filter((c) => plugins.some((p) => 
       (<kbd>SUPER</kbd> + <kbd>SHIFT</kbd> + <kbd>P</kbd>), which shows what it can do before anything is installed, or with
       <code>mazapan plugins add ID</code>.
     </p>
+    <p class="needs">{needs}</p>
     <div class="filters">
       <input id="search" type="search" placeholder="Search plugins" aria-label="Search plugins" />
       <div class="chips" role="group" aria-label="Category">
@@ -44,12 +45,20 @@ const categories = Object.keys(categoryNames).filter((c) => plugins.some((p) => 
 
   <section class="make-yours">
     <h2>Make your own</h2>
+    <p>Your plugin stays in your own repository; the registry lists it, and finds its new versions by itself.</p>
+    <ol class="steps">
+      <li><strong>Start it.</strong> <code>mazapan plugins new my-plugin --kind panel --dir ~/src/mazapan-my-plugin</code>,
+        then <code>mazapan plugins dev ~/src/mazapan-my-plugin</code> applies it on every save.</li>
+      <li><strong>Make it ready.</strong> An <code>author</code>, a <code>license</code> and a <code>[gallery]</code> icon and
+        screenshots in plugin.toml, a README.md and a LICENSE; <code>mazapan plugins check</code> passes with no errors.</li>
+      <li><strong>Release it.</strong> A public repository, and a tag that is its version: <code>git tag v1.0.0</code>.</li>
+      <li><strong>List it.</strong> A pull request adding <code>id</code>, <code>source</code>, <code>ref</code> and
+        <code>commit</code> to the <a href="https://github.com/rick-dev-creator/mazapan-plugins">registry</a>'s plugins.toml.
+        Its checks run, a person reviews what it can do, and once merged it's here and in every Mazapan's Plugins panel.</li>
+    </ol>
     <p>
-      <code>mazapan plugins new my-plugin --kind panel</code> starts one; <code>mazapan plugins check</code> renders it with
-      every theme and language and says what it would be able to do. Put it in a repository of yours, tag a version, and
-      open a pull request to the <a href="https://github.com/rick-dev-creator/mazapan-plugins">registry</a>.
-      New versions are picked up from your tags. <a href="https://github.com/rick-dev-creator/mazapan/blob/main/docs/publishing-plugins.md">Publishing a plugin</a> is the whole way, step by
-      step; <a href="/plugins/feed.xml">the feed</a> says what's new.
+      After that, a new version is only a new tag: listed by itself when it can do nothing more, reviewed first when it can.{" "}
+      <a href={guide}>Publishing a plugin</a> is the whole way, step by step; <a href="/plugins/feed.xml">the feed</a> says what's new.
     </p>
   </section>
 </Page>

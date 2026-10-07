@@ -1,7 +1,7 @@
 ---
 // mazapan.dev/plugins/ID: a plugin's page, as the registry lists it.
 import Page from "../../layouts/Page.astro";
-import { categoryNames, date, languageNames, media, plugins, readme, type Plugin } from "../../lib/plugins";
+import { categoryNames, date, languageNames, media, needs, plugins, readme, type Plugin } from "../../lib/plugins";
 
 export function getStaticPaths() {
   return plugins.map((p) => ({ params: { id: p.id }, props: { p } }));
@@ -28,6 +28,7 @@ const repo = p.source;
     <pre><code>mazapan plugins add {p.id}
 mazapan apply</code></pre>
     <p class="note">Either way you see what it can do and approve it before anything is installed.</p>
+    <p class="note">{needs}</p>
   </section>
 
   {p.screenshots.length > 0 && (

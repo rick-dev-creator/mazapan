@@ -198,3 +198,6 @@ aside { min-width: 0; }
 dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.35rem 1rem; margin: 0; font-size: 0.9rem; }
 dt { color: var(--muted); }
 dd { margin: 0; overflow-wrap: anywhere; }
+.gallery-head .needs { color: var(--gold); margin: 0.6rem 0 0; font-size: 0.95rem; }
+.steps { padding-left: 1.25rem; }
+.steps li { margin-block: 0.6rem; }

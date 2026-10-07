@@ -29,6 +29,19 @@ export interface Plugin {
 }
 
 export const generated: string = registry.generated;
+
+/**
+ * The first Mazapan that reads the registry: "" until it's out. Set it in
+ * the release that brings it (docs/versioning.md): the gallery then says
+ * which Mazapan its plugins need instead of "the next one".
+ */
+export const since: string = "";
+export const needs = since
+  ? `Needs Mazapan ${since} or newer.`
+  : "Coming with the next Mazapan release (after 0.3.2): until then, Mazapan built from main.";
+
+/** The guide to publishing one, step by step. */
+export const guide = "https://github.com/rick-dev-creator/mazapan/blob/main/docs/publishing-plugins.md";
 /** Newest first: what changed lately leads. */
 export const plugins: Plugin[] = [...(registry.plugins as Plugin[])].sort((a, b) => b.updated.localeCompare(a.updated) || a.name.localeCompare(b.name));
 
