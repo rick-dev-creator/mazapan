@@ -83,25 +83,19 @@ Simplest first:
 10. **How the machine is doing.** CPU, GPU, memory, temperatures and fans
     in the bar; a word when something runs hot or memory runs out, with
     what's using it, and stopping it from there.
-11. **What's playing, wherever it plays.** Spotify, YouTube in a browser,
-    mpv, any app that says so over MPRIS: what's on in the bar, and a
-    panel with every player at once, switching between them, the cover's
-    colors, a bar to drag through the song, shuffle and repeat, its own
-    volume, and the sound drawn as it plays (cava). The Control Center's
-    music grows from one player into this.
-12. **A VPN with one click.** WireGuard and OpenVPN through NetworkManager,
+11. **A VPN with one click.** WireGuard and OpenVPN through NetworkManager,
     a config file dropped in to add one, a switch in the Control Center,
     what's connected said in the bar.
-13. **The camera before a call.** Any webcam's brightness, focus,
+12. **The camera before a call.** Any webcam's brightness, focus,
     exposure and zoom with a live preview, kept per camera and set again
     when it's plugged in.
-14. **Where my time goes.** Time per app, today and over the weeks, kept
+13. **Where my time goes.** Time per app, today and over the weeks, kept
     on this computer only; a limit for an app if you want one.
-15. **A battery that lasts years.** A charge limit (80 %, or full for a
+14. **A battery that lasts years.** A charge limit (80 %, or full for a
     trip) where the kernel offers one (`charge_control_end_threshold`:
     ThinkPad, ASUS, Framework, Dell, Huawei, Samsung…), kept across
     restarts, and the battery's health over time, not only today's.
-16. **Sound the way I want it.** Every output and input, more than one
+15. **Sound the way I want it.** Every output and input, more than one
     output at once, the codec of Bluetooth headphones, each app's volume
     and where it plays, and an equalizer with presets (PipeWire and
     WirePlumber).
@@ -133,7 +127,7 @@ Simplest first:
 | Learn | Lessons recorded from the real moves, tried for real and ticked off; every key while SUPER is held |
 | Security | Encryption, the firewall, privacy dots, app permissions, fingerprint; audited (see [security.md](security.md)) |
 | Plugins | Dependencies, approved capabilities, catalogs, the Plugins panel, tools for authors; hardware fixes offered only where they apply |
-| Published | mazapan.dev, the ISO with its checksum and signature, the signed repository at repo.mazapan.dev, releases on their channels; the plugin registry, with Markets and Pomodoro |
+| Published | mazapan.dev, the ISO with its checksum and signature, the signed repository at repo.mazapan.dev, releases on their channels; the plugin registry, with Markets, Pomodoro and Now Playing (what's playing, wherever it plays) |
 | Look | The login, boot menu and boot splash in the theme; GTK, Qt, browsers, editors and terminals themed |
 
 ## Waiting

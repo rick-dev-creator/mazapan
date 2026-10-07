@@ -6,6 +6,12 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- Now Playing, a new plugin in the registry
+  ([mazapan-now-playing](https://github.com/rick-dev-creator/mazapan-now-playing)):
+  what's playing wherever it plays (Spotify, YouTube in a browser, mpv…)
+  in the bar, the Control Center and a panel with the cover's colors,
+  every player, a bar to drag through the song and the sound drawn as it
+  plays. `mazapan plugins add now-playing`, or the Plugins panel.
 - The Control Center: a plugin can take the place of one of its parts by
   giving its own the same name and a higher number
   (`control/sections/31-media.qml` over `30-media.qml`). With the plugin
