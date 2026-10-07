@@ -4,6 +4,14 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
+## Unreleased
+
+- Apps from their makers (Herdr, VS Code, JetBrains…): asked again for a
+  few seconds when the network doesn't answer, instead of left out at
+  once. The first login's apps start as soon as there's a connection, and
+  its DNS can take a moment more: they were left out then ("not
+  everything was installed").
+
 ## 0.3.0 (2026-10-07)
 
 - Default apps: the terminal is one of them (Settings, Default apps):
