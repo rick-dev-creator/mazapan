@@ -1,0 +1,45 @@
+---
+// A page of mazapan.dev besides the front one: its header, its footer, the site's look.
+import "../styles/site.css";
+
+interface Props {
+  title: string;
+  description: string;
+  feed?: boolean;
+}
+const { title, description, feed = false } = Astro.props;
+const github = "https://github.com/rick-dev-creator/mazapan";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {feed && <link rel="alternate" type="application/atom+xml" title="Mazapan plugins" href="/plugins/feed.xml" />}
+  </head>
+  <body>
+    <header class="top">
+      <a class="brand" href="/"><img src="/favicon.svg" alt="" width="28" height="28" />Mazapan</a>
+      <nav>
+        <a href="/#features">Features</a>
+        <a href="/plugins/">Plugins</a>
+        <a href="/#download">Download</a>
+        <a href={github}>GitHub</a>
+      </nav>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer>
+      <p>
+        MIT licensed · <a href={github}>GitHub</a> · <a href="https://github.com/rick-dev-creator/mazapan-plugins">Plugin registry</a>
+      </p>
+      <p class="fine">Mazapan is built on Arch Linux and is not affiliated with or endorsed by it.</p>
+    </footer>
+  </body>
+</html>

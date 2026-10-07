@@ -487,6 +487,26 @@ public static partial class Program
         List<Applying.Change> changes = [];
         List<string> orphans = [];
         Owned owned = new();
+        // Plugins Mazapan used to ship, on here: now from their own
+        // repositories (online now: the packages just came). One that can't
+        // be fetched stays as it was, its files kept, for the next update.
+        try
+        {
+            var c = Catalog.Load();
+            if (MovedMissing(c.Cfg, c.All, c.Broken, c.Lock).Count > 0)
+            {
+                steps.Start("plugins", "Plugins");
+                var moved = new List<string>();
+                var failed = InstallMoved(moved.Add);
+                if (failed.Count > 0)
+                {
+                    rec.Note = (rec.Note + "; " + string.Join("; ", failed)).TrimStart(';', ' ');
+                    steps.Skip("plugins", string.Join("; ", failed));
+                }
+                else steps.Ok("plugins", string.Join(", ", moved) + " now from " + (moved.Count == 1 ? "its own repository" : "their own repositories"));
+            }
+        }
+        catch (Exception e) when (e is MazapanException or IOException or UnauthorizedAccessException) { } // the configuration's step says what's wrong
         steps.Start("config", "Configuration");
         try
         {

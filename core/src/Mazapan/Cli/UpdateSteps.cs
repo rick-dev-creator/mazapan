@@ -263,10 +263,24 @@ public static partial class Program
         Install.PluginsLock lk;
         try { lk = Install.PluginsLock.Load(); }
         catch (MazapanException) { return out_; }
+        // Those that follow a catalog move when the catalog lists another
+        // version of them, not when a branch moves.
+        List<Install.CatalogEntry> listed = [];
+        if (lk.Plugins.Any(e => e.Catalog))
+        {
+            try { listed = Listed(Config.Settings.Load(), false).Entries; }
+            catch (MazapanException) { }
+        }
         foreach (var e in lk.Plugins)
         {
             var dir = Paths.Join(Install.Git.Dir, e.Id);
             if (!Directory.Exists(dir)) continue;
+            if (e.Catalog && e.Ref != "")
+            {
+                if (CatalogMove(e, listed) is { } ce)
+                    out_.Add(new PluginUpdate(e.Id, Install.Git.Short(e.Commit), ce.Commit != "" ? Install.Git.Short(ce.Commit) : ce.Ref));
+                continue;
+            }
             // Exactly the ref followed: ls-remote matches a pattern's tail, so
             // "main" alone would also find refs/heads/release/main.
             string[] wanted = e.Ref == "" ? ["HEAD"] : [$"refs/tags/{e.Ref}^{{}}", $"refs/tags/{e.Ref}", $"refs/heads/{e.Ref}"];

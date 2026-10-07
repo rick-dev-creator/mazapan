@@ -42,6 +42,77 @@ public class AuthorTests
         Assert.All(p.Settings.Keys, k => Assert.NotEqual("", p.SettingsInfo[k].Description));
     }
 
+    /// <summary>plugins check ARG --json, read back.</summary>
+    static (int Exit, System.Text.Json.JsonElement Json) CheckJson(string arg)
+    {
+        var o = Console.Out;
+        var w = new StringWriter();
+        Console.SetOut(w);
+        try
+        {
+            var exit = Program.PluginsCheck(arg, json: true);
+            return (exit, System.Text.Json.JsonDocument.Parse(w.ToString()).RootElement);
+        }
+        finally
+        {
+            Console.SetOut(o);
+        }
+    }
+
+    static List<string> Strings(System.Text.Json.JsonElement j, string key) => [.. j.GetProperty(key).EnumerateArray().Select(x => x.GetString()!)];
+
+    [Fact]
+    public void CheckSaysWhatTheRegistryNeeds()
+    {
+        using var h = new Home();
+        Program.PluginsNew("my-panel", "panel", "");
+        var dir = Path.Join(Git.Dir, "my-panel");
+        // Others' plugins say who made them and how they look.
+        var (exit, j) = CheckJson("my-panel");
+        Assert.Equal(0, exit);
+        Assert.True(j.GetProperty("ok").GetBoolean());
+        var warnings = Strings(j, "warnings");
+        Assert.Contains(warnings, w => w.StartsWith("no author"));
+        Assert.Contains(warnings, w => w.StartsWith("no icon"));
+        Assert.Contains(warnings, w => w.StartsWith("no screenshots"));
+        Assert.Equal("my-panel", j.GetProperty("id").GetString());
+        Assert.NotEqual("", j.GetProperty("translations").GetProperty("es").GetProperty("name").GetString());
+        Assert.Contains("es", Strings(j, "languages"));
+        Assert.True(j.GetProperty("renders").GetInt32() > 1);
+
+        // All said: nothing to warn about there.
+        Directory.CreateDirectory(Path.Join(dir, "media"));
+        File.WriteAllText(Path.Join(dir, "media", "icon.svg"), "<svg/>");
+        File.WriteAllBytes(Path.Join(dir, "media", "panel.png"), new byte[1000]);
+        var manifest = Path.Join(dir, "plugin.toml");
+        var text = File.ReadAllText(manifest);
+        var i = text.IndexOf("\n[", StringComparison.Ordinal);
+        text = text[..i] + "\nauthor = \"Ana\"\nlicense = \"MIT\"\nhomepage = \"https://example.com\"\n\n[gallery]\nicon = \"media/icon.svg\"\nscreenshots = [\"media/panel.png\"]\n" + text[i..];
+        File.WriteAllText(manifest, text);
+        (exit, j) = CheckJson("my-panel");
+        Assert.Equal(0, exit);
+        Assert.DoesNotContain(Strings(j, "warnings"), w => w.StartsWith("no author") || w.StartsWith("no license") || w.StartsWith("no icon") || w.StartsWith("no screenshots"));
+        Assert.Equal(("Ana", "MIT", "media/icon.svg"), (j.GetProperty("author").GetString(), j.GetProperty("license").GetString(), j.GetProperty("icon").GetString()));
+        Assert.Equal(["media/panel.png"], Strings(j, "screenshots"));
+
+        // A screenshot too big for the gallery, a built-in's key: errors.
+        File.WriteAllBytes(Path.Join(dir, "media", "panel.png"), new byte[3 << 20]);
+        var palette = (string)Plugin.Load(Path.Join(Repo.Root, "plugins", "palette")).Settings["key"];
+        File.WriteAllText(manifest, System.Text.RegularExpressions.Regex.Replace(File.ReadAllText(manifest), "(?m)^key = \".*\"$", $"key = \"{palette}\""));
+        (exit, j) = CheckJson("my-panel");
+        Assert.Equal(1, exit);
+        var errors = Strings(j, "errors");
+        Assert.Contains(errors, e => e.Contains("media/panel.png is 3072 KB: up to 2048 KB"));
+        Assert.Contains(errors, e => e.Contains("palette.key's too"));
+
+        // One that doesn't load: said as JSON too.
+        File.WriteAllText(manifest, "[plugin]\nid = \"Bad\"\n");
+        (exit, j) = CheckJson(dir);
+        Assert.Equal(1, exit);
+        Assert.False(j.GetProperty("ok").GetBoolean());
+        Assert.Single(Strings(j, "errors"));
+    }
+
     [Fact]
     public void NewDoesntTakeABuiltInsName()
     {

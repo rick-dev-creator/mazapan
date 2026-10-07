@@ -290,9 +290,15 @@ TOML, JSON, CSS, shell…), filled from the theme and your settings.
 - **Write one in minutes**: `mazapan plugins new my-widget --kind bar`, then
   `plugins dev` (applied again on every save) and `plugins check`; `plugins
   fork` copies a built-in one to change it.
-- **Installed with consent**: `mazapan plugins add <git-url>` shows what a
+- **The community's, in their own repositories**: the
+  [plugin registry](https://github.com/rick-dev-creator/mazapan-plugins)
+  lists them by tag and commit, and [mazapan.dev/plugins](https://mazapan.dev/plugins/)
+  shows them (Markets, Pomodoro…). Yours goes in with a pull request; new
+  versions are picked up from your tags.
+- **Installed with consent**: `mazapan plugins add <id|git-url>` shows what a
   plugin will be able to do (files, commands, root, packages) before
-  anything runs; `plugins.lock` brings the same set to another machine.
+  anything runs, and installs exactly the commit the registry looked at;
+  `plugins.lock` brings the same set to another machine.
 - **Safe to experiment**: Mazapan never overwrites a file it didn't write
   or one you edited; every apply is previewed (`--dry-run --diff`) and
   undoable (`mazapan undo`, or History).

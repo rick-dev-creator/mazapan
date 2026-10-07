@@ -343,16 +343,22 @@ public static partial class Git
         Paths.Clean(path.StartsWith('/') ? path : Paths.Join(Directory.GetCurrentDirectory(), path));
 
     /// <summary>
-    /// Update fetches the latest commit of ref for an installed plugin. It
-    /// returns null when it's already there. The checkout must be what the
-    /// lock says.
+    /// Update fetches the latest commit of ref for an installed plugin, or
+    /// commit when given (the one a catalog lists). It returns null when it's
+    /// already there. The checkout must be what the lock says.
     /// </summary>
-    public static Move? Update(Entry e, string @ref)
+    public static Move? Update(Entry e, string @ref, string commit = "")
     {
         var dir = Paths.Join(Dir, e.Id);
         Verify(dir, e, null);
         Fetch(dir);
-        var to = Resolve(dir, @ref);
+        string to;
+        if (commit == "") to = Resolve(dir, @ref);
+        else
+        {
+            FetchCommit(dir, commit);
+            to = Run(dir, "rev-parse", "--verify", "--quiet", "--end-of-options", commit + "^{commit}");
+        }
         if (to == e.Commit) return null;
         Safe(dir, to);
         var tmp = Stage();

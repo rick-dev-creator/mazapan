@@ -63,13 +63,13 @@ jobs:
           path: bin
 
       # Each plugin rendered with every theme and language, and what it can
-      # do read out: the built-in ones and the community's.
+      # do read out. The community's are checked by the plugin registry.
       - name: plugins check
         run: |
           chmod +x bin/mazapan
           export HOME="$(mktemp -d)"
           fail=0
-          for p in plugins/*/ community/*/; do
+          for p in plugins/*/; do
             if ! out=$(bin/mazapan plugins check "$p" 2>&1); then
               echo "::error title=plugins check ${p%/}::$(printf '%s' "$out" | tail -n 5 | tr '\n' ' ')"
               printf '%s\n' "$out"
