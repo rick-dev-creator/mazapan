@@ -2,6 +2,7 @@
 // (import "../../components/kit").
 //
 // A button. `primary` fills it with the accent: one per card at most.
+// Tab reaches it, and Space or Enter presses it, as a click does.
 
 import QtQuick
 import qs
@@ -13,14 +14,20 @@ Rectangle {
   property bool primary: false
   signal clicked()
 
+  activeFocusOnTab: enabled && visible
+  Keys.onSpacePressed: if (button.enabled) button.clicked()
+  Keys.onReturnPressed: if (button.enabled) button.clicked()
+  Keys.onEnterPressed: if (button.enabled) button.clicked()
+
   implicitWidth: label.implicitWidth + 24
   implicitHeight: 28
   radius: Theme.radius
   opacity: enabled ? 1 : 0.4
   color: primary ? (area.containsMouse ? Qt.lighter(Theme.accent, 1.15) : Theme.accent)
        : area.containsMouse ? Theme.surface : "transparent"
-  border.width: 1
-  border.color: primary ? Theme.accent : Theme.border
+  // Where the keys are: a ring in the text's color.
+  border.width: activeFocus ? 2 : 1
+  border.color: activeFocus ? Theme.fg : primary ? Theme.accent : Theme.border
 
   Text {
     // Plain: what it shows can come from a plugin or a catalog, and

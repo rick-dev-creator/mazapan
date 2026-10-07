@@ -2,6 +2,7 @@
 // (import "../../components/kit").
 //
 // An on/off switch. Square, like the rest of the theme when radius is 0.
+// Tab reaches it, and Space flips it (Enter is the card's: on with the form).
 
 import QtQuick
 import qs
@@ -14,6 +15,20 @@ Item {
 
   implicitWidth: 32
   implicitHeight: 16
+
+  activeFocusOnTab: enabled && visible
+  Keys.onSpacePressed: toggle.toggled(!toggle.checked)
+
+  // Where the keys are.
+  Rectangle {
+    visible: toggle.activeFocus
+    anchors.fill: parent
+    anchors.margins: -3
+    radius: Theme.radius
+    color: "transparent"
+    border.width: 1
+    border.color: Theme.fg
+  }
 
   Rectangle {
     anchors.fill: parent
