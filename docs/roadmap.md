@@ -72,34 +72,39 @@ when it depends on a brand, a service or a taste. Mazapan makes the first
 community ones itself, as it did with Markets and Pomodoro, so the registry
 starts with plugins worth installing.
 
+### From the community
+
 Simplest first:
 
-1. **What I follow** (community). Feeds and tickers, as Markets does: one
-   each.
-2. **What's running while I build** (community). The ports in use and
-   which process holds each, the containers up, stopped with a click: next
-   to dev-databases and dev-dotnet. The first one made from scratch for the
+1. **What I follow.** Feeds and tickers, as Markets does: one each.
+2. **What's running while I build.** The ports in use and which process
+   holds each, the containers up, stopped with a click: next to
+   dev-databases and dev-dotnet. The first one made from scratch for the
    registry.
-3. **How the machine is doing** (built-in). CPU, GPU, memory,
-   temperatures and fans in the bar; a word when something runs hot or
-   memory runs out, with what's using it, and stopping it from there.
-4. **A VPN with one click** (built-in). WireGuard and OpenVPN through
-   NetworkManager, a config file dropped in to add one, a switch in the
-   Control Center, what's connected said in the bar.
-5. **A battery that lasts years** (built-in). A charge limit (80 %, or
-   full for a trip) where the kernel offers one
-   (`charge_control_end_threshold`: ThinkPad, ASUS, Framework, Dell,
-   Huawei, Samsung…), kept across restarts, and the battery's health over
-   time, not only today's.
-6. **The services I work in** (community). Tasks, issues and
-   notifications from one service each (Todoist, Linear, GitHub…) in the
-   bar or the palette, each signed in to its own way.
-7. **The phone next to me** (community). Its screen in a window (scrcpy),
-   files and notifications both ways (KDE Connect).
-8. **My devices working** (community). One plugin per brand, where only
-   its own tools reach: keyboard lighting, Logitech mice (Solaar), Razer
-   (OpenRazer), headphones' battery, MSI laptops' charge limit and fans
-   (msi-ec); each tried on the device itself.
+3. **The services I work in.** Tasks, issues and notifications from one
+   service each (Todoist, Linear, GitHub…) in the bar or the palette, each
+   signed in to its own way.
+4. **The phone next to me.** Its screen in a window (scrcpy), files and
+   notifications both ways (KDE Connect).
+5. **My devices working.** One plugin per brand, where only its own tools
+   reach: keyboard lighting, Logitech mice (Solaar), Razer (OpenRazer),
+   headphones' battery, MSI laptops' charge limit and fans (msi-ec); each
+   tried on the device itself.
+
+### Built-in
+
+Simplest first:
+
+6. **How the machine is doing.** CPU, GPU, memory, temperatures and fans
+   in the bar; a word when something runs hot or memory runs out, with
+   what's using it, and stopping it from there.
+7. **A VPN with one click.** WireGuard and OpenVPN through NetworkManager,
+   a config file dropped in to add one, a switch in the Control Center,
+   what's connected said in the bar.
+8. **A battery that lasts years.** A charge limit (80 %, or full for a
+   trip) where the kernel offers one (`charge_control_end_threshold`:
+   ThinkPad, ASUS, Framework, Dell, Huawei, Samsung…), kept across
+   restarts, and the battery's health over time, not only today's.
 
 ## Road to 1.0
 
