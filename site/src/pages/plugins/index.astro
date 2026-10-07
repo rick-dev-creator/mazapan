@@ -1,7 +1,7 @@
 ---
 // mazapan.dev/plugins: every plugin in the registry, newest first, to filter and search.
 import Page from "../../layouts/Page.astro";
-import { categoryNames, guide, media, needs, plugins } from "../../lib/plugins";
+import { categoryNames, developer, guide, media, needs, plugins, stars } from "../../lib/plugins";
 
 const categories = Object.keys(categoryNames).filter((c) => plugins.some((p) => p.categories.includes(c)));
 ---
@@ -27,13 +27,18 @@ const categories = Object.keys(categoryNames).filter((c) => plugins.some((p) => 
   <div class="plugin-grid" id="grid">
     {plugins.map((p) => (
       <a class="plugin-card" href={`/plugins/${p.id}/`} data-categories={p.categories.join(" ")}
-         data-text={[p.id, p.name, p.description, p.author, ...Object.values(p.translations).flatMap((t) => [t.name ?? "", t.description ?? ""])].join(" ").toLowerCase()}>
+         data-text={[p.id, p.name, p.description, p.author, p.owner?.login ?? "", p.owner?.name ?? "", ...Object.values(p.translations).flatMap((t) => [t.name ?? "", t.description ?? ""])].join(" ").toLowerCase()}>
         {p.screenshots[0] && <img class="shot" src={media(p.screenshots[0])} alt="" loading="lazy" />}
         <div class="card-body">
           {p.icon && <img class="icon" src={media(p.icon)} alt="" width="40" height="40" />}
           <div>
             <h3>{p.name}</h3>
-            <p class="by">by {p.author} · {p.version}</p>
+            <p class="by">
+              {p.owner && <img class="avatar" src={media(p.owner.picture)} alt="" width="18" height="18" loading="lazy" />}
+              <span>{developer(p)}</span>
+              {p.owner && <span class="login">@{p.owner.login}</span>}
+              {p.stars !== undefined && <span class="stars" title={`${p.stars} stars on GitHub`}>★ {stars(p.stars)}</span>}
+            </p>
           </div>
         </div>
         <p class="what">{p.description}</p>

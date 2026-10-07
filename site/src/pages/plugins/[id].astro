@@ -1,13 +1,14 @@
 ---
 // mazapan.dev/plugins/ID: a plugin's page, as the registry lists it.
 import Page from "../../layouts/Page.astro";
-import { categoryNames, date, languageNames, media, needs, plugins, readme, type Plugin } from "../../lib/plugins";
+import { categoryNames, date, developer, languageNames, media, needs, plugins, readme, site, stars, website, type Plugin } from "../../lib/plugins";
 
 export function getStaticPaths() {
   return plugins.map((p) => ({ params: { id: p.id }, props: { p } }));
 }
 const { p } = Astro.props as { p: Plugin };
-const repo = p.source;
+const repo = p.repository || p.source;
+const o = p.owner;
 ---
 
 <Page title={`${p.name} · Mazapan plugins`} description={p.description} feed>
@@ -16,7 +17,11 @@ const repo = p.source;
     {p.icon && <img class="icon big" src={media(p.icon)} alt="" width="72" height="72" />}
     <div>
       <h1>{p.name}</h1>
-      <p class="by">by {p.author} · version {p.version} · {p.license || "no license given"}</p>
+      <p class="by">
+        by {o ? <a href={o.html_url}>{developer(p)}</a> : developer(p)}
+        · version {p.version} · {p.license || "no license given"}
+        {p.stars !== undefined && <> · <a class="stars" href={`${repo}/stargazers`} title={`${p.stars} stars on GitHub`}>★ {stars(p.stars)}</a></>}
+      </p>
       <p class="what">{p.description}</p>
       <p class="tags">{p.categories.map((c) => <a href={`/plugins/?category=${c}`}>{categoryNames[c] ?? c}</a>)}</p>
     </div>
@@ -46,6 +51,23 @@ mazapan apply</code></pre>
       <ul class="caps">
         {p.capabilities.map((c) => <li class={c.startsWith("full access") || c.startsWith("runs") ? "risky" : ""}>{c}</li>)}
       </ul>
+      {o && (
+        <section class="developer">
+          <h2>Made by</h2>
+          <a class="who" href={o.html_url}>
+            <img class="avatar" src={media(o.picture)} alt="" width="56" height="56" />
+            <span><strong>{o.name || o.login}</strong><span class="login">@{o.login}</span></span>
+          </a>
+          {o.bio && <p class="bio">{o.bio}</p>}
+          <ul class="facts">
+            {o.company && <li>{o.company}</li>}
+            {o.location && <li>{o.location}</li>}
+            {o.blog && <li><a href={website(o.blog)} rel="nofollow ugc">{site(o.blog)}</a></li>}
+            {o.created_at && <li>On GitHub since {new Date(o.created_at).getUTCFullYear()}</li>}
+          </ul>
+          {p.author && ![o.name, o.login].some((n) => n.toLowerCase() === p.author.toLowerCase()) && <p class="note">Signs the plugin as “{p.author}”.</p>}
+        </section>
+      )}
       <h2>About</h2>
       <dl>
         <dt>Repository</dt><dd><a href={repo}>{repo.replace("https://", "")}</a></dd>

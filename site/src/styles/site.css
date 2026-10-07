@@ -138,7 +138,18 @@ kbd {
 .plugin-card .shot { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-bottom: 1px solid var(--border); }
 .card-body { display: flex; gap: 0.75rem; align-items: center; padding: 1rem 1.1rem 0; }
 .plugin-card h3 { font: 700 1.05rem var(--mono); margin: 0; }
-.by { color: var(--muted); font-size: 0.85rem; margin: 0; }
+.by { color: var(--muted); font-size: 0.85rem; margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 0.4rem; }
+.by a { color: inherit; }
+.avatar { border-radius: 50%; flex: none; background: var(--bg-alt); }
+.login { color: var(--muted); font-family: var(--mono); font-size: 0.85em; }
+.stars { font-family: var(--mono); color: var(--gold); text-decoration: none; }
+.developer { margin-bottom: 1.5rem; }
+.developer .who { display: flex; gap: 0.75rem; align-items: center; color: var(--fg); text-decoration: none; }
+.developer .who > span { display: flex; flex-direction: column; min-width: 0; }
+.developer .bio { margin: 0.75rem 0 0.5rem; font-size: 0.9rem; }
+.developer .facts { list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: var(--muted); }
+.developer .facts li { padding-block: 0.1rem; overflow-wrap: anywhere; }
+.developer .note { color: var(--muted); font-size: 0.8rem; margin: 0.5rem 0 0; }
 .plugin-card .what { color: var(--muted); margin: 0.6rem 1.1rem 0; flex: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.75rem 1.1rem 1rem; }
 .tags span, .tags a {
