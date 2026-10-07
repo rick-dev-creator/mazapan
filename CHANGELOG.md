@@ -4,7 +4,7 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
-## Unreleased
+## 0.3.1 (2026-10-07)
 
 - Apps from their makers (Herdr, VS Code, JetBrains…): asked again for a
   few seconds when the network doesn't answer, instead of left out at
