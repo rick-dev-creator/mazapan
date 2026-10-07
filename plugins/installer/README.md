@@ -9,6 +9,12 @@ at once, each app to see and change for whoever wants to. A review, and
 then `mazapan install run` does it with archinstall, from the ISO's own
 repository: nothing is downloaded.
 
+All of it by keyboard too: each screen starts in its search (type at
+once, ↓ to the list) or its list; ↑↓ move, Space picks, Enter picks or
+moves on, Tab goes through the fields, switches and buttons (Space flips a
+switch; Space or Enter presses a button). Enter never starts the install on its own: on the
+review, Tab to Install.
+
 Only on the ISO's live system (`[hardware] live = true`). On the first
 start, the welcome picks up where it left off, and the apps chosen here
 install as soon as there's a connection.

@@ -63,13 +63,27 @@ Item {
     kbNow.running = true
     stepAt = Date.now() + 800
     open = true
-    Qt.callLater(() => card.forceActiveFocus())
+    Qt.callLater(focusStep)
   }
 
   function close() {
     if (phase === "running") return
     open = false
     session.dismissed = true
+  }
+
+  // Where the keys go on a step: its search (type at once, ↓ to the list),
+  // its list, the account's first field; elsewhere the card (Enter, Esc).
+  // Tab goes through the rest, Space or Enter takes what has the focus.
+  function focusStep() {
+    if (phase !== "") card.forceActiveFocus()
+    else if (step === "language") langSearch.focusInput()
+    else if (step === "keyboard") kbSearch.focusInput()
+    else if (step === "region") tzSearch.focusInput()
+    else if (step === "network" && wifiList.count > 0) wifiList.forceActiveFocus()
+    else if (step === "disk" && diskList.count > 0) diskList.forceActiveFocus()
+    else if (step === "account") nameField.focusInput()
+    else card.forceActiveFocus()
   }
 
   // Clicks right after it opens, or a step changes, aren't taken.
@@ -97,6 +111,8 @@ Item {
   property bool details: false
   // "", "running", "done", "failed"; the run's id, to tell its log from an older one's.
   property string phase: ""
+  // Its buttons gone (Install) or new (Restart): the keys back on the card.
+  onPhaseChanged: if (open) Qt.callLater(focusStep)
   property string runId: ""
 
   FileView {
@@ -346,8 +362,7 @@ Item {
   }
   property bool kbPicked: false
   onStepChanged: {
-    // The account's first field takes the keys; elsewhere the card (Enter, Esc).
-    if (open) Qt.callLater(() => step === "account" ? nameField.focusInput() : card.forceActiveFocus())
+    if (open) Qt.callLater(focusStep)
     // The keyboard it suggests, taken already (one click to change it);
     // the time zone from the connection, when there's one.
     // Until one is picked by hand, it follows where you are (changed on the way back).
@@ -634,12 +649,17 @@ Item {
     property string detail: ""
     property bool selected: false
     signal picked()
+    // In a list, the list has the keys (Picks) and this is its current one;
+    // on its own (the profiles), Tab reaches it and Space picks it.
+    readonly property bool keyed: ListView.view ? ListView.isCurrentItem && ListView.view.activeFocus : activeFocus
+    activeFocusOnTab: !ListView.view
+    Keys.onSpacePressed: if (enabled) picked()
     Layout.fillWidth: true
     implicitHeight: detail !== "" ? 52 : 40
     radius: Theme.radius
-    color: selected ? Theme.selection : ch.containsMouse ? Theme.surface : "transparent"
-    border.color: selected ? Theme.accent : "transparent"
-    border.width: 1
+    color: selected ? Theme.selection : ch.containsMouse || keyed ? Theme.surface : "transparent"
+    border.color: keyed ? Theme.fg : selected ? Theme.accent : "transparent"
+    border.width: keyed ? 2 : 1
     MouseArea {
       id: ch
       anchors.fill: parent
@@ -660,6 +680,55 @@ Item {
       Caption { visible: choice.detail !== ""; text: choice.detail; elide: Text.ElideRight; horizontalAlignment: Text.AlignLeft; Layout.fillWidth: true }
       Item { Layout.fillHeight: true }
     }
+  }
+
+  // A list of Choices for the keys: Tab reaches it (on the one picked),
+  // ↑↓ move, Space picks; Enter picks one not picked yet, or moves on with
+  // it (`multi`: Space only, Enter moves on). ↑ on the first goes back to
+  // the search above it (`above`).
+  component Picks: ListView {
+    id: picks
+    property var above: null
+    property bool multi: false
+    // Its step's list, filled after the step came (the disks, the networks
+    // found): the keys come to it then, unless they're somewhere already.
+    property string takesKeysOn: ""
+    onCountChanged: if (count > 0 && root.open && root.step === takesKeysOn && card.activeFocus) forceActiveFocus()
+    Layout.fillWidth: true
+    Layout.fillHeight: true
+    clip: true
+    spacing: 2
+    activeFocusOnTab: count > 0
+    keyNavigationEnabled: true
+    highlightMoveDuration: 0
+    onActiveFocusChanged: {
+      if (!activeFocus) return
+      for (let i = 0; i < count; i++) {
+        const it = itemAtIndex(i)
+        if (it && it.selected) { currentIndex = i; break }
+      }
+    }
+    Keys.onUpPressed: event => {
+      if (currentIndex <= 0 && above) above.focusInput()
+      else event.accepted = false
+    }
+    Keys.onSpacePressed: if (currentItem && currentItem.enabled && root.settled()) currentItem.picked()
+    Keys.onReturnPressed: event => pickOrGo(event)
+    Keys.onEnterPressed: event => pickOrGo(event)
+    function pickOrGo(event) {
+      const it = currentItem
+      // Not taken: the card's Enter moves on.
+      if (multi || !it || !it.enabled || it.selected) { event.accepted = false; return }
+      if (root.settled()) it.picked()
+    }
+  }
+
+  // Enter in a step's search: the first one shown, or on with it when it's
+  // the one picked already.
+  function pickFirst(first, isPicked, pick) {
+    if (!first) return
+    if (isPicked(first)) primary(true)
+    else pick(first)
   }
 
   component Field: ColumnLayout {
@@ -783,13 +852,14 @@ Item {
               id: langSearch
               Layout.fillWidth: true
               placeholder: {{ tq "lang.search" }}
-              onAccepted: if (root.languagesShown.length > 0) root.setLanguage(root.languagesShown[0][0])
+              // Nothing searched: Enter keeps the one picked, and moves on.
+              onAccepted: if (text.trim() === "") root.primary(true)
+                else root.pickFirst(root.languagesShown[0], l => l[0] === root.language, l => root.setLanguage(l[0]))
+              Keys.onDownPressed: langList.forceActiveFocus()
             }
-            ListView {
-              Layout.fillWidth: true
-              Layout.fillHeight: true
-              clip: true
-              spacing: 2
+            Picks {
+              id: langList
+              above: langSearch
               model: root.languagesShown
               delegate: Choice {
                 required property var modelData
@@ -812,13 +882,14 @@ Item {
               id: kbSearch
               Layout.fillWidth: true
               placeholder: {{ tq "kb.search" }}
-              onAccepted: if (root.kbShown.length > 0) root.setKeyboard(root.kbShown[0].layout, root.kbShown[0].variant)
+              onAccepted: if (text.trim() === "") root.primary(true)
+                else root.pickFirst(root.kbShown[0], k => k.layout === root.layout && k.variant === root.variant,
+                                         k => { root.kbPicked = true; root.setKeyboard(k.layout, k.variant) })
+              Keys.onDownPressed: kbList.forceActiveFocus()
             }
-            ListView {
-              Layout.fillWidth: true
-              Layout.fillHeight: true
-              clip: true
-              spacing: 2
+            Picks {
+              id: kbList
+              above: kbSearch
               model: root.kbShown
               delegate: Choice {
                 required property var modelData
@@ -854,13 +925,13 @@ Item {
               id: tzSearch
               Layout.fillWidth: true
               placeholder: {{ tq "tz.search" }}
-              onAccepted: if (root.zonesShown.length > 0) { root.timezone = root.zonesShown[0]; root.save() }
+              onAccepted: if (text.trim() === "") root.primary(true)
+                else root.pickFirst(root.zonesShown[0], z => z === root.timezone, z => { root.timezone = z; root.save() })
+              Keys.onDownPressed: if (tzList.count > 0) tzList.forceActiveFocus()
             }
-            ListView {
-              Layout.fillWidth: true
-              Layout.fillHeight: true
-              clip: true
-              spacing: 2
+            Picks {
+              id: tzList
+              above: tzSearch
               model: root.zonesShown
               delegate: Choice {
                 required property string modelData
@@ -889,11 +960,9 @@ Item {
               property: "scannerEnabled"
               value: root.open && root.step === "network"
             }
-            ListView {
-              Layout.fillWidth: true
-              Layout.fillHeight: true
-              clip: true
-              spacing: 2
+            Picks {
+              id: wifiList
+              takesKeysOn: "network"
               // While a password is asked, only that network.
               model: !root.wifi || !Networking.wifiEnabled ? [] : netStep.asking ? [netStep.asking]
                 : root.wifi.networks.values.slice().sort((a, b) => b.signalStrength - a.signalStrength)
@@ -974,10 +1043,9 @@ Item {
             visible: root.step === "disk"
             anchors.fill: parent
             spacing: 8
-            ListView {
-              Layout.fillWidth: true
-              Layout.fillHeight: true
-              clip: true
+            Picks {
+              id: diskList
+              takesKeysOn: "disk"
               spacing: 4
               model: root.disks
               delegate: Choice {
@@ -1103,12 +1171,9 @@ Item {
                 }
               }
             }
-            ListView {
+            Picks {
               visible: root.details
-              Layout.fillWidth: true
-              Layout.fillHeight: true
-              clip: true
-              spacing: 2
+              multi: true
               model: root.apps
               delegate: Choice {
                 required property var modelData
