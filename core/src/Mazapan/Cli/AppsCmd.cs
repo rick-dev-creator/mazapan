@@ -258,7 +258,7 @@ public static partial class Program
             VendorRelease? release = null;
             if (a.Vendor != "")
             {
-                try { release = Mazapan.Store.Vendor.Latest(a.Vendor); }
+                try { release = VendorLatest(a.Vendor); }
                 catch (Exception e) when (e is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException or KeyNotFoundException or InvalidOperationException or IndexOutOfRangeException)
                 {
                     p.Unreachable.Add((a, e.Message));
@@ -716,6 +716,26 @@ public static partial class Program
             }
         }
     }
+
+    /// <summary>
+    /// A maker's latest release, asked again when the network didn't answer
+    /// (a connection just up can have no DNS for a moment: the first login's
+    /// apps start right then). An answer that's wrong (an error status, what
+    /// it says unreadable) isn't asked again.
+    /// </summary>
+    static VendorRelease VendorLatest(string spec)
+    {
+        for (var i = 1; ; i++)
+        {
+            try { return Mazapan.Store.Vendor.Latest(spec); }
+            catch (Exception e) when (i < VendorTries && e is HttpRequestException { StatusCode: null } or TaskCanceledException)
+            {
+                Thread.Sleep(VendorWait);
+            }
+        }
+    }
+    internal static int VendorTries = 3;
+    internal static TimeSpan VendorWait = TimeSpan.FromSeconds(5);
 
     /// <summary>Arch's mirrors answer (a connection said up can still have no DNS for a while).</summary>
     static bool Reachable(TimeSpan wait)
