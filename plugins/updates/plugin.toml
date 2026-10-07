@@ -8,7 +8,7 @@ categories = ["bar", "panel"]
 requires = ["shell-bar"]
 
 [packages]
-pacman = ["quickshell", "pacman-contrib", "libnotify", "fwupd"]
+pacman = ["quickshell", "pacman-contrib", "libnotify", "fwupd", "xdg-terminal-exec"]
 
 [settings]
 # How often to look for updates (hours). Looking downloads the package lists only.

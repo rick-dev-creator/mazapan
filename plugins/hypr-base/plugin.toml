@@ -7,7 +7,7 @@ description = "Hyprland entry point: monitors, input, core bindings; loads every
 categories = ["window"]
 
 [packages]
-pacman = ["hyprland", "foot"]
+pacman = ["hyprland", "foot", "xdg-terminal-exec"]
 
 [settings]
 # Keyboard layouts, comma separated ("us", "es", "us,es"): xkb's names.
@@ -40,7 +40,7 @@ run = "Hyprland --verify-config -c ~/.config/hypr/hyprland.lua"
 # What the palette lists: each with its command and its keybinding.
 [[actions]]
 name = "{{ t \"act.terminal\" }}"
-run = "foot"
+run = "xdg-terminal-exec"
 key = "SUPER + Return"
 keywords = "{{ t \"act.terminal.kw\" }}"
 

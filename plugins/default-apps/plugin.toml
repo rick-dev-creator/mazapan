@@ -1,14 +1,16 @@
 [plugin]
 id = "default-apps"
 name = "Default apps"
-version = "0.2.0"
+version = "0.3.0"
 api = 1
-description = "What opens links, PDFs, pictures, videos, music, text, folders, mail, documents and archives: the first installed of the usual ones, unless you picked one; what you set in an app stays"
+description = "What opens links, PDFs, pictures, videos, music, text, folders, mail, documents and archives, and the terminal: the first installed of the usual ones, unless you picked one; what you set in an app stays"
 categories = ["tools"]
 requires = ["hypr-base"]
 
 [packages]
-pacman = ["xdg-utils", "jq", "glib2"]
+# xdg-terminal-exec: the terminal everything opens (SUPER + Enter, the
+# palette, Apps…), the one in xdg-terminals.list.
+pacman = ["xdg-utils", "jq", "glib2", "xdg-terminal-exec", "foot"]
 
 [settings]
 # Links and web pages: a desktop file's name ("firefox.desktop"); empty: the first installed.
@@ -27,6 +29,8 @@ audio = { default = "", kind = "text", label = "Music" }
 text = { default = "", kind = "text", label = "Text" }
 # Email links (mailto:).
 email = { default = "", kind = "text", label = "Email" }
+# The terminal (SUPER + Enter, and what opens one): empty, the first installed.
+terminal = { default = "", kind = "text", label = "Terminal" }
 # Goes to the browser's window when it's open, else opens it ("": none).
 browser_key = { default = "SUPER + B", label = "Browser key" }
 # The same for the files.

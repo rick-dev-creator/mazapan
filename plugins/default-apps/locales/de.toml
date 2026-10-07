@@ -15,6 +15,8 @@
 "setting.text" = "Text"
 "setting.text.help" = "Reiner Text."
 "setting.email" = "E-Mail"
+"setting.terminal" = "Terminal"
+"setting.terminal.help" = "Das Terminal (SUPER + Enter, und was eines öffnet): leer, das erste installierte."
 "setting.email.help" = "E-Mail-Links (mailto:)."
 "setting.browser_key" = "Taste für den Browser"
 "setting.browser_key.help" = "Springt zum Browserfenster, wenn er offen ist, sonst öffnet sie ihn. Leer: keine."

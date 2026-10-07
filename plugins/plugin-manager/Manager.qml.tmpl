@@ -157,7 +157,7 @@ Item {
       Quickshell.execDetached(["sh", "-c", wrap, "sh"].concat(args))
       return
     }
-    Quickshell.execDetached(["sh", "-c", 'T=$1; shift; exec $T sh -c "$@"', "sh", {{ quote settings.terminal }},
+    Quickshell.execDetached(["sh", "-c", 'T=$1; shift; exec $T sh -c "$@"', "sh", {{ json settings.terminal }}.trim() || "xdg-terminal-exec --hold",
       wrap, "sh"].concat(args))
     close()
   }

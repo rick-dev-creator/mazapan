@@ -73,7 +73,8 @@ hl.config({
   },
 })
 
-local terminal = "foot"
+-- The default terminal (Settings, Default apps: xdg-terminals.list).
+local terminal = "xdg-terminal-exec"
 local mod = "SUPER"
 
 hl.bind(mod .. " + Return", hl.dsp.exec_cmd(terminal))

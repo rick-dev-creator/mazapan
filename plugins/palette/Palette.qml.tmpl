@@ -34,8 +34,8 @@ Item {
 
   readonly property bool showCommands: {{ settings.show_commands }}
   // Shell commands, the user's own quoting kept; never empty.
-  readonly property string terminal: {{ json settings.terminal }}.trim() || "foot"
-  readonly property string terminalHold: {{ json settings.terminal_hold }}.trim() || "foot --hold"
+  readonly property string terminal: {{ json settings.terminal }}.trim() || "xdg-terminal-exec"
+  readonly property string terminalHold: {{ json settings.terminal_hold }}.trim() || "xdg-terminal-exec --hold"
   readonly property string launcher: Quickshell.env("HOME") + "/.local/share/mazapan/bin/palette-launch"
   // Every plugin's actions, rendered by the core.
   readonly property var actions: {{ json actions }}

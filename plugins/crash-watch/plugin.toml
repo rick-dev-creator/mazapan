@@ -9,7 +9,7 @@ requires = ["shell-bar", "agent"]
 optional = true
 
 [packages]
-pacman = ["quickshell", "libnotify", "systemd", "foot"]
+pacman = ["quickshell", "libnotify", "systemd", "xdg-terminal-exec"]
 
 [settings]
 # How often to look (seconds).

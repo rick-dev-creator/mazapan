@@ -112,8 +112,63 @@ Item {
           root.apps = o.apps || []
         } catch (e) {}
         root.loading = false
+        root.probeDefaults()
       }
     }
+  }
+
+  // --- what an installed app can be the default for ----------------------------------
+
+  // Its main kind (a terminal, a browser…) when it isn't the default for it
+  // yet: {appId: kind}. One button, "Use as default …", beside it.
+  property var canDefault: ({})
+  // The kinds, the most telling first (a browser opens PDFs too: it's a browser).
+  readonly property var defaultKinds: ["terminal", "browser", "email", "files", "video", "audio", "images", "pdf", "text"]
+  readonly property var kindNames: ({
+    terminal: {{ tq "kind.terminal" }}, browser: {{ tq "kind.browser" }}, email: {{ tq "kind.email" }},
+    files: {{ tq "kind.files" }}, video: {{ tq "kind.video" }}, audio: {{ tq "kind.audio" }},
+    images: {{ tq "kind.images" }}, pdf: {{ tq "kind.pdf" }}, text: {{ tq "kind.text" }}
+  })
+  function probeDefaults() {
+    const ids = apps.filter(a => a.installed && a.desktop).map(a => a.id + "=" + a.desktop)
+    if (ids.length === 0) { canDefault = {}; return }
+    defaultsProbe.command = ["sh", "-c",
+      // Each app's kinds (default-apps --kinds), then what's the default now:
+      // mimeapps.list for a type, xdg-terminals.list for the terminal.
+      'b="$HOME/.local/share/mazapan/bin/default-apps"; c="${XDG_CONFIG_HOME:-$HOME/.config}"; '
+      + 'for p in "$@"; do for k in $(sh "$b" --kinds "${p#*=}"); do echo "app ${p%%=*} $k"; done; done; '
+      + 'echo "now terminal $(grep -v "^[#-]" "$c/xdg-terminals.list" 2>/dev/null | head -1 | cut -d: -f1)"; '
+      + 'for k in browser:x-scheme-handler/https files:inode/directory pdf:application/pdf images:image/png video:video/mp4 '
+      + 'audio:audio/mpeg text:text/plain email:x-scheme-handler/mailto; do '
+      + 'echo "now ${k%%:*} $(xdg-mime query default "${k#*:}" 2>/dev/null)"; done', "sh"].concat(ids)
+    defaultsProbe.running = true
+  }
+  Process {
+    id: defaultsProbe
+    stdout: StdioCollector {
+      onStreamFinished: {
+        const kinds = {}, now = {}
+        for (const l of text.split("\n")) {
+          const f = l.split(" ")
+          if (f[0] === "app") (kinds[f[1]] = kinds[f[1]] || []).push(f[2])
+          else if (f[0] === "now") now[f[1]] = f.slice(2).join(" ")
+        }
+        const out = {}
+        for (const a of root.apps) {
+          const k = root.defaultKinds.find(k => (kinds[a.id] || []).includes(k))
+          if (k && now[k] !== a.desktop) out[a.id] = k
+        }
+        root.canDefault = out
+      }
+    }
+  }
+  function makeDefault(a) {
+    const k = canDefault[a.id]
+    if (!k) return
+    const c = Object.assign({}, canDefault)
+    delete c[a.id]
+    canDefault = c
+    Quickshell.execDetached(["mazapan", "apply", "--set", "default-apps." + k + "=\"" + a.desktop + "\""])
   }
 
   // --- what a Flatpak app may reach ------------------------------------------------
@@ -354,7 +409,7 @@ Item {
   // An app opened as the palette opens it: a terminal app (Neovim, btop…)
   // in a terminal, since DesktopEntry.execute() would start it with none
   // and nothing would show.
-  readonly property string terminal: {{ json settings.terminal }}.trim() || "foot"
+  readonly property string terminal: {{ json settings.terminal }}.trim() || "xdg-terminal-exec"
   function word(s) {
     return /^[\w@%+=:,./-]+$/.test(s) ? s : "'" + s.replace(/'/g, "'\\''") + "'"
   }
@@ -427,6 +482,11 @@ Item {
           elide: Text.ElideRight
           Layout.fillWidth: true
         }
+      }
+      Button {
+        visible: rowItem.app.installed && !!root.canDefault[rowItem.app.id]
+        text: {{ tq "make_default" }}.arg(root.kindNames[root.canDefault[rowItem.app.id]] || "")
+        onClicked: root.makeDefault(rowItem.app)
       }
       Button {
         visible: rowItem.app.installed && !!rowItem.app.desktop

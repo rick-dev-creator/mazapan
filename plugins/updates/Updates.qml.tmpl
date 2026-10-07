@@ -228,7 +228,7 @@ Item {
             Caption { text: {{ tq "plugins" }}; Layout.fillWidth: true }
             Button {
               text: {{ tq "plugins.update" }}
-              onClicked: { root.close(); Quickshell.execDetached(["foot", "--hold", "sh", "-c", "mazapan plugins update && mazapan apply"]) }
+              onClicked: { root.close(); Quickshell.execDetached(["xdg-terminal-exec", "--hold", "sh", "-c", "mazapan plugins update && mazapan apply"]) }
             }
           }
           Label {
@@ -248,7 +248,7 @@ Item {
             Caption { text: {{ tq "firmware" }}; Layout.fillWidth: true }
             Button {
               text: {{ tq "firmware.update" }}
-              onClicked: { root.close(); Quickshell.execDetached(["foot", "--hold", "fwupdmgr", "update"]) }
+              onClicked: { root.close(); Quickshell.execDetached(["xdg-terminal-exec", "--hold", "fwupdmgr", "update"]) }
             }
           }
           Repeater {

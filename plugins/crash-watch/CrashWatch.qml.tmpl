@@ -80,7 +80,7 @@ Item {
       stdout: StdioCollector {
         onStreamFinished: {
           if (text.trim() === "ask" && root.ask)
-            Quickshell.execDetached(["sh", "-c", "foot --hold sh -c " + root.word(root.ask.run)])
+            Quickshell.execDetached(["sh", "-c", "xdg-terminal-exec --hold sh -c " + root.word(root.ask.run)])
         }
       }
       onExited: Qt.callLater(p.destroy)
