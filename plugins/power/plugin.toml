@@ -31,6 +31,11 @@ reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 template = "hyprlock.conf.tmpl"
 output = "~/.config/hypr/hyprlock.conf"
 
+# The lock screen's line for a locked account, and its buttons.
+[[targets]]
+template = "lock-screen.sh.tmpl"
+output = "~/.local/share/mazapan/bin/lock-screen"
+
 [[targets]]
 template = "power.lua.tmpl"
 output = "~/.config/hypr/mazapan/power.lua"

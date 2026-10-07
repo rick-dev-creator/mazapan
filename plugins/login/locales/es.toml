@@ -3,6 +3,8 @@
 password = "Contraseña"
 starting = "Iniciando…"
 wrong = "Esa no es la contraseña"
+account_locked = "Cuenta bloqueada por demasiados intentos fallidos"
+account_locked_for = "Cuenta bloqueada por demasiados intentos fallidos · faltan %1 min"
 restart = "Reiniciar"
 power_off = "Apagar"
 "setting.autologin" = "Entrar directo al arrancar"

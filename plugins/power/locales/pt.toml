@@ -14,6 +14,8 @@
 "uptime" = "ligado há %1"
 "password" = "senha"
 "wrong" = "Senha incorreta"
+"account_locked" = "Conta bloqueada após muitas senhas erradas"
+"account_locked_for" = "Conta bloqueada após muitas senhas erradas · faltam %1 min"
 "locked" = "bloqueado"
 "lock.kw" = "bloquear tela ausente"
 "suspend.kw" = "dormir repouso"

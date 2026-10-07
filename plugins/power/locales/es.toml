@@ -14,6 +14,8 @@
 "uptime" = "encendido %1"
 "password" = "contraseña"
 "wrong" = "Contraseña incorrecta"
+"account_locked" = "Cuenta bloqueada por demasiados intentos fallidos"
+"account_locked_for" = "Cuenta bloqueada por demasiados intentos fallidos · faltan %1 min"
 "locked" = "bloqueado"
 "lock.kw" = "bloquear pantalla ausente"
 "suspend.kw" = "dormir reposo"

@@ -3,6 +3,8 @@
 password = "Passwort"
 starting = "Wird gestartet…"
 wrong = "Das ist nicht das Passwort"
+account_locked = "Konto nach zu vielen falschen Passwörtern gesperrt"
+account_locked_for = "Konto nach zu vielen falschen Passwörtern gesperrt · noch %1 Min."
 restart = "Neu starten"
 power_off = "Ausschalten"
 "setting.autologin" = "Beim Start direkt anmelden"

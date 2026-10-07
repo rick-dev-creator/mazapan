@@ -16,6 +16,12 @@ release (a tag `vX.Y.Z`) names them.
   giving its own the same name and a higher number
   (`control/sections/31-media.qml` over `30-media.qml`). With the plugin
   off, the original is back.
+- Three wrong passwords lock the account for 10 minutes (Arch's
+  faillock), and the lock screen and the login screen kept saying only
+  "wrong password", the right one too. Now they say the account is locked
+  and the minutes left. The lock screen has suspend, restart and shut down
+  at the bottom, as the login screen does (restart and shut down ask for
+  a second click).
 
 ## 0.4.1 (2026-10-07)
 

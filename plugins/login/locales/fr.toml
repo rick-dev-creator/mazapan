@@ -3,6 +3,8 @@
 password = "Mot de passe"
 starting = "Démarrage…"
 wrong = "Ce n'est pas le mot de passe"
+account_locked = "Compte bloqué après trop de mots de passe erronés"
+account_locked_for = "Compte bloqué après trop de mots de passe erronés · encore %1 min"
 restart = "Redémarrer"
 power_off = "Éteindre"
 "setting.autologin" = "Entrer directement au démarrage"
