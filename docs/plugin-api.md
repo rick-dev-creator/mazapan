@@ -707,6 +707,12 @@ a tile's arrow opens (its networks, its devices) goes below the switches:
 tile never moves under the pointer. `ControlService.close()` (`import "../../components/control"`)
 closes the panel after an action.
 
+Two parts of the same name in one folder: the one with the higher `NN`
+takes the other's place. A plugin replaces one of the Control Center's own
+that way, without touching it: `control/sections/31-media.qml` shows
+instead of its `30-media.qml`, and with that plugin off, the original is
+back.
+
 A bar widget whose file name (without `NN-` and `.qml`) is the same as a
 part's leaves the bar while the Control Center is on: `widgets/right/30-volume.qml`
 and `control/sections/20-volume.qml`. With it off, the widgets are back.
