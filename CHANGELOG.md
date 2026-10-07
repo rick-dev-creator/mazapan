@@ -4,6 +4,13 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
+## Unreleased
+
+- Apps from their makers: their download is tried again too when the
+  network doesn't answer (four times, five seconds apart), not only the
+  question for their latest version: a home router's DNS that misses a
+  question now and then no longer leaves an app out.
+
 ## 0.3.1 (2026-10-07)
 
 - Apps from their makers (Herdr, VS Code, JetBrains…): asked again for a

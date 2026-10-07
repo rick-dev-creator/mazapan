@@ -258,7 +258,7 @@ public static partial class Program
             VendorRelease? release = null;
             if (a.Vendor != "")
             {
-                try { release = VendorLatest(a.Vendor); }
+                try { release = Retrying(() => Mazapan.Store.Vendor.Latest(a.Vendor)); }
                 catch (Exception e) when (e is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException or KeyNotFoundException or InvalidOperationException or IndexOutOfRangeException)
                 {
                     p.Unreachable.Add((a, e.Message));
@@ -718,23 +718,24 @@ public static partial class Program
     }
 
     /// <summary>
-    /// A maker's latest release, asked again when the network didn't answer
-    /// (a connection just up can have no DNS for a moment: the first login's
-    /// apps start right then). An answer that's wrong (an error status, what
-    /// it says unreadable) isn't asked again.
+    /// What asks a maker (its latest release, its download), done again when
+    /// the network didn't answer: a connection just up can have no DNS for a
+    /// moment (the first login's apps start right then), and a home router's
+    /// DNS can miss one question in fifty. An answer that's wrong (an error
+    /// status, what it says unreadable) isn't asked again.
     /// </summary>
-    static VendorRelease VendorLatest(string spec)
+    static T Retrying<T>(Func<T> ask)
     {
         for (var i = 1; ; i++)
         {
-            try { return Mazapan.Store.Vendor.Latest(spec); }
+            try { return ask(); }
             catch (Exception e) when (i < VendorTries && e is HttpRequestException { StatusCode: null } or TaskCanceledException)
             {
                 Thread.Sleep(VendorWait);
             }
         }
     }
-    internal static int VendorTries = 3;
+    internal static int VendorTries = 4;
     internal static TimeSpan VendorWait = TimeSpan.FromSeconds(5);
 
     /// <summary>Arch's mirrors answer (a connection said up can still have no DNS for a while).</summary>
@@ -837,7 +838,7 @@ public static partial class Program
             {
                 try
                 {
-                    Mazapan.Store.Vendor.Install(a.Id, Mazapan.Store.Vendor.MakerOf(a.Vendor), rel, a.In(lang).Name);
+                    Retrying(() => { Mazapan.Store.Vendor.Install(a.Id, Mazapan.Store.Vendor.MakerOf(a.Vendor), rel, a.In(lang).Name); return true; });
                     tx.Vendor.Add(a.Id);
                     okApps.Add(a.Id);
                 }
