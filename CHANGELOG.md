@@ -4,7 +4,7 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
-## Unreleased
+## 0.3.0 (2026-10-07)
 
 - Default apps: the terminal is one of them (Settings, Default apps):
   SUPER + Enter, the palette's terminal apps, Plugins, Updates and a
