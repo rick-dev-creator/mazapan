@@ -4,7 +4,7 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
-## Unreleased
+## 0.3.2 (2026-10-07)
 
 - Apps from their makers: their download is tried again too when the
   network doesn't answer (four times, five seconds apart), not only the
