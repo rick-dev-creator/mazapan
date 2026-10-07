@@ -16,16 +16,31 @@ The store is goal-first: people look for what they want to get done
 widget. Every rule here is there so a listing says plainly what a plugin
 does, shows it doing it, and keeps its word.
 
-## Who publishes
+## Who's who
 
-A plugin's author is the owner of its repository on GitHub: a person or
-an organization. The store shows their public GitHub profile (picture,
-name, @login, bio, company, location, website, since when), refreshed
-every hour, and never their email, even when public. `author` in
-plugin.toml is shown next to it as a display name, never instead of it.
+Two people meet in the store, and each is known differently:
 
-Reviews are written with a GitHub account too, so an author's answer to a
-review is marked as theirs by itself.
+| | The developer | The user |
+|---|---|---|
+| Who | Whoever made the plugin | Whoever installs it |
+| Known by | The GitHub account that owns its repository (a person or an organization) | No account: a nickname, and a key their computer made |
+| Does | Publishes it, releases versions, answers reviews | Installs, recommends or not, reviews, reports |
+| From | GitHub, and the store's web signed in with GitHub | Mazapan's Plugins panel |
+| Shown | Their public GitHub profile: picture, name, @login, bio, company, location, website, since when; never their email | Their nickname, the version they have and how long they've had it |
+
+**The developer.** `author` in plugin.toml is shown next to the GitHub
+profile as a display name, never instead of it. The profile is read every
+hour: changed there, changed here. An answer to a review is marked as the
+developer's by itself, since they sign in with the account that owns the
+repository.
+
+**The user.** Only someone who has the plugin can rate it, as on a phone:
+from the Plugins panel, never from the web (the web only shows). Mazapan
+makes a key for the computer when it's installed and keeps it there; a
+vote or a review is signed with it. The first review asks for a nickname;
+linking a GitHub account is optional and adds a ✓. One vote per computer
+and plugin (a new one replaces it), and it counts once the computer has
+had the plugin for 7 days, as the weekly install count says.
 
 ## The listing
 
@@ -131,10 +146,11 @@ The review refuses, and the store takes down, a plugin that:
 
 ## What the store shows
 
-- **Recommended by**: the share of 👍 among 👍 and 👎 on its reviews
-  discussion, with how many voted; shown from 5 votes on.
-- **Reviews**: the latest ones, each with its version, and the author's
-  answer under it.
+- **Recommended by**: the share of users who recommend it among those who
+  voted, with how many; shown from 5 votes on.
+- **Reviews**: the latest ones, each with its version, and the
+  developer's answer under it. Anyone can report one; reported reviews are
+  looked at by a person.
 - **On how many computers**: counted once a week by Mazapan's update check
   with no identifier (see [roadmap.md](roadmap.md)); shown from 10 on.
 - **Checked**: the commit the registry reviewed, and what the plugin can
