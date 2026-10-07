@@ -4,7 +4,7 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
-## Unreleased
+## 0.4.2 (2026-10-07)
 
 - Now Playing, a new plugin in the registry
   ([mazapan-now-playing](https://github.com/rick-dev-creator/mazapan-now-playing)):
