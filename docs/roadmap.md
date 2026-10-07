@@ -63,6 +63,60 @@ machine, a published ISO, 1.0.
 8. **1.0.** Once 1 and 2 are done: tagged `v1.0.0`, from the stable
    channel.
 
+## Plugins that make a difference
+
+What comes next is mostly plugins: each one a goal someone has, reached
+without a terminal. Built-in when nearly everyone needs it and it works on
+any hardware; from the community (their own repository, in the registry)
+when it depends on a brand, a service or a taste. Mazapan makes the first
+community ones itself, as it did with Markets and Pomodoro, so the registry
+starts with plugins worth installing.
+
+### The store
+
+Before more plugins, a place to find them that says which are good:
+**Mazapan Store**, an app of its own in its own repository
+(mazapan-store: ASP.NET Core and PostgreSQL). Ratings and reviews from
+the people who installed a plugin, without an account, from the Plugins
+panel; the developer known by their GitHub account, answering from their
+repository; how many computers have it, counted without spying. The
+registry stays where plugins are listed and reviewed; the store reads it.
+Its rules: [store.md](store.md).
+
+### From the community
+
+Simplest first:
+
+1. **What I follow.** Feeds and tickers, as Markets does: one each.
+2. **What's running while I build.** The ports in use and which process
+   holds each, the containers up, stopped with a click: next to
+   dev-databases and dev-dotnet. The first one made from scratch for the
+   registry.
+3. **The services I work in.** Tasks, issues and notifications from one
+   service each (Todoist, Linear, GitHub…) in the bar or the palette, each
+   signed in to its own way.
+4. **The phone next to me.** Its screen in a window (scrcpy), files and
+   notifications both ways (KDE Connect).
+5. **My devices working.** One plugin per brand, where only its own tools
+   reach: keyboard lighting, Logitech mice (Solaar), Razer (OpenRazer),
+   headphones' battery, MSI laptops' charge limit and fans (msi-ec); each
+   tried on the device itself.
+
+### Built-in
+
+Simplest first:
+
+6. **How the machine is doing.** CPU, GPU, memory, temperatures and fans
+   in the bar; a word when something runs hot or memory runs out, with
+   what's using it, and stopping it from there.
+7. **A VPN with one click.** WireGuard and OpenVPN through NetworkManager,
+   a config file dropped in to add one, a switch in the Control Center,
+   what's connected said in the bar.
+8. **A battery that lasts years.** A charge limit (80 %, or full for a
+   trip) where the kernel offers one (`charge_control_end_threshold`:
+   ThinkPad, ASUS, Framework, Dell, Huawei, Samsung…), kept across
+   restarts, and the battery's health over time, not only today's.
+
 ## Road to 1.0
 
 | Block | What it takes | State |
@@ -100,14 +154,13 @@ After 1.0, roughly in this order:
   TPM later.
 - **For people at work:** backups of your files (as Time Machine),
   printers and scanners said when plugged in, files found from the
-  palette, the calendar and the next meeting in the bar, the phone
-  linked (KDE Connect).
+  palette, the calendar and the next meeting in the bar.
 - **Less friction:** "where do you come from?" in the welcome (macOS- or
   Windows-like keys and windows), a dock or taskbar with Alt+Tab
   previews, Quick Look, a right click on the desktop, the scale from the
   screen's density.
 - **Robustness:** an LTS kernel to fall back on, systemd-oomd, the disk's
-  and battery's health, btrfs scrub, security advisories (arch-audit),
+  health, btrfs scrub, security advisories (arch-audit),
   reinstall keeping your files, "report this bug" from a crash, a pinned
   Arch snapshot.
 - **The same desktop anywhere:** config and plugins synced through git,
