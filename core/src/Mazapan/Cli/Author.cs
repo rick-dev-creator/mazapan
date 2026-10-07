@@ -53,6 +53,8 @@ public static partial class Program
             next:
               mazapan plugins dev {at}     apply it on every save, while you change it
               mazapan plugins check {at}   before sharing it: every theme, every language
+
+            to share it: https://github.com/rick-dev-creator/mazapan/blob/main/docs/publishing-plugins.md
             """);
     }
 

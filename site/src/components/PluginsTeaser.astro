@@ -1,6 +1,6 @@
 ---
 // The front page's way into the plugin gallery: the newest few.
-import { media, plugins } from "../lib/plugins";
+import { guide, media, plugins } from "../lib/plugins";
 const shown = plugins.slice(0, 3);
 ---
 
@@ -28,5 +28,5 @@ const shown = plugins.slice(0, 3);
       </a>
     ))}
   </div>
-  <p class="teaser-more"><a class="button" href="/plugins/">Every plugin</a> <a class="button" href="https://github.com/rick-dev-creator/mazapan-plugins#listing-your-plugin">Make your own</a></p>
+  <p class="teaser-more"><a class="button" href="/plugins/">Every plugin</a> <a class="button" href={guide}>Make your own</a></p>
 </section>

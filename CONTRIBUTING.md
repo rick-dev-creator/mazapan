@@ -103,6 +103,11 @@ with a translation come first; a new one moves up by itself.
 
 ## A plugin
 
+A plugin of yours doesn't need to come here: it lives in your own
+repository and the plugin registry lists it
+([docs/publishing-plugins.md](docs/publishing-plugins.md)). This is for
+Mazapan's own plugins (`plugins/`).
+
 ```sh
 mazapan plugins new my-widget --kind bar    # in the VM
 mazapan plugins check my-widget             # every theme × every language, and what it can do

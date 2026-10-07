@@ -751,9 +751,10 @@ what the plugin says it is (the registry reads it).
 To share it: a public git repository with plugin.toml, a README.md and a
 LICENSE at its root, a tag for each version (`vX.Y.Z`, the version in
 plugin.toml), and a pull request listing it in the
-[plugin registry](https://github.com/rick-dev-creator/mazapan-plugins#listing-your-plugin).
+[plugin registry](https://github.com/rick-dev-creator/mazapan-plugins).
 The registry checks it at that commit, a person looks at what it can do,
 and from then on new tags are listed by themselves (those that would be
 able to do more, after a person looks again). Or keep a catalog file of
-your own.
+your own. [publishing-plugins.md](publishing-plugins.md) is the whole way,
+step by step.
 
