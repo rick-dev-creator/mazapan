@@ -72,6 +72,17 @@ when it depends on a brand, a service or a taste. Mazapan makes the first
 community ones itself, as it did with Markets and Pomodoro, so the registry
 starts with plugins worth installing.
 
+### The store
+
+Before more plugins, a place to find them that says which are good:
+**Mazapan Store**, an app of its own in its own repository
+(mazapan-store: ASP.NET Core and PostgreSQL). Ratings and reviews from
+the people who installed a plugin, without an account, from the Plugins
+panel; the developer known by their GitHub account, answering from their
+repository; how many computers have it, counted without spying. The
+registry stays where plugins are listed and reviewed; the store reads it.
+Its rules: [store.md](store.md).
+
 ### From the community
 
 Simplest first:
