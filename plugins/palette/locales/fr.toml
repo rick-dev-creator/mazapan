@@ -12,6 +12,7 @@
 "copied" = "Copié : %1"
 "nothing" = "Rien ne correspond à “%1”"
 "workspace" = "espace %1"
+"minimized" = "réduite"
 "key_only" = "Appuyez sur %1"
 "act.palette" = "Palette de commandes"
 "act.update" = "Mettre à jour le système"

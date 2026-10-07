@@ -121,11 +121,15 @@ Item {
     const out = []
     for (const t of Hyprland.toplevels.values) {
       const cls = (t.lastIpcObject && t.lastIpcObject.class) || (t.wayland && t.wayland.appId) || ""
-      const cmd = `hyprctl dispatch 'hl.dsp.focus({ window = "address:${address(t)}" })'`
+      // Through hypr-base's mazapan_go_to_window: a minimized window comes
+      // to the workspace you're on rather than showing the one it waits on.
+      const cmd = `hyprctl eval 'mazapan_go_to_window("${address(t)}")'`
       const e = cls ? DesktopEntries.heuristicLookup(cls) : null
+      const where = !t.workspace ? "" : t.workspace.name === "special:minimized" ? {{ tq "minimized" }}
+        : {{ tq "workspace" }}.arg(t.workspace.name)
       out.push({
         kind: "window", glyph: "󰖯", icon: e ? iconFor(e.icon) : "", title: t.title || cls,
-        detail: [e ? e.name : cls, t.workspace ? {{ tq "workspace" }}.arg(t.workspace.name) : ""].filter(x => x).join(" · "),
+        detail: [e ? e.name : cls, where].filter(x => x).join(" · "),
         // Found by title, class and workspace; not by its command, which
         // is the same for every window but the address.
         command: cmd, searchable: false, key: "", words: cls,
