@@ -45,21 +45,27 @@ Item {
 
   // A fresh URL each (re)load, or the engine keeps the old component.
   readonly property string generation: String(Date.now())
-  readonly property var nowFiles: [
+  // Two parts of one name (NN-<name>.qml): the later one takes the other's
+  // place (a plugin's own music over the Control Center's).
+  function lastOfEachName(files) {
+    const name = f => f.split("/").pop().replace(/^[0-9]+-/, "").replace(/\.qml$/, "")
+    return files.filter((f, i) => !files.slice(i + 1).some(g => name(g) === name(f)))
+  }
+  readonly property var nowFiles: lastOfEachName([
 {{- for file in under "~/.config/quickshell/mazapan/control/now/" }}
     {{ quote file }},
 {{- end }}
-  ]
-  readonly property var tileFiles: [
+  ])
+  readonly property var tileFiles: lastOfEachName([
 {{- for file in under "~/.config/quickshell/mazapan/control/tiles/" }}
     {{ quote file }},
 {{- end }}
-  ]
-  readonly property var sectionFiles: [
+  ])
+  readonly property var sectionFiles: lastOfEachName([
 {{- for file in under "~/.config/quickshell/mazapan/control/sections/" }}
     {{ quote file }},
 {{- end }}
-  ]
+  ])
 
   // What the pill shows, gathered from what's loaded (the sections live
   // while the panel is closed: they feed the pill).

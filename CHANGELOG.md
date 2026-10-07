@@ -4,6 +4,13 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
+## Unreleased
+
+- The Control Center: a plugin can take the place of one of its parts by
+  giving its own the same name and a higher number
+  (`control/sections/31-media.qml` over `30-media.qml`). With the plugin
+  off, the original is back.
+
 ## 0.4.1 (2026-10-07)
 
 - After an update that wanted a restart (a new kernel), the Updates panel
