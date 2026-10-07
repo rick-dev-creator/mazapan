@@ -4,6 +4,13 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
+## Unreleased
+
+- After an update that wanted a restart (a new kernel), the Updates panel
+  and the bar kept asking for it after the restart too: they read the last
+  run's log again. Now a restart asked for before the computer last
+  started counts as done.
+
 ## 0.4.0 (2026-10-07)
 
 - The plugin registry: plugins others make live in their own repositories,
