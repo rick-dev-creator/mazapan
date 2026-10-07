@@ -3,12 +3,30 @@
 import { Marked, type Tokens } from "marked";
 import registry from "../data/plugins.json";
 
+/** Who made a plugin: the GitHub account that owns its repository, as its public profile says. */
+export interface Owner {
+  id: number;
+  login: string;
+  name: string;
+  bio: string;
+  company: string;
+  blog: string;
+  location: string;
+  html_url: string;
+  created_at: string;
+  type: string;
+  picture: string;
+}
+
 export interface Plugin {
   id: string;
   name: string;
   description: string;
   version: string;
   author: string;
+  owner?: Owner;
+  repository?: string;
+  stars?: number;
   homepage: string;
   license: string;
   source: string;
@@ -52,6 +70,15 @@ export const categoryNames: Record<string, string> = {
 export const languageNames: Record<string, string> = {
   en: "English", es: "Español", de: "Deutsch", fr: "Français", pt: "Português",
 };
+
+/** The name a developer goes by: their GitHub profile's, else the plugin's own author line. */
+export const developer = (p: Plugin) => p.owner?.name || p.owner?.login || p.author;
+
+/** A website as people type it: no scheme, no trailing slash. */
+export const site = (url: string) => url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+export const website = (url: string) => (/^https?:\/\//.test(url) ? url : `https://${url}`);
+
+export const stars = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k` : `${n}`);
 
 /** A picture of the registry's, as the site serves it. */
 export const media = (path: string) => `/plugins/${path}`;

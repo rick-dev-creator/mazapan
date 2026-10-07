@@ -30,6 +30,10 @@ const out = join(site, "public", "plugins");
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
 for (const f of ["index.toml", "plugins.json", "media"]) cpSync(join(generated, f), join(out, f), { recursive: true });
+// The developers' pictures, as GitHub showed them to the registry: the site asks GitHub nothing.
+if (existsSync(join(generated, "authors"))) {
+  cpSync(join(generated, "authors"), join(out, "authors"), { recursive: true, filter: (f) => !f.endsWith(".json") });
+}
 mkdirSync(join(site, "src", "data"), { recursive: true });
 writeFileSync(join(site, "src", "data", "plugins.json"), JSON.stringify(data));
 if (tmp) rmSync(tmp, { recursive: true, force: true });
