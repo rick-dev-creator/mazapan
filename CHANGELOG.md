@@ -4,6 +4,16 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
+## 0.4.3 (2026-10-07)
+
+- The installer couldn't be used by keyboard: only Enter, to move on.
+  Now each screen starts in its search or its list, ↑↓ move through
+  languages, keyboards, time zones, networks and disks, Space picks,
+  Enter picks or moves on, and Tab goes through the fields, switches and
+  buttons. Buttons and switches everywhere (panels, the Control Center)
+  take Tab too, Space or Enter a button and Space a switch, with a ring
+  where the keys are.
+
 ## 0.4.2 (2026-10-07)
 
 - Now Playing, a new plugin in the registry
@@ -22,13 +32,6 @@ release (a tag `vX.Y.Z`) names them.
   and the minutes left. The lock screen has suspend, restart and shut down
   at the bottom, as the login screen does (restart and shut down ask for
   a second click).
-- The installer couldn't be used by keyboard: only Enter, to move on.
-  Now each screen starts in its search or its list, ↑↓ move through
-  languages, keyboards, time zones, networks and disks, Space picks,
-  Enter picks or moves on, and Tab goes through the fields, switches and
-  buttons. Buttons and switches everywhere (panels, the Control Center)
-  take Tab too, Space or Enter a button and Space a switch, with a ring
-  where the keys are.
 
 ## 0.4.1 (2026-10-07)
 
