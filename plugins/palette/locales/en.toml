@@ -1,6 +1,7 @@
 "copied" = "Copied: %1"
 "nothing" = "Nothing matches “%1”"
 "workspace" = "workspace %1"
+"minimized" = "minimized"
 "key_only" = "Press %1"
 "act.palette" = "Command palette"
 "act.update" = "Update the system"

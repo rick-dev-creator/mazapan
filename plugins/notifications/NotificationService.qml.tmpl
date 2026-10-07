@@ -429,7 +429,8 @@ Singleton {
     })
     if (!t) return
     const a = String(t.address)
-    Hyprland.dispatch(`hl.dsp.focus({ window = "address:${a.startsWith("0x") ? a : "0x" + a}" })`)
+    // hypr-base's: a minimized window comes to the workspace you're on.
+    Quickshell.execDetached(["hyprctl", "eval", `mazapan_go_to_window("${a.startsWith("0x") ? a : "0x" + a}")`])
   }
 
   // --- Do Not Disturb -----------------------------------------------------------

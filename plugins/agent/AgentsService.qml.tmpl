@@ -138,7 +138,8 @@ Singleton {
         for (const pid of clients.pids) {
           const c = list.find(x => x.pid === pid)
           if (c) {
-            Quickshell.execDetached(["hyprctl", "dispatch", `hl.dsp.focus({ window = "address:${c.address}" })`])
+            // hypr-base's: a minimized window comes to the workspace you're on.
+            Quickshell.execDetached(["hyprctl", "eval", `mazapan_go_to_window("${c.address}")`])
             return
           }
         }

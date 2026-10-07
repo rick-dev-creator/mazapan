@@ -77,6 +77,23 @@ hl.config({
 local terminal = "xdg-terminal-exec"
 local mod = "SUPER"
 
+-- Goes to a window: `hyprctl eval 'mazapan_go_to_window("0x…")'`, what the
+-- palette, a notification and an agent's card run. A minimized window
+-- waits on a special workspace (special:minimized, where docks for
+-- Hyprland put it), and focusing it there would show that workspace
+-- instead: it's brought to the workspace you're on first.
+function mazapan_go_to_window(address)
+  local window = "address:" .. address
+  local w = hl.get_window(window)
+  if not w then return end
+  if w.workspace and w.workspace.name == "special:minimized" then
+    local here = hl.get_active_workspace()
+    local to = (here and here.id > 0) and here.id or 1
+    hl.dispatch(hl.dsp.window.move({ window = window, workspace = to, follow = false }))
+  end
+  hl.dispatch(hl.dsp.focus({ window = window }))
+end
+
 hl.bind(mod .. " + Return", hl.dsp.exec_cmd(terminal))
 -- Close: the shell's open panel if there is one (the monitor manager…),
 -- else the window. A panel isn't a window: without this, SUPER + Q would
