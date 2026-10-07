@@ -35,7 +35,7 @@ export const generated: string = registry.generated;
  * the release that brings it (docs/versioning.md): the gallery then says
  * which Mazapan its plugins need instead of "the next one".
  */
-export const since: string = "";
+export const since: string = "0.4.0";
 export const needs = since
   ? `Needs Mazapan ${since} or newer.`
   : "Coming with the next Mazapan release (after 0.3.2): until then, Mazapan built from main.";
