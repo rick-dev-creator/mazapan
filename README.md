@@ -294,7 +294,8 @@ TOML, JSON, CSS, shell…), filled from the theme and your settings.
   [plugin registry](https://github.com/rick-dev-creator/mazapan-plugins)
   lists them by tag and commit, and [mazapan.dev/plugins](https://mazapan.dev/plugins/)
   shows them (Markets, Pomodoro…). Yours goes in with a pull request; new
-  versions are picked up from your tags.
+  versions are picked up from your tags: [publishing a plugin](docs/publishing-plugins.md),
+  step by step.
 - **Installed with consent**: `mazapan plugins add <id|git-url>` shows what a
   plugin will be able to do (files, commands, root, packages) before
   anything runs, and installs exactly the commit the registry looked at;
@@ -443,7 +444,7 @@ Each with its full description: [docs/plugins.md](docs/plugins.md).
 
 </details>
 
-How to write one: [docs/plugin-api.md](docs/plugin-api.md).
+How to write one: [docs/plugin-api.md](docs/plugin-api.md); how to publish it for everyone: [docs/publishing-plugins.md](docs/publishing-plugins.md).
 
 ## Every feature
 
@@ -543,6 +544,7 @@ mazapan apply --theme phosphor   # write it; mazapan undo takes it back
 |---|---|
 | [docs/development.md](docs/development.md) | The `mazapan` command, the repository, the dev VM, each part of the desktop in detail |
 | [docs/plugin-api.md](docs/plugin-api.md) | Writing a plugin: targets, templates, settings, health checks |
+| [docs/publishing-plugins.md](docs/publishing-plugins.md) | Publishing a plugin: your repository, the registry, new versions |
 | [docs/agent-api.md](docs/agent-api.md) | Agents and MCP |
 | [docs/first-install.md](docs/first-install.md) | The first install on real hardware |
 | [docs/security.md](docs/security.md) | What's protected, and what isn't |
