@@ -14,6 +14,8 @@
 "uptime" = "läuft seit %1"
 "password" = "Passwort"
 "wrong" = "Falsches Passwort"
+"account_locked" = "Konto nach zu vielen falschen Passwörtern gesperrt"
+"account_locked_for" = "Konto nach zu vielen falschen Passwörtern gesperrt · noch %1 Min."
 "locked" = "gesperrt"
 "lock.kw" = "sperren bildschirm abwesend"
 "suspend.kw" = "schlafen ruhezustand bereitschaft standby"

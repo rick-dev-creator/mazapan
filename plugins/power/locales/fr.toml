@@ -13,6 +13,8 @@
 "uptime" = "allumé depuis %1"
 "password" = "mot de passe"
 "wrong" = "Mot de passe incorrect"
+"account_locked" = "Compte bloqué après trop de mots de passe erronés"
+"account_locked_for" = "Compte bloqué après trop de mots de passe erronés · encore %1 min"
 "locked" = "verrouillé"
 "lock.kw" = "verrouiller écran absent lock"
 "suspend.kw" = "veille suspendre dormir sleep"

@@ -67,18 +67,30 @@ ShellRoot {
     if (busy || !user || password === "") return
     busy = true
     message = ""
+    notices = []
     Greetd.createSession(user.name)
   }
 
+
+  // What PAM said along the way: pam_faillock's two lines when the account
+  // is locked (too many wrong passwords), "locked due to 3 failed logins"
+  // and "(9 minutes left to unlock)", in the system's language.
+  property var notices: []
 
   Connections {
     target: Greetd
     function onAuthMessage(message, error, responseRequired, echoResponse) {
       if (responseRequired) Greetd.respond(root.password)
       else if (error) root.message = message
+      else root.notices = root.notices.concat([message])
     }
     function onAuthFailure(message) {
-      root.message = {{ tq "wrong" }}
+      // Locked, the password won't do until it's over: say so, and the
+      // minutes left (the second line's number), not "wrong".
+      const left = root.notices.length > 1 ? root.notices[1].match(/\d+/) : null
+      root.message = root.notices.length === 0 ? {{ tq "wrong" }}
+        : left ? {{ tq "account_locked_for" }}.replace("%1", left[0]) : {{ tq "account_locked" }}
+      root.notices = []
       root.password = ""
       root.busy = false
     }
