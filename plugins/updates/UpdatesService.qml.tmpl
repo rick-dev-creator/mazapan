@@ -33,8 +33,17 @@ Singleton {
   property string last: ""
   property string runId: ""
   // The one running (or last run) needs a restart after it: what
-  // `mazapan update` said ("::reboot kernel|hyprland").
-  property bool restartAfter: false
+  // `mazapan update` said ("::reboot kernel|hyprland"), unless the computer
+  // has restarted since (the log outlives the restart it asked for).
+  property bool rebootSaid: false
+  readonly property bool restartAfter: rebootSaid && bootedAt > 0 && Number(runId) > bootedAt
+  // When the computer started (ms, from /proc/stat's btime); 0: not known yet.
+  property real bootedAt: 0
+  Process {
+    running: true
+    command: ["awk", "/^btime /{print $2}", "/proc/stat"]
+    stdout: StdioCollector { onStreamFinished: root.bootedAt = Number(text.trim()) * 1000 || 0 }
+  }
   // Its steps as it goes ("::step ID run|ok|fail|skip DETAIL"), in order.
   property var steps: []
 
@@ -85,7 +94,7 @@ Singleton {
   function update() {
     if (running) return
     runId = String(Date.now())
-    restartAfter = false
+    rebootSaid = false
     steps = []
     running = true
     exit = -1
@@ -126,7 +135,7 @@ Singleton {
         } else if (l.startsWith(tag + "reboot ")) reboot = true
       }
       root.steps = steps
-      root.restartAfter = reboot
+      root.rebootSaid = reboot
       root.last = lines.filter(l => !l.startsWith("START ") && !l.startsWith("DONE ") && !l.startsWith(tag)).slice(-1)[0] || ""
       if (done) {
         const was = root.running
