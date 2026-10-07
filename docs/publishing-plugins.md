@@ -41,8 +41,8 @@ install, even if the tag is moved later.
 - Mazapan, to write and test the plugin (a computer with it, or the dev
   VM: [development.md](development.md)): 0.4.0 or newer, the first that
   reads the plugin registry. So do the people who install it.
-- git, and an account on GitHub, or any host that serves public
-  repositories over `https://`.
+- git, and an account on GitHub: the repository's owner is who the store
+  shows as the plugin's author ([store.md](store.md)).
 
 ## 1. Start the plugin
 
@@ -91,7 +91,9 @@ The Plugins panel and the gallery show it in each person's language.
 ## 3. Make it ready to share
 
 Besides working, a plugin others can add says who made it and how it
-looks. In `plugin.toml`:
+looks. The store's rules for each of these (its name, the one line, the
+pictures and their sizes, what a plugin may not do) are in
+[store.md](store.md). In `plugin.toml`:
 
 ```toml
 [plugin]
@@ -106,17 +108,22 @@ homepage = "https://github.com/you/mazapan-my-plugin"
 license = "MIT"
 
 [gallery]
-icon = "media/icon.svg"              # SVG, PNG, JPEG or WebP, up to 256 KB
-screenshots = ["media/panel.webp"]   # PNG, JPEG or WebP, up to 2 MB each, up to 8
+icon = "media/icon.svg"              # square: SVG, or 512×512 or larger; up to 256 KB
+screenshots = ["media/panel.webp"]   # 16:9, 1920×1080 or 2560×1440; up to 2 MB each, 1 to 8
 ```
+
+(`[store] goal`, `cover` and `accent`, in [store.md](store.md), come
+with the store: today's Mazapan refuses keys it doesn't know, so leave
+them out until the version that reads them.)
 
 And next to it:
 
-- **README.md**: what it does and how to use it (its keys, its settings).
-  It's the plugin's page in the Plugins panel and on mazapan.dev.
+- **README.md**: what it does and how to use it (its keys, its settings),
+  and everything it reaches and why. It's the plugin's page in the
+  Plugins panel and on mazapan.dev.
 - **LICENSE**: what others may do with your code (MIT, GPL, …).
-- **The pictures** `[gallery]` names. Screenshots of the whole screen
-  read best (1920×1080, WebP keeps them small); a square icon.
+- **The pictures** `[gallery]` names: real screenshots of the whole
+  screen, with made-up data (WebP keeps them small); a square icon.
 
 Then check it:
 
@@ -289,7 +296,8 @@ The rules for versions:
 
 - [ ] `mazapan plugins check` passes, with no warnings you can fix
 - [ ] plugin.toml: `author`, `license`, `homepage`, `categories`, `[gallery]`
-- [ ] README.md, LICENSE, the icon and screenshots in the repository
+- [ ] README.md (with what it reaches and why), LICENSE, the icon and screenshots in the repository
+- [ ] The name, the one line and the pictures follow [store.md](store.md)
 - [ ] The repository is public; CI runs the registry's check
 - [ ] Tagged `vX.Y.Z`, the same as `version`, and pushed
 - [ ] Tried from the tag: `mazapan plugins add <url>#vX.Y.Z`
