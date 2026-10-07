@@ -9,6 +9,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Bluetooth
+import Quickshell.Io
 import qs
 import "../../components/kit"
 import "../../components/control"
@@ -24,6 +25,21 @@ Tile {
 
   property bool shown: adapter !== null
   readonly property string pillGlyph: connected.length > 0 ? "󰂱" : ""
+
+  // Files to a phone or computer, through Share (when it's on): a file
+  // chooser, then sent to it.
+  readonly property string shareBin: Quickshell.env("HOME") + "/.local/share/mazapan/bin/share"
+  property bool canShare: false
+  Process {
+    running: true
+    command: ["test", "-f", root.shareBin]
+    onExited: code => root.canShare = code === 0
+  }
+  function takesFiles(d) { return d.paired && /phone|computer|tablet|pda/.test(d.icon || "") }
+  function sendTo(d) {
+    ControlService.close()
+    Quickshell.execDetached(["sh", root.shareBin, "--to", d.address, "--choose"])
+  }
 
   function deviceGlyph(d) {
     const icon = d.icon || ""
@@ -93,6 +109,21 @@ Tile {
           detail: root.describe(modelData)
           active: modelData.connected
           onClicked: root.choose(modelData)
+          // Send files to it (a phone, a computer): through Share.
+          Rectangle {
+            visible: root.canShare && root.takesFiles(modelData)
+            anchors { right: parent.right; rightMargin: 4; verticalCenter: parent.verticalCenter }
+            width: 28; height: 28; radius: Theme.radius
+            color: sendArea.containsMouse ? Theme.surfaceRaised : "transparent"
+            Glyph { anchors.centerIn: parent; text: "󰒖"; color: sendArea.containsMouse ? Theme.accentText : Theme.fgMuted }
+            MouseArea {
+              id: sendArea
+              anchors.fill: parent
+              hoverEnabled: true
+              cursorShape: Qt.PointingHandCursor
+              onClicked: root.sendTo(modelData)
+            }
+          }
         }
       }
       Caption {

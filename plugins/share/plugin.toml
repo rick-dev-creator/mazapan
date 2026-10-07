@@ -1,18 +1,68 @@
 [plugin]
 id = "share"
 name = "Share"
-version = "0.3.0"
+version = "0.4.0"
 api = 1
-description = "Files, a picture or text from the clipboard to a device nearby (LocalSend) or one of your devices on your tailnet (Taildrop), from the palette or Files' right click"
+description = "Files to a phone or computer nearby over Bluetooth (paired right there), LocalSend or your tailnet (Taildrop), from the palette or Files' right click; and files a phone sends here, to Downloads"
 categories = ["tools"]
 requires = ["shell-bar"]
 
+# Bluetooth: BlueZ and obexd (files over it), Python's D-Bus for the
+# nearby service; zenity to choose files.
 [packages]
-pacman = ["quickshell", "jq", "wl-clipboard", "libnotify"]
+pacman = ["quickshell", "jq", "wl-clipboard", "libnotify", "bluez", "bluez-obex", "python-dbus", "python-gobject", "zenity"]
+
+[settings]
+# When a phone sends a file here: ask first, accept from paired devices without asking, or never.
+receive = { default = "ask", choices = ["ask", "paired", "off"] }
 
 [[targets]]
 template = "Share.qml.tmpl"
 output = "~/.config/quickshell/mazapan/panels/share.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+# Bluetooth, on the shell's side: what the nearby service asks, sends and
+# receives; its settings read live (changing one reloads nothing).
+[[targets]]
+template = "qmldir.tmpl"
+output = "~/.config/quickshell/mazapan/components/share/qmldir"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
+template = "NearbyService.qml.tmpl"
+output = "~/.config/quickshell/mazapan/components/share/NearbyService.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
+template = "Ring.qml.tmpl"
+output = "~/.config/quickshell/mazapan/components/share/Ring.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+[[targets]]
+template = "settings.json.tmpl"
+output = "~/.config/quickshell/mazapan/components/share/settings.json"
+
+# The nearby service: BlueZ's and obexd's agent (pairing's codes, files
+# arriving) and what's sent, started by its socket when the shell connects.
+[[targets]]
+template = "nearby.py.tmpl"
+output = "~/.local/share/mazapan/bin/nearby"
+reload = "systemctl --user try-restart mazapan-nearby.service 2>/dev/null; true"
+
+[[targets]]
+template = "nearby.service.tmpl"
+output = "~/.config/systemd/user/mazapan-nearby.service"
+
+[[targets]]
+template = "nearby.socket.tmpl"
+output = "~/.config/systemd/user/mazapan-nearby.socket"
+# Gone (the plugin off): stopped first, then its link taken out.
+reload = "s=mazapan-nearby; d=~/.config/systemd/user; if [ -e $d/$s.socket ]; then systemctl --user daemon-reload; systemctl --user stop $s.service 2>/dev/null; systemctl --user enable -q $s.socket; systemctl --user restart $s.socket; else systemctl --user stop $s.socket $s.service 2>/dev/null; systemctl --user disable -q $s.socket 2>/dev/null; rm -f $d/sockets.target.wants/$s.socket; systemctl --user daemon-reload; fi; true"
+
+# Its place in the Control Center: visible to phones, and send files.
+[[targets]]
+template = "Tile.qml.tmpl"
+output = "~/.config/quickshell/mazapan/control/tiles/25-share.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
@@ -35,3 +85,9 @@ glyph = "󰒖"
 name = "{{ t \"act.open\" }}"
 run = "sh ~/.local/share/mazapan/bin/share"
 keywords = "{{ t \"act.open.kw\" }}"
+
+# The nearby service's socket, listening (the shell starts the service
+# through it).
+[[checks]]
+name = "{{ t \"check.nearby\" }}"
+run = "systemctl --user is-active -q mazapan-nearby.socket"
