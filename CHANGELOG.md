@@ -4,6 +4,19 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
+## Unreleased
+
+- Share, like AirDrop: files to a phone or computer nearby over Bluetooth,
+  as bubbles with their progress; one not paired is paired right there,
+  its code confirmed in the panel. Files a phone sends here: the panel
+  opens to accept them, shows them arriving, and they go to Downloads
+  (ask, from paired devices without asking, or never). Pairing from the
+  phone: the Share switch in the Control Center makes this computer
+  visible for three minutes. A send button beside a paired phone in the
+  Bluetooth card; "Choose files…" in the panel and the Control Center.
+  Pairing a phone from the Bluetooth card now asks for its code too (it
+  had nobody to ask).
+
 ## 0.2.1 (2026-10-06)
 
 - Plugins: changing a plugin's settings keeps the list where it was and the

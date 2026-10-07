@@ -15,3 +15,8 @@ Without a Bluetooth adapter there's nothing to do, and the icon hides
 (`hide_without_adapter`, on). It talks to BlueZ; if you use Bluetooth
 (an adapter, and its service enabled), "Check that everything works" makes
 sure it's running.
+
+With Share on, a phone or computer you paired has a send button at its
+right (here and in the Control Center): choose files, and they go to it,
+their progress in the Share panel. A pairing that asks to confirm a code
+(a phone) is confirmed in the Share panel, which opens with the code.

@@ -1,9 +1,9 @@
 [plugin]
 id = "bar-bluetooth"
 name = "Bluetooth"
-version = "0.1.0"
+version = "0.2.0"
 api = 1
-description = "Bluetooth in the bar; click to connect, pair and forget devices"
+description = "Bluetooth in the bar; click to connect, pair and forget devices, and send files to a phone (with Share)"
 categories = ["bar"]
 requires = ["shell-bar"]
 

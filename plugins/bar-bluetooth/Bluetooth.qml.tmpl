@@ -10,6 +10,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Bluetooth
+import Quickshell.Io
 import qs
 import "../../components/kit"
 
@@ -20,6 +21,21 @@ BarItem {
   readonly property bool on: adapter !== null && adapter.enabled
   readonly property var devices: adapter ? adapter.devices.values : []
   readonly property var connected: devices.filter(d => d.connected)
+
+  // Files to a phone or computer, through Share (when it's on): a file
+  // chooser, then sent to it.
+  readonly property string shareBin: Quickshell.env("HOME") + "/.local/share/mazapan/bin/share"
+  property bool canShare: false
+  Process {
+    running: true
+    command: ["test", "-f", root.shareBin]
+    onExited: code => root.canShare = code === 0
+  }
+  function takesFiles(d) { return d.paired && /phone|computer|tablet|pda/.test(d.icon || "") }
+  function sendTo(d) {
+    popup.visible = false
+    Quickshell.execDetached(["sh", root.shareBin, "--to", d.address, "--choose"])
+  }
 
   function deviceGlyph(d) {
     const icon = d.icon || ""
@@ -129,13 +145,30 @@ BarItem {
           glyph: root.deviceGlyph(modelData)
           title: modelData.name || modelData.address
           detail: root.detail(modelData)
-          trailing: modelData.batteryAvailable ? `${Math.round(modelData.battery * 100)}%` : ""
+          // Room at its right for the send button, when there's one.
+          trailing: (modelData.batteryAvailable ? `${Math.round(modelData.battery * 100)}%` : "")
+            + (root.canShare && root.takesFiles(modelData) ? "     " : "")
           active: modelData.connected
           onClicked: mouse => {
             if (mouse.button === Qt.RightButton) {
               if (modelData.paired) modelData.forget()
             } else {
               root.choose(modelData)
+            }
+          }
+          // Send files to it (a phone, a computer): through Share.
+          Rectangle {
+            visible: root.canShare && root.takesFiles(modelData)
+            anchors { right: parent.right; rightMargin: 4; verticalCenter: parent.verticalCenter }
+            width: 28; height: 28; radius: Theme.radius
+            color: sendArea.containsMouse ? Theme.surfaceRaised : "transparent"
+            Glyph { anchors.centerIn: parent; text: "󰒖"; color: sendArea.containsMouse ? Theme.accentText : Theme.fgMuted }
+            MouseArea {
+              id: sendArea
+              anchors.fill: parent
+              hoverEnabled: true
+              cursorShape: Qt.PointingHandCursor
+              onClicked: root.sendTo(modelData)
             }
           }
         }
