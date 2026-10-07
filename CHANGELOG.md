@@ -6,6 +6,12 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- Default apps: the terminal is one of them (Settings, Default apps):
+  SUPER + Enter, the palette's terminal apps, Plugins, Updates and a
+  crash's details open the one chosen (xdg-terminal-exec), not always
+  foot. Each kind offers every installed app that opens it, not only a
+  fixed list; and in Apps, an installed app that can be the default has
+  "Use as default …" beside it.
 - Share, like AirDrop: files to a phone or computer nearby over Bluetooth,
   as bubbles with their progress; one not paired is paired right there,
   its code confirmed in the panel. Files a phone sends here: the panel

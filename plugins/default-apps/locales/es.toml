@@ -15,6 +15,8 @@
 "setting.text" = "Texto"
 "setting.text.help" = "Texto plano."
 "setting.email" = "Correo"
+"setting.terminal" = "Terminal"
+"setting.terminal.help" = "La terminal (SUPER + Enter, y lo que abre una): vacío, la primera instalada."
 "setting.email.help" = "Enlaces de correo (mailto:)."
 "setting.browser_key" = "Tecla del navegador"
 "setting.browser_key.help" = "Va a la ventana del navegador si está abierto; si no, lo abre. Vacía: ninguna."

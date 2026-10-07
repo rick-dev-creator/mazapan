@@ -10,9 +10,9 @@ categories = ["panel", "tools"]
 [settings]
 # Opens the Plugins panel.
 key = "SUPER + SHIFT + P"
-# What asks for a password or an approval runs in a terminal: this one,
-# kept open to read.
-terminal = "foot --hold"
+# What asks for a password or an approval runs in a terminal, kept open to
+# read: this command; empty, the default terminal (Settings, Default apps).
+terminal = { default = "", kind = "command" }
 
 [[targets]]
 template = "Manager.qml.tmpl"

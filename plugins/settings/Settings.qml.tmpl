@@ -293,8 +293,10 @@ Item {
     }
   }
 
-  // The default apps: each kind's candidates (as default-apps knows them),
-  // those installed offered, the one in use marked.
+  // The default apps: each kind's candidates, those installed offered, the
+  // one in use marked. The usual ones first (as default-apps knows them),
+  // then any other installed app that says it opens that kind (gio mime's
+  // registered ones); for the terminal, every installed terminal.
   readonly property var kinds: [
     ["browser", {{ tq "k.browser" }}, "x-scheme-handler/https", ["chromium", "firefox", "org.mozilla.firefox", "brave-browser", "google-chrome"]],
     ["files", {{ tq "k.files" }}, "inode/directory", ["org.gnome.Nautilus", "thunar", "org.kde.dolphin", "pcmanfm"]],
@@ -304,21 +306,31 @@ Item {
     ["audio", {{ tq "k.audio" }}, "audio/mpeg", ["io.github.celluloid_player.Celluloid", "mpv", "vlc"]],
     ["text", {{ tq "k.text" }}, "text/plain", ["org.gnome.TextEditor", "code-oss", "dev.zed.Zed", "nvim"]],
     ["email", {{ tq "k.email" }}, "x-scheme-handler/mailto", ["org.mozilla.Thunderbird", "thunderbird"]],
+    ["terminal", {{ tq "k.terminal" }}, "terminal", ["foot", "com.mitchellh.ghostty", "kitty", "Alacritty", "org.wezfurlong.wezterm"]],
   ]
+  // Other installed apps for each mime type: {type: [id…]}.
+  property var registered: ({})
   Process {
     id: defaults
-    // The one chosen (mimeapps.list's [Default Applications], as default-apps reads it).
+    // The one chosen (mimeapps.list's [Default Applications], as default-apps
+    // reads it; the terminal, xdg-terminals.list's first), then gio's
+    // registered ones as "type+=id".
     command: ["sh", "-c", 'f="${XDG_CONFIG_HOME:-$HOME/.config}/mimeapps.list"; for m in "$@"; do '
-      + 'echo "$m=$(sed -n "/^\\[Default Applications\\]/,/^\\[/p" "$f" 2>/dev/null | grep -m1 "^$m=" | cut -d= -f2 | cut -d";" -f1)"; done', "sh"]
+      + 'if [ "$m" = terminal ]; then echo "terminal=$(grep -v "^[#-]" "${XDG_CONFIG_HOME:-$HOME/.config}/xdg-terminals.list" 2>/dev/null | head -1 | cut -d: -f1)"; continue; fi; '
+      + 'echo "$m=$(sed -n "/^\\[Default Applications\\]/,/^\\[/p" "$f" 2>/dev/null | grep -m1 "^$m=" | cut -d= -f2 | cut -d";" -f1)"; '
+      + 'done; sh "$HOME/.local/share/mazapan/bin/default-apps" --registered "$@"', "sh"]
       .concat(root.kinds.map(k => k[2]))
     stdout: StdioCollector {
       onStreamFinished: {
-        const c = {}
+        const c = {}, r = {}
         for (const l of text.split("\n")) {
+          const j = l.indexOf("+=")
+          if (j > 0) { (r[l.slice(0, j)] = r[l.slice(0, j)] || []).push(l.slice(j + 2)); continue }
           const i = l.indexOf("=")
           if (i > 0) c[l.slice(0, i)] = l.slice(i + 1).replace(/\.desktop$/, "")
         }
         root.current = c
+        root.registered = r
       }
     }
   }
@@ -578,8 +590,14 @@ Item {
                   // shell started, or before its list was read): byId alone
                   // isn't something a binding follows.
                   readonly property var installed: {
-                    DesktopEntries.applications.values
-                    return modelData[3].filter(id => !!DesktopEntries.byId(id))
+                    const all = DesktopEntries.applications.values
+                    const usual = modelData[3].filter(id => !!DesktopEntries.byId(id))
+                    const others = modelData[2] === "terminal"
+                      // Every terminal; not foot's client and server (they need it running).
+                      ? all.filter(e => !e.noDisplay && Array.from(e.categories || []).includes("TerminalEmulator")).map(e => e.id)
+                          .filter(id => !/^foot(client|-server)$/.test(id))
+                      : (root.registered[modelData[2]] || []).filter(id => { const e = DesktopEntries.byId(id); return e && !e.noDisplay })
+                    return usual.concat(others.filter(id => !usual.includes(id)))
                   }
                   Layout.fillWidth: true
                   spacing: 4

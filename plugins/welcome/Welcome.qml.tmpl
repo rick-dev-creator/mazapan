@@ -260,7 +260,7 @@ Item {
   readonly property var actions: {{ json actions }}
   readonly property bool canLearn: {{ if (under "~/.config/quickshell/mazapan/panels/learn.qml").size > 0 }}true{{ else }}false{{ end }}
   readonly property var keys: [
-    ["panel palette", {{ tq "k.palette" }}], ["foot", {{ tq "k.terminal" }}], ["panel apps", {{ tq "k.apps" }}],
+    ["panel palette", {{ tq "k.palette" }}], ["xdg-terminal-exec", {{ tq "k.terminal" }}], ["panel apps", {{ tq "k.apps" }}],
     ["panel themes", {{ tq "k.themes" }}], ["panel modes", {{ tq "k.modes" }}], ["panel history", {{ tq "k.history" }}],
     ["panel notifications", {{ tq "k.notifications" }}], ["window.close", {{ tq "k.close" }}],
   ].map(k => {

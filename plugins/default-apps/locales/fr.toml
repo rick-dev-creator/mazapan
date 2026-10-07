@@ -15,6 +15,8 @@
 "setting.text" = "Texte"
 "setting.text.help" = "Texte brut."
 "setting.email" = "E-mail"
+"setting.terminal" = "Terminal"
+"setting.terminal.help" = "Le terminal (SUPER + Entrée, et ce qui en ouvre un) : vide, le premier installé."
 "setting.email.help" = "Liens e-mail (mailto:)."
 "setting.browser_key" = "Touche du navigateur"
 "setting.browser_key.help" = "Va à la fenêtre du navigateur s'il est ouvert, sinon l'ouvre. Vide : aucune."

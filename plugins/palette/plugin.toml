@@ -8,7 +8,7 @@ categories = ["panel", "tools"]
 requires = ["shell-bar", "hypr-base"]
 
 [packages]
-pacman = ["quickshell", "wl-clipboard", "foot", "libnotify", "util-linux"]
+pacman = ["quickshell", "wl-clipboard", "xdg-terminal-exec", "libnotify", "util-linux"]
 
 [settings]
 # Opens the palette.
@@ -19,10 +19,11 @@ bar = true
 show_commands = true
 # Terminal apps (btop…) open in this terminal; commands that ask or print
 # (mazapan update) in terminal_hold, which stays open afterwards. Shell
-# commands: quote as you would in a shell.
-terminal = "foot"
+# commands: quote as you would in a shell. Empty: the default terminal
+# (Settings, Default apps).
+terminal = { default = "", kind = "command" }
 # The terminal for commands that ask or print: it stays open afterwards, to read.
-terminal_hold = { default = "foot --hold", kind = "command" }
+terminal_hold = { default = "", kind = "command" }
 
 [[targets]]
 template = "palette.lua.tmpl"
