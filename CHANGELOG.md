@@ -4,6 +4,18 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
+## Unreleased
+
+- Ports, a new plugin in the registry
+  ([mazapan-ports](https://github.com/rick-dev-creator/mazapan-ports)):
+  what's listening on your computer, by name: your servers with their
+  project and tool, containers (Podman's and Docker's, by name and Compose
+  project), your systemd sockets, the system's. Type a port to know if
+  it's free and the next one that is; stop what holds it, with what
+  restarts it; how far each one reaches, the firewall counted; a word,
+  and a card in the Control Center, when something of yours is open to
+  the network. `mazapan plugins add ports`, or the Plugins panel.
+
 ## 0.4.4 (2026-10-08)
 
 - Dock, a new plugin in the registry

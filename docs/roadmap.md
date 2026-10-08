@@ -6,7 +6,7 @@ was decided, built, tested and audited is in [history.md](history.md).
 **Today (2026-10-08):** Mazapan runs on a real machine (an MSI Vector
 A16 HX), mazapan.dev is up, and the ISO and the signed
 package repository are published, released as a routine (0.4.4 now).
-The plugin registry is open, with six plugins. Not yet: 1.0.
+The plugin registry is open, with seven plugins. Not yet: 1.0.
 
 ## Next
 
@@ -45,7 +45,7 @@ without a terminal. Built-in when nearly everyone needs it and it works on
 any hardware; from the community (their own repository, in the registry)
 when it depends on a brand, a service or a taste. Mazapan makes the first
 community ones itself, as it did with Markets, Pomodoro, Now Playing,
-Playback, Radio and Dock, so the registry starts with plugins worth
+Playback, Radio, Dock and Ports, so the registry starts with plugins worth
 installing.
 
 ### From the community
@@ -53,23 +53,20 @@ installing.
 Simplest first:
 
 1. **What I follow.** Feeds and tickers, as Markets does: one each.
-2. **What's running while I build.** The ports in use and which process
-   holds each, the containers up, stopped with a click: next to
-   dev-databases and dev-dotnet.
-3. **A wallpaper that moves.** A looping video as the wallpaper, muted,
+2. **A wallpaper that moves.** A looping video as the wallpaper, muted,
    paused while a window covers it or on battery; part of a theme like any
    picture.
-4. **The services I work in.** Tasks, issues and notifications from one
+3. **The services I work in.** Tasks, issues and notifications from one
    service each (Todoist, Linear, GitHub…) in the bar or the palette, each
    signed in to its own way.
-5. **My passwords at hand.** Bitwarden from the palette: search, copy a
+4. **My passwords at hand.** Bitwarden from the palette: search, copy a
    password or a code, the vault locked with the session; nothing kept
    outside the system's keyring.
-6. **My home.** Home Assistant's lights, switches and scenes in the bar or
+5. **My home.** Home Assistant's lights, switches and scenes in the bar or
    the Control Center, and what its sensors say.
-7. **The phone next to me.** Its screen in a window (scrcpy), the
+6. **The phone next to me.** Its screen in a window (scrcpy), the
    clipboard, files and notifications both ways (KDE Connect).
-8. **My devices working.** One plugin per brand, where only its own tools
+7. **My devices working.** One plugin per brand, where only its own tools
    reach: keyboard lighting, Logitech mice (Solaar), Razer (OpenRazer),
    headphones' battery, MSI laptops' charge limit and fans (msi-ec); each
    tried on the device itself.
@@ -78,22 +75,22 @@ Simplest first:
 
 Simplest first:
 
-9. **How the machine is doing.** CPU, GPU, memory, temperatures and fans
+8. **How the machine is doing.** CPU, GPU, memory, temperatures and fans
     in the bar; a word when something runs hot or memory runs out, with
     what's using it, and stopping it from there.
-10. **A VPN with one click.** WireGuard and OpenVPN through NetworkManager,
+9. **A VPN with one click.** WireGuard and OpenVPN through NetworkManager,
     a config file dropped in to add one, a switch in the Control Center,
     what's connected said in the bar.
-11. **The camera before a call.** Any webcam's brightness, focus,
+10. **The camera before a call.** Any webcam's brightness, focus,
     exposure and zoom with a live preview, kept per camera and set again
     when it's plugged in.
-12. **Where my time goes.** Time per app, today and over the weeks, kept
+11. **Where my time goes.** Time per app, today and over the weeks, kept
     on this computer only; a limit for an app if you want one.
-13. **A battery that lasts years.** A charge limit (80 %, or full for a
+12. **A battery that lasts years.** A charge limit (80 %, or full for a
     trip) where the kernel offers one (`charge_control_end_threshold`:
     ThinkPad, ASUS, Framework, Dell, Huawei, Samsung…), kept across
     restarts, and the battery's health over time, not only today's.
-14. **Sound the way I want it.** Every output and input, more than one
+13. **Sound the way I want it.** Every output and input, more than one
     output at once, the codec of Bluetooth headphones, each app's volume
     and where it plays, and an equalizer with presets (PipeWire and
     WirePlumber).
@@ -125,7 +122,7 @@ Simplest first:
 | Learn | Lessons recorded from the real moves, tried for real and ticked off; every key while SUPER is held |
 | Security | Encryption, the firewall, privacy dots, app permissions, fingerprint; audited (see [security.md](security.md)) |
 | Plugins | Dependencies, approved capabilities, catalogs, the Plugins panel, tools for authors; hardware fixes offered only where they apply |
-| Published | mazapan.dev, the ISO with its checksum and signature, the signed repository at repo.mazapan.dev, releases on their channels; the plugin registry, with Markets, Pomodoro, Now Playing (what's playing, wherever it plays), Playback (the same in Mazapan's own look), Radio (live stations from all over the world) and Dock (your apps at the bottom of the screen, every window of each) |
+| Published | mazapan.dev, the ISO with its checksum and signature, the signed repository at repo.mazapan.dev, releases on their channels; the plugin registry, with Markets, Pomodoro, Now Playing (what's playing, wherever it plays), Playback (the same in Mazapan's own look), Radio (live stations from all over the world) Dock (your apps at the bottom of the screen, every window of each) and Ports (what's listening, by name: is a port free, stop what holds it, a word when something is open to the network) |
 | Look | The login, boot menu and boot splash in the theme; GTK, Qt, browsers, editors and terminals themed |
 
 ## Waiting
