@@ -79,7 +79,13 @@ Item {
     card.forceActiveFocus()
     asked++
     running_ = asked
-    asking.command = ["mazapan", "agents", "ask", "--json"].concat(...files.map(f => ["--file", f])).concat(["--", question])
+    // This desktop's report is still being made when the card opens (it
+    // takes seconds): waited for, up to 30 s, else asked without it.
+    asking.command = ["sh", "-c", 'r=; for a in "$@"; do case "$a" in */mazapan-ask/desktop.txt) r=$a ;; esac; done; '
+      + 'if [ -n "$r" ]; then n=0; while [ ! -e "$r" ] && [ -e "$r.part" ] && [ $n -lt 300 ]; do sleep 0.1; n=$((n+1)); done; '
+      + '[ -e "$r" ] || { p=; for a; do shift; if [ -n "$p" ]; then [ "$a" = "$r" ] || set -- "$@" --file "$a"; p=; '
+      + 'elif [ "$a" = "--file" ]; then p=1; else set -- "$@" "$a"; fi; done; }; fi; '
+      + 'exec mazapan "$@"', "sh", "agents", "ask", "--json"].concat(...files.map(f => ["--file", f])).concat(["--", question])
     started = Date.now()
     now = started
     asking.running = true

@@ -1,7 +1,7 @@
 [plugin]
 id = "learn"
 name = "Learn"
-version = "0.1.0"
+version = "0.1.1"
 api = 1
 description = "Short lessons on moving around Mazapan (the columns, workspaces, the palette), each a real recording with its keys, then tried for real; and every key on screen while SUPER is held"
 categories = ["panel", "tools"]

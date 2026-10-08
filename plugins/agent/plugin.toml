@@ -1,11 +1,11 @@
 [plugin]
 id = "agent"
 name = "Agents"
-version = "0.9.1"
+version = "0.10.0"
 api = 1
 description = "Your coding agents: in the bar, which is working and which waits for you (a click goes to its window), each account's limits and when they reset, and what they've used today, for Claude Code, opencode, pi, Codex… every account found by itself; and from the palette, ask one about this desktop with mazapan's report"
 categories = ["agent", "tools", "bar"]
-requires = ["shell-bar"]
+requires = ["shell-bar", "hypr-base"]
 
 [packages]
 pacman = ["quickshell", "libnotify", "sqlite", "qt6-graphs", "jq", "libsecret", "wl-clipboard"]
@@ -19,6 +19,12 @@ pacman = ["quickshell", "libnotify", "sqlite", "qt6-graphs", "jq", "libsecret", 
 # undo), register the MCP server with it, e.g.
 #   claude mcp add --scope user mazapan -- mazapan mcp
 command = "claude"
+# Asks an agent about this desktop (the Ask card).
+ask_key = "SUPER + SHIFT + A"
+# Asks an agent about the selected text (else what was copied).
+selection_key = "SUPER + SHIFT + S"
+# Opens the agents: their sessions, limits and use.
+panel_key = "SUPER + I"
 # Claude Code tells which session works or waits through hooks this plugin
 # puts in each configuration's settings.json (your own hooks stay; a copy
 # of the file is kept the first time). Off: taken out again.
@@ -138,6 +144,12 @@ reload = "s=mazapan-agents-otel; d=~/.config/systemd/user; if [ -e $d/$s.socket 
 template = "agent-keys.sh.tmpl"
 output = "~/.local/share/mazapan/bin/agent-keys"
 
+# Its keys: asking, and the agents' panel.
+[[targets]]
+template = "agent.lua.tmpl"
+output = "~/.config/hypr/mazapan/agent.lua"
+reload = "hyprctl reload >/dev/null"
+
 [[actions]]
 name = "{{ t \"ask\" }}"
 # The Ask card about this desktop (mazapan's report with the question), to
@@ -146,11 +158,15 @@ name = "{{ t \"ask\" }}"
 # copied or continued in a terminal. Another agent set as the command:
 # that one, in a terminal, the report as its first message.
 run = "{{ if settings.command == \"claude\" }}sh ~/.local/share/mazapan/bin/agent-ask --desktop{{ else }}xdg-terminal-exec {{ settings.command }} \"$(mazapan report --agent)\"{{ end }}"
+key = "{{ settings.ask_key }}"
+label = "{{ t \"ask.label\" }}"
 keywords = "{{ t \"ask.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.ask_selection\" }}"
 run = "sh ~/.local/share/mazapan/bin/agent-ask --selection"
+key = "{{ settings.selection_key }}"
+label = "{{ t \"act.ask_selection.label\" }}"
 keywords = "{{ t \"act.ask_selection.kw\" }}"
 
 [[actions]]
@@ -166,6 +182,8 @@ keywords = "{{ t \"report.kw\" }}"
 [[actions]]
 name = "{{ t \"act.open\" }}"
 run = "qs ipc -c mazapan call agents open"
+key = "{{ settings.panel_key }}"
+label = "{{ t \"act.open.label\" }}"
 keywords = "{{ t \"act.open.kw\" }}"
 
 [[actions]]

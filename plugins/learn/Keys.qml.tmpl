@@ -44,9 +44,10 @@ Item {
     "bar-workspaces": "workspaces", "monitors": "workspaces",
     "palette": "open", "apps": "open", "settings": "open", "control-center": "open", "themes": "open",
     "plugin-manager": "open", "learn": "open", "updates": "open", "history": "open", "wallpaper": "open",
+    "agent": "agents", "dictation": "agents",
   })
   readonly property var groups: {
-    const g = { windows: [], workspaces: [], open: [], everyday: [] }
+    const g = { windows: [], workspaces: [], open: [], agents: [], everyday: [] }
     for (const a of actions) {
       // Keys a keyboard has for one thing (volume, brightness) and switches
       // (the lid) aren't keys to learn.
@@ -57,6 +58,7 @@ Item {
       { title: {{ tq "keys.windows" }}, rows: g.windows },
       { title: {{ tq "keys.workspaces" }}, rows: g.workspaces },
       { title: {{ tq "keys.open" }}, rows: g.open },
+      { title: {{ tq "keys.agents" }}, rows: g.agents },
       { title: {{ tq "keys.everyday" }}, rows: g.everyday },
     ].filter(x => x.rows.length > 0)
   }

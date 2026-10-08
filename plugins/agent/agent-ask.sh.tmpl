@@ -7,13 +7,15 @@ d="${XDG_RUNTIME_DIR:-/tmp}/mazapan-ask"
 mkdir -p "$d" && chmod 700 "$d" || exit 1
 # What earlier questions were about (captures, notifications), gone after a day.
 find "$d" -maxdepth 1 -type f -mmin +1440 -delete 2>/dev/null
+desktop=
 if [ "$1" = "--desktop" ]; then
   shift
   # State, failing checks, crashes, logged errors: what the agent's own
-  # tools can't all see.
-  if (umask 077; mazapan report --agent > "$d/desktop.txt") 2>/dev/null; then
-    set -- "$d/desktop.txt" "$@"
-  fi
+  # tools can't all see. It takes seconds (the checks run), so it's made
+  # while the question is typed; the card waits for it before asking.
+  desktop="$d/desktop.txt"
+  rm -f "$desktop"
+  (umask 077; mazapan report --agent > "$desktop.part" 2>/dev/null; mv -f "$desktop.part" "$desktop") &
 elif [ "$1" = "--selection" ]; then
   shift
   t=$(wl-paste --primary --no-newline 2>/dev/null)
@@ -26,6 +28,7 @@ fi
 n=$#
 for f in "$@"; do set -- "$@" "$(realpath -- "$f")"; done
 shift "$n"
+[ -z "$desktop" ] || set -- "$desktop" "$@"
 r="$d/r-$$.json"
 jq -n --arg q "${MAZAPAN_ASK:-}" '{question: $q, files: $ARGS.positional}' --args "$@" > "$r" || exit 1
 exec qs ipc -c mazapan call mazapan open ask "$r" >/dev/null

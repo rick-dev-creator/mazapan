@@ -33,6 +33,7 @@
 "keys.windows" = "Windows and columns"
 "keys.workspaces" = "Workspaces and screens"
 "keys.open" = "Open"
+"keys.agents" = "AI agents"
 "keys.everyday" = "Everyday"
 "topic.columns" = "Windows in columns"
 "topic.workspaces" = "Workspaces"
