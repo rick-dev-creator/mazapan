@@ -5,7 +5,7 @@ was decided, built, tested and audited is in [history.md](history.md).
 
 **Today (2026-10-08):** Mazapan runs on a real machine (an MSI Vector
 A16 HX), mazapan.dev is up, and the ISO and the signed
-package repository are published, released as a routine (0.4.4 now).
+package repository are published, released as a routine (0.5.0 now).
 The plugin registry is open, with seven plugins. Not yet: 1.0.
 
 ## Next
@@ -114,7 +114,7 @@ Simplest first:
 | History | Every change on a timeline, undone; checkpoints anyone understands, started from the boot menu, kept or restored |
 | Install | The ISO with a graphical installer (any language), offline, unattended (`cidata`), welcome and profiles |
 | Apps | A catalog with profiles (development, .NET, mobile, gaming, creative, office, retro…), languages and databases in one click, containers (Podman or Docker) |
-| Agents | Every agent and account found, limits and the next account taken, live sessions in the bar, a dashboard, MCP with previews and approval |
+| Agents | Every agent and account found, limits and the next account taken, live sessions in the bar, a dashboard, MCP with previews and approval; Mazapan, the agent: a pixel-art character you ask by text or voice (SUPER + SHIFT + A) that makes the changes you ask for with your approval, searches the web, and only answers about what isn't yours |
 | Desktop | The palette, monitors with profiles, themes (and one from any picture), wallpapers, modes, notifications, capture with OCR and recording, sharing |
 | Tiling | Niri's way on Hyprland's scrolling layout: columns, workspaces as a strip, the overview |
 | Control Center | One pill on the bar's right, grown into one panel: what needs you, the switches, sound, music, agents, power |

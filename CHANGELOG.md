@@ -4,21 +4,27 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
-## Unreleased
+## 0.5.0 (2026-10-08)
 
-- Mazapan, the agent: `SUPER + SHIFT + A`, `? …` in the palette
-  (or a question that starts with "¿"), or "ask by voice" opens a card
-  with Mazapan, the icon's mazapan as a pixel-art character, whose gestures say what it's
-  doing. Ask it for a change ("put a dark theme with a green accent") and
-  it makes it through Mazapan, after Mazapan's own card shows you the diff
-  and you allow it; Undo takes it back. The conversation goes on in the
-  card, by typing or by voice, and survives the reload a theme causes. Only
-  your own words act: about a capture, a notification or the selected text
-  it only answers. Settings for who answers, which Claude account, paid
-  with the subscription or an API key, the model, and the character itself.
-  Holding SUPER shows its keys under "AI agents"; "Ask an agent about this
-  desktop" no longer opens a terminal.
-
+- Mazapan, the agent: `SUPER + SHIFT + A`, `? …` in the palette (or a
+  question that starts with "¿"), or "ask by voice" opens a card with
+  Mazapan, the icon's mazapan as a pixel-art character whose gestures say
+  what it's doing. Ask it for a change ("put a dark theme with a green
+  accent") and it makes it through Mazapan, after Mazapan's own card shows
+  you the diff and you allow it; Undo takes it back. Ask why something
+  failed and it reads Mazapan's logs, telling an old error from a new one.
+  The conversation goes on in the card, by typing or by voice, scrolls when
+  it's long, survives the reload a theme causes, and copies whole.
+- It searches the web, and opens pages on the sites you name; a
+  conversation that did changes nothing more (a page can hold words written
+  to steer an agent), and it says so. Images in its answers show as a card
+  and load only when you click them, then big on another click.
+- Only your own words act: about a capture, a notification or the selected
+  text it only answers. Settings for who answers, which Claude account,
+  paid with the subscription or an API key, the model, and the character
+  itself. Account emails are shown masked (ri***v@gmail.com) wherever an
+  agent's account is named. Holding SUPER shows its keys under "AI agents";
+  "Ask an agent about this desktop" no longer opens a terminal.
 - Ports, a new plugin in the registry
   ([mazapan-ports](https://github.com/rick-dev-creator/mazapan-ports)):
   what's listening on your computer, by name: your servers with their

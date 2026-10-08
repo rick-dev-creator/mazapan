@@ -1,7 +1,7 @@
 # The Mazapan plugin registry: plugins from others, each in its own
 # repository, at the commit the registry looked at. Generated from
 # https://github.com/rick-dev-creator/mazapan-plugins; don't edit.
-# 2026-10-07T22:57:28+00:00
+# 2026-10-08T04:41:00+00:00
 
 [[plugin]]
 id = "dock"
@@ -107,6 +107,27 @@ translations.fr.name = "Pomodoro"
 translations.fr.description = "Concentrez-vous par sessions, avec des pauses entre elles : un anneau qui se remplit avec le temps, les sessions de chaque cycle, ce sur quoi vous travaillez, Ne pas déranger pendant la concentration, et la concentration du jour et de la semaine en un coup d'œil"
 translations.pt.name = "Pomodoro"
 translations.pt.description = "Foque em sessões com pausas entre elas: um anel que se enche com o tempo, as sessões de cada ciclo, no que você está trabalhando, Não perturbe enquanto foca, e o foco de hoje e da semana num relance"
+
+[[plugin]]
+id = "ports"
+name = "Ports"
+description = "What's listening on your computer, by name: your servers with their project, containers, the system's. Is a port free (and the next one that is), stop what holds it for good, and a word when something of yours is open to the network"
+author = "RickDev"
+source = "https://github.com/rick-dev-creator/mazapan-ports"
+ref = "v0.1.0"
+commit = "c37ee1cad9dc7d6a3b18f794ab8a5459a7de13f9"
+version = "0.1.0"
+license = "MIT"
+homepage = "https://github.com/rick-dev-creator/mazapan-ports"
+categories = ["panel", "bar", "tools"]
+translations.de.name = "Ports"
+translations.de.description = "Was auf deinem Computer lauscht, mit Namen: deine Server mit ihrem Projekt, Container, die des Systems. Ob ein Port frei ist (und der nächste freie), beenden, was ihn belegt, und ein Hinweis, wenn etwas von dir im Netzwerk offen ist"
+translations.es.name = "Puertos"
+translations.es.description = "Lo que escucha en tu computadora, con su nombre: tus servidores con su proyecto, contenedores, los del sistema. Si un puerto está libre (y el siguiente que lo está), detener lo que lo ocupa de verdad, y un aviso cuando algo tuyo queda abierto a la red"
+translations.fr.name = "Ports"
+translations.fr.description = "Ce qui écoute sur ton ordinateur, par son nom : tes serveurs avec leur projet, les conteneurs, ceux du système. Savoir si un port est libre (et le prochain qui l'est), arrêter ce qui l'occupe pour de bon, et un mot quand quelque chose à toi est ouvert au réseau"
+translations.pt.name = "Portas"
+translations.pt.description = "O que está escutando no seu computador, pelo nome: seus servidores com o projeto, contêineres, os do sistema. Se uma porta está livre (e a próxima que está), parar de vez o que a ocupa, e um aviso quando algo seu fica aberto para a rede"
 
 [[plugin]]
 id = "radio"
