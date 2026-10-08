@@ -20,7 +20,7 @@ light) and Not installed (the catalog's apps, which open in the Apps
 panel to install). Letters needn't be together: "vsc" finds Visual Studio
 Code. The filters above the list narrow it (a click, or Ctrl ←→); the
 Apps filter with nothing typed shows every app. `> ` is the Actions
-filter; `? ` asks Mazapan's agent (with the Agents plugin: the mazapán,
+filter; `? ` asks Mazapan's agent (with the Agents plugin: Mazapan,
 in its card), and so does a question as Spanish writes it, `¿…?`.
 
 Every row says what ↵ does to it: Open, Switch to, Run, Change,

@@ -22,6 +22,16 @@ import "components/kit"
 
 FloatingWindow {
   id: win
+  // An account's email, shown with most of it hidden (ri***v@gmail.com: its first
+  // two letters and its last, so two accounts are told apart): it's personal,
+  // and the screen may be shared or recorded.
+  function masked(label) {
+    const s = String(label || "")
+    const at = s.indexOf("@")
+    if (at < 1) return s
+    const name = s.slice(0, at)
+    return (name.length > 4 ? name.slice(0, 2) + "***" + name.slice(-1) : name.slice(0, 1) + "***") + s.slice(at)
+  }
   // The same window across a reload (a new theme): it keeps its place.
   reloadableId: "agents-dashboard"
 
@@ -469,7 +479,7 @@ FloatingWindow {
               spacing: 4
               RowLayout {
                 Layout.fillWidth: true
-                Label { text: acct.modelData.account.label; Layout.fillWidth: true; elide: Text.ElideRight }
+                Label { text: win.masked(acct.modelData.account.label); Layout.fillWidth: true; elide: Text.ElideRight }
                 Caption { text: acct.modelData.account.plan + (acct.modelData.stale && acct.modelData.read !== "" ? " · " + {{ tq "dash.stale" }} : ""); color: Theme.fgSubtle }
               }
               Caption {

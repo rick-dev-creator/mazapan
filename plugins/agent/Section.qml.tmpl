@@ -96,7 +96,7 @@ Group {
       Layout.fillWidth: true
       spacing: 8
       Caption {
-        text: modelData.account ? (modelData.account.label || modelData.account.id || "") : ""
+        text: modelData.account ? AgentsService.masked(modelData.account.label || modelData.account.id || "") : ""
         font.letterSpacing: 0
         elide: Text.ElideRight
         Layout.preferredWidth: 130

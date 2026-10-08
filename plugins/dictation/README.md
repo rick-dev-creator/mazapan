@@ -5,7 +5,7 @@ again stops, and what you said is typed in the window you're in (or
 copied, to paste, with `type` off). After two minutes it stops by itself.
 
 `SUPER + CTRL + A` (`ask_key`) talks to Mazapan's agent instead (the
-Agents plugin's mazapán): its card opens listening, and what you said is
+Agents plugin's Mazapan): its card opens listening, and what you said is
 asked there, a change you ask for made once you allow it; the card's
 microphone answers it in the same conversation (without that plugin,
 it's typed as ever).

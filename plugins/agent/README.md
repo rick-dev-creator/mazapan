@@ -44,9 +44,9 @@ it (`otel`); telemetry of your own already there is left alone.
 Workspaces plugin): amber while it waits for you, the text's color while it
 works, green when it's done.
 
-**The mazapán, Mazapan's agent**: `SUPER + SHIFT + A` (or `? …` in the
+**Mazapan, the agent**: `SUPER + SHIFT + A` (or `? …` in the
 palette, or dictation's "ask by voice", `SUPER + CTRL + A`) opens a card
-with the mazapán of the icon, in pixel art, ready for what you want:
+with Mazapan, the character: the icon's mazapan in pixel art, ready for what you want:
 "put a dark theme with a green accent", "why is the battery draining?".
 Its gestures say what it's doing: listening, looking at your desktop,
 preparing a change, waiting for your approval, a jump when it's done, a
@@ -76,7 +76,7 @@ off: a glyph and words instead).
   (only for your own words), `ask_model` the model. The card says who
   answered. Copy the answer, or continue the conversation in a terminal.
 
-**Keys**: `SUPER + SHIFT + A` the mazapán (about this desktop),
+**Keys**: `SUPER + SHIFT + A` Mazapan (about this desktop),
 `SUPER + SHIFT + S` about the selected text (else what was copied),
 `SUPER + I` opens the agents; Settings › Keys changes them, and holding
 SUPER shows them under "AI agents".

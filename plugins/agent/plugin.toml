@@ -25,7 +25,7 @@ ask_key = "SUPER + SHIFT + A"
 selection_key = "SUPER + SHIFT + S"
 # Opens the agents: their sessions, limits and use.
 panel_key = "SUPER + I"
-# The mazapán in the Ask card: its gestures say what the agent is doing (listening, thinking, waiting for your approval…). Off: a glyph and words.
+# Mazapan, the character in the Ask card: its gestures say what the agent is doing (listening, thinking, waiting for your approval…). Off: a glyph and words.
 mascot = true
 # Who answers in the Ask card: the first coding agent there is, or one of them. Only Claude Code can change things (through Mazapan, with your approval); the others only answer.
 ask_agent = { default = "auto", choices = ["auto", "claude", "codex", "pi"] }
@@ -69,7 +69,7 @@ template = "AgentsService.qml.tmpl"
 output = "~/.config/quickshell/mazapan/components/agents/AgentsService.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
-# The agent's face in the Ask card: the mazapán and its gestures.
+# The agent's face in the Ask card: Mazapan, the character, and its gestures.
 [[targets]]
 template = "Mazapan.qml.tmpl"
 output = "~/.config/quickshell/mazapan/components/agents/Mazapan.qml"

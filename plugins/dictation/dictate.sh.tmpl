@@ -114,7 +114,7 @@ if ! kill -0 "$rec" 2>/dev/null; then
   say {{ shq (t "no_mic") }} critical
   exit 0
 fi
-# Asked by voice: the Ask card opens listening (the mazapán hears you); its
+# Asked by voice: the Ask card opens listening (Mazapan hears you); its
 # microphone needs no notification, the card says it.
 if [ "$mode" = ask ] && [ -f "$HOME/.local/share/mazapan/bin/agent-ask" ]; then
   sh "$HOME/.local/share/mazapan/bin/agent-ask" --listen >/dev/null 2>&1 || say {{ shq (t "listening_ask") }}

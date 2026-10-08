@@ -38,6 +38,16 @@ Singleton {
 
   readonly property var names: ({ claude: "Claude Code", opencode: "OpenCode", pi: "Pi", codex: "Codex", gemini: "Gemini CLI", crush: "Crush", aider: "Aider" })
   function nameOf(id) { return names[id] || id }
+  // An account's email, shown with most of it hidden (ri***v@gmail.com: its first
+  // two letters and its last, so two accounts are told apart): it's personal,
+  // and the screen may be shared or recorded.
+  function masked(label) {
+    const s = String(label || "")
+    const at = s.indexOf("@")
+    if (at < 1) return s
+    const name = s.slice(0, at)
+    return (name.length > 4 ? name.slice(0, 2) + "***" + name.slice(-1) : name.slice(0, 1) + "***") + s.slice(at)
+  }
   function base(p) { return String(p || "").split("/").filter(x => x !== "").pop() || "~" }
 
   // "3 min", "2 h 5 min".
@@ -109,7 +119,7 @@ Singleton {
           alerted[key] = true
           if (!limitsRead) continue
           const when = w.resets_at ? new Date(w.resets_at).toLocaleTimeString(Qt.locale("{{ lang }}"), Locale.ShortFormat) : ""
-          root.notify({{ tq "n.limit" }}.arg(a.account.label).arg(Math.round(w.percent)), when ? {{ tq "n.resets" }}.arg(when) : "", "")
+          root.notify({{ tq "n.limit" }}.arg(root.masked(a.account.label)).arg(Math.round(w.percent)), when ? {{ tq "n.resets" }}.arg(when) : "", "")
         }
       }
     }
