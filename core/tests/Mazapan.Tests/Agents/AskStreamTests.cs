@@ -44,6 +44,15 @@ public class AskStreamTests
     }
 
     [Fact]
+    public void AChangeWithNothingToWriteIsMadeNotTurnedDown()
+    {
+        var r = Follow(
+            """{"type":"assistant","message":{"content":[{"type":"tool_use","id":"t4","name":"mcp__mazapan__apply_change","input":{}}]}}""",
+            """{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"t4","content":"0 written\n1 system file and 0 packages wait for: mazapan apply --system (with sudo)"}]}}""");
+        Assert.Equal("""{"event":"applied","id":""}""", r.Events[^1]);
+    }
+
+    [Fact]
     public void OtherToolResultsAndJunkAreLeftAlone()
     {
         var r = Follow("not json", "[]",

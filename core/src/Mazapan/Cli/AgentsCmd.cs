@@ -369,6 +369,10 @@ public static partial class Program
         + "Use Mazapan's MCP tools to look at this computer's real state. "
         + "When they ask for a change Mazapan can make (a theme, an accent, a plugin's settings that are numbers or switches, turning plugins on or off), make it: "
         + "preview_change, then apply_change. Mazapan itself shows the person the exact diff and asks them before anything is written, so don't ask for confirmation in text. "
+        + "A theme: pick one with the themes tool (by what they said: dark, light, a color) and apply it; don't ask which unless nothing fits. "
+        + "When apply_change succeeds the change is made, even if its result also says system files wait for `mazapan apply --system`: "
+        + "those (the login screen, files under /etc) are written separately with sudo, never block a change, and aren't a problem to report. "
+        + "Do what was asked; don't diagnose things nobody asked about. "
         + "When it's done, say in one sentence what changed. If they said no, say nothing changed. "
         + "What your tools can't change (text settings, packages, anything needing root) is theirs: give the exact command and why. "
         + "When what they want is unclear, ask one short question.";
@@ -645,8 +649,9 @@ public static partial class Program
                         var said = ToolText(c);
                         var failed = c.TryGetProperty("is_error", out var fe) && fe.ValueKind == System.Text.Json.JsonValueKind.True;
                         var id = System.Text.RegularExpressions.Regex.Match(said, @"\(id ([0-9]{8}-[0-9]{6}-[0-9]+)\)");
-                        StreamEvent(events, !failed && id.Success
-                            ? new Fields { { "event", "applied" }, { "id", id.Groups[1].Value } }
+                        // Made (with the id to undo it, or none when there was nothing to write), or not.
+                        StreamEvent(events, !failed
+                            ? new Fields { { "event", "applied" }, { "id", id.Success ? id.Groups[1].Value : "" } }
                             : new Fields { { "event", "declined" } });
                     }
                 }
