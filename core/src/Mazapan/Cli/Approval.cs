@@ -98,6 +98,7 @@ public static class ApprovalNames
         {
             ["claude-code"] = "Claude Code", ["claude-ai"] = "Claude", ["opencode"] = "OpenCode", ["codex-mcp-client"] = "Codex",
             ["gemini-cli-mcp-client"] = "Gemini CLI", ["cursor-vscode"] = "Cursor", ["visual-studio-code"] = "VS Code", ["zed"] = "Zed",
+            ["mazapan-ask"] = "Mazapan's agent",
         };
         if (known.TryGetValue(client, out var name)) return name;
         var clean = new string([.. client.Where(c => char.IsLetterOrDigit(c) || c is ' ' or '-' or '_' or '.')]).Trim();

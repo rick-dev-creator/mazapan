@@ -1,7 +1,7 @@
 [plugin]
 id = "palette"
 name = "Command palette"
-version = "0.3.0"
+version = "0.3.1"
 api = 1
 description = "One palette for your apps, open windows, every plugin's actions and settings, and apps to install: in sections, each saying what Enter does"
 categories = ["panel", "tools"]

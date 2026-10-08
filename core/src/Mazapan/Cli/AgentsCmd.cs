@@ -362,6 +362,17 @@ public static partial class Program
         + "When the question is about this computer, use Mazapan's MCP tools (status, doctor, plugins, themes, history, agents_usage…) to look at its real state. "
         + "Change nothing: when something should change, give the exact command (mazapan apply --set …, mazapan plugins enable …) for the person to run.";
 
+    // Asked with --act: the person's own words (typed or said), and the agent may change this
+    // desktop through Mazapan, each change shown to the person and allowed by them first.
+    const string ActContext = "You are Mazapan's own agent, in a card on this Arch Linux desktop (Hyprland, Quickshell); the person typed or said what they want. "
+        + "Answer in their language, briefly: a sentence or two, Markdown. "
+        + "Use Mazapan's MCP tools to look at this computer's real state. "
+        + "When they ask for a change Mazapan can make (a theme, an accent, a plugin's settings that are numbers or switches, turning plugins on or off), make it: "
+        + "preview_change, then apply_change. Mazapan itself shows the person the exact diff and asks them before anything is written, so don't ask for confirmation in text. "
+        + "When it's done, say in one sentence what changed. If they said no, say nothing changed. "
+        + "What your tools can't change (text settings, packages, anything needing root) is theirs: give the exact command and why. "
+        + "When what they want is unclear, ask one short question.";
+
     // Mazapan's tools that only read (and preview): what the answer may use without asking.
     static readonly string[] AskTools = ["status", "doctor", "themes", "plugins", "coverage", "history", "agents_usage", "agents_limits", "agents_spend", "preview_change"];
 
@@ -375,20 +386,35 @@ public static partial class Program
     /// </summary>
     static int AgentsAsk(string[] args)
     {
-        string? want = null;
+        string? want = null, resumeId = null, accountLabel = null, model = null, keyProvider = null;
         var json = false;
+        var act = false;
+        var stream = false;
         var words = new List<string>();
         var files = new List<string>();
         for (var i = 0; i < args.Length; i++)
         {
             if (args[i] == "--json") json = true;
-            else if (args[i] == "--agent" && i + 1 < args.Length) want = args[++i];
+            else if (args[i] == "--act") act = true;
+            else if (args[i] == "--stream") stream = json = true;
+            else if (args[i] == "--agent" && i + 1 < args.Length) want = args[++i] is "auto" or "" ? null : args[i];
+            else if (args[i] == "--resume" && i + 1 < args.Length) resumeId = args[++i];
+            else if (args[i] == "--account" && i + 1 < args.Length) accountLabel = args[++i] is "" ? null : args[i];
+            else if (args[i] == "--model" && i + 1 < args.Length) model = args[++i] is "" or "default" ? null : args[i];
+            else if (args[i] == "--key" && i + 1 < args.Length) keyProvider = args[++i] is "" or "subscription" ? null : args[i];
             else if (args[i] == "--file" && i + 1 < args.Length) files.Add(Path.GetFullPath(Paths.ExpandHome(args[++i])));
             else if (args[i] == "--") { words.AddRange(args[(i + 1)..]); break; }
             else words.Add(args[i]);
         }
         var question = string.Join(' ', words).Trim();
-        if (question == "") throw new MazapanException("usage: mazapan agents ask [--agent ID] [--file PATH]… [--json] QUESTION");
+        if (question == "") throw new MazapanException("usage: mazapan agents ask [--agent ID] [--act] [--resume SESSION] [--account LABEL] [--model NAME] [--key PROVIDER] [--file PATH]… [--json|--stream] QUESTION");
+        if (resumeId != null && !SafeSession(resumeId)) throw new MazapanException($"{resumeId}: not a session");
+        if (model != null && !System.Text.RegularExpressions.Regex.IsMatch(model, @"^[a-z0-9][a-z0-9.\-]{0,63}\z")) throw new MazapanException($"{model}: not a model's name");
+        // Only the person's own words may act, or spend an API key: material from
+        // elsewhere (a notification, a page, a capture, a file) can hold words meant
+        // to steer an agent. This desktop's report is Mazapan's own.
+        var ownWords = files.All(f => f.EndsWith("/mazapan-ask/desktop.txt", StringComparison.Ordinal));
+        if (!ownWords) { act = false; keyProvider = null; }
         // What it's about: a short text, in the question itself (any agent
         // reads it); a picture or anything else, by its path (Claude may read
         // it, and nothing else).
@@ -434,15 +460,31 @@ public static partial class Program
         switch (agent.Id)
         {
             case "claude":
-                argv = ["-p", "--output-format", "json", "--append-system-prompt", AskContext,
+            {
+                // Acting, it may apply and undo through Mazapan (each change shown to the
+                // person and allowed by them first, in Mazapan's own card); never more.
+                string[] acting = act ? ["apply_change", "undo"] : [];
+                var denied = new List<string> { "Bash", "Edit", "MultiEdit", "Write", "NotebookEdit", "WebFetch", "WebSearch", "Task" };
+                if (!act) denied.AddRange(["mcp__mazapan__apply_change", "mcp__mazapan__undo"]);
+                var a = new List<string>
+                {
+                    "-p", "--output-format", stream ? "stream-json" : "json", "--append-system-prompt", act ? ActContext : AskContext,
                     // Of its own tools, Read only (an allow list: tools that come later aren't in it),
                     // asked as usual whatever the person's settings say (bypass, accept edits).
                     "--tools", "Read", "--permission-mode", "default",
-                    "--mcp-config", "{\"mcpServers\":{\"mazapan\":{\"command\":\"/usr/bin/mazapan\",\"args\":[\"mcp\"]}}}", "--strict-mcp-config",
-                    "--allowedTools", string.Join(",", AskTools.Select(t => "mcp__mazapan__" + t).Concat(readFiles.Select(f => $"Read(/{f})"))),
+                    // Mazapan's server, named as this card's agent: the approval card says who asks,
+                    // and "Always allow" for it isn't for Claude Code in a terminal.
+                    "--mcp-config", "{\"mcpServers\":{\"mazapan\":{\"command\":\"/usr/bin/mazapan\",\"args\":[\"mcp\"],\"env\":{\"MAZAPAN_MCP_CLIENT\":\"mazapan-ask\"}}}}", "--strict-mcp-config",
+                    "--allowedTools", string.Join(",", AskTools.Concat(acting).Select(t => "mcp__mazapan__" + t).Concat(readFiles.Select(f => $"Read(/{f})"))),
                     // Denied over any allow rule of the person's own.
-                    "--disallowedTools", "Bash,Edit,MultiEdit,Write,NotebookEdit,WebFetch,WebSearch,Task,mcp__mazapan__apply_change,mcp__mazapan__undo"];
+                    "--disallowedTools", string.Join(",", denied),
+                };
+                if (stream) a.Add("--verbose");
+                if (model != null) a.AddRange(["--model", model]);
+                if (resumeId != null) a.AddRange(["--resume", resumeId]);
+                argv = [.. a];
                 break;
+            }
             case "codex":
                 // Read only, and none of the person's own MCP servers (they could act).
                 argv = ["exec", "--skip-git-repo-check", "--sandbox", "read-only", "-c", "mcp_servers={}", "-"];
@@ -458,9 +500,26 @@ public static partial class Program
         }
         foreach (var a in argv) psi.ArgumentList.Add(a);
         Account? account = null;
-        if (agent.Id == "claude" && agent.Accounts.Count > 1) account = UseClaudeAccount(agents, agent, psi, quiet: true);
-        // No keyring keys here: what it reads (a notification, the clipboard) isn't the person's
-        // word, and a key in its environment is one more thing to read out.
+        if (agent.Id == "claude" && accountLabel != null)
+        {
+            // The account the person picked, whatever its limits.
+            account = agent.Accounts.FirstOrDefault(x => x.Label == accountLabel)
+                ?? throw new MazapanException($"no Claude account \"{accountLabel}\" (mazapan agents)");
+            var home = Environment.GetEnvironmentVariable("HOME") ?? "";
+            if (account.ConfigDir.TrimEnd('/') != Paths.Join(home, ".claude")) psi.Environment["CLAUDE_CONFIG_DIR"] = account.ConfigDir;
+            else psi.Environment.Remove("CLAUDE_CONFIG_DIR");
+        }
+        else if (agent.Id == "claude" && agent.Accounts.Count > 1) account = UseClaudeAccount(agents, agent, psi, quiet: true);
+        // A keyring key only when the person picked one, and only for their own words: what it
+        // reads otherwise (a notification, the clipboard) isn't theirs, and a key in its
+        // environment is one more thing to read out.
+        if (keyProvider != null)
+        {
+            var provider = Keys.Of(keyProvider);
+            if (provider.Admin || provider.Env == "") throw new MazapanException($"{provider.Name}'s key is for its spend only");
+            if (agent.Id == "claude" && provider.Id != "anthropic") throw new MazapanException($"Claude Code takes Anthropic's key, not {provider.Name}'s");
+            psi.Environment[provider.Env] = Keys.Get(provider.Id) ?? throw new MazapanException($"no {provider.Name} key in the keyring (mazapan agents keys set {provider.Id})");
+        }
 
         string answer = "", session = "", problem = "";
         using (var p = Process.Start(psi)!)
@@ -468,8 +527,26 @@ public static partial class Program
             try { p.StandardInput.Write(stdin); }
             catch (IOException) { }
             p.StandardInput.Close();
-            var out_ = p.StandardOutput.ReadToEndAsync();
             var err = p.StandardError.ReadToEndAsync();
+            if (stream && agent.Id == "claude")
+            {
+                // Each step said as it comes (the card shows it), the answer last.
+                var follow = Task.Run(() => FollowStream(p.StandardOutput, Console.Out));
+                if (!p.WaitForExit(300_000))
+                {
+                    try { p.Kill(true); } catch (InvalidOperationException) { }
+                    problem = "it took more than five minutes";
+                }
+                else
+                {
+                    follow.Wait(10_000);
+                    if (follow.IsCompletedSuccessfully) (answer, session, problem) = follow.Result;
+                    if (answer == "" && problem == "") problem = err.GetAwaiter().GetResult().Trim() is { Length: > 0 } e3 ? e3.Split('\n')[^1] : $"{agent.Name} gave no answer";
+                }
+            }
+            else
+            {
+            var out_ = p.StandardOutput.ReadToEndAsync();
             if (!p.WaitForExit(300_000))
             {
                 try { p.Kill(true); } catch (InvalidOperationException) { }
@@ -492,6 +569,7 @@ public static partial class Program
                 else answer = text.Trim();
                 if (answer == "" && problem == "") problem = err.GetAwaiter().GetResult().Trim() is { Length: > 0 } e2 ? e2.Split('\n')[^1] : $"{agent.Name} gave no answer";
             }
+            }
         }
         if (questionFile != null) File.Delete(questionFile);
         // Claude's conversation, again in a terminal: its account's directory, its session.
@@ -505,16 +583,94 @@ public static partial class Program
         }
         if (json)
         {
-            Console.WriteLine(GoJson.Marshal(new Fields
+            var result = new Fields
             {
                 { "version", AgentsVersion }, { "agent", agent.Id }, { "name", agent.Name }, { "account", account?.Label ?? "" },
                 { "answer", answer }, { "session", session }, { "resume", resume }, { "cwd", work }, { "problem", problem },
-            }));
+                { "acting", act },
+            };
+            // Streamed: the last line, marked as such.
+            if (stream) result.Add("event", "done");
+            Console.WriteLine(GoJson.Marshal(result));
             return problem == "" ? 0 : 1;
         }
         if (problem != "") throw new MazapanException($"{agent.Name}: {problem}");
         Console.WriteLine(answer);
         return 0;
+    }
+
+    /// <summary>
+    /// Claude's stream-json, followed: each tool it calls said as one line
+    /// ({"event":"tool","name":"status"}), an apply_change's outcome as
+    /// {"event":"applied","id":…} or {"event":"declined"}; the answer, its
+    /// session and its error (if it was one) returned.
+    /// </summary>
+    internal static (string Answer, string Session, string Problem) FollowStream(TextReader r, TextWriter events)
+    {
+        string answer = "", session = "", problem = "";
+        var applying = new HashSet<string>();
+        string? line;
+        while ((line = r.ReadLine()) != null)
+        {
+            System.Text.Json.JsonDocument doc;
+            try { doc = System.Text.Json.JsonDocument.Parse(line); }
+            catch (System.Text.Json.JsonException) { continue; }
+            using (doc)
+            {
+                var root = doc.RootElement;
+                if (root.ValueKind != System.Text.Json.JsonValueKind.Object) continue;
+                var type = Discovery.Str(root, "type");
+                if (type == "result")
+                {
+                    answer = Discovery.Str(root, "result");
+                    session = Discovery.Str(root, "session_id");
+                    if (root.TryGetProperty("is_error", out var ie) && ie.ValueKind == System.Text.Json.JsonValueKind.True) { problem = answer; answer = ""; }
+                    continue;
+                }
+                if (type is not ("assistant" or "user") || !root.TryGetProperty("message", out var m) || m.ValueKind != System.Text.Json.JsonValueKind.Object
+                    || !m.TryGetProperty("content", out var content) || content.ValueKind != System.Text.Json.JsonValueKind.Array) continue;
+                foreach (var c in content.EnumerateArray())
+                {
+                    if (c.ValueKind != System.Text.Json.JsonValueKind.Object) continue;
+                    var kind = Discovery.Str(c, "type");
+                    if (kind == "tool_use")
+                    {
+                        var name = Discovery.Str(c, "name");
+                        if (name.StartsWith("mcp__mazapan__", StringComparison.Ordinal)) name = name["mcp__mazapan__".Length..];
+                        if (name == "apply_change") applying.Add(Discovery.Str(c, "id"));
+                        StreamEvent(events, new Fields { { "event", "tool" }, { "name", name } });
+                    }
+                    else if (kind == "tool_result" && applying.Remove(Discovery.Str(c, "tool_use_id")))
+                    {
+                        var said = ToolText(c);
+                        var failed = c.TryGetProperty("is_error", out var fe) && fe.ValueKind == System.Text.Json.JsonValueKind.True;
+                        var id = System.Text.RegularExpressions.Regex.Match(said, @"\(id ([0-9]{8}-[0-9]{6}-[0-9]+)\)");
+                        StreamEvent(events, !failed && id.Success
+                            ? new Fields { { "event", "applied" }, { "id", id.Groups[1].Value } }
+                            : new Fields { { "event", "declined" } });
+                    }
+                }
+            }
+        }
+        return (answer, session, problem);
+    }
+
+    // A tool result's text: a string, or a list of text parts.
+    static string ToolText(System.Text.Json.JsonElement c)
+    {
+        if (!c.TryGetProperty("content", out var v)) return "";
+        if (v.ValueKind == System.Text.Json.JsonValueKind.String) return v.GetString() ?? "";
+        if (v.ValueKind != System.Text.Json.JsonValueKind.Array) return "";
+        return string.Join("\n", v.EnumerateArray().Where(x => x.ValueKind == System.Text.Json.JsonValueKind.Object).Select(x => Discovery.Str(x, "text")));
+    }
+
+    static void StreamEvent(TextWriter events, Fields f)
+    {
+        lock (events)
+        {
+            events.WriteLine(GoJson.Marshal(f));
+            events.Flush();
+        }
     }
 
     static bool SafeSession(string s) => s.Length is > 0 and < 100 && s.All(c => char.IsAsciiLetterOrDigit(c) || c == '-');

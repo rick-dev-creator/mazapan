@@ -425,7 +425,9 @@ Item {
   // What ↑↓ and ↵ go through, in the order shown.
   readonly property var results: {
     if (!open) return []
+    // "? question", or a question as Spanish writes it ("¿qué tema tengo?"): asked as typed.
     if (canAsk && query.startsWith("?")) return [askItem(query.slice(1).trim())]
+    if (canAsk && query.startsWith("¿")) return [askItem(query.trim() === "¿" ? "" : query.trim())]
     if (home) return homeApps.concat(homeWindows, tiles, systemItems)
     if (typed === "") {
       // A filter with nothing typed: all of that kind, by name.

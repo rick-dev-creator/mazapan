@@ -206,6 +206,8 @@ public static partial class Program
                     if (p.ValueKind == JsonValueKind.Object && p.TryGetProperty("clientInfo", out var ci) && ci.ValueKind == JsonValueKind.Object
                         && ci.TryGetProperty("name", out var cn) && cn.ValueKind == JsonValueKind.String)
                         AgentClient = Approval.Readable(cn.GetString() ?? "");
+                    // Started for the Ask card (mazapan agents ask): its agent, by that name.
+                    if (Environment.GetEnvironmentVariable("MAZAPAN_MCP_CLIENT") is "mazapan-ask") AgentClient = Approval.Readable("mazapan-ask");
                     var asked = p.ValueKind == JsonValueKind.Object && p.TryGetProperty("protocolVersion", out var pv) ? pv.GetString() : null;
                     return RpcResult(id, new Fields
                     {

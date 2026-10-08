@@ -1,7 +1,7 @@
 [plugin]
 id = "agent"
 name = "Agents"
-version = "0.10.0"
+version = "0.11.0"
 api = 1
 description = "Your coding agents: in the bar, which is working and which waits for you (a click goes to its window), each account's limits and when they reset, and what they've used today, for Claude Code, opencode, pi, Codex… every account found by itself; and from the palette, ask one about this desktop with mazapan's report"
 categories = ["agent", "tools", "bar"]
@@ -25,6 +25,16 @@ ask_key = "SUPER + SHIFT + A"
 selection_key = "SUPER + SHIFT + S"
 # Opens the agents: their sessions, limits and use.
 panel_key = "SUPER + I"
+# The mazapán in the Ask card: its gestures say what the agent is doing (listening, thinking, waiting for your approval…). Off: a glyph and words.
+mascot = true
+# Who answers in the Ask card: the first coding agent there is, or one of them. Only Claude Code can change things (through Mazapan, with your approval); the others only answer.
+ask_agent = { default = "auto", choices = ["auto", "claude", "codex", "pi"] }
+# Which Claude account answers: empty, the first with room in its limits; else its email, as "mazapan agents" lists it.
+ask_account = ""
+# What Claude is paid with: your subscription, or Anthropic's API key from the keyring (only for what you ask yourself, never about something from elsewhere).
+ask_credential = { default = "subscription", choices = ["subscription", "anthropic"] }
+# The model: the agent's own default, or one of Claude's.
+ask_model = { default = "default", choices = ["default", "haiku", "sonnet", "opus"] }
 # Claude Code tells which session works or waits through hooks this plugin
 # puts in each configuration's settings.json (your own hooks stay; a copy
 # of the file is kept the first time). Off: taken out again.
@@ -57,6 +67,12 @@ reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 [[targets]]
 template = "AgentsService.qml.tmpl"
 output = "~/.config/quickshell/mazapan/components/agents/AgentsService.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+# The agent's face in the Ask card: the mazapán and its gestures.
+[[targets]]
+template = "Mazapan.qml.tmpl"
+output = "~/.config/quickshell/mazapan/components/agents/Mazapan.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]

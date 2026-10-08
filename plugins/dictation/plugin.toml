@@ -1,7 +1,7 @@
 [plugin]
 id = "dictation"
 name = "Dictation"
-version = "0.2.0"
+version = "0.3.0"
 api = 1
 description = "Speak instead of typing: a key starts listening, the same key stops, and what you said is typed where you are. Worked out on this computer (whisper.cpp): nothing you say leaves it"
 categories = ["tools"]
