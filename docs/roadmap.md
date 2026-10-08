@@ -3,10 +3,10 @@
 Where Mazapan stands, what comes next, and what's waiting. How each part
 was decided, built, tested and audited is in [history.md](history.md).
 
-**Today (2026-10-07):** Mazapan runs on a real machine (an MSI Vector
+**Today (2026-10-08):** Mazapan runs on a real machine (an MSI Vector
 A16 HX), mazapan.dev is up, and the ISO and the signed
-package repository are published, released as a routine (0.4.1 now).
-The plugin registry is open. Not yet: 1.0.
+package repository are published, released as a routine (0.4.4 now).
+The plugin registry is open, with six plugins. Not yet: 1.0.
 
 ## Next
 
@@ -32,10 +32,11 @@ The plugin registry is open. Not yet: 1.0.
    Quickshell 0.3 (a kept window capture brings the shell down after a
    screen recording) and Hyprland 0.56 (a Lua timer stopped mid-countdown
    never fires again).
-3. **VS Code ready for C#.** The C# Dev Kit and its extensions in the
-   .NET profile, so F5 runs a backend and Aspire on Linux.
-4. **1.0.** Every block of the road below is done: tagged `v1.0.0`,
-   from the stable channel.
+3. **VS Code ready for C#.** Microsoft's VS Code is already in the .NET
+   profile (dev-dotnet); what's left is the C# Dev Kit and its extensions
+   installed with it, and tried: F5 runs a backend and Aspire on Linux.
+4. **1.0.** The road below is done; once the three above are too:
+   tagged `v1.0.0`, from the stable channel.
 
 ## Plugins that make a difference
 
@@ -43,35 +44,32 @@ What comes next is mostly plugins: each one a goal someone has, reached
 without a terminal. Built-in when nearly everyone needs it and it works on
 any hardware; from the community (their own repository, in the registry)
 when it depends on a brand, a service or a taste. Mazapan makes the first
-community ones itself, as it did with Markets and Pomodoro, so the registry
-starts with plugins worth installing.
+community ones itself, as it did with Markets, Pomodoro, Now Playing,
+Playback, Radio and Dock, so the registry starts with plugins worth
+installing.
 
 ### From the community
 
 Simplest first:
 
 1. **What I follow.** Feeds and tickers, as Markets does: one each.
-2. **The radio.** Live stations from everywhere, found by country, genre
-   or name, played through the media keys and the Control Center's music;
-   favorites kept.
-3. **What's running while I build.** The ports in use and which process
+2. **What's running while I build.** The ports in use and which process
    holds each, the containers up, stopped with a click: next to
-   dev-databases and dev-dotnet. The first one made from scratch for the
-   registry.
-4. **A wallpaper that moves.** A looping video as the wallpaper, muted,
+   dev-databases and dev-dotnet.
+3. **A wallpaper that moves.** A looping video as the wallpaper, muted,
    paused while a window covers it or on battery; part of a theme like any
    picture.
-5. **The services I work in.** Tasks, issues and notifications from one
+4. **The services I work in.** Tasks, issues and notifications from one
    service each (Todoist, Linear, GitHub…) in the bar or the palette, each
    signed in to its own way.
-6. **My passwords at hand.** Bitwarden from the palette: search, copy a
+5. **My passwords at hand.** Bitwarden from the palette: search, copy a
    password or a code, the vault locked with the session; nothing kept
    outside the system's keyring.
-7. **My home.** Home Assistant's lights, switches and scenes in the bar or
+6. **My home.** Home Assistant's lights, switches and scenes in the bar or
    the Control Center, and what its sensors say.
-8. **The phone next to me.** Its screen in a window (scrcpy), the
+7. **The phone next to me.** Its screen in a window (scrcpy), the
    clipboard, files and notifications both ways (KDE Connect).
-9. **My devices working.** One plugin per brand, where only its own tools
+8. **My devices working.** One plugin per brand, where only its own tools
    reach: keyboard lighting, Logitech mice (Solaar), Razer (OpenRazer),
    headphones' battery, MSI laptops' charge limit and fans (msi-ec); each
    tried on the device itself.
@@ -80,22 +78,22 @@ Simplest first:
 
 Simplest first:
 
-10. **How the machine is doing.** CPU, GPU, memory, temperatures and fans
+9. **How the machine is doing.** CPU, GPU, memory, temperatures and fans
     in the bar; a word when something runs hot or memory runs out, with
     what's using it, and stopping it from there.
-11. **A VPN with one click.** WireGuard and OpenVPN through NetworkManager,
+10. **A VPN with one click.** WireGuard and OpenVPN through NetworkManager,
     a config file dropped in to add one, a switch in the Control Center,
     what's connected said in the bar.
-12. **The camera before a call.** Any webcam's brightness, focus,
+11. **The camera before a call.** Any webcam's brightness, focus,
     exposure and zoom with a live preview, kept per camera and set again
     when it's plugged in.
-13. **Where my time goes.** Time per app, today and over the weeks, kept
+12. **Where my time goes.** Time per app, today and over the weeks, kept
     on this computer only; a limit for an app if you want one.
-14. **A battery that lasts years.** A charge limit (80 %, or full for a
+13. **A battery that lasts years.** A charge limit (80 %, or full for a
     trip) where the kernel offers one (`charge_control_end_threshold`:
     ThinkPad, ASUS, Framework, Dell, Huawei, Samsung…), kept across
     restarts, and the battery's health over time, not only today's.
-15. **Sound the way I want it.** Every output and input, more than one
+14. **Sound the way I want it.** Every output and input, more than one
     output at once, the codec of Bluetooth headphones, each app's volume
     and where it plays, and an equalizer with presets (PipeWire and
     WirePlumber).
@@ -127,7 +125,7 @@ Simplest first:
 | Learn | Lessons recorded from the real moves, tried for real and ticked off; every key while SUPER is held |
 | Security | Encryption, the firewall, privacy dots, app permissions, fingerprint; audited (see [security.md](security.md)) |
 | Plugins | Dependencies, approved capabilities, catalogs, the Plugins panel, tools for authors; hardware fixes offered only where they apply |
-| Published | mazapan.dev, the ISO with its checksum and signature, the signed repository at repo.mazapan.dev, releases on their channels; the plugin registry, with Markets, Pomodoro and Now Playing (what's playing, wherever it plays) |
+| Published | mazapan.dev, the ISO with its checksum and signature, the signed repository at repo.mazapan.dev, releases on their channels; the plugin registry, with Markets, Pomodoro, Now Playing (what's playing, wherever it plays), Playback (the same in Mazapan's own look), Radio (live stations from all over the world) and Dock (your apps at the bottom of the screen, every window of each) |
 | Look | The login, boot menu and boot splash in the theme; GTK, Qt, browsers, editors and terminals themed |
 
 ## Waiting
@@ -140,13 +138,12 @@ After 1.0, roughly in this order:
   printers and scanners said when plugged in, files found from the
   palette, the calendar and the next meeting in the bar.
 - **Less friction:** "where do you come from?" in the welcome (macOS- or
-  Windows-like keys and windows), a dock or taskbar with Alt+Tab
-  previews, Quick Look, a right click on the desktop, the scale from the
+  Windows-like keys and windows), Alt+Tab with previews (the dock is a
+  plugin now), Quick Look, a right click on the desktop, the scale from the
   screen's density.
 - **Robustness:** an LTS kernel to fall back on, systemd-oomd, the disk's
   health, btrfs scrub, security advisories (arch-audit),
-  reinstall keeping your files, "report this bug" from a crash, a pinned
-  Arch snapshot.
+  reinstall keeping your files, a pinned Arch snapshot.
 - **The same desktop anywhere:** config and plugins synced through git,
   what's per machine kept apart.
 - **Tiling, more of Niri:** workspaces that go back to their screen, tabs
