@@ -29,7 +29,7 @@ public class McpTests
     {
         var tools = Call("""{"jsonrpc":"2.0","id":2,"method":"tools/list"}""").GetProperty("result").GetProperty("tools")
             .EnumerateArray().ToDictionary(t => t.GetProperty("name").GetString()!);
-        foreach (var name in new[] { "status", "doctor", "themes", "plugins", "coverage", "history", "preview_change", "apply_change", "undo" })
+        foreach (var name in new[] { "status", "doctor", "themes", "plugins", "coverage", "history", "logs", "preview_change", "apply_change", "undo" })
             Assert.Contains(name, tools.Keys);
         Assert.True(tools["preview_change"].GetProperty("annotations").GetProperty("readOnlyHint").GetBoolean());
         Assert.False(tools["apply_change"].GetProperty("annotations").GetProperty("readOnlyHint").GetBoolean());

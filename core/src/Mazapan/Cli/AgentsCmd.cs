@@ -373,15 +373,16 @@ public static partial class Program
         + "When apply_change succeeds the change is made, even if its result also says system files wait for `mazapan apply --system`: "
         + "those (the login screen, files under /etc) are written separately with sudo, never block a change, and aren't a problem to report. "
         + "Do what was asked; don't diagnose things nobody asked about. "
-        + "To find out why something failed, read Mazapan's own logs (~/.local/state/mazapan/*.log: theme.log is the last theme change made from the picker or a mode) "
-        + "and compare with the history tool (when each change was applied): an error from before the last change that worked is old news, not a problem now. "
+        + "To find out why something failed, use the logs tool (Mazapan's logs, each with when it was written) and compare with the history tool (when each change was applied): "
+        + "an error from before the last change that worked is old: say so, and that nothing needs fixing. "
+        + "Never guess what a file you couldn't read says, its format or how to edit it: say what you found and what you couldn't check. "
         + "Send them to a terminal or sudo only when that is the fix for what they asked. "
         + "When it's done, say in one sentence what changed. If they said no, say nothing changed. "
         + "What your tools can't change (text settings, packages, anything needing root) is theirs: give the exact command and why. "
         + "When what they want is unclear, ask one short question.";
 
     // Mazapan's tools that only read (and preview): what the answer may use without asking.
-    static readonly string[] AskTools = ["status", "doctor", "themes", "plugins", "coverage", "history", "agents_usage", "agents_limits", "agents_spend", "preview_change"];
+    static readonly string[] AskTools = ["status", "doctor", "themes", "plugins", "coverage", "history", "logs", "agents_usage", "agents_limits", "agents_spend", "preview_change"];
 
     /// <summary>
     /// mazapan agents ask [--agent ID] [--json] QUESTION: one question to a
@@ -481,11 +482,12 @@ public static partial class Program
                     "--tools", "Read", "--permission-mode", "default",
                     // Mazapan's server, named as this card's agent: the approval card says who asks,
                     // and "Always allow" for it isn't for Claude Code in a terminal.
-                    "--mcp-config", "{\"mcpServers\":{\"mazapan\":{\"command\":\"/usr/bin/mazapan\",\"args\":[\"mcp\"],\"env\":{\"MAZAPAN_MCP_CLIENT\":\"mazapan-ask\"}}}}", "--strict-mcp-config",
-                    // Mazapan's own logs may be read to say why something failed (only *.log: the
-                    // rest of its state, a database's password, isn't the agent's to read).
-                    "--allowedTools", string.Join(",", AskTools.Concat(acting).Select(t => "mcp__mazapan__" + t).Concat(readFiles.Select(f => $"Read(/{f})"))
-                        .Concat(["Read(~/.local/state/mazapan/*.log)", "Read(~/.local/state/mazapan-wallpaper/*.log)"])),
+                    // This very mazapan (not one found on the PATH): its tools are the ones it knows.
+                    "--mcp-config", GoJson.Marshal(new Fields { { "mcpServers", new Fields { { "mazapan", new Fields {
+                        { "command", Environment.ProcessPath is { Length: > 0 } self && File.Exists(self) ? self : "/usr/bin/mazapan" },
+                        { "args", new List<string> { "mcp" } }, { "env", new Fields { { "MAZAPAN_MCP_CLIENT", "mazapan-ask" } } } } } } } }),
+                    "--strict-mcp-config",
+                    "--allowedTools", string.Join(",", AskTools.Concat(acting).Select(t => "mcp__mazapan__" + t).Concat(readFiles.Select(f => $"Read(/{f})"))),
                     // Denied over any allow rule of the person's own.
                     "--disallowedTools", string.Join(",", denied),
                 };

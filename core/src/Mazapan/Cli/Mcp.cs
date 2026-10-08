@@ -81,6 +81,9 @@ public static partial class Program
             "What differs between a checkpoint and the main system: packages (versions on each side), Mazapan's last update, and the errors and failed services of the last starts (on a checkpoint, the start before it: the one that broke). Read only. Making a checkpoint the main system is the person's: `sudo mazapan checkpoint keep` on it, or `sudo mazapan checkpoint restore N` (then a restart); tell them, with why.",
             Obj(new Fields { { "id", Prop("string", "the checkpoint to compare with the running system (when not started from one; default the newest)") } }), true,
             a => a.TryGetProperty("id", out var id) && id.GetString() is { Length: > 0 } s ? ["diagnose", s] : ["diagnose"], CmdCheckpoint),
+        new("logs", "Mazapan's logs",
+            "Mazapan's own logs (the last theme change from the picker or a mode, the Plugins panel's last action, the wallpaper's): each with when it was last written and its last lines. Compare those times with the history tool: an error from before the last change that worked is old, not a problem now.",
+            Obj([]), true, _ => [], _ => McpLogs()),
         new("preview_change", "Preview a change",
             "What a change would do, without doing it: the plan and the exact unified diff of every file it would write. Show it to the person before apply_change.",
             ChangeSchema, true, a => ["--agent", "--dry-run", "--diff", .. ChangeArgs(a)], CmdApply),
@@ -92,6 +95,27 @@ public static partial class Program
             Obj(new Fields { { "id", Prop("string", "the apply to undo (apply_change's result says it); it must be the last one") } }), false,
             a => a.TryGetProperty("id", out var id) && id.GetString() is { Length: > 0 } s ? ["--agent", "-y", "--id=" + s] : ["--agent", "-y"], CmdUndo),
     ];
+
+    /// <summary>Mazapan's own logs, with when each was last written (their last 60 lines; never another file of its state).</summary>
+    static int McpLogs()
+    {
+        var found = false;
+        foreach (var dir in new[] { "~/.local/state/mazapan", "~/.local/state/mazapan-wallpaper" })
+        {
+            var d = Paths.ExpandHome(dir);
+            if (!Directory.Exists(d)) continue;
+            foreach (var f in Directory.GetFiles(d, "*.log").Order(StringComparer.Ordinal))
+            {
+                found = true;
+                var lines = File.ReadAllLines(f);
+                Console.WriteLine($"== {dir}/{Path.GetFileName(f)} (last written {File.GetLastWriteTime(f):yyyy-MM-dd HH:mm:ss})");
+                foreach (var l in lines.Skip(Math.Max(0, lines.Length - 60))) Console.WriteLine(l);
+                Console.WriteLine();
+            }
+        }
+        if (!found) Console.WriteLine("no logs");
+        return 0;
+    }
 
     /// <summary>A change's JSON as apply's flags.</summary>
     static string[] ChangeArgs(JsonElement a)
