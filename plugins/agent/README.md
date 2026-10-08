@@ -44,6 +44,11 @@ it (`otel`); telemetry of your own already there is left alone.
 Workspaces plugin): amber while it waits for you, the text's color while it
 works, green when it's done.
 
+**Keys**: `SUPER + SHIFT + A` asks about this desktop,
+`SUPER + SHIFT + S` about the selected text (else what was copied),
+`SUPER + I` opens the agents; Settings › Keys changes them, and holding
+SUPER shows them under "AI agents".
+
 **A question from the palette**: type `?` and the question (`? why is
 my battery draining`). The first coding agent here answers it in a card,
 without opening it: Claude Code with the account that has room and
@@ -83,8 +88,8 @@ its that day" takes them back together.
 terminal's palette, so it follows every theme. (Mazapan doesn't set it:
 that choice is yours, in Claude's own settings.)
 
-**Ask an agent about this desktop**, from the palette, opens the same
-card to type the question, with mazapan's report beside it: state,
+**Ask an agent about this desktop** (`SUPER + SHIFT + A`, or the
+palette) opens the same card to type the question, with mazapan's report beside it: state,
 failing checks, crashes, logged errors. Another agent set as `command`
 (`codex`, `opencode run`…) opens instead in a terminal, the report as its
 first message. "Copy a report"
