@@ -158,10 +158,11 @@ Item {
         anchors.margins: 16
         spacing: 10
 
-        // What it's about.
+        // What it's about: this desktop (mazapan's report), or the files.
         Caption {
           visible: root.files.length > 0
-          text: "󰁦 " + root.files.map(f => f.split("/").pop()).join(", ")
+          text: root.files.length === 1 && root.files[0].endsWith("/mazapan-ask/desktop.txt") ? "󰍹 " + {{ tq "ask.desktop" }}
+            : "󰁦 " + root.files.map(f => f.split("/").pop()).join(", ")
           color: Theme.fgMuted
           elide: Text.ElideMiddle
           Layout.fillWidth: true

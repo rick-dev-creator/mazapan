@@ -1,7 +1,7 @@
 [plugin]
 id = "agent"
 name = "Agents"
-version = "0.9.0"
+version = "0.9.1"
 api = 1
 description = "Your coding agents: in the bar, which is working and which waits for you (a click goes to its window), each account's limits and when they reset, and what they've used today, for Claude Code, opencode, pi, Codex… every account found by itself; and from the palette, ask one about this desktop with mazapan's report"
 categories = ["agent", "tools", "bar"]
@@ -11,10 +11,11 @@ requires = ["shell-bar"]
 pacman = ["quickshell", "libnotify", "sqlite", "qt6-graphs", "jq", "libsecret", "wl-clipboard"]
 
 [settings]
-# The agent to open, as its command: it gets the report as its first
-# message. "claude" is Claude Code (with the first of your accounts that has
-# room); any agent that takes a prompt as its argument works ("codex",
-# "opencode run"…). To let it use mazapan directly (status, previews, apply,
+# The agent "Ask an agent about this desktop" opens. "claude": the Ask
+# card, answered by the first coding agent there is (Claude Code with the
+# first of your accounts that has room). Any other command opens that agent
+# in a terminal with the report as its first message; any agent that takes
+# a prompt as its argument works ("codex", "opencode run"…). To let it use mazapan directly (status, previews, apply,
 # undo), register the MCP server with it, e.g.
 #   claude mcp add --scope user mazapan -- mazapan mcp
 command = "claude"
@@ -139,9 +140,12 @@ output = "~/.local/share/mazapan/bin/agent-keys"
 
 [[actions]]
 name = "{{ t \"ask\" }}"
-# Claude Code with the first account that has room (mazapan agents run).
-run = "{{ if settings.command == \"claude\" }}mazapan agents run claude{{ else }}{{ settings.command }}{{ end }} \"$(mazapan report --agent)\""
-terminal = true
+# The Ask card about this desktop (mazapan's report with the question), to
+# type it: the first coding agent answers it there (mazapan agents ask:
+# Claude with the account that has room and Mazapan's read-only tools),
+# copied or continued in a terminal. Another agent set as the command:
+# that one, in a terminal, the report as its first message.
+run = "{{ if settings.command == \"claude\" }}sh ~/.local/share/mazapan/bin/agent-ask --desktop{{ else }}xdg-terminal-exec {{ settings.command }} \"$(mazapan report --agent)\"{{ end }}"
 keywords = "{{ t \"ask.kw\" }}"
 
 [[actions]]

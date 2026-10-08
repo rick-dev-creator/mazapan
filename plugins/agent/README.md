@@ -83,9 +83,11 @@ its that day" takes them back together.
 terminal's palette, so it follows every theme. (Mazapan doesn't set it:
 that choice is yours, in Claude's own settings.)
 
-**Ask an agent about this desktop**, from the palette, opens your agent
-(`command`; Claude with the first account that has room) with mazapan's
-report: state, failing checks, crashes, logged errors. "Copy a report"
+**Ask an agent about this desktop**, from the palette, opens the same
+card to type the question, with mazapan's report beside it: state,
+failing checks, crashes, logged errors. Another agent set as `command`
+(`codex`, `opencode run`…) opens instead in a terminal, the report as its
+first message. "Copy a report"
 puts it on the clipboard. The report goes to the agent you run, and from
 there wherever that agent sends what it's given: a hosted one (Claude
 Code, Codex) sends it to its company's servers.
