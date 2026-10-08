@@ -186,6 +186,14 @@ Item {
   function safe(md) {
     return md.replace(/!\[/g, "[").replace(/^ {0,3}\[[^\]\n]+\]:.*$/gm, "").replace(/&/g, "&amp;").replace(/</g, "&lt;")
   }
+  // An image seen big over the card (one already loaded, so nothing new is fetched).
+  property string viewing: ""
+  property string viewingAlt: ""
+  property string viewingHost: ""
+  function view(url, alt, host) { viewing = url; viewingAlt = alt; viewingHost = host }
+  // Esc: the big image first, then the card.
+  function dismiss() { if (viewing !== "") viewing = ""; else close() }
+
   // An answer as pieces: its text, and each image it shows from the web
   // (https only) apart, to be loaded only when the person asks.
   function pieces(md) {
@@ -399,7 +407,7 @@ Item {
       radius: Math.max(Theme.radius, 4)
       clip: true
       focus: true
-      Keys.onEscapePressed: root.close()
+      Keys.onEscapePressed: root.dismiss()
       Behavior on border.color { enabled: Theme.motion; ColorAnimation { duration: 200 } }
 
       opacity: root.open ? 1 : 0
@@ -441,6 +449,65 @@ Item {
             duration: 1300
             loops: Animation.Infinite
             easing.type: Easing.InOutCubic
+          }
+        }
+      }
+
+      // The image seen big: over the whole card, on a darkened ground; a click or Esc closes it.
+      Rectangle {
+        anchors.fill: parent
+        z: 20
+        visible: opacity > 0.01
+        opacity: root.viewing !== "" ? 1 : 0
+        Behavior on opacity { enabled: Theme.motion; NumberAnimation { duration: 180 } }
+        color: Qt.rgba(0, 0, 0, Theme.mode === "light" ? 0.72 : 0.82)
+        radius: card.radius
+        TapHandler { onTapped: root.viewing = "" }
+        Image {
+          id: bigImg
+          anchors.fill: parent
+          anchors.margins: 24
+          anchors.bottomMargin: 52
+          source: root.viewing
+          asynchronous: true
+          fillMode: Image.PreserveAspectFit
+          smooth: true
+          mipmap: true
+          scale: root.viewing !== "" ? 1 : 0.96
+          Behavior on scale { enabled: Theme.motion; NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+        }
+        RowLayout {
+          anchors.left: parent.left
+          anchors.right: parent.right
+          anchors.bottom: parent.bottom
+          anchors.margins: 16
+          spacing: 10
+          Text {
+            Layout.fillWidth: true
+            text: (root.viewingAlt ? root.viewingAlt + "  ·  " : "") + root.viewingHost
+            color: "white"
+            elide: Text.ElideRight
+            font.family: Theme.fontMono
+            font.pixelSize: Theme.fontSize * 0.95
+            textFormat: Text.PlainText
+          }
+          Rectangle {
+            implicitWidth: openBig.implicitWidth + 20
+            implicitHeight: 28
+            radius: 14
+            color: Qt.rgba(1, 1, 1, 0.14)
+            Text { id: openBig; anchors.centerIn: parent; text: "󰏌  " + {{ tq "ask.image.open" }}; color: "white"; font.family: Theme.fontMono; font.pixelSize: Theme.fontSize * 0.9 }
+            HoverHandler { cursorShape: Qt.PointingHandCursor }
+            TapHandler { onTapped: Qt.openUrlExternally(root.viewing) }
+          }
+          Rectangle {
+            implicitWidth: 28
+            implicitHeight: 28
+            radius: 14
+            color: Qt.rgba(1, 1, 1, 0.14)
+            Text { anchors.centerIn: parent; text: "󰅖"; color: "white"; font.family: Theme.fontMono; font.pixelSize: 15 }
+            HoverHandler { cursorShape: Qt.PointingHandCursor }
+            TapHandler { onTapped: root.viewing = "" }
           }
         }
       }
@@ -824,7 +891,7 @@ Item {
                 clip: true
                 function focusInput() { forceActiveFocus() }
                 onAccepted: { const q = text.trim(); if (q !== "") { text = ""; root.ask(q) } }
-                Keys.onEscapePressed: root.close()
+                Keys.onEscapePressed: root.dismiss()
                 Text {
                   anchors.fill: parent
                   verticalAlignment: Text.AlignVCenter
@@ -904,59 +971,198 @@ Item {
     }
   }
 
-  // An image from the web: a button saying what and where, loaded only when clicked
-  // (shown by itself, it could carry what the agent read to that site).
-  component WebPicture: Rectangle {
+  // An image from the web: a card saying what and where, loaded only when asked
+  // (shown by itself, it could carry what the agent read to that site). Loaded:
+  // at its own size (never stretched), rounded, with what it is and where it's
+  // from under it; clicked, seen big over the card.
+  component WebPicture: Item {
     id: pic
     property string url: ""
     property string alt: ""
     property real most: 420
     property bool shown: false
     readonly property string host: (url.match(/^https:\/\/([^\/?#:]+)/) || ["", ""])[1]
-    readonly property bool ready: picImg.status === Image.Ready
-    implicitWidth: shown ? most : Math.min(most, picRow.implicitWidth + 24)
-    implicitHeight: shown ? (ready ? picImg.height + 12 : 64) : 38
-    radius: Math.max(Theme.radius, 6)
-    color: picHover.hovered && !shown ? Theme.surfaceRaised : Qt.alpha(Theme.fg, 0.04)
-    border.width: 1
-    border.color: picHover.hovered && !shown ? Qt.alpha(Theme.accent, 0.55) : Theme.border
-    Row {
-      id: picRow
+    readonly property bool ready: picImg.status === Image.Ready && picImg.sourceSize.width > 0
+    readonly property bool failed: picImg.status === Image.Error
+    // Its size on the card: its own, within the bubble and 300 px high.
+    readonly property real ratio: ready ? picImg.sourceSize.height / picImg.sourceSize.width : 0.62
+    readonly property real w: ready ? Math.min(most, picImg.sourceSize.width, 300 / ratio) : Math.min(most, 280)
+    readonly property real h: w * ratio
+    implicitWidth: shown ? w : Math.min(most, askCard.implicitWidth)
+    implicitHeight: shown ? frame.height + 6 + caption.implicitHeight : askCard.implicitHeight
+
+    // Not loaded: what it is, from where, and Show.
+    Rectangle {
+      id: askCard
       visible: !pic.shown
-      anchors.centerIn: parent
-      spacing: 8
-      Text { anchors.verticalCenter: parent.verticalCenter; text: "󰋩"; color: Theme.accentText; font.family: Theme.fontMono; font.pixelSize: 16 }
-      Text {
-        anchors.verticalCenter: parent.verticalCenter
-        width: Math.min(implicitWidth, pic.most - 80)
-        elide: Text.ElideRight
-        text: (pic.alt || {{ tq "ask.image" }}) + "  ·  " + pic.host
-        color: Theme.fg
-        font.family: Theme.fontMono
-        font.pixelSize: Theme.fontSize * 0.95
-        textFormat: Text.PlainText
+      implicitWidth: Math.max(240, askRow.implicitWidth + 24)
+      implicitHeight: 52
+      width: Math.min(pic.most, implicitWidth)
+      radius: Math.max(Theme.radius, 8)
+      color: askHover.hovered ? Theme.surfaceRaised : Qt.alpha(Theme.fg, 0.04)
+      border.width: 1
+      border.color: askHover.hovered ? Qt.alpha(Theme.accent, 0.55) : Theme.border
+      Behavior on color { enabled: Theme.motion; ColorAnimation { duration: 120 } }
+      RowLayout {
+        id: askRow
+        anchors.fill: parent
+        anchors.leftMargin: 10
+        anchors.rightMargin: 8
+        spacing: 10
+        Rectangle {
+          Layout.preferredWidth: 34
+          Layout.preferredHeight: 34
+          radius: Math.max(Theme.radius, 6)
+          color: Qt.alpha(Theme.accent, 0.14)
+          Text { anchors.centerIn: parent; text: "󰋩"; color: Theme.accentText; font.family: Theme.fontMono; font.pixelSize: 17 }
+        }
+        ColumnLayout {
+          Layout.fillWidth: true
+          spacing: 1
+          Text {
+            Layout.fillWidth: true
+            text: pic.alt || {{ tq "ask.image" }}
+            color: Theme.fg
+            elide: Text.ElideRight
+            font.family: Theme.fontMono
+            font.pixelSize: Theme.fontSize * 0.98
+            font.bold: true
+            textFormat: Text.PlainText
+          }
+          Text {
+            Layout.fillWidth: true
+            text: pic.host
+            color: Theme.fgSubtle
+            elide: Text.ElideMiddle
+            font.family: Theme.fontMono
+            font.pixelSize: Theme.fontSize * 0.85
+            textFormat: Text.PlainText
+          }
+        }
+        Rectangle {
+          implicitWidth: showText.implicitWidth + 18
+          implicitHeight: 26
+          radius: 13
+          color: Theme.accent
+          Text { id: showText; anchors.centerIn: parent; text: {{ tq "ask.image.show" }}; color: Theme.accentFg; font.family: Theme.fontMono; font.pixelSize: Theme.fontSize * 0.9; font.bold: true }
+        }
+      }
+      HoverHandler { id: askHover; cursorShape: Qt.PointingHandCursor }
+      TapHandler { onTapped: pic.shown = true }
+    }
+
+    // Loaded, or loading.
+    Item {
+      id: frame
+      visible: pic.shown
+      width: pic.w
+      height: pic.failed ? 52 : pic.h
+      // Loading: a panel of its size that breathes.
+      Rectangle {
+        anchors.fill: parent
+        visible: !pic.ready && !pic.failed
+        radius: Math.max(Theme.radius, 8)
+        color: Qt.alpha(Theme.fg, 0.06)
+        SequentialAnimation on opacity {
+          running: pic.shown && !pic.ready && !pic.failed && Theme.motion
+          loops: Animation.Infinite
+          NumberAnimation { to: 0.45; duration: 650; easing.type: Easing.InOutSine }
+          NumberAnimation { to: 1; duration: 650; easing.type: Easing.InOutSine }
+        }
+        Text { anchors.centerIn: parent; text: {{ tq "ask.image.loading" }}; color: Theme.fgMuted; font.family: Theme.fontMono; font.pixelSize: Theme.fontSize * 0.9 }
+      }
+      // Failed: said, with another try.
+      Rectangle {
+        anchors.fill: parent
+        visible: pic.failed
+        radius: Math.max(Theme.radius, 8)
+        color: Qt.alpha(Theme.danger, 0.08)
+        border.width: 1
+        border.color: Qt.alpha(Theme.danger, 0.35)
+        RowLayout {
+          anchors.fill: parent
+          anchors.leftMargin: 12
+          anchors.rightMargin: 8
+          spacing: 8
+          Text { text: "󰀦"; color: Theme.danger; font.family: Theme.fontMono; font.pixelSize: 15 }
+          Text { Layout.fillWidth: true; text: {{ tq "ask.image.failed" }}; color: Theme.fg; elide: Text.ElideRight; font.family: Theme.fontMono; font.pixelSize: Theme.fontSize * 0.92 }
+          Text {
+            text: "󰑓 " + {{ tq "ask.image.retry" }}
+            color: Theme.accentText
+            font.family: Theme.fontMono
+            font.pixelSize: Theme.fontSize * 0.92
+            HoverHandler { cursorShape: Qt.PointingHandCursor }
+            TapHandler { onTapped: { pic.shown = false; Qt.callLater(() => pic.shown = true) } }
+          }
+        }
+      }
+      Image {
+        id: picImg
+        anchors.fill: parent
+        source: pic.shown ? pic.url : ""
+        asynchronous: true
+        fillMode: Image.PreserveAspectFit
+        smooth: true
+        mipmap: true
+        opacity: pic.ready ? 1 : 0
+        Behavior on opacity { enabled: Theme.motion; NumberAnimation { duration: 260 } }
+        // Rounded like the rest of the card.
+        layer.enabled: pic.ready
+        layer.effect: MultiEffect {
+          maskEnabled: true
+          maskSource: picMask
+          maskThresholdMin: 0.5
+          maskSpreadAtMin: 1.0
+        }
+      }
+      Rectangle {
+        id: picMask
+        anchors.fill: parent
+        radius: Math.max(Theme.radius, 8)
+        visible: false
+        layer.enabled: true
+      }
+      // Seen big, on a click.
+      HoverHandler { id: frameHover; enabled: pic.ready; cursorShape: Qt.PointingHandCursor }
+      TapHandler { enabled: pic.ready; onTapped: root.view(pic.url, pic.alt, pic.host) }
+      Rectangle {
+        visible: pic.ready && frameHover.hovered
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.margins: 8
+        width: 28
+        height: 28
+        radius: 14
+        color: Qt.rgba(0, 0, 0, 0.55)
+        Text { anchors.centerIn: parent; text: "󰊓"; color: "white"; font.family: Theme.fontMono; font.pixelSize: 15 }
       }
     }
-    Image {
-      id: picImg
-      visible: pic.shown && pic.ready
-      anchors.centerIn: parent
-      source: pic.shown ? pic.url : ""
-      asynchronous: true
-      fillMode: Image.PreserveAspectFit
-      width: pic.width - 12
-      height: ready && sourceSize.width > 0 ? Math.min(320, width * sourceSize.height / sourceSize.width) : 0
+
+    // What it is, where from, and the browser.
+    RowLayout {
+      id: caption
+      visible: pic.shown && !pic.failed
+      y: frame.height + 6
+      width: pic.w
+      spacing: 6
+      Text {
+        Layout.fillWidth: true
+        text: (pic.alt ? pic.alt + "  ·  " : "") + pic.host
+        color: Theme.fgSubtle
+        elide: Text.ElideRight
+        font.family: Theme.fontMono
+        font.pixelSize: Theme.fontSize * 0.85
+        textFormat: Text.PlainText
+      }
+      Text {
+        text: "󰏌"
+        color: openHover.hovered ? Theme.accentText : Theme.fgSubtle
+        font.family: Theme.fontMono
+        font.pixelSize: 14
+        HoverHandler { id: openHover; cursorShape: Qt.PointingHandCursor }
+        TapHandler { onTapped: Qt.openUrlExternally(pic.url) }
+      }
     }
-    Text {
-      visible: pic.shown && !pic.ready
-      anchors.centerIn: parent
-      text: picImg.status === Image.Error ? {{ tq "ask.image.failed" }} : {{ tq "ask.image.loading" }}
-      color: picImg.status === Image.Error ? Theme.danger : Theme.fgMuted
-      font.family: Theme.fontMono
-      font.pixelSize: Theme.fontSize * 0.95
-    }
-    HoverHandler { id: picHover; cursorShape: pic.shown ? Qt.ArrowCursor : Qt.PointingHandCursor }
-    TapHandler { onTapped: if (!pic.shown) pic.shown = true; else if (pic.ready) Qt.openUrlExternally(pic.url) }
   }
 
   // A small round button with a glyph; lit when it's what's next.
