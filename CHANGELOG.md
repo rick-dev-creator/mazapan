@@ -6,6 +6,19 @@ release (a tag `vX.Y.Z`) names them.
 
 ## Unreleased
 
+- The mazapán, Mazapan's agent: `SUPER + SHIFT + A`, `? …` in the palette
+  (or a question that starts with "¿"), or "ask by voice" opens a card
+  with the mazapán of the icon, in pixel art, whose gestures say what it's
+  doing. Ask it for a change ("put a dark theme with a green accent") and
+  it makes it through Mazapan, after Mazapan's own card shows you the diff
+  and you allow it; Undo takes it back. The conversation goes on in the
+  card, by typing or by voice, and survives the reload a theme causes. Only
+  your own words act: about a capture, a notification or the selected text
+  it only answers. Settings for who answers, which Claude account, paid
+  with the subscription or an API key, the model, and the mazapán itself.
+  Holding SUPER shows its keys under "AI agents"; "Ask an agent about this
+  desktop" no longer opens a terminal.
+
 - Ports, a new plugin in the registry
   ([mazapan-ports](https://github.com/rick-dev-creator/mazapan-ports)):
   what's listening on your computer, by name: your servers with their

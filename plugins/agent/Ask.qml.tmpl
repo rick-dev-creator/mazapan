@@ -34,52 +34,83 @@ Item {
   readonly property bool canDictate: {{ if (under "~/.local/share/mazapan/bin/dictate").size > 0 }}true{{ else }}false{{ end }}
   readonly property string home: Quickshell.env("HOME")
 
-  // The conversation: [{ me: bool, text }], the agent's session to go on with.
-  property var turns: []
-  property var files: []           // what it's about
+  // The conversation and where it is, kept across the shell's reloads: a
+  // change it makes (a theme, an accent) rewrites the shell, this card with
+  // it, and the card comes back as it was, following the agent where it is.
+  PersistentProperties {
+    id: kept
+    reloadableId: "mazapan-ask"
+    property bool open: false
+    // Lists kept as JSON: a reload brings back text and numbers, not JavaScript's lists.
+    property string turnsJ: "[]"   // [{ me: bool, text, problem }]
+    property string filesJ: "[]"   // what it's about
+    property string session: ""    // the agent's, to go on with
+    property string resumeJ: "null"
+    property string agentName: ""
+    property string account: ""
+    property string undoId: ""     // the last change made here, to undo
+    property string phase: "idle"
+    property string step: ""
+    property string log: ""        // the running ask's lines (empty: none running)
+    property string doneFor: ""    // the log whose answer is already in turns
+    property string undoLog: ""    // an undo running (it reloads the shell too)
+    property double started: 0
+    // Its values are back only now (not yet when the card is made).
+    onLoaded: root.restore()
+  }
+  function parsed(j, d) { try { const v = JSON.parse(j); return v === undefined ? d : v } catch (e) { return d } }
+  readonly property var turns: parsed(kept.turnsJ, [])
+  readonly property var files: parsed(kept.filesJ, [])
+  readonly property var resume: parsed(kept.resumeJ, null)
+  property alias session: kept.session
+  property alias agentName: kept.agentName
+  property alias account: kept.account
+  property alias undoId: kept.undoId
+  // What it's doing: idle, listening, thinking, working, waiting, done,
+  // declined, error, sleeping; and the step, said.
+  property alias phase: kept.phase
+  property alias step: kept.step
+  property alias started: kept.started
   readonly property bool aboutDesktop: files.length === 1 && files[0].endsWith("/mazapan-ask/desktop.txt")
   // Material from elsewhere: it only answers.
   readonly property bool readOnly: files.length > 0 && !aboutDesktop
-  property string session: ""
-  property var resume: null
-  property string agentName: ""
-  property string account: ""
-  property string undoId: ""       // the last change made here, to undo
-
-  // What it's doing: idle, listening, thinking, working, waiting, done,
-  // declined, error, sleeping; and the step, said.
-  property string phase: "idle"
-  property string step: ""
-  property double started: 0
+  readonly property bool busy: kept.log !== ""
   property double now: 0
-  property int asked: 0            // which ask a line belongs to (a cancelled one's are dropped)
-  property int running_: 0
 
   readonly property string mood: phase === "listening" ? "listen" : phase === "thinking" ? "think"
     : phase === "working" ? "work" : phase === "waiting" ? "wait" : phase === "done" ? "happy"
     : phase === "declined" ? "shrug" : phase === "error" ? "dizzy" : phase === "sleeping" ? "sleep"
     : readOnly ? "read" : "idle"
 
+  // Back after a reload: open again, following the ask still running.
+  function restore() {
+    if (kept.open && !open) show()
+    if (kept.log !== "" && !follower.running) follower.running = true
+  }
+
   function toggle() { open ? close() : show() }
   function show() {
     screenAtOpen = Quickshell.screens.find(s => Hyprland.focusedMonitor && s.name === Hyprland.focusedMonitor.name) ?? Quickshell.screens[0]
     open = true
+    kept.open = true
     Qt.callLater(() => field.focusInput())
   }
   function close() {
     open = false
+    kept.open = false
     cancel()
   }
   function reset() {
     cancel()
-    turns = []
-    session = ""
-    resume = null
-    agentName = ""
-    account = ""
-    undoId = ""
-    phase = "idle"
-    step = ""
+    kept.turnsJ = JSON.stringify([])
+    kept.filesJ = JSON.stringify([])
+    kept.session = ""
+    kept.resumeJ = JSON.stringify(null)
+    kept.agentName = ""
+    kept.account = ""
+    kept.undoId = ""
+    kept.phase = "idle"
+    kept.step = ""
   }
 
   // A request written for this (read, then gone).
@@ -99,38 +130,44 @@ Item {
         const goOn = r.follow === true && root.open && root.turns.length > 0
         if (!goOn) {
           root.reset()
-          root.files = (r.files || []).filter(f => typeof f === "string" && f.startsWith("/"))
+          kept.filesJ = JSON.stringify((r.files || []).filter(f => typeof f === "string" && f.startsWith("/")))
         }
         root.show()
-        if (r.listening === true) root.phase = "listening"
+        if (r.listening === true) kept.phase = "listening"
         else if (q !== "") root.ask(q)
       }
     }
   }
 
+  // The agent runs on its own (a reload doesn't stop it), its lines in a file
+  // of the runtime folder that this card follows; its process group's id beside
+  // it, to stop it. This desktop's report is still being made when the card
+  // opens (it takes seconds): waited for, up to 30 s, else asked without it.
+  readonly property string run_: 'log=$1; shift; echo $$ > "$log.pid"; '
+    + 'r=; for a in "$@"; do case "$a" in */mazapan-ask/desktop.txt) r=$a ;; esac; done; '
+    + 'if [ -n "$r" ]; then n=0; while [ ! -e "$r" ] && [ -e "$r.part" ] && [ $n -lt 300 ]; do sleep 0.1; n=$((n+1)); done; '
+    + '[ -e "$r" ] || { p=; for a; do shift; if [ -n "$p" ]; then [ "$a" = "$r" ] || set -- "$@" --file "$a"; p=; '
+    + 'elif [ "$a" = "--file" ]; then p=1; else set -- "$@" "$a"; fi; done; }; fi; '
+    + 'mazapan "$@" > "$log" 2> "$log.err"; echo $? > "$log.exit"'
+
   function ask(q) {
-    if (q === "" || asking.running) return
-    turns = turns.concat([{ me: true, text: q }])
-    asked++
-    running_ = asked
-    phase = "thinking"
-    step = {{ tq "ask.step.looking" }}
+    if (q === "" || busy) return
+    kept.turnsJ = JSON.stringify(turns.concat([{ me: true, text: q }]))
+    kept.phase = "thinking"
+    kept.step = {{ tq "ask.step.looking" }}
     const flags = ["--stream", "--agent", {{ quote settings.ask_agent }}, "--model", {{ quote settings.ask_model }},
       "--account", {{ quote settings.ask_account }}, "--key", {{ quote settings.ask_credential }}]
     if (!readOnly) flags.push("--act")
     if (session !== "") flags.push("--resume", session)
-    // This desktop's report is still being made when the card opens (it
-    // takes seconds): waited for, up to 30 s, else asked without it.
-    asking.command = ["sh", "-c", 'r=; for a in "$@"; do case "$a" in */mazapan-ask/desktop.txt) r=$a ;; esac; done; '
-      + 'if [ -n "$r" ]; then n=0; while [ ! -e "$r" ] && [ -e "$r.part" ] && [ $n -lt 300 ]; do sleep 0.1; n=$((n+1)); done; '
-      + '[ -e "$r" ] || { p=; for a; do shift; if [ -n "$p" ]; then [ "$a" = "$r" ] || set -- "$@" --file "$a"; p=; '
-      + 'elif [ "$a" = "--file" ]; then p=1; else set -- "$@" "$a"; fi; done; }; fi; '
-      + 'exec mazapan "$@"', "sh", "agents", "ask"].concat(flags)
+    const log = (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/mazapan-ask/turn-" + Date.now() + ".jsonl"
+    kept.log = log
+    kept.started = Date.now()
+    now = kept.started
+    Quickshell.execDetached(["setsid", "sh", "-c", run_, "sh", log, "agents", "ask"].concat(flags)
       // The material goes with the first question only; then it's in the conversation.
-      .concat(...(session === "" ? files : []).map(f => ["--file", f])).concat(["--", q])
-    started = Date.now()
-    now = started
-    asking.running = true
+      .concat(...(session === "" ? files : []).map(f => ["--file", f])).concat(["--", q]))
+    follower.running = false
+    follower.running = true
   }
 
   // Shown as Markdown, without what would load by itself: an image (or HTML)
@@ -142,79 +179,115 @@ Item {
     return md.replace(/!\[/g, "[").replace(/^ {0,3}\[[^\]\n]+\]:.*$/gm, "").replace(/&/g, "&amp;").replace(/</g, "&lt;")
   }
   function cancel() {
-    running_ = 0
-    if (asking.running) asking.running = false
-    if (phase === "thinking" || phase === "working" || phase === "waiting") phase = "idle"
+    if (kept.log !== "") Quickshell.execDetached(["sh", "-c", 'p=$(cat -- "$0.pid" 2>/dev/null) && kill -TERM -- "-$p" 2>/dev/null; true', kept.log])
+    kept.log = ""
+    follower.running = false
+    if (phase === "thinking" || phase === "working" || phase === "waiting") kept.phase = "idle"
   }
 
   // Each line the agent says as it goes: a tool (looking, preparing a change,
-  // waiting for you), a change made or turned down, and the answer, last.
+  // waiting for you), a change made or turned down, and the answer, last. After
+  // a reload it's read again from the start: each line says the same again.
+  property bool applied: false
+  property bool declined: false
   Process {
-    id: asking
-    property bool applied: false
-    property bool declined: false
-    onRunningChanged: if (running) { applied = false; declined = false }
+    id: follower
+    command: ["tail", "-n", "+1", "-F", "--", kept.log]
+    onRunningChanged: if (running) { root.applied = false; root.declined = false }
     stdout: SplitParser {
       onRead: line => {
-        if (root.running_ !== root.asked) return
+        if (kept.log === "") return
         let e = {}
         try { e = JSON.parse(line) } catch (x) { return }
         if (e.event === "tool") {
-          if (e.name === "preview_change") { root.phase = "working"; root.step = {{ tq "ask.step.preparing" }} }
-          else if (e.name === "apply_change") { root.phase = "waiting"; root.step = {{ tq "ask.step.approval" }} }
-          else if (e.name === "undo") { root.phase = "working"; root.step = {{ tq "ask.step.undoing" }} }
-          else if (root.phase !== "working" && root.phase !== "waiting") { root.phase = "thinking"; root.step = {{ tq "ask.step.looking" }} }
+          if (e.name === "preview_change") { kept.phase = "working"; kept.step = {{ tq "ask.step.preparing" }} }
+          else if (e.name === "apply_change") { kept.phase = "waiting"; kept.step = {{ tq "ask.step.approval" }} }
+          else if (e.name === "undo") { kept.phase = "working"; kept.step = {{ tq "ask.step.undoing" }} }
+          else if (root.phase !== "working" && root.phase !== "waiting") { kept.phase = "thinking"; kept.step = {{ tq "ask.step.looking" }} }
         } else if (e.event === "applied") {
-          asking.applied = true
-          root.undoId = e.id || ""
+          root.applied = true
+          kept.undoId = e.id || ""
         } else if (e.event === "declined") {
-          asking.declined = true
+          root.declined = true
         } else if (e.event === "done" || e.answer !== undefined) {
-          root.agentName = e.name || ""
-          root.account = e.account || ""
-          if (e.session) root.session = e.session
-          root.resume = e.resume || null
-          if (e.problem) {
-            root.turns = root.turns.concat([{ me: false, text: e.problem, problem: true }])
-            root.phase = /limit/i.test(e.problem) ? "sleeping" : "error"
-          } else {
-            root.turns = root.turns.concat([{ me: false, text: e.answer || "" }])
-            root.phase = asking.applied ? "done" : asking.declined ? "declined" : "idle"
-          }
-          root.step = ""
-          Qt.callLater(() => { flick.contentY = Math.max(0, flick.contentHeight - flick.height); field.focusInput() })
+          root.finish(e)
         }
       }
     }
-    stderr: StdioCollector { id: askErr }
-    onExited: code => {
-      if (root.running_ !== root.asked) return
-      if (root.phase === "thinking" || root.phase === "working" || root.phase === "waiting") {
-        root.turns = root.turns.concat([{ me: false, text: askErr.text.trim().split("\n").pop() || {{ tq "ask.failed" }}, problem: true }])
-        root.phase = "error"
-        root.step = ""
+  }
+  function finish(e) {
+    if (kept.doneFor === kept.log) return
+    kept.doneFor = kept.log
+    kept.agentName = e.name || ""
+    kept.account = e.account || ""
+    if (e.session) kept.session = e.session
+    kept.resumeJ = JSON.stringify(e.resume || null)
+    if (e.problem) {
+      kept.turnsJ = JSON.stringify(turns.concat([{ me: false, text: e.problem, problem: true }]))
+      kept.phase = /limit/i.test(e.problem) ? "sleeping" : "error"
+    } else {
+      kept.turnsJ = JSON.stringify(turns.concat([{ me: false, text: e.answer || "" }]))
+      kept.phase = root.applied ? "done" : root.declined ? "declined" : "idle"
+    }
+    kept.step = ""
+    kept.log = ""
+    follower.running = false
+    Qt.callLater(() => { flick.contentY = Math.max(0, flick.contentHeight - flick.height); field.focusInput() })
+  }
+  // Ended without an answer (it failed, or was stopped): said, from what it wrote on stderr.
+  Process {
+    id: ended
+    command: ["sh", "-c", 'cat -- "$0.exit" 2>/dev/null || exit 1; tail -n 1 -- "$0.err"', kept.log]
+    stdout: StdioCollector {
+      onStreamFinished: {
+        if (kept.log === "" || text.trim() === "") return
+        // The answer may still be on its way through the follower: a moment's grace.
+        grace.problem = text.trim().split("\n").slice(1).join(" ")
+        if (!grace.running) grace.start()
       }
     }
   }
-  Timer { interval: 1000; repeat: true; running: asking.running; onTriggered: root.now = Date.now() }
+  Timer {
+    id: grace
+    property string problem: ""
+    interval: 1500
+    onTriggered: if (kept.log !== "" && kept.doneFor !== kept.log) root.finish({ problem: problem || {{ tq "ask.failed" }} })
+  }
+  Timer {
+    interval: 1000; repeat: true; running: root.busy || kept.undoLog !== ""
+    onTriggered: { root.now = Date.now(); if (root.busy && !ended.running) ended.running = true }
+  }
   // A jump for a change made, a shrug for one turned down: then back to listening.
-  Timer { interval: 2600; running: root.phase === "done" || root.phase === "declined"; onTriggered: root.phase = "idle" }
+  Timer { interval: 2600; running: root.phase === "done" || root.phase === "declined"; onTriggered: kept.phase = "idle" }
 
   // Undone: the change it made here, by its id (only if it's still the last one).
+  // It reloads the shell as the change did: run on its own, its outcome read back.
+  function undo() {
+    if (undoId === "" || kept.undoLog !== "") return
+    kept.phase = "working"
+    kept.step = {{ tq "ask.step.undoing" }}
+    const log = (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/mazapan-ask/undo-" + Date.now() + ".log"
+    kept.undoLog = log
+    kept.started = Date.now()
+    root.now = kept.started
+    Quickshell.execDetached(["setsid", "sh", "-c", 'mazapan undo -y --id="$1" > "$0" 2>&1; echo $? > "$0.exit"', log, undoId])
+  }
   Process {
-    id: undoer
-    onExited: code => {
-      root.turns = root.turns.concat([{ me: false, text: code === 0 ? {{ tq "ask.undone" }} : {{ tq "ask.undo_failed" }}, problem: code !== 0 }])
-      if (code === 0) root.undoId = ""
-      root.phase = code === 0 ? "idle" : "error"
+    id: undone
+    command: ["cat", "--", kept.undoLog + ".exit"]
+    stdout: StdioCollector {
+      onStreamFinished: {
+        const code = text.trim()
+        if (kept.undoLog === "" || code === "") return
+        kept.undoLog = ""
+        kept.turnsJ = JSON.stringify(root.turns.concat([{ me: false, text: code === "0" ? {{ tq "ask.undone" }} : {{ tq "ask.undo_failed" }}, problem: code !== "0" }]))
+        if (code === "0") kept.undoId = ""
+        kept.phase = code === "0" ? "idle" : "error"
+        kept.step = ""
+      }
     }
   }
-  function undo() {
-    if (undoId === "" || undoer.running) return
-    root.phase = "working"
-    undoer.command = ["mazapan", "undo", "-y", "--id=" + undoId]
-    undoer.running = true
-  }
+  Timer { interval: 700; repeat: true; running: kept.undoLog !== ""; onTriggered: if (!undone.running) undone.running = true }
 
   // The microphone: dictation listens; what you said comes back as the next turn.
   Process { id: dictate }
@@ -228,8 +301,8 @@ Item {
     id: hearing
     command: ["sh", "-c", 'f="${XDG_RUNTIME_DIR:-/tmp}/mazapan-dictation/pid"; [ -f "$f" ] && read -r p h m < "$f" && kill -0 "$p" 2>/dev/null && [ "$m" != type ]']
     onExited: code => {
-      if (code === 0 && !asking.running) root.phase = "listening"
-      else if (code !== 0 && root.phase === "listening") root.phase = "idle"
+      if (code === 0 && !root.busy) kept.phase = "listening"
+      else if (code !== 0 && root.phase === "listening") kept.phase = "idle"
     }
   }
   Timer { interval: 500; repeat: true; running: root.open && root.canDictate; onTriggered: if (!hearing.running) hearing.running = true }
@@ -370,7 +443,7 @@ Item {
 
           // What it's doing now.
           Caption {
-            visible: root.phase === "listening" || asking.running || undoer.running
+            visible: root.phase === "listening" || root.busy || kept.undoLog !== ""
             text: root.phase === "listening" ? {{ tq "ask.listening" }}
               : root.step + "  " + Math.round((root.now - root.started) / 1000) + " s"
             color: root.phase === "waiting" ? Theme.accentText : Theme.fgSubtle
@@ -384,7 +457,7 @@ Item {
             TextField {
               id: field
               Layout.fillWidth: true
-              enabled: !asking.running
+              enabled: !root.busy
               placeholder: root.turns.length > 0 ? {{ tq "ask.more" }} : root.readOnly ? {{ tq "ask.placeholder" }} : {{ tq "ask.placeholder.act" }}
               onAccepted: { const q = text.trim(); if (q !== "") { text = ""; root.ask(q) } }
             }
@@ -392,7 +465,7 @@ Item {
               visible: root.canDictate
               text: root.phase === "listening" ? "󰏤" : "󰍬"
               primary: root.phase === "listening"
-              enabled: !asking.running
+              enabled: !root.busy
               onClicked: root.listen()
             }
           }
@@ -407,22 +480,22 @@ Item {
               Layout.fillWidth: true
             }
             Button {
-              visible: asking.running
+              visible: root.busy
               text: {{ tq "ask.cancel" }}
               onClicked: root.cancel()
             }
             Button {
-              visible: root.undoId !== "" && !asking.running
+              visible: root.undoId !== "" && !root.busy && kept.undoLog === ""
               text: {{ tq "ask.undo" }}
               onClicked: root.undo()
             }
             Button {
-              visible: root.lastAnswer !== "" && !asking.running
+              visible: root.lastAnswer !== "" && !root.busy
               text: {{ tq "ask.copy" }}
               onClicked: Quickshell.execDetached(["wl-copy", "--", root.lastAnswer])
             }
             Button {
-              visible: !!root.resume && !asking.running
+              visible: !!root.resume && !root.busy
               text: {{ tq "ask.continue" }}
               onClicked: { root.terminal(root.resume); root.close() }
             }
