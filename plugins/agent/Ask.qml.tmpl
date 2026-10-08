@@ -17,6 +17,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
+import QtQuick.Controls as QQC
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -318,6 +319,8 @@ Item {
     for (let i = turns.length - 1; i >= 0; i--) if (!turns[i].me && !turns[i].problem) return turns[i].text
     return ""
   }
+  // The whole conversation, as text: who said what, in order.
+  readonly property string conversation: turns.map(t => (t.me ? {{ tq "ask.you" }} : {{ tq "ask.title" }}) + ": " + t.text).join("\n\n")
 
   // The phase as a word and a color, for the pill under Mazapan.
   readonly property string phaseWord: phase === "listening" ? {{ tq "ask.state.listening" }}
@@ -615,14 +618,37 @@ Item {
             visible: root.turns.length > 0
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.preferredHeight: Math.min(talk.implicitHeight, win.screenHeight * 0.48)
-            contentWidth: width
+            // As tall as the conversation up to 40% of the screen; then it scrolls.
+            readonly property real most: Math.round(win.screenHeight * 0.4)
+            Layout.preferredHeight: Math.min(talk.implicitHeight, most)
+            Layout.maximumHeight: most
+            contentWidth: width - (talkBar.visible ? 12 : 0)
             contentHeight: talk.implicitHeight
             clip: true
             boundsBehavior: Flickable.StopAtBounds
+            QQC.ScrollBar.vertical: QQC.ScrollBar { id: talkBar; policy: flick.contentHeight > flick.height + 1 ? QQC.ScrollBar.AlwaysOn : QQC.ScrollBar.AlwaysOff }
+            // Following the newest, unless you scrolled up to read.
+            property bool atEnd: true
+            onContentYChanged: if (moving || dragging) atEnd = contentY >= contentHeight - height - 24
+            onMovementEnded: atEnd = contentY >= contentHeight - height - 24
+            onContentHeightChanged: if (atEnd) contentY = Math.max(0, contentHeight - height)
+            // More above: the top fades.
+            Rectangle {
+              parent: flick
+              anchors.left: parent.left
+              anchors.right: parent.right
+              anchors.top: parent.top
+              height: 18
+              z: 2
+              visible: flick.contentY > 4
+              gradient: Gradient {
+                GradientStop { position: 0; color: Theme.bg }
+                GradientStop { position: 1; color: "transparent" }
+              }
+            }
             ColumnLayout {
               id: talk
-              width: flick.width
+              width: flick.contentWidth
               spacing: 10
               Repeater {
                 model: root.turns
@@ -798,11 +824,11 @@ Item {
               onClicked: root.undo()
             }
             Chip {
-              visible: root.lastAnswer !== "" && !root.busy
+              visible: root.turns.length > 0 && !root.busy
               glyph: copied ? "󰄬" : "󰆏"
-              text: {{ tq "ask.copy" }}
+              text: copied ? {{ tq "ask.copied" }} : {{ tq "ask.copy.all" }}
               property bool copied: false
-              onClicked: { Quickshell.execDetached(["wl-copy", "--", root.lastAnswer]); copied = true; copiedTimer.restart() }
+              onClicked: { Quickshell.execDetached(["wl-copy", "--", root.conversation]); copied = true; copiedTimer.restart() }
               Timer { id: copiedTimer; interval: 1500; onTriggered: parent.copied = false }
             }
             Chip {
