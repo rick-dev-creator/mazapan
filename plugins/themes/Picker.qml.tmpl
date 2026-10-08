@@ -124,7 +124,8 @@ Item {
     const acc = ai === 0 ? "theme" : accent.color
     message = {{ tq "applying" }}.arg(theme.name)
     Quickshell.execDetached(["sh", "-c",
-      'mkdir -p ~/.local/state/mazapan; mazapan apply --theme "$0" --accent "$1" > ~/.local/state/mazapan/theme.log 2>&1 '
+      // The log starts with when it was made: an old error is told from a new one.
+      'mkdir -p ~/.local/state/mazapan; { date "+%F %T"; mazapan apply --theme "$0" --accent "$1"; } > ~/.local/state/mazapan/theme.log 2>&1 '
       // Failed: everything back as it was, then said (after the shell's
       // reload, which would take a notice shown before it along).
       + '|| { hyprctl reload >/dev/null; qs ipc -c mazapan call mazapan reload >/dev/null; sleep 2; '

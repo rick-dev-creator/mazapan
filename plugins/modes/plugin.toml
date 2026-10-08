@@ -1,7 +1,7 @@
 [plugin]
 id = "modes"
 name = "Modes"
-version = "0.1.0"
+version = "0.1.1"
 api = 1
 description = "The whole desktop changed at once: quiet but for some apps, the theme, night light, the power profile, keep awake, what the bar shows; by hand, on a schedule or with a second screen, and back as it was when it's over"
 categories = ["panel", "bar", "tools"]

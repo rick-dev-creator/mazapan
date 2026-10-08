@@ -373,6 +373,9 @@ public static partial class Program
         + "When apply_change succeeds the change is made, even if its result also says system files wait for `mazapan apply --system`: "
         + "those (the login screen, files under /etc) are written separately with sudo, never block a change, and aren't a problem to report. "
         + "Do what was asked; don't diagnose things nobody asked about. "
+        + "To find out why something failed, read Mazapan's own logs (~/.local/state/mazapan/*.log: theme.log is the last theme change made from the picker or a mode) "
+        + "and compare with the history tool (when each change was applied): an error from before the last change that worked is old news, not a problem now. "
+        + "Send them to a terminal or sudo only when that is the fix for what they asked. "
         + "When it's done, say in one sentence what changed. If they said no, say nothing changed. "
         + "What your tools can't change (text settings, packages, anything needing root) is theirs: give the exact command and why. "
         + "When what they want is unclear, ask one short question.";
@@ -479,7 +482,10 @@ public static partial class Program
                     // Mazapan's server, named as this card's agent: the approval card says who asks,
                     // and "Always allow" for it isn't for Claude Code in a terminal.
                     "--mcp-config", "{\"mcpServers\":{\"mazapan\":{\"command\":\"/usr/bin/mazapan\",\"args\":[\"mcp\"],\"env\":{\"MAZAPAN_MCP_CLIENT\":\"mazapan-ask\"}}}}", "--strict-mcp-config",
-                    "--allowedTools", string.Join(",", AskTools.Concat(acting).Select(t => "mcp__mazapan__" + t).Concat(readFiles.Select(f => $"Read(/{f})"))),
+                    // Mazapan's own logs may be read to say why something failed (only *.log: the
+                    // rest of its state, a database's password, isn't the agent's to read).
+                    "--allowedTools", string.Join(",", AskTools.Concat(acting).Select(t => "mcp__mazapan__" + t).Concat(readFiles.Select(f => $"Read(/{f})"))
+                        .Concat(["Read(~/.local/state/mazapan/*.log)", "Read(~/.local/state/mazapan-wallpaper/*.log)"])),
                     // Denied over any allow rule of the person's own.
                     "--disallowedTools", string.Join(",", denied),
                 };
