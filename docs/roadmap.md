@@ -122,7 +122,7 @@ Simplest first:
 | Learn | Lessons recorded from the real moves, tried for real and ticked off; every key while SUPER is held |
 | Security | Encryption, the firewall, privacy dots, app permissions, fingerprint; audited (see [security.md](security.md)) |
 | Plugins | Dependencies, approved capabilities, catalogs, the Plugins panel, tools for authors; hardware fixes offered only where they apply |
-| Published | mazapan.dev, the ISO with its checksum and signature, the signed repository at repo.mazapan.dev, releases on their channels; the plugin registry, with Markets, Pomodoro, Now Playing (what's playing, wherever it plays), Playback (the same in Mazapan's own look), Radio (live stations from all over the world) Dock (your apps at the bottom of the screen, every window of each) and Ports (what's listening, by name: is a port free, stop what holds it, a word when something is open to the network) |
+| Published | mazapan.dev, the ISO with its checksum and signature, the signed repository at repo.mazapan.dev, releases on their channels; the plugin registry, with Markets, Pomodoro, Now Playing (what's playing, wherever it plays), Playback (the same in Mazapan's own look), Radio (live stations from all over the world), Dock (your apps at the bottom of the screen, every window of each) and Ports (what's listening, by name: is a port free, stop what holds it, a word when something is open to the network) |
 | Look | The login, boot menu and boot splash in the theme; GTK, Qt, browsers, editors and terminals themed |
 
 ## Waiting
@@ -157,8 +157,9 @@ After 1.0, roughly in this order:
 - **Smaller follow-ups:** themes for Electron apps and Qt 5, light and
   dark at sunset; the palette remembering what you pick; a capture across
   two screens, blur as a tool; per-app notification sounds; "ask an
-  agent" offered when a check fails; HDR; more hardware fixes (T2 Macs,
-  thermald and lpmd rules).
+  agent" offered when a check fails; the Ask card's buttons (Undo, Copy)
+  by keyboard too, and an agent's approval card starting on "Don't allow";
+  HDR; more hardware fixes (T2 Macs, thermald and lpmd rules).
 
 ## Dropped
 
