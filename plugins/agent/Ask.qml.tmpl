@@ -56,6 +56,8 @@ Item {
     property string log: ""        // the running ask's lines (empty: none running)
     property string doneFor: ""    // the log whose answer is already in turns
     property string undoLog: ""    // an undo running (it reloads the shell too)
+    property string conv: ""       // this conversation's name, for Mazapan to know it read the web
+    property bool web: false       // it did: it only answers from then on
     property double started: 0
     // Its values are back only now (not yet when the card is made).
     onLoaded: root.restore()
@@ -82,7 +84,7 @@ Item {
   readonly property string mood: phase === "listening" ? "listen" : phase === "thinking" ? "think"
     : phase === "working" ? "work" : phase === "waiting" ? "wait" : phase === "done" ? "happy"
     : phase === "declined" ? "shrug" : phase === "error" ? "dizzy" : phase === "sleeping" ? "sleep"
-    : readOnly ? "read" : "idle"
+    : readOnly || kept.web ? "read" : "idle"
 
   // Back after a reload: open again, following the ask still running.
   function restore() {
@@ -113,6 +115,8 @@ Item {
     kept.undoId = ""
     kept.phase = "idle"
     kept.step = ""
+    kept.conv = "c" + Date.now()
+    kept.web = false
   }
 
   // A request written for this (read, then gone).
@@ -159,7 +163,9 @@ Item {
     kept.step = {{ tq "ask.step.looking" }}
     const flags = ["--stream", "--agent", {{ quote settings.ask_agent }}, "--model", {{ quote settings.ask_model }},
       "--account", {{ quote settings.ask_account }}, "--key", {{ quote settings.ask_credential }}]
-    if (!readOnly) flags.push("--act")
+    if (kept.conv === "") kept.conv = "c" + Date.now()
+    flags.push("--conversation", kept.conv)
+    if (!readOnly && !kept.web) flags.push("--act")
     if (session !== "") flags.push("--resume", session)
     const log = (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/mazapan-ask/turn-" + Date.now() + ".jsonl"
     kept.log = log
@@ -179,6 +185,20 @@ Item {
   // written as text (a tag shows as what it says: `--theme <id>`, never runs).
   function safe(md) {
     return md.replace(/!\[/g, "[").replace(/^ {0,3}\[[^\]\n]+\]:.*$/gm, "").replace(/&/g, "&amp;").replace(/</g, "&lt;")
+  }
+  // An answer as pieces: its text, and each image it shows from the web
+  // (https only) apart, to be loaded only when the person asks.
+  function pieces(md) {
+    const out = []
+    const re = /!\[([^\]\n]*)\]\((https:\/\/[^)\s]+)\)/g
+    let last = 0, m
+    while ((m = re.exec(md)) !== null) {
+      if (m.index > last && md.slice(last, m.index).trim() !== "") out.push({ text: md.slice(last, m.index) })
+      out.push({ url: m[2], alt: m[1] })
+      last = re.lastIndex
+    }
+    if (md.slice(last).trim() !== "" || out.length === 0) out.push({ text: md.slice(last) })
+    return out
   }
   function cancel() {
     if (kept.log !== "") Quickshell.execDetached(["sh", "-c", 'p=$(cat -- "$0.pid" 2>/dev/null) && kill -TERM -- "-$p" 2>/dev/null; true', kept.log])
@@ -209,6 +229,8 @@ Item {
         } else if (e.event === "applied") {
           root.applied = true
           kept.undoId = e.id || ""
+        } else if (e.event === "web") {
+          kept.web = true
         } else if (e.event === "declined") {
           root.declined = true
         } else if (e.event === "done" || e.answer !== undefined) {
@@ -220,6 +242,7 @@ Item {
   function finish(e) {
     if (kept.doneFor === kept.log) return
     kept.doneFor = kept.log
+    if (e.web) kept.web = true
     kept.agentName = e.name || ""
     kept.account = e.account || ""
     if (e.session) kept.session = e.session
@@ -543,6 +566,23 @@ Item {
               font.bold: true
             }
             Rectangle {
+              visible: kept.web
+              implicitWidth: webText.implicitWidth + 20
+              implicitHeight: 24
+              radius: 12
+              color: Qt.alpha(Theme.warning, 0.12)
+              border.width: 1
+              border.color: Qt.alpha(Theme.warning, 0.4)
+              Text {
+                id: webText
+                anchors.centerIn: parent
+                text: "󰖟  " + {{ tq "ask.web" }}
+                color: Theme.fg
+                font.family: Theme.fontMono
+                font.pixelSize: Theme.fontSize * 0.9
+              }
+            }
+            Rectangle {
               visible: root.files.length > 0
               Layout.fillWidth: true
               Layout.maximumWidth: implicitWidth
@@ -661,12 +701,15 @@ Item {
                   readonly property color tone: me ? Theme.accent : bad ? Theme.danger : Theme.fg
                   Layout.fillWidth: true
                   implicitHeight: bubble.implicitHeight
+                  // Its answer in pieces: text, and the images it shows (each a button until clicked).
+                  readonly property var pieces: me || bad ? [{ text: modelData.text }] : root.pieces(modelData.text)
+                  readonly property real most: turn.width * (turn.me ? 0.82 : 0.96) - 28
                   Rectangle {
                     id: bubble
                     anchors.right: turn.me ? parent.right : undefined
                     anchors.left: turn.me ? undefined : parent.left
-                    width: Math.min(parent.width * (turn.me ? 0.82 : 0.96), said.implicitWidth + 28)
-                    implicitHeight: said.implicitHeight + 20
+                    width: Math.min(turn.most, inside.implicitWidth) + 28
+                    implicitHeight: inside.implicitHeight + 20
                     radius: Math.max(Theme.radius, 6)
                     color: turn.me ? Qt.alpha(Theme.accent, 0.16) : turn.bad ? Qt.alpha(Theme.danger, 0.1) : Theme.surface
                     border.width: 1
@@ -674,22 +717,40 @@ Item {
                     opacity: 0
                     Component.onCompleted: opacity = 1
                     Behavior on opacity { enabled: Theme.motion; NumberAnimation { duration: 220 } }
-                    TextEdit {
-                      id: said
+                    Column {
+                      id: inside
                       x: 14
                       y: 10
-                      width: Math.min(implicitWidth, turn.width * (turn.me ? 0.82 : 0.96) - 28)
-                      readOnly: true
-                      selectByMouse: true
-                      textFormat: turn.me || turn.bad ? TextEdit.PlainText : TextEdit.MarkdownText
-                      text: turn.me || turn.bad ? turn.modelData.text : root.safe(turn.modelData.text)
-                      wrapMode: TextEdit.Wrap
-                      color: turn.bad ? Theme.danger : Theme.fg
-                      selectionColor: Theme.selection
-                      font.family: Theme.fontUi
-                      font.pointSize: Theme.fontSize
-                      font.bold: turn.me
-                      onLinkActivated: link => { if (/^https?:\/\//.test(link)) Qt.openUrlExternally(link) }
+                      spacing: 8
+                      Repeater {
+                        model: turn.pieces
+                        delegate: Loader {
+                          id: piece
+                          required property var modelData
+                          sourceComponent: piece.modelData.url ? pictureC : textC
+                          Component {
+                            id: textC
+                            TextEdit {
+                              width: Math.min(implicitWidth, turn.most)
+                              readOnly: true
+                              selectByMouse: true
+                              textFormat: turn.me || turn.bad ? TextEdit.PlainText : TextEdit.MarkdownText
+                              text: turn.me || turn.bad ? piece.modelData.text : root.safe(piece.modelData.text)
+                              wrapMode: TextEdit.Wrap
+                              color: turn.bad ? Theme.danger : Theme.fg
+                              selectionColor: Theme.selection
+                              font.family: Theme.fontUi
+                              font.pointSize: Theme.fontSize
+                              font.bold: turn.me
+                              onLinkActivated: link => { if (/^https?:\/\//.test(link)) Qt.openUrlExternally(link) }
+                            }
+                          }
+                          Component {
+                            id: pictureC
+                            WebPicture { url: piece.modelData.url; alt: piece.modelData.alt; most: Math.min(turn.most, 420) }
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -841,6 +902,61 @@ Item {
         }
       }
     }
+  }
+
+  // An image from the web: a button saying what and where, loaded only when clicked
+  // (shown by itself, it could carry what the agent read to that site).
+  component WebPicture: Rectangle {
+    id: pic
+    property string url: ""
+    property string alt: ""
+    property real most: 420
+    property bool shown: false
+    readonly property string host: (url.match(/^https:\/\/([^\/?#:]+)/) || ["", ""])[1]
+    readonly property bool ready: picImg.status === Image.Ready
+    implicitWidth: shown ? most : Math.min(most, picRow.implicitWidth + 24)
+    implicitHeight: shown ? (ready ? picImg.height + 12 : 64) : 38
+    radius: Math.max(Theme.radius, 6)
+    color: picHover.hovered && !shown ? Theme.surfaceRaised : Qt.alpha(Theme.fg, 0.04)
+    border.width: 1
+    border.color: picHover.hovered && !shown ? Qt.alpha(Theme.accent, 0.55) : Theme.border
+    Row {
+      id: picRow
+      visible: !pic.shown
+      anchors.centerIn: parent
+      spacing: 8
+      Text { anchors.verticalCenter: parent.verticalCenter; text: "󰋩"; color: Theme.accentText; font.family: Theme.fontMono; font.pixelSize: 16 }
+      Text {
+        anchors.verticalCenter: parent.verticalCenter
+        width: Math.min(implicitWidth, pic.most - 80)
+        elide: Text.ElideRight
+        text: (pic.alt || {{ tq "ask.image" }}) + "  ·  " + pic.host
+        color: Theme.fg
+        font.family: Theme.fontMono
+        font.pixelSize: Theme.fontSize * 0.95
+        textFormat: Text.PlainText
+      }
+    }
+    Image {
+      id: picImg
+      visible: pic.shown && pic.ready
+      anchors.centerIn: parent
+      source: pic.shown ? pic.url : ""
+      asynchronous: true
+      fillMode: Image.PreserveAspectFit
+      width: pic.width - 12
+      height: ready && sourceSize.width > 0 ? Math.min(320, width * sourceSize.height / sourceSize.width) : 0
+    }
+    Text {
+      visible: pic.shown && !pic.ready
+      anchors.centerIn: parent
+      text: picImg.status === Image.Error ? {{ tq "ask.image.failed" }} : {{ tq "ask.image.loading" }}
+      color: picImg.status === Image.Error ? Theme.danger : Theme.fgMuted
+      font.family: Theme.fontMono
+      font.pixelSize: Theme.fontSize * 0.95
+    }
+    HoverHandler { id: picHover; cursorShape: pic.shown ? Qt.ArrowCursor : Qt.PointingHandCursor }
+    TapHandler { onTapped: if (!pic.shown) pic.shown = true; else if (pic.ready) Qt.openUrlExternally(pic.url) }
   }
 
   // A small round button with a glyph; lit when it's what's next.

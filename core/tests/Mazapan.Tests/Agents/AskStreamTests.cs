@@ -68,6 +68,49 @@ public class AskStreamTests
     }
 
     [Fact]
+    public void ReadingTheWebMarksTheConversation()
+    {
+        var mark = Path.Combine(Path.GetTempPath(), $"web-test-{Guid.NewGuid():N}");
+        try
+        {
+            var events = new StringWriter();
+            Program.FollowStream(new StringReader(
+                """{"type":"assistant","message":{"content":[{"type":"tool_use","id":"w1","name":"WebSearch","input":{"query":"x"}}]}}""" + "\n"), events, mark);
+            Assert.True(File.Exists(mark));
+            Assert.Contains("""{"event":"web"}""", events.ToString());
+        }
+        finally { File.Delete(mark); }
+    }
+
+    [Fact]
+    public void AConversationThatReadTheWebChangesNothing()
+    {
+        var mark = Path.Combine(Path.GetTempPath(), $"web-test-{Guid.NewGuid():N}");
+        var old = Environment.GetEnvironmentVariable("MAZAPAN_ASK_WEB");
+        try
+        {
+            Environment.SetEnvironmentVariable("MAZAPAN_ASK_WEB", mark);
+            Assert.Null(Program.WebRefusal());
+            File.WriteAllText(mark, "");
+            Assert.Contains("read the web", Program.WebRefusal());
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("MAZAPAN_ASK_WEB", old);
+            File.Delete(mark);
+        }
+    }
+
+    [Theory]
+    [InlineData("mira github.com/rick-dev-creator/mazapan y dime", "github.com")]
+    [InlineData("lee https://wiki.archlinux.org/title/Hyprland, por favor", "wiki.archlinux.org")]
+    [InlineData("¿qué tema tengo?", "")]
+    [InlineData("escríbele a ana@example.com", "")]
+    [InlineData("abre printer.local", "")]
+    public void TheSitesItMayOpenAreTheOnesNamed(string words, string expected) =>
+        Assert.Equal(expected, string.Join(",", Program.WebSites(words)));
+
+    [Fact]
     public void TheCardsAgentIsNamedAsSuch() =>
         Assert.Equal("Mazapan's agent", ApprovalNames.Readable("mazapan-ask"));
 }

@@ -275,6 +275,14 @@ public static partial class Program
                     if (tool == null) return RpcError(id, -32602, $"no tool {name}");
                     var arguments = p.TryGetProperty("arguments", out var a) && a.ValueKind == JsonValueKind.Object
                         ? a : JsonDocument.Parse("{}").RootElement;
+                    // The Ask card's conversation read the web: it changes nothing any more
+                    // (a page can hold words written to steer an agent).
+                    if (!tool.ReadOnly && WebRefusal() is { } refused)
+                        return RpcResult(id, new Fields
+                        {
+                            { "content", new List<Fields> { new() { { "type", "text" }, { "text", refused } } } },
+                            { "isError", true },
+                        });
                     var (text, ok) = CallTool(tool, arguments);
                     return RpcResult(id, new Fields
                     {
@@ -286,6 +294,16 @@ public static partial class Program
             }
         }
     }
+
+    /// <summary>
+    /// Why a change is refused, when this server is the Ask card's and its
+    /// conversation read the web (MAZAPAN_ASK_WEB names the file marking it); null otherwise.
+    /// </summary>
+    internal static string? WebRefusal() =>
+        Environment.GetEnvironmentVariable("MAZAPAN_ASK_WEB") is { Length: > 0 } web && File.Exists(web)
+            ? "This conversation read the web, so it changes nothing on this desktop (a page can hold words written to steer an agent). " +
+              "Tell the person what you'd change and that a new conversation can do it."
+            : null;
 
     /// <summary>The agent this MCP server serves, by name ("Claude Code"); "" outside it.</summary>
     internal static string AgentClient = "";
