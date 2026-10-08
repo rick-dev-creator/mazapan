@@ -98,7 +98,7 @@ BarItem {
         spacing: 4
         RowLayout {
           Layout.fillWidth: true
-          Label { text: acct.modelData.account.label; elide: Text.ElideRight; Layout.fillWidth: true }
+          Label { text: AgentsService.masked(acct.modelData.account.label); elide: Text.ElideRight; Layout.fillWidth: true }
           Caption { text: acct.modelData.account.plan; color: Theme.fgSubtle }
         }
         Caption {

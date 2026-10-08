@@ -1,0 +1,55 @@
+{
+  "frame": 48,
+  "states": {
+    "idle": {
+      "row": 0,
+      "frames": 12,
+      "fps": 6
+    },
+    "listen": {
+      "row": 1,
+      "frames": 8,
+      "fps": 8
+    },
+    "think": {
+      "row": 2,
+      "frames": 9,
+      "fps": 5
+    },
+    "work": {
+      "row": 3,
+      "frames": 6,
+      "fps": 10
+    },
+    "wait": {
+      "row": 4,
+      "frames": 8,
+      "fps": 6
+    },
+    "happy": {
+      "row": 5,
+      "frames": 10,
+      "fps": 10
+    },
+    "shrug": {
+      "row": 6,
+      "frames": 8,
+      "fps": 6
+    },
+    "read": {
+      "row": 7,
+      "frames": 12,
+      "fps": 6
+    },
+    "sleep": {
+      "row": 8,
+      "frames": 8,
+      "fps": 3
+    },
+    "dizzy": {
+      "row": 9,
+      "frames": 8,
+      "fps": 8
+    }
+  }
+}

@@ -4,8 +4,10 @@ Speak instead of typing. `SUPER + CTRL + D` starts listening; the same key
 again stops, and what you said is typed in the window you're in (or
 copied, to paste, with `type` off). After two minutes it stops by itself.
 
-`SUPER + CTRL + A` (`ask_key`) asks a coding agent instead: what you said
-goes to the Agents plugin's card, its answer there (without that plugin,
+`SUPER + CTRL + A` (`ask_key`) talks to Mazapan's agent instead (the
+Agents plugin's Mazapan): its card opens listening, and what you said is
+asked there, a change you ask for made once you allow it; the card's
+microphone answers it in the same conversation (without that plugin,
 it's typed as ever).
 
 It's worked out on this computer, by whisper.cpp: nothing you say leaves

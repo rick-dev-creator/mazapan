@@ -51,7 +51,11 @@ if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
   ask="$HOME/.local/share/mazapan/bin/agent-ask"
   if [ "$mode" = ask ] && [ -f "$ask" ]; then
     say {{ shq (t "asking") }}
-    MAZAPAN_ASK="$text" exec sh "$ask"
+    MAZAPAN_ASK="$text" MAZAPAN_ASK_FOLLOW=1 exec sh "$ask"
+  fi
+  # The Ask card's microphone: the next turn of its conversation.
+  if [ "$mode" = reply ] && [ -f "$ask" ]; then
+    MAZAPAN_ASK="$text" MAZAPAN_ASK_FOLLOW=1 exec sh "$ask"
   fi
 {{- if settings.type }}
   # Notifications never take the keyboard: it goes to the window you're in.
@@ -67,6 +71,7 @@ fi
 [ "$1" = stop ] && exit 0
 mode=type
 [ "$1" = ask ] && mode=ask
+[ "$1" = reply ] && mode=reply
 rm -f "$run/pid"
 locked && exit 0
 
@@ -109,5 +114,10 @@ if ! kill -0 "$rec" 2>/dev/null; then
   say {{ shq (t "no_mic") }} critical
   exit 0
 fi
-if [ "$mode" = ask ]; then say {{ shq (t "listening_ask") }}; else say {{ shq (t "listening") }}; fi
+# Asked by voice: the Ask card opens listening (Mazapan hears you); its
+# microphone needs no notification, the card says it.
+if [ "$mode" = ask ] && [ -f "$HOME/.local/share/mazapan/bin/agent-ask" ]; then
+  sh "$HOME/.local/share/mazapan/bin/agent-ask" --listen >/dev/null 2>&1 || say {{ shq (t "listening_ask") }}
+elif [ "$mode" = ask ]; then say {{ shq (t "listening_ask") }}
+elif [ "$mode" = type ]; then say {{ shq (t "listening") }}; fi
 ( sleep 120; p=; [ -f "$run/pid" ] && read -r p h < "$run/pid"; [ "$p" = "$rec" ] && kill -0 "$rec" 2>/dev/null && sh "$0" stop ) >/dev/null 2>&1 &

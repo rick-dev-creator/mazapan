@@ -1,7 +1,7 @@
 [plugin]
 id = "themes"
 name = "Theme picker"
-version = "0.1.0"
+version = "0.1.1"
 api = 1
 description = "Pick a theme and an accent, previewed live on the desktop, with each theme's contrast checked"
 categories = ["panel", "theme"]

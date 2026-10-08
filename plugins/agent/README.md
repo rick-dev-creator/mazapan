@@ -44,12 +44,42 @@ it (`otel`); telemetry of your own already there is left alone.
 Workspaces plugin): amber while it waits for you, the text's color while it
 works, green when it's done.
 
-**A question from the palette**: type `?` and the question (`? why is
-my battery draining`). The first coding agent here answers it in a card,
-without opening it: Claude Code with the account that has room and
-Mazapan's read-only tools (it can look at this desktop's state, never
-change it), else opencode, Codex, Gemini CLI or pi. The answer can be
-copied, or Claude's conversation continued in a terminal.
+**Mazapan, the agent**: `SUPER + SHIFT + A` (or `? …` in the
+palette, or dictation's "ask by voice", `SUPER + CTRL + A`) opens a card
+with Mazapan, the character: the icon's mazapan in pixel art, ready for what you want:
+"put a dark theme with a green accent", "why is the battery draining?".
+Its gestures say what it's doing: listening, looking at your desktop,
+preparing a change, waiting for your approval, a jump when it's done, a
+shrug when you said no, reading glasses when it only answers, asleep when
+your accounts are at their limit, dizzy when something failed (`mascot`
+off: a glyph and words instead).
+
+- **It changes things, with your approval.** What Mazapan can change (a
+  theme, an accent, a plugin's settings that are numbers or switches,
+  turning plugins on or off) it changes through Mazapan's tools; Mazapan's
+  own card (below) shows you the exact diff first, named "Mazapan's
+  agent", and nothing is written until you allow it. It never runs
+  commands, edits files or goes on the web; what its tools can't do (text
+  settings, packages, root) it tells you as a command. **Undo** in the
+  card takes its change back.
+- **A conversation**: what you say next goes on in the same card (by
+  typing, or by voice with the microphone there, with dictation), and it
+  can ask you something back. A theme it changes reloads the desktop; the
+  card comes back as it was, where it was.
+- **Only your own words act.** About something from elsewhere (a capture,
+  the selected text, a notification, files) it only answers: such
+  material can hold words written to steer an agent.
+- **Who answers**: Claude Code with the first of your accounts that has
+  room, Mazapan's tools and nothing else; or Codex or pi, which only
+  answer. `ask_agent` picks one, `ask_account` a Claude account (its email),
+  `ask_credential` the subscription or Anthropic's key from the keyring
+  (only for your own words), `ask_model` the model. The card says who
+  answered. Copy the answer, or continue the conversation in a terminal.
+
+**Keys**: `SUPER + SHIFT + A` Mazapan (about this desktop),
+`SUPER + SHIFT + S` about the selected text (else what was copied),
+`SUPER + I` opens the agents; Settings › Keys changes them, and holding
+SUPER shows them under "AI agents".
 
 **Recent projects in the palette**: the folders your agents worked in
 lately (from their own logs) are found by typing their name; picked, the
@@ -83,12 +113,14 @@ its that day" takes them back together.
 terminal's palette, so it follows every theme. (Mazapan doesn't set it:
 that choice is yours, in Claude's own settings.)
 
-**Ask an agent about this desktop**, from the palette, opens your agent
-(`command`; Claude with the first account that has room) with mazapan's
-report: state, failing checks, crashes, logged errors. "Copy a report"
-puts it on the clipboard. The report goes to the agent you run, and from
-there wherever that agent sends what it's given: a hosted one (Claude
-Code, Codex) sends it to its company's servers.
+**About this desktop**: the card `SUPER + SHIFT + A` opens has mazapan's
+report beside the question: state, failing checks, crashes, logged
+errors. Another agent set as `command` (`codex`, `opencode run`…) makes
+"Ask an agent about this desktop" open that agent in a terminal instead,
+the report as its first message. "Copy a report" puts it on the
+clipboard. The report and your question go to the agent that answers,
+and from there wherever that agent sends what it's given: a hosted one
+(Claude Code, Codex) sends it to its company's servers.
 
 How it knows: numbers only, read on this computer from what each agent
 keeps (Claude Code's project logs, opencode's database, pi's and Codex's

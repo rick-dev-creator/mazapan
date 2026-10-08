@@ -31,7 +31,7 @@
 "confirm" = "%1: ↵ otra vez para confirmar"
 "ask" = "Preguntar a un agente: %1"
 "ask.empty" = "Preguntar a un agente: escribe una pregunta tras el ?"
-"hints.ask" = "? preguntar a un agente"
+"hints.ask" = "? o ¿… preguntar a un agente"
 "plugin.description" = "Una sola paleta para tus apps, las ventanas abiertas, las acciones y ajustes de cada plugin y las apps por instalar: por secciones, cada una diciendo qué hace Intro"
 "placeholder" = "Abre una app, cambia de ventana, ejecuta una acción…"
 "f.all" = "Todo"

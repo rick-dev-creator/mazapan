@@ -1,23 +1,40 @@
 [plugin]
 id = "agent"
 name = "Agents"
-version = "0.9.0"
+version = "0.11.0"
 api = 1
 description = "Your coding agents: in the bar, which is working and which waits for you (a click goes to its window), each account's limits and when they reset, and what they've used today, for Claude Code, opencode, pi, Codex… every account found by itself; and from the palette, ask one about this desktop with mazapan's report"
 categories = ["agent", "tools", "bar"]
-requires = ["shell-bar"]
+requires = ["shell-bar", "hypr-base"]
 
 [packages]
 pacman = ["quickshell", "libnotify", "sqlite", "qt6-graphs", "jq", "libsecret", "wl-clipboard"]
 
 [settings]
-# The agent to open, as its command: it gets the report as its first
-# message. "claude" is Claude Code (with the first of your accounts that has
-# room); any agent that takes a prompt as its argument works ("codex",
-# "opencode run"…). To let it use mazapan directly (status, previews, apply,
+# The agent "Ask an agent about this desktop" opens. "claude": the Ask
+# card, answered by the first coding agent there is (Claude Code with the
+# first of your accounts that has room). Any other command opens that agent
+# in a terminal with the report as its first message; any agent that takes
+# a prompt as its argument works ("codex", "opencode run"…). To let it use mazapan directly (status, previews, apply,
 # undo), register the MCP server with it, e.g.
 #   claude mcp add --scope user mazapan -- mazapan mcp
 command = "claude"
+# Asks an agent about this desktop (the Ask card).
+ask_key = "SUPER + SHIFT + A"
+# Asks an agent about the selected text (else what was copied).
+selection_key = "SUPER + SHIFT + S"
+# Opens the agents: their sessions, limits and use.
+panel_key = "SUPER + I"
+# Mazapan, the character in the Ask card: its gestures say what the agent is doing (listening, thinking, waiting for your approval…). Off: a glyph and words.
+mascot = true
+# Who answers in the Ask card: the first coding agent there is, or one of them. Only Claude Code can change things (through Mazapan, with your approval); the others only answer.
+ask_agent = { default = "auto", choices = ["auto", "claude", "codex", "pi"] }
+# Which Claude account answers: empty, the first with room in its limits; else its email, as "mazapan agents" lists it.
+ask_account = ""
+# What Claude is paid with: your subscription, or Anthropic's API key from the keyring (only for what you ask yourself, never about something from elsewhere).
+ask_credential = { default = "subscription", choices = ["subscription", "anthropic"] }
+# The model: the agent's own default, or one of Claude's.
+ask_model = { default = "default", choices = ["default", "haiku", "sonnet", "opus"] }
 # Claude Code tells which session works or waits through hooks this plugin
 # puts in each configuration's settings.json (your own hooks stay; a copy
 # of the file is kept the first time). Off: taken out again.
@@ -50,6 +67,12 @@ reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 [[targets]]
 template = "AgentsService.qml.tmpl"
 output = "~/.config/quickshell/mazapan/components/agents/AgentsService.qml"
+reload = "sh ~/.local/share/mazapan/bin/shell-reload"
+
+# The agent's face in the Ask card: Mazapan, the character, and its gestures.
+[[targets]]
+template = "Mazapan.qml.tmpl"
+output = "~/.config/quickshell/mazapan/components/agents/Mazapan.qml"
 reload = "sh ~/.local/share/mazapan/bin/shell-reload"
 
 [[targets]]
@@ -137,16 +160,29 @@ reload = "s=mazapan-agents-otel; d=~/.config/systemd/user; if [ -e $d/$s.socket 
 template = "agent-keys.sh.tmpl"
 output = "~/.local/share/mazapan/bin/agent-keys"
 
+# Its keys: asking, and the agents' panel.
+[[targets]]
+template = "agent.lua.tmpl"
+output = "~/.config/hypr/mazapan/agent.lua"
+reload = "hyprctl reload >/dev/null"
+
 [[actions]]
 name = "{{ t \"ask\" }}"
-# Claude Code with the first account that has room (mazapan agents run).
-run = "{{ if settings.command == \"claude\" }}mazapan agents run claude{{ else }}{{ settings.command }}{{ end }} \"$(mazapan report --agent)\""
-terminal = true
+# The Ask card about this desktop (mazapan's report with the question), to
+# type it: the first coding agent answers it there (mazapan agents ask:
+# Claude with the account that has room and Mazapan's read-only tools),
+# copied or continued in a terminal. Another agent set as the command:
+# that one, in a terminal, the report as its first message.
+run = "{{ if settings.command == \"claude\" }}sh ~/.local/share/mazapan/bin/agent-ask --desktop{{ else }}xdg-terminal-exec {{ settings.command }} \"$(mazapan report --agent)\"{{ end }}"
+key = "{{ settings.ask_key }}"
+label = "{{ t \"ask.label\" }}"
 keywords = "{{ t \"ask.kw\" }}"
 
 [[actions]]
 name = "{{ t \"act.ask_selection\" }}"
 run = "sh ~/.local/share/mazapan/bin/agent-ask --selection"
+key = "{{ settings.selection_key }}"
+label = "{{ t \"act.ask_selection.label\" }}"
 keywords = "{{ t \"act.ask_selection.kw\" }}"
 
 [[actions]]
@@ -162,6 +198,8 @@ keywords = "{{ t \"report.kw\" }}"
 [[actions]]
 name = "{{ t \"act.open\" }}"
 run = "qs ipc -c mazapan call agents open"
+key = "{{ settings.panel_key }}"
+label = "{{ t \"act.open.label\" }}"
 keywords = "{{ t \"act.open.kw\" }}"
 
 [[actions]]
