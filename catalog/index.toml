@@ -1,7 +1,28 @@
 # The Mazapan plugin registry: plugins from others, each in its own
 # repository, at the commit the registry looked at. Generated from
 # https://github.com/rick-dev-creator/mazapan-plugins; don't edit.
-# 2026-10-07T03:59:43+00:00
+# 2026-10-07T22:57:28+00:00
+
+[[plugin]]
+id = "dock"
+name = "Dock"
+description = "Your apps at the bottom of the screen: the ones you keep there and the ones open, a mark for each window, the window found wherever it is on the strip, and every window of an app live to pick one"
+author = "rickdev"
+source = "https://github.com/rick-dev-creator/mazapan-dock"
+ref = "v0.3.0"
+commit = "6ea5ef087fdd212fe5aab2613c635e8ed11d4da0"
+version = "0.3.0"
+license = "MIT"
+homepage = "https://github.com/rick-dev-creator/mazapan-dock"
+categories = ["panel", "window"]
+translations.de.name = "Dock"
+translations.de.description = "Deine Apps unten am Bildschirm: die, die du dort behältst, und die offenen, eine Markierung pro Fenster, das Fenster gefunden, wo auch immer es auf dem Streifen ist, und alle Fenster einer App live zur Auswahl"
+translations.es.name = "Dock"
+translations.es.description = "Tus apps abajo de la pantalla: las que dejas ahí y las abiertas, una marca por cada ventana, la ventana encontrada esté donde esté en la tira, y todas las ventanas de una app en vivo para elegir una"
+translations.fr.name = "Dock"
+translations.fr.description = "Vos apps en bas de l'écran : celles que vous y gardez et celles ouvertes, une marque par fenêtre, la fenêtre retrouvée où qu'elle soit sur la bande, et toutes les fenêtres d'une app en direct pour en choisir une"
+translations.pt.name = "Dock"
+translations.pt.description = "Seus apps embaixo da tela: os que você deixa ali e os abertos, uma marca para cada janela, a janela encontrada onde quer que esteja na faixa, e todas as janelas de um app ao vivo para escolher uma"
 
 [[plugin]]
 id = "markets"
@@ -25,6 +46,48 @@ translations.pt.name = "Mercados"
 translations.pt.description = "Preços de cripto e ações com gráficos de tendência: uma lista em que cada símbolo tem seu próprio período (BTC 4H, BTC 1W, SOL 1D), as 20 maiores moedas, suas ações e um ticker na barra"
 
 [[plugin]]
+id = "now-playing"
+name = "Now Playing"
+description = "What's playing, wherever it plays: Spotify, YouTube in a browser, mpv… in the bar, the Control Center and a panel with every player, the cover's colors, a bar to drag through the song and the sound drawn as it plays"
+author = "RickDev"
+source = "https://github.com/rick-dev-creator/mazapan-now-playing"
+ref = "v0.1.2"
+commit = "2a4f4c7441b8dee0e9adb836f781f484d59e6a9f"
+version = "0.1.2"
+license = "MIT"
+homepage = "https://github.com/rick-dev-creator/mazapan-now-playing"
+categories = ["panel", "bar"]
+translations.de.name = "Läuft gerade"
+translations.de.description = "Was gerade spielt, wo auch immer: Spotify, YouTube im Browser, mpv… in der Leiste, im Kontrollzentrum und in einem Panel mit allen Playern, den Farben des Covers, einer Leiste zum Spulen und dem Klang als Balken"
+translations.es.name = "Reproduciendo"
+translations.es.description = "Lo que suena, donde suene: Spotify, YouTube en un navegador, mpv… en la barra, el Centro de control y un panel con todos los reproductores, los colores de la portada, una barra para moverte en la canción y el sonido dibujado mientras suena"
+translations.fr.name = "En cours de lecture"
+translations.fr.description = "Ce qui joue, où que ce soit : Spotify, YouTube dans un navigateur, mpv… dans la barre, le Centre de contrôle et un panneau avec tous les lecteurs, les couleurs de la pochette, une barre pour se déplacer dans la chanson et le son dessiné pendant qu'il joue"
+translations.pt.name = "Tocando agora"
+translations.pt.description = "O que está tocando, onde estiver: Spotify, YouTube num navegador, mpv… na barra, na Central de controle e num painel com todos os reprodutores, as cores da capa, uma barra para andar pela música e o som desenhado enquanto toca"
+
+[[plugin]]
+id = "playback"
+name = "Playback"
+description = "What's playing, in Mazapan's own look: Spotify, YouTube in a browser, mpv… in the bar, the Control Center and a compact panel in the theme's colors, with every player, a bar to drag through the song and the sound drawn as it plays"
+author = "RickDev"
+source = "https://github.com/rick-dev-creator/mazapan-playback"
+ref = "v0.1.0"
+commit = "da44fa757cf87471c5facccd1901b1c75c99167b"
+version = "0.1.0"
+license = "MIT"
+homepage = "https://github.com/rick-dev-creator/mazapan-playback"
+categories = ["panel", "bar"]
+translations.de.name = "Wiedergabe"
+translations.de.description = "Was gerade spielt, im eigenen Look von Mazapan: Spotify, YouTube im Browser, mpv… in der Leiste, im Kontrollzentrum und in einem kompakten Panel in den Farben des Themes, mit allen Playern, einer Leiste zum Spulen und dem Klang als Balken"
+translations.es.name = "Reproducción"
+translations.es.description = "Lo que suena, con el aspecto propio de Mazapan: Spotify, YouTube en un navegador, mpv… en la barra, el Centro de control y un panel compacto con los colores del tema, todos los reproductores, una barra para moverte en la canción y el sonido dibujado mientras suena"
+translations.fr.name = "Lecture"
+translations.fr.description = "Ce qui joue, avec le style propre à Mazapan : Spotify, YouTube dans un navigateur, mpv… dans la barre, le Centre de contrôle et un panneau compact aux couleurs du thème, avec tous les lecteurs, une barre pour se déplacer dans la chanson et le son dessiné pendant qu'il joue"
+translations.pt.name = "Reprodução"
+translations.pt.description = "O que está tocando, com o visual próprio do Mazapan: Spotify, YouTube num navegador, mpv… na barra, na Central de controle e num painel compacto nas cores do tema, com todos os reprodutores, uma barra para andar pela música e o som desenhado enquanto toca"
+
+[[plugin]]
 id = "pomodoro"
 name = "Pomodoro"
 description = "Focus in sessions with breaks between them: a ring that fills as the time goes, the sessions of each set, what you're working on, Do Not Disturb while you focus, and today's and the week's focus at a glance"
@@ -44,3 +107,24 @@ translations.fr.name = "Pomodoro"
 translations.fr.description = "Concentrez-vous par sessions, avec des pauses entre elles : un anneau qui se remplit avec le temps, les sessions de chaque cycle, ce sur quoi vous travaillez, Ne pas déranger pendant la concentration, et la concentration du jour et de la semaine en un coup d'œil"
 translations.pt.name = "Pomodoro"
 translations.pt.description = "Foque em sessões com pausas entre elas: um anel que se enche com o tempo, as sessões de cada ciclo, no que você está trabalhando, Não perturbe enquanto foca, e o foco de hoje e da semana num relance"
+
+[[plugin]]
+id = "radio"
+name = "Radio"
+description = "Live radio from all over the world, found by mood, country or name: each song's cover and colors as it plays, the songs you heard to find again, favorites, a sleep timer and an alarm, and the media keys"
+author = "RickDev"
+source = "https://github.com/rick-dev-creator/mazapan-radio"
+ref = "v0.1.3"
+commit = "4ec63aabedd3e8741d71c0e31d60d1d9ca8a8c7c"
+version = "0.1.3"
+license = "MIT"
+homepage = "https://github.com/rick-dev-creator/mazapan-radio"
+categories = ["panel", "bar", "tools"]
+translations.de.name = "Radio"
+translations.de.description = "Live-Radio aus aller Welt, nach Stimmung, Land oder Name: Cover und Farben jedes Songs beim Hören, gehörte Songs zum Wiederfinden, Favoriten, ein Schlaf-Timer, ein Wecker und die Medientasten"
+translations.es.name = "Radio"
+translations.es.description = "Radio en vivo de todo el mundo, por ánimo, país o nombre: la portada y los colores de cada canción mientras suena, las canciones escuchadas para encontrarlas otra vez, favoritas, temporizador para dormir, alarma y las teclas de medios"
+translations.fr.name = "Radio"
+translations.fr.description = "La radio en direct du monde entier, par humeur, pays ou nom : la pochette et les couleurs de chaque chanson, les chansons entendues à retrouver, des favoris, une minuterie de sommeil, un réveil et les touches multimédia"
+translations.pt.name = "Rádio"
+translations.pt.description = "Rádio ao vivo do mundo todo, por clima, país ou nome: a capa e as cores de cada música enquanto toca, as músicas ouvidas para achar de novo, favoritas, timer para dormir, alarme e as teclas de mídia"

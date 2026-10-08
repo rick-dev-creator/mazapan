@@ -4,6 +4,26 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
+## 0.4.4 (2026-10-08)
+
+- Dock, a new plugin in the registry
+  ([mazapan-dock](https://github.com/rick-dev-creator/mazapan-dock)): your
+  apps at the bottom of the screen, the ones you keep there and the ones
+  open, icons in the theme's colors, a mark for each window, the window
+  found wherever it is on the strip of columns, every window of an app
+  live to pick one, and minimize. `mazapan plugins add dock`, or the
+  Plugins panel.
+- Radio ([mazapan-radio](https://github.com/rick-dev-creator/mazapan-radio))
+  and Playback ([mazapan-playback](https://github.com/rick-dev-creator/mazapan-playback))
+  are in the registry too: live radio from all over the world, and what's
+  playing in Mazapan's own look. The copy of the registry that ships lists
+  all three.
+- A minimized window (docks for Hyprland put one on a special workspace,
+  `special:minimized`) picked in the palette, a notification or an agent's
+  card showed that hidden workspace instead of the window. Now it comes to
+  the workspace you're on, with the focus, and the palette says it's
+  minimized.
+
 ## 0.4.3 (2026-10-07)
 
 - The installer couldn't be used by keyboard: only Enter, to move on.
