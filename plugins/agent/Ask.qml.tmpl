@@ -16,6 +16,7 @@
 
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -318,15 +319,29 @@ Item {
     return ""
   }
 
+  // The phase as a word and a color, for the pill under the mazapán.
+  readonly property string phaseWord: phase === "listening" ? {{ tq "ask.state.listening" }}
+    : phase === "thinking" ? {{ tq "ask.state.thinking" }} : phase === "working" ? {{ tq "ask.state.working" }}
+    : phase === "waiting" ? {{ tq "ask.state.waiting" }} : phase === "done" ? {{ tq "ask.state.done" }}
+    : phase === "declined" ? {{ tq "ask.state.declined" }} : phase === "error" ? {{ tq "ask.state.error" }}
+    : phase === "sleeping" ? {{ tq "ask.state.sleeping" }} : readOnly ? {{ tq "ask.state.reading" }} : {{ tq "ask.state.idle" }}
+  readonly property color phaseColor: phase === "done" ? Theme.success : phase === "error" ? Theme.danger
+    : phase === "waiting" ? Theme.warning : phase === "sleeping" ? Theme.info
+    : phase === "idle" || phase === "declined" ? Theme.fgMuted : Theme.accent
+  readonly property bool working: busy || kept.undoLog !== ""
+
+  // Things to ask, for an empty card: what it can do, one click away.
+  readonly property var ideas: [{{ tq "ask.idea.theme" }}, {{ tq "ask.idea.slow" }}, {{ tq "ask.idea.night" }}]
+
   PanelWindow {
     id: win
-    visible: root.open
+    visible: root.open || card.opacity > 0.01
     screen: root.screenAtOpen
     readonly property real screenHeight: screen ? screen.height : 1080
-    implicitWidth: Math.max(520, Math.min(760, (screen ? screen.width : 1280) * 0.55))
-    implicitHeight: Math.min(card.implicitHeight, screenHeight * 0.78)
+    implicitWidth: Math.max(560, Math.min(820, (screen ? screen.width : 1280) * 0.58)) + 48
+    implicitHeight: Math.min(card.implicitHeight, screenHeight * 0.8) + 56
     anchors.top: true
-    margins.top: Math.round(screenHeight * 0.14)
+    margins.top: Math.round(screenHeight * 0.12) - 24
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
@@ -334,65 +349,273 @@ Item {
     WlrLayershell.namespace: "mazapan-panel-ask"
     // Mazapan's approval card needs the pointer and keys while a change waits.
     WlrLayershell.keyboardFocus: root.phase === "waiting" ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.Exclusive
+    mask: Region { item: card }
+
+    RectangularShadow {
+      anchors.fill: card
+      radius: card.radius
+      blur: 36
+      offset.y: 12
+      opacity: card.opacity
+      color: Qt.rgba(0, 0, 0, Theme.mode === "light" ? 0.16 : 0.42)
+    }
 
     Rectangle {
       id: card
-      anchors.fill: parent
-      implicitHeight: body.implicitHeight + 32
-      color: Theme.surfaceRaised
-      border.color: root.phase === "waiting" ? Theme.accent : Theme.border
+      x: 24
+      y: 12
+      width: parent.width - 48
+      implicitHeight: body.implicitHeight + 40
+      height: Math.min(implicitHeight, win.screenHeight * 0.8)
+      color: Theme.bg
+      border.color: root.phase === "waiting" ? Theme.warning : Theme.border
       border.width: 1
-      radius: Theme.radius
+      radius: Math.max(Theme.radius, 4)
+      clip: true
       focus: true
       Keys.onEscapePressed: root.close()
       Behavior on border.color { enabled: Theme.motion; ColorAnimation { duration: 200 } }
 
+      opacity: root.open ? 1 : 0
+      transform: Translate { y: root.open ? 0 : -10; Behavior on y { enabled: Theme.motion; NumberAnimation { duration: 240; easing.type: Easing.OutCubic } } }
+      Behavior on opacity { enabled: Theme.motion; NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+
+      // A glow of the phase's color behind the mazapán's side.
+      Rectangle {
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        width: stage.width + 40
+        gradient: Gradient {
+          orientation: Gradient.Horizontal
+          GradientStop { position: 0; color: Qt.alpha(root.phaseColor, Theme.mode === "light" ? 0.07 : 0.1) }
+          GradientStop { position: 1; color: "transparent" }
+        }
+        Behavior on opacity { enabled: Theme.motion; NumberAnimation { duration: 300 } }
+      }
+
+      // Working: a light that runs along the top.
+      Rectangle {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        height: 2
+        color: "transparent"
+        visible: root.working
+        clip: true
+        Rectangle {
+          id: runner
+          width: parent.width * 0.3
+          height: 2
+          radius: 1
+          color: root.phaseColor
+          NumberAnimation on x {
+            running: root.working && root.open && Theme.motion
+            from: -runner.width; to: card.width
+            duration: 1300
+            loops: Animation.Infinite
+            easing.type: Easing.InOutCubic
+          }
+        }
+      }
+
       RowLayout {
         id: body
         anchors.fill: parent
-        anchors.margins: 16
-        spacing: 16
+        anchors.margins: 20
+        spacing: 20
 
-        // The face: the mazapán, or a glyph and the step in words.
+        // --- the mazapán, on its stage ------------------------------------------------
         ColumnLayout {
+          id: stage
           Layout.alignment: Qt.AlignTop
-          spacing: 6
-          Mazapan {
-            visible: root.mascot
-            mood: root.mood
-            zoom: 2
+          Layout.preferredWidth: 156
+          spacing: 12
+
+          Item {
             Layout.alignment: Qt.AlignHCenter
+            Layout.preferredWidth: 156
+            Layout.preferredHeight: root.mascot ? 156 : 72
+            // Its shadow on the ground, in the phase's color.
+            Rectangle {
+              visible: root.mascot
+              anchors.horizontalCenter: parent.horizontalCenter
+              anchors.horizontalCenterOffset: -4
+              anchors.bottom: parent.bottom
+              anchors.bottomMargin: 15
+              width: 78
+              height: 8
+              radius: 4
+              color: Qt.alpha(root.phase === "idle" ? Theme.fg : root.phaseColor, root.phase === "idle" ? 0.1 : 0.3)
+              Behavior on color { enabled: Theme.motion; ColorAnimation { duration: 300 } }
+            }
+            Mazapan {
+              visible: root.mascot
+              anchors.centerIn: parent
+              anchors.verticalCenterOffset: -4
+              mood: root.mood
+              zoom: 3
+            }
+            Rectangle {
+              visible: !root.mascot
+              anchors.centerIn: parent
+              width: 64
+              height: 64
+              radius: 32
+              color: Qt.alpha(root.phaseColor, 0.15)
+              border.width: 1
+              border.color: Qt.alpha(root.phaseColor, 0.5)
+              Glyph {
+                anchors.centerIn: parent
+                text: root.phase === "waiting" ? "󰔟" : root.phase === "done" ? "󰄬" : root.phase === "error" ? "󰀦"
+                  : root.phase === "listening" ? "󰍬" : root.phase === "sleeping" ? "󰒲" : root.readOnly ? "󰈈" : "󰚩"
+                color: root.phaseColor
+                font.pointSize: 22
+              }
+            }
           }
-          Glyph {
-            visible: !root.mascot
-            text: root.phase === "waiting" ? "󰔟" : root.phase === "done" ? "󰄬" : root.phase === "error" ? "󰀦" : root.phase === "listening" ? "󰍬" : "󰚩"
-            color: root.phase === "error" ? Theme.danger : root.phase === "done" ? Theme.success : Theme.accentText
-            font.pointSize: 22
+
+          // What it's doing, in a word.
+          Rectangle {
             Layout.alignment: Qt.AlignHCenter
+            implicitWidth: pillRow.implicitWidth + 22
+            implicitHeight: 26
+            radius: 13
+            color: Qt.alpha(root.phaseColor, 0.14)
+            border.width: 1
+            border.color: Qt.alpha(root.phaseColor, 0.45)
+            Behavior on color { enabled: Theme.motion; ColorAnimation { duration: 250 } }
+            Row {
+              id: pillRow
+              anchors.centerIn: parent
+              spacing: 7
+              Rectangle {
+                anchors.verticalCenter: parent.verticalCenter
+                width: 7
+                height: 7
+                radius: 3.5
+                color: root.phaseColor
+                SequentialAnimation on opacity {
+                  running: (root.working || root.phase === "listening") && Theme.motion && root.open
+                  loops: Animation.Infinite
+                  NumberAnimation { to: 0.25; duration: 600 }
+                  NumberAnimation { to: 1; duration: 600 }
+                }
+              }
+              Text {
+                anchors.verticalCenter: parent.verticalCenter
+                text: root.phaseWord
+                color: Theme.fg
+                font.family: Theme.fontMono
+                font.pixelSize: Theme.fontSize * 0.95
+                font.bold: true
+              }
+            }
+          }
+          Text {
+            Layout.alignment: Qt.AlignHCenter
+            visible: root.working
+            text: Math.max(0, Math.round((root.now - root.started) / 1000)) + " s"
+            color: Theme.fgSubtle
+            font.family: Theme.fontMono
+            font.pixelSize: Theme.fontSize * 0.9
           }
         }
 
+        // --- the conversation ---------------------------------------------------------------
         ColumnLayout {
           Layout.fillWidth: true
           Layout.fillHeight: true
-          spacing: 10
+          spacing: 12
 
-          // What it's about: this desktop (mazapan's report), or the files, and if it only reads.
-          Caption {
-            visible: root.files.length > 0
-            text: root.aboutDesktop ? "󰍹 " + {{ tq "ask.desktop" }}
-              : "󰁦 " + root.files.map(f => f.split("/").pop()).join(", ") + "  ·  " + {{ tq "ask.readonly" }}
-            color: Theme.fgMuted
-            elide: Text.ElideMiddle
+          // Who it is, and what it's about.
+          RowLayout {
             Layout.fillWidth: true
+            spacing: 10
+            Text {
+              text: {{ tq "ask.title" }}
+              color: Theme.fg
+              font.family: Theme.fontMono
+              font.pixelSize: Theme.fontSize * 1.45
+              font.bold: true
+            }
+            Rectangle {
+              visible: root.files.length > 0
+              Layout.fillWidth: true
+              Layout.maximumWidth: implicitWidth
+              implicitWidth: aboutText.implicitWidth + 20
+              implicitHeight: 24
+              radius: 12
+              color: Qt.alpha(root.readOnly ? Theme.warning : Theme.info, 0.12)
+              border.width: 1
+              border.color: Qt.alpha(root.readOnly ? Theme.warning : Theme.info, 0.4)
+              Text {
+                id: aboutText
+                anchors.centerIn: parent
+                width: Math.min(implicitWidth, parent.width - 20)
+                elide: Text.ElideMiddle
+                text: root.aboutDesktop ? "󰍹  " + {{ tq "ask.desktop.short" }}
+                  : "󰈈  " + root.files.map(f => f.split("/").pop()).join(", ") + " · " + {{ tq "ask.readonly" }}
+                color: Theme.fg
+                font.family: Theme.fontMono
+                font.pixelSize: Theme.fontSize * 0.9
+                textFormat: Text.PlainText
+              }
+            }
+            Item { Layout.fillWidth: true }
           }
 
-          // The conversation, scrolled when long.
+          // Nothing asked yet: what it can do.
+          ColumnLayout {
+            visible: root.turns.length === 0 && root.phase !== "listening"
+            Layout.fillWidth: true
+            spacing: 10
+            Text {
+              Layout.fillWidth: true
+              text: root.readOnly ? {{ tq "ask.hello.readonly" }} : {{ tq "ask.hello" }}
+              color: Theme.fgMuted
+              wrapMode: Text.Wrap
+              font.family: Theme.fontUi
+              font.pointSize: Theme.fontSize
+            }
+            Flow {
+              visible: !root.readOnly
+              Layout.fillWidth: true
+              spacing: 8
+              Repeater {
+                model: root.ideas
+                delegate: Rectangle {
+                  id: idea
+                  required property string modelData
+                  implicitWidth: ideaText.implicitWidth + 24
+                  implicitHeight: 30
+                  radius: 15
+                  color: ideaHover.hovered ? Qt.alpha(Theme.accent, 0.16) : Theme.surface
+                  border.width: 1
+                  border.color: ideaHover.hovered ? Qt.alpha(Theme.accent, 0.6) : Theme.border
+                  Behavior on color { enabled: Theme.motion; ColorAnimation { duration: 120 } }
+                  Text {
+                    id: ideaText
+                    anchors.centerIn: parent
+                    text: idea.modelData
+                    color: Theme.fg
+                    font.family: Theme.fontMono
+                    font.pixelSize: Theme.fontSize * 0.98
+                  }
+                  HoverHandler { id: ideaHover; cursorShape: Qt.PointingHandCursor }
+                  TapHandler { onTapped: root.ask(idea.modelData) }
+                }
+              }
+            }
+          }
+
+          // The conversation, as bubbles, scrolled when long.
           Flickable {
             id: flick
             visible: root.turns.length > 0
             Layout.fillWidth: true
-            Layout.preferredHeight: Math.min(talk.implicitHeight, win.screenHeight * 0.5)
+            Layout.fillHeight: true
+            Layout.preferredHeight: Math.min(talk.implicitHeight, win.screenHeight * 0.48)
             contentWidth: width
             contentHeight: talk.implicitHeight
             clip: true
@@ -406,96 +629,185 @@ Item {
                 delegate: Item {
                   id: turn
                   required property var modelData
+                  required property int index
+                  readonly property bool me: !!modelData.me
+                  readonly property bool bad: !!modelData.problem
+                  readonly property color tone: me ? Theme.accent : bad ? Theme.danger : Theme.fg
                   Layout.fillWidth: true
-                  implicitHeight: turn.modelData.me ? mine.implicitHeight : theirs.implicitHeight
-                  RowLayout {
-                    id: mine
-                    visible: turn.modelData.me
-                    width: parent.width
-                    spacing: 8
-                    Glyph { text: "󰀄"; color: Theme.fgSubtle; Layout.alignment: Qt.AlignTop }
-                    Label {
-                      text: turn.modelData.text
-                      font.bold: true
-                      wrapMode: Text.Wrap
-                      Layout.fillWidth: true
+                  implicitHeight: bubble.implicitHeight
+                  Rectangle {
+                    id: bubble
+                    anchors.right: turn.me ? parent.right : undefined
+                    anchors.left: turn.me ? undefined : parent.left
+                    width: Math.min(parent.width * (turn.me ? 0.82 : 0.96), said.implicitWidth + 28)
+                    implicitHeight: said.implicitHeight + 20
+                    radius: Math.max(Theme.radius, 6)
+                    color: turn.me ? Qt.alpha(Theme.accent, 0.16) : turn.bad ? Qt.alpha(Theme.danger, 0.1) : Theme.surface
+                    border.width: 1
+                    border.color: turn.me ? Qt.alpha(Theme.accent, 0.4) : turn.bad ? Qt.alpha(Theme.danger, 0.4) : Theme.border
+                    opacity: 0
+                    Component.onCompleted: opacity = 1
+                    Behavior on opacity { enabled: Theme.motion; NumberAnimation { duration: 220 } }
+                    TextEdit {
+                      id: said
+                      x: 14
+                      y: 10
+                      width: Math.min(implicitWidth, turn.width * (turn.me ? 0.82 : 0.96) - 28)
+                      readOnly: true
+                      selectByMouse: true
+                      textFormat: turn.me || turn.bad ? TextEdit.PlainText : TextEdit.MarkdownText
+                      text: turn.me || turn.bad ? turn.modelData.text : root.safe(turn.modelData.text)
+                      wrapMode: TextEdit.Wrap
+                      color: turn.bad ? Theme.danger : Theme.fg
+                      selectionColor: Theme.selection
+                      font.family: Theme.fontUi
+                      font.pointSize: Theme.fontSize
+                      font.bold: turn.me
+                      onLinkActivated: link => { if (/^https?:\/\//.test(link)) Qt.openUrlExternally(link) }
                     }
-                  }
-                  TextEdit {
-                    id: theirs
-                    visible: !turn.modelData.me
-                    width: parent.width
-                    readOnly: true
-                    selectByMouse: true
-                    textFormat: turn.modelData.problem ? TextEdit.PlainText : TextEdit.MarkdownText
-                    text: turn.modelData.problem ? turn.modelData.text : root.safe(turn.modelData.text)
-                    wrapMode: TextEdit.Wrap
-                    color: turn.modelData.problem ? Theme.danger : Theme.fg
-                    selectionColor: Theme.selection
-                    font.family: Theme.fontUi
-                    font.pointSize: Theme.fontSize
-                    onLinkActivated: link => { if (/^https?:\/\//.test(link)) Qt.openUrlExternally(link) }
                   }
                 }
               }
             }
           }
 
-          // What it's doing now.
-          Caption {
-            visible: root.phase === "listening" || root.busy || kept.undoLog !== ""
-            text: root.phase === "listening" ? {{ tq "ask.listening" }}
-              : root.step + "  " + Math.round((root.now - root.started) / 1000) + " s"
-            color: root.phase === "waiting" ? Theme.accentText : Theme.fgSubtle
+          // Waiting for you: where to look.
+          Rectangle {
+            visible: root.phase === "waiting"
             Layout.fillWidth: true
-          }
-
-          // What you say next.
-          RowLayout {
-            Layout.fillWidth: true
-            spacing: 8
-            TextField {
-              id: field
-              Layout.fillWidth: true
-              enabled: !root.busy
-              placeholder: root.turns.length > 0 ? {{ tq "ask.more" }} : root.readOnly ? {{ tq "ask.placeholder" }} : {{ tq "ask.placeholder.act" }}
-              onAccepted: { const q = text.trim(); if (q !== "") { text = ""; root.ask(q) } }
-            }
-            Button {
-              visible: root.canDictate
-              text: root.phase === "listening" ? "󰏤" : "󰍬"
-              primary: root.phase === "listening"
-              enabled: !root.busy
-              onClicked: root.listen()
+            implicitHeight: waitRow.implicitHeight + 16
+            radius: Math.max(Theme.radius, 6)
+            color: Qt.alpha(Theme.warning, 0.12)
+            border.width: 1
+            border.color: Qt.alpha(Theme.warning, 0.45)
+            RowLayout {
+              id: waitRow
+              anchors.fill: parent
+              anchors.margins: 8
+              anchors.leftMargin: 12
+              spacing: 10
+              Glyph { text: "󰔟"; color: Theme.warning }
+              Label { text: {{ tq "ask.hint.approval" }}; wrapMode: Text.Wrap; Layout.fillWidth: true }
             }
           }
 
+          // What it's doing now, in words.
+          Text {
+            visible: root.working && root.phase !== "waiting"
+            Layout.fillWidth: true
+            text: root.step
+            color: Theme.fgMuted
+            elide: Text.ElideRight
+            font.family: Theme.fontMono
+            font.pixelSize: Theme.fontSize
+          }
+          Text {
+            visible: root.phase === "listening"
+            Layout.fillWidth: true
+            text: {{ tq "ask.listening" }}
+            color: Theme.accentText
+            wrapMode: Text.Wrap
+            font.family: Theme.fontMono
+            font.pixelSize: Theme.fontSize
+          }
+
+          // What you say next: a field with its microphone and its send.
+          Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: 46
+            radius: Math.max(Theme.radius, 6)
+            color: Theme.surface
+            border.width: field.activeFocus ? 2 : 1
+            border.color: field.activeFocus ? Theme.accent : Theme.border
+            opacity: root.busy ? 0.6 : 1
+            Behavior on border.color { enabled: Theme.motion; ColorAnimation { duration: 140 } }
+            RowLayout {
+              anchors.fill: parent
+              anchors.leftMargin: 14
+              anchors.rightMargin: 6
+              spacing: 6
+              TextInput {
+                id: field
+                Layout.fillWidth: true
+                enabled: !root.busy
+                color: Theme.fg
+                selectionColor: Theme.selection
+                font.family: Theme.fontUi
+                font.pointSize: Theme.fontSize * 1.08
+                clip: true
+                function focusInput() { forceActiveFocus() }
+                onAccepted: { const q = text.trim(); if (q !== "") { text = ""; root.ask(q) } }
+                Keys.onEscapePressed: root.close()
+                Text {
+                  anchors.fill: parent
+                  verticalAlignment: Text.AlignVCenter
+                  visible: field.text === ""
+                  text: root.turns.length > 0 ? {{ tq "ask.more" }} : root.readOnly ? {{ tq "ask.placeholder" }} : {{ tq "ask.placeholder.act" }}
+                  color: Theme.fgSubtle
+                  font: field.font
+                  elide: Text.ElideRight
+                }
+              }
+              IconButton {
+                visible: root.canDictate
+                glyph: root.phase === "listening" ? "󰏤" : "󰍬"
+                lit: root.phase === "listening"
+                enabled: !root.busy
+                onClicked: root.listen()
+              }
+              IconButton {
+                glyph: "󰒊"
+                lit: field.text.trim() !== ""
+                enabled: !root.busy && field.text.trim() !== ""
+                onClicked: field.accepted()
+              }
+            }
+          }
+
+          // Who answered, and what can be done with it.
           RowLayout {
             Layout.fillWidth: true
             spacing: 8
-            Caption {
-              text: [root.agentName, root.account].filter(s => s).join("  ·  ")
-              color: Theme.fgSubtle
-              elide: Text.ElideRight
-              Layout.fillWidth: true
+            Rectangle {
+              visible: root.agentName !== ""
+              implicitWidth: whoText.implicitWidth + 18
+              implicitHeight: 24
+              radius: 12
+              color: Qt.alpha(Theme.fg, 0.06)
+              Text {
+                id: whoText
+                anchors.centerIn: parent
+                text: "󰚩  " + [root.agentName, root.account].filter(s => s).join(" · ")
+                color: Theme.fgMuted
+                font.family: Theme.fontMono
+                font.pixelSize: Theme.fontSize * 0.85
+                textFormat: Text.PlainText
+              }
             }
-            Button {
+            Item { Layout.fillWidth: true }
+            Chip {
               visible: root.busy
+              glyph: "󰓛"
               text: {{ tq "ask.cancel" }}
               onClicked: root.cancel()
             }
-            Button {
-              visible: root.undoId !== "" && !root.busy && kept.undoLog === ""
+            Chip {
+              visible: root.undoId !== "" && !root.working
+              glyph: "󰕌"
               text: {{ tq "ask.undo" }}
               onClicked: root.undo()
             }
-            Button {
+            Chip {
               visible: root.lastAnswer !== "" && !root.busy
+              glyph: copied ? "󰄬" : "󰆏"
               text: {{ tq "ask.copy" }}
-              onClicked: Quickshell.execDetached(["wl-copy", "--", root.lastAnswer])
+              property bool copied: false
+              onClicked: { Quickshell.execDetached(["wl-copy", "--", root.lastAnswer]); copied = true; copiedTimer.restart() }
+              Timer { id: copiedTimer; interval: 1500; onTriggered: parent.copied = false }
             }
-            Button {
+            Chip {
               visible: !!root.resume && !root.busy
+              glyph: "󰆍"
               text: {{ tq "ask.continue" }}
               onClicked: { root.terminal(root.resume); root.close() }
             }
@@ -503,5 +815,52 @@ Item {
         }
       }
     }
+  }
+
+  // A small round button with a glyph; lit when it's what's next.
+  component IconButton: Rectangle {
+    id: ib
+    property string glyph: ""
+    property bool lit: false
+    signal clicked()
+    implicitWidth: 34
+    implicitHeight: 34
+    radius: 17
+    opacity: enabled ? 1 : 0.4
+    color: lit ? Theme.accent : ibHover.hovered ? Qt.alpha(Theme.fg, 0.08) : "transparent"
+    Behavior on color { enabled: Theme.motion; ColorAnimation { duration: 120 } }
+    Text {
+      anchors.centerIn: parent
+      text: ib.glyph
+      color: ib.lit ? Theme.accentFg : Theme.fgMuted
+      font.family: Theme.fontMono
+      font.pixelSize: 16
+    }
+    HoverHandler { id: ibHover; cursorShape: Qt.PointingHandCursor }
+    TapHandler { onTapped: if (ib.enabled) ib.clicked() }
+  }
+
+  // An action under the conversation: a glyph and a word.
+  component Chip: Rectangle {
+    id: chip
+    property string glyph: ""
+    property string text: ""
+    signal clicked()
+    implicitWidth: chipRow.implicitWidth + 20
+    implicitHeight: 30
+    radius: 15
+    color: chipHover.hovered ? Theme.surfaceRaised : Theme.surface
+    border.width: 1
+    border.color: chipHover.hovered ? Qt.alpha(Theme.accent, 0.55) : Theme.border
+    Behavior on color { enabled: Theme.motion; ColorAnimation { duration: 120 } }
+    Row {
+      id: chipRow
+      anchors.centerIn: parent
+      spacing: 7
+      Text { anchors.verticalCenter: parent.verticalCenter; text: chip.glyph; color: Theme.accentText; font.family: Theme.fontMono; font.pixelSize: 14 }
+      Text { anchors.verticalCenter: parent.verticalCenter; text: chip.text; color: Theme.fg; font.family: Theme.fontMono; font.pixelSize: Theme.fontSize * 0.95 }
+    }
+    HoverHandler { id: chipHover; cursorShape: Qt.PointingHandCursor }
+    TapHandler { onTapped: chip.clicked() }
   }
 }
