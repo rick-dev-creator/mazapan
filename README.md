@@ -36,9 +36,14 @@
   <a href="docs/roadmap.md">Roadmap</a>
 </p>
 
-<p align="center"><img src="docs/media/agent.gif" alt="An agent asks to change the theme; the card shows the diff; allowed, the whole desktop follows"></p>
+<p align="center"><img src="docs/media/agent.gif" alt="Mazapan, the agent, asked for the Amber theme: its card shows the exact diff; allowed, the whole desktop follows"></p>
 
-<p align="center"><sub>Claude Code asks, through Mazapan's MCP server, to switch the theme. The card shows exactly what it would write; one click, and the whole desktop follows, the agents' dashboard included. <i>(Sample accounts and data.)</i></sub></p>
+<p align="center"><sub>Asked for the Amber theme, Mazapan, the agent, prepares the change. Mazapan's own card shows exactly what it would write; one click, and the whole desktop follows.</sub></p>
+
+<p align="center">
+  ▶ <b><a href="docs/media/mazapan-agent.mp4">Mazapan, the agent</a></b> (73 s): its gestures, a question, a change allowed, and back ·
+  ▶ <b><a href="docs/media/mazapan-learn.mp4">Learn, and an agent's change</a></b> (56 s)
+</p>
 
 > **A personal project, shared as it is.** Mazapan is one person's desktop,
 > made public in case it helps someone else. It comes with no warranty of
@@ -80,7 +85,7 @@ If it's useful to you too, that's the best that could happen to it.
 
 | | |
 |---|---|
-| 🤖 **Agentic OS** | Every agent's live sessions in the bar · each account's limits · a dashboard of cost and tokens · a built-in MCP server · an approval card with the exact diff · ask from anywhere · diagnosis from crashes, checks and checkpoints |
+| 🤖 **Agentic OS** | Mazapan, the agent: ask by text or voice, changes made with your approval · every agent's live sessions in the bar · each account's limits · a dashboard of cost and tokens · a built-in MCP server · an approval card with the exact diff · ask from anywhere · diagnosis from crashes, checks and checkpoints |
 | 💿 **Install** | Graphical and text installers in 5 languages · full-disk encryption · a recovery key as text and QR · hardware fixes picked for your machine |
 | 🛟 **Updates and safety** | Arch news before updating · automatic rollback when a check fails · checkpoints you boot into from the menu · a signed repository · a firewall that denies everything in |
 | 🪟 **Desktop** | A Control Center out of a status pill · Niri-style scrolling columns · overview of every workspace · command palette · settings · monitors with profiles · notifications and Do Not Disturb · night light · modes · idle and hibernate |
@@ -108,6 +113,19 @@ it lets them change things the way a person does, never behind your back.
   </tr>
 </table>
 <p align="center"><sub>Sample accounts and data; the answer shown is a sample too.</sub></p>
+
+### Mazapan, the agent
+- **`SUPER + SHIFT + A`**, `? …` in the palette, or **ask by voice**: a card
+  with Mazapan, the icon's mazapan as a pixel-art character whose gestures
+  say what it's doing (listening, thinking, preparing a change, your turn,
+  done, turned down, only reading…).
+- **Ask for a change** ("put a dark theme with a green accent") and it makes
+  it through Mazapan, after Mazapan's own card shows you the diff and you
+  allow it; Undo takes it back. Ask why something failed and it reads
+  Mazapan's logs.
+- **Only your own words act**: about a capture, a notification or the
+  selected text it only answers. The conversation goes on in the card, by
+  typing or by voice. ▶ [See it in 73 s](docs/media/mazapan-agent.mp4).
 
 ### Sees your agents
 - **Live sessions in the bar** for Claude Code, Codex, opencode and pi: which
@@ -140,7 +158,8 @@ it lets them change things the way a person does, never behind your back.
 - **Ask from anywhere**: `?` in the palette, about a screenshot, the
   selected text, files (right click in Files), or **by voice**. The answer
   comes in a card; "Continue in a terminal" picks the conversation up.
-  Asked read-only, in an empty folder, with no keys.
+  About something from elsewhere it's asked read-only, in an empty folder,
+  with no keys.
 - **Diagnosis built in**: an app crashes, a health check fails, or a
   checkpoint was needed, and "Ask an agent" hands over `mazapan report`
   (state, failing checks, recent errors, what changed since the
