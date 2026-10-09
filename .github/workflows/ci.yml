@@ -23,7 +23,7 @@ jobs:
       - name: Tools
         run: pacman -Syu --noconfirm --needed dotnet-sdk clang lld git sqlite base-devel sudo
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # pkg/version reads the tags and the history
 
@@ -55,7 +55,7 @@ jobs:
       - name: Tools
         run: pacman -Syu --noconfirm --needed git
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/download-artifact@v4
         with:
@@ -82,7 +82,7 @@ jobs:
     name: Shell scripts · shellcheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Plain scripts only: templates (*.tmpl) are shell only once rendered.
       - name: shellcheck
