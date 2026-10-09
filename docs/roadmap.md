@@ -3,10 +3,10 @@
 Where Mazapan stands, what comes next, and what's waiting. How each part
 was decided, built, tested and audited is in [history.md](history.md).
 
-**Today (2026-10-08):** Mazapan runs on a real machine (an MSI Vector
+**Today (2026-10-09):** Mazapan runs on a real machine (an MSI Vector
 A16 HX), mazapan.dev is up, the ISO and the signed package repository
 are published, and releases come out as a routine (0.5.0 is the latest).
-The plugin registry is open, with seven plugins. Not yet: 1.0, which
+The plugin registry is open, with eight plugins. Not yet: 1.0, which
 waits on the first three items below.
 
 ## Next
@@ -47,29 +47,28 @@ without a terminal. Built-in when nearly everyone needs it and it works on
 any hardware; from the community (their own repository, in the registry)
 when it depends on a brand, a service or a taste. Mazapan makes the first
 community ones itself, as it did with Markets, Pomodoro, Now Playing,
-Playback, Radio, Dock and Ports, so the registry starts with plugins worth
-installing. They don't hold up 1.0: they're made alongside Next and
-after it, in the order below.
+Playback, Radio, Dock, Ports and News, so the registry starts with
+plugins worth installing. They don't hold up 1.0: they're made alongside
+Next and after it, in the order below.
 
 ### From the community
 
 Simplest first:
 
-1. **What I follow.** Feeds and tickers, as Markets does: one each.
-2. **A wallpaper that moves.** A looping video as the wallpaper, muted,
+1. **A wallpaper that moves.** A looping video as the wallpaper, muted,
    paused while a window covers it or on battery; part of a theme like any
    picture.
-3. **The services I work in.** Tasks, issues and notifications from one
+2. **The services I work in.** Tasks, issues and notifications from one
    service each (Todoist, Linear, GitHub…) in the bar or the palette, each
    signed in to its own way.
-4. **My passwords at hand.** Bitwarden from the palette: search, copy a
+3. **My passwords at hand.** Bitwarden from the palette: search, copy a
    password or a code, the vault locked with the session; nothing kept
    outside the system's keyring.
-5. **My home.** Home Assistant's lights, switches and scenes in the bar or
+4. **My home.** Home Assistant's lights, switches and scenes in the bar or
    the Control Center, and what its sensors say.
-6. **The phone next to me.** Its screen in a window (scrcpy), the
+5. **The phone next to me.** Its screen in a window (scrcpy), the
    clipboard, files and notifications both ways (KDE Connect).
-7. **My devices working.** One plugin per brand, where only its own tools
+6. **My devices working.** One plugin per brand, where only its own tools
    reach: keyboard lighting, Logitech mice (Solaar), Razer (OpenRazer),
    headphones' battery, MSI laptops' fans and performance modes (msi-ec);
    each tried on the device itself. A charge limit isn't one of them: the
@@ -130,7 +129,7 @@ Simplest first:
 | Learn | Lessons recorded from the real moves, tried for real and ticked off; every key while SUPER is held |
 | Security | Encryption, the firewall, privacy dots, app permissions, fingerprint; audited (see [security.md](security.md)) |
 | Plugins | Dependencies, approved capabilities, catalogs, the Plugins panel, tools for authors; hardware fixes offered only where they apply |
-| Published | mazapan.dev, the ISO with its checksum and signature, the signed repository at repo.mazapan.dev, releases on their channels; the plugin registry, with seven plugins: Markets, Pomodoro, Now Playing (what's playing, anywhere), Playback (the same in Mazapan's look), Radio (live stations), Dock (your apps and their windows) and Ports (what's listening, and stopping it) |
+| Published | mazapan.dev, the ISO with its checksum and signature, the signed repository at repo.mazapan.dev, releases on their channels; the plugin registry, with eight plugins: Markets, Pomodoro, Now Playing (what's playing, anywhere), Playback (the same in Mazapan's look), Radio (live stations), Dock (your apps and their windows), Ports (what's listening, and stopping it) and News (headlines by country, language and topic) |
 | Look | The login, boot menu and boot splash in the theme; GTK, Qt, browsers, editors and terminals themed |
 
 ## Waiting
