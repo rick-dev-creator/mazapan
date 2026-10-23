@@ -433,6 +433,7 @@ TOML, JSON, CSS, shell…), filled from the theme and your settings.
 
 **Hardware fixes (on the machines that need them)**
 
+- **AMD Strix and Krackan Point laptop screen that keeps updating** (`hw-amd-strix-psr`): The screen of laptops on AMD Ryzen AI 300 (Strix and Krackan Point: the ASUS Zenbook S 16 and others) no longer freezes on its last frame, the mouse and keyboard seemingly dead
 - **Wi-Fi passwords on Macs with Broadcom Wi-Fi** (`hw-apple-brcmfmac-wpa`): Macs whose Broadcom Wi-Fi runs on the brcmfmac driver (2015 on, T2 Macs too) join WPA2/WPA3 networks that otherwise turn the right password down
 - **Function keys first on Apple keyboards** (`hw-apple-fnkeys`): F1–F12 as function keys, media keys with Fn, on keyboards the hid_apple driver runs
 - **MacBook NVMe waking from sleep** (`hw-apple-nvme-suspend`): Keeps the NVMe drive of the 2015-2017 MacBook and MacBook Pro out of its deepest power state (D3cold), which it fails to wake from after sleep
@@ -441,7 +442,6 @@ TOML, JSON, CSS, shell…), filled from the theme and your settings.
 - **ASUS Panther Lake screen brightness** (`hw-asus-ptl-backlight`): Screen brightness that really changes on the ASUS ExpertBook B9406 and Zenbook UX5406AA (Intel Panther Lake), not only full or off
 - **ASUS ROG laptop controls** (`hw-asus-rog`): asusctl on ASUS ROG laptops: performance profiles, fan curves, a battery charge limit and the keyboard's lighting
 - **ASUS ROG laptop speaker volume** (`hw-asus-rog-audio`): Volume on ASUS ROG laptops set in software (WirePlumber's soft mixer), away from the Realtek codec's hardware mixer quirks that muffle the speakers
-- **ASUS Zenbook S 16 screen that keeps updating** (`hw-asus-um5606-psr`): The ASUS Zenbook S 16 (UM5606, AMD Ryzen AI) screen no longer freezes on its last frame, the mouse and keyboard seemingly dead
 - **ASUS ROG Flow Z13 touchpad while typing** (`hw-asus-z13-touchpad`): The touchpad of the ASUS ROG Flow Z13's (GZ302) detachable keyboard ignored while typing, as a built-in one is
 - **Broadcom BCM4360 and BCM4331 Wi-Fi** (`hw-broadcom-wl`): Broadcom's wl driver for the BCM4360 and BCM4331 Wi-Fi chips (2012-2015 MacBooks, and other laptops), which the kernel's own drivers run poorly or…
 - **Fingerprint reader** (`hw-fingerprint`): A finger unlocks the screen and allows system changes (the password still works)

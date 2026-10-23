@@ -1,3 +1,0 @@
-"plugin.name" = "La pantalla del ASUS Zenbook S 16 se sigue actualizando"
-"plugin.description" = "La pantalla del ASUS Zenbook S 16 (UM5606, AMD Ryzen AI) ya no se congela en el último fotograma, con el ratón y el teclado aparentemente muertos: Panel Self Refresh, en el que su panel OLED se queda colgado, desactivado"
-"check.option" = "Panel Self Refresh está desactivado en el driver amdgpu"

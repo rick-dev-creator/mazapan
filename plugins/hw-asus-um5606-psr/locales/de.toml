@@ -1,3 +1,0 @@
-"plugin.name" = "ASUS Zenbook S 16: Bildschirm aktualisiert sich weiter"
-"plugin.description" = "Der Bildschirm des ASUS Zenbook S 16 (UM5606, AMD Ryzen AI) friert nicht mehr beim letzten Bild ein, Maus und Tastatur scheinbar tot: Panel Self Refresh, in dem sein OLED-Panel hängen bleibt, ist aus"
-"check.option" = "Panel Self Refresh ist für den Treiber amdgpu aus"
