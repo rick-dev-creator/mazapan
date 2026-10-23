@@ -4,6 +4,15 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
+## Unreleased
+
+- The ASUS Zenbook S 16 (UM5606) froze on its first frame, from the
+  ISO's live session on: a black screen with the cursor in the middle,
+  the keyboard seemingly dead. Panel Self Refresh, which its OLED panel
+  hangs in on Linux 7, is turned off: by a hardware fix the installer
+  turns on there (`hw-asus-um5606-psr`), and on the ISO by its "safe
+  graphics" entry, now for AMD as well as NVIDIA.
+
 ## 0.5.0 (2026-10-08)
 
 - Mazapan, the agent: `SUPER + SHIFT + A`, `? …` in the palette (or a
