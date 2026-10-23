@@ -5,7 +5,7 @@ was decided, built, tested and audited is in [history.md](history.md).
 
 **Today (2026-10-09):** Mazapan runs on a real machine (an MSI Vector
 A16 HX), mazapan.dev is up, the ISO and the signed package repository
-are published, and releases come out as a routine (0.5.0 is the latest).
+are published, and releases come out as a routine (0.5.1 is the latest).
 The plugin registry is open, with eight plugins. Not yet: 1.0, which
 waits on the first three items below.
 

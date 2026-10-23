@@ -4,8 +4,14 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
-## Unreleased
+## 0.5.1 (2026-10-23)
 
+- News, a new plugin in the registry
+  ([mazapan-news](https://github.com/rick-dev-creator/mazapan-news)): the
+  news from where you're from and where you live, in the languages you
+  read, by country, section and your own topics, in a quiet icon in the
+  bar and a panel made for reading. `mazapan plugins add news`, or the
+  Plugins panel. The copy of the registry that ships lists it.
 - The ASUS Zenbook S 16 (UM5606) froze on its first frame, from the
   ISO's live session on: a black screen with the cursor in the middle,
   the keyboard seemingly dead. Panel Self Refresh, which its panel hangs
