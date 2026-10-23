@@ -12,6 +12,11 @@ release (a tag `vX.Y.Z`) names them.
   hangs in on Linux 7, is turned off: by a hardware fix the installer
   turns on there (`hw-asus-um5606-psr`), and on the ISO by its "safe
   graphics" entry, now for AMD as well as NVIDIA.
+- The installer's disk screen could do nothing at all on Continue (or
+  Enter), with no word of why, until it was closed and opened again: no
+  disk was picked, or the disks it found when it opened weren't there.
+  Now it looks for the disks again on coming to that screen, and says
+  why it doesn't move on: no disk, a disk too small, or none picked yet.
 
 ## 0.5.0 (2026-10-08)
 
