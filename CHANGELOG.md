@@ -10,8 +10,8 @@ release (a tag `vX.Y.Z`) names them.
   ISO's live session on: a black screen with the cursor in the middle,
   the keyboard seemingly dead. Panel Self Refresh, which its OLED panel
   hangs in on Linux 7, is turned off: by a hardware fix the installer
-  turns on there (`hw-asus-um5606-psr`), and on the ISO by its "safe
-  graphics" entry, now for AMD as well as NVIDIA.
+  turns on there (`hw-asus-um5606-psr`), and on the ISO in every entry
+  of its boot menu, so it starts without anything to pick.
 - The installer's disk screen could do nothing at all on Continue (or
   Enter), with no word of why, until it was closed and opened again: no
   disk was picked, or the disks it found when it opened weren't there.

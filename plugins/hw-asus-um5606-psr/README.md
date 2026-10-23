@@ -8,8 +8,8 @@ and its selective update, PSR2-SU) never wakes this OLED panel. This
 turns it off, and the screen follows what's drawn again.
 
 Offered on the Zenbook S 16 (UM5606) with AMD graphics. The installer
-turns it on there by itself; the ISO's "safe graphics" entry carries the
-same option, for the live session.
+turns it on there by itself; every entry of the ISO's boot menu carries
+the same option, for the live session.
 
 It writes one kernel module option, as root: the amdgpu driver's
 `dcdebugmask=0x600`, in `/etc/modprobe.d/mazapan-asus-um5606-psr.conf`

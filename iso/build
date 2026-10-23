@@ -115,16 +115,21 @@ sed -i 's/Arch Linux install medium/mazapan/' "$p"/efiboot/loader/entries/*.conf
 # and the install then run out of it (the install stalls).
 sed -i 's/archisosearchuuid=%ARCHISO_UUID%/& copytoram=n/' "$p"/efiboot/loader/entries/*.conf "$p"/syslinux/*.cfg "$p"/grub/*.cfg
 grep -q 'copytoram=n' "$p"/efiboot/loader/entries/*.conf || die "the boot entries changed: copytoram=n wasn't added"
+# amdgpu's Panel Self Refresh off, in every entry: some AMD OLED laptops
+# (the Zenbook S 16: plugins/hw-asus-um5606-psr) freeze on their first
+# frame with it, and nobody should have to know that to start the ISO.
+# Elsewhere it costs the live session a little battery; desktops and
+# Intel or NVIDIA laptops don't use it at all.
+sed -i 's/archisosearchuuid=%ARCHISO_UUID%/& amdgpu.dcdebugmask=0x600/' "$p"/efiboot/loader/entries/*.conf "$p"/syslinux/*.cfg "$p"/grub/*.cfg
+grep -q 'amdgpu.dcdebugmask=0x600' "$p"/efiboot/loader/entries/*.conf || die "the boot entries changed: amdgpu.dcdebugmask wasn't added"
 # Safe graphics, for laptops whose NVIDIA card the ISO's drivers don't
 # handle yet: NVIDIA's drivers kept out, so the desktop starts on the
 # integrated GPU (with the GPU switch on Hybrid); if it can't start at all,
-# the console offers the installer in text (mazapan-install-text). And
-# amdgpu's Panel Self Refresh off, which freezes some AMD OLED laptops
-# (the Zenbook S 16: plugins/hw-asus-um5606-psr) on their first frame.
+# the console offers the installer in text (mazapan-install-text).
 e="$p/efiboot/loader/entries/01-archiso-linux.conf"
 [[ -f $e ]] || die "the boot entries changed: no 01-archiso-linux.conf"
-sed -e 's/^title .*/title    mazapan, safe graphics (NVIDIA off, AMD PSR off)/' -e 's/^sort-key .*/sort-key 01-safe/' \
-  -e 's/^options .*/& modprobe.blacklist=nouveau,nvidia,nvidia_drm,nvidia_modeset amdgpu.dcdebugmask=0x600/' "$e" > "$p/efiboot/loader/entries/01-mazapan-safe.conf"
+sed -e 's/^title .*/title    mazapan, safe graphics (NVIDIA off)/' -e 's/^sort-key .*/sort-key 01-safe/' \
+  -e 's/^options .*/& modprobe.blacklist=nouveau,nvidia,nvidia_drm,nvidia_modeset/' "$e" > "$p/efiboot/loader/entries/01-mazapan-safe.conf"
 
 log "mkarchiso (a few minutes)"
 # shellcheck disable=SC2024
