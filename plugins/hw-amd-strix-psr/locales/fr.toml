@@ -1,0 +1,3 @@
+"plugin.name" = "L'écran des portables AMD Strix et Krackan Point qui se met à jour"
+"plugin.description" = "L'écran des portables à AMD Ryzen AI 300 (Strix et Krackan Point : l'ASUS Zenbook S 16 et d'autres) ne se fige plus sur sa dernière image, la souris et le clavier en apparence morts : Panel Self Refresh, où leurs dalles restent bloquées, désactivé"
+"check.option" = "Panel Self Refresh est désactivé pour le pilote amdgpu"

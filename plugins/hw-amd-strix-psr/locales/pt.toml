@@ -1,0 +1,3 @@
+"plugin.name" = "A tela dos notebooks AMD Strix e Krackan Point continua atualizando"
+"plugin.description" = "A tela dos notebooks com AMD Ryzen AI 300 (Strix e Krackan Point: o ASUS Zenbook S 16 e outros) não congela mais no último quadro, com o mouse e o teclado aparentemente mortos: o Panel Self Refresh, no qual seus painéis travam, desativado"
+"check.option" = "O Panel Self Refresh está desativado no driver amdgpu"

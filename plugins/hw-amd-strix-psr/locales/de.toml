@@ -1,0 +1,3 @@
+"plugin.name" = "Laptops mit AMD Strix und Krackan Point: Bildschirm aktualisiert sich weiter"
+"plugin.description" = "Der Bildschirm von Laptops mit AMD Ryzen AI 300 (Strix und Krackan Point: das ASUS Zenbook S 16 und andere) friert nicht mehr beim letzten Bild ein, Maus und Tastatur scheinbar tot: Panel Self Refresh, in dem ihre Panels hängen bleiben, ist aus"
+"check.option" = "Panel Self Refresh ist für den Treiber amdgpu aus"

@@ -8,10 +8,12 @@ release (a tag `vX.Y.Z`) names them.
 
 - The ASUS Zenbook S 16 (UM5606) froze on its first frame, from the
   ISO's live session on: a black screen with the cursor in the middle,
-  the keyboard seemingly dead. Panel Self Refresh, which its OLED panel
-  hangs in on Linux 7, is turned off: by a hardware fix the installer
-  turns on there (`hw-asus-um5606-psr`), and on the ISO in every entry
-  of its boot menu, so it starts without anything to pick.
+  the keyboard seemingly dead. Panel Self Refresh, which its panel hangs
+  in on Linux 7, is turned off: on the ISO in every entry of its boot
+  menu, so it starts without anything to pick, and on the installed
+  system by a hardware fix the installer turns on (`hw-amd-strix-psr`),
+  for every laptop on AMD Ryzen AI 300 (Strix and Krackan Point), whose
+  panels the same bug can hang.
 - The installer's disk screen could do nothing at all on Continue (or
   Enter), with no word of why, until it was closed and opened again: no
   disk was picked, or the disks it found when it opened weren't there.

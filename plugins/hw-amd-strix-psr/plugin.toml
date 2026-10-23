@@ -1,0 +1,28 @@
+[plugin]
+id = "hw-amd-strix-psr"
+name = "AMD Strix and Krackan Point laptop screen that keeps updating"
+version = "0.1.0"
+api = 1
+description = "The screen of laptops on AMD Ryzen AI 300 (Strix and Krackan Point: the ASUS Zenbook S 16 and others) no longer freezes on its last frame, the mouse and keyboard seemingly dead: Panel Self Refresh, which their panels hang in, turned off"
+categories = ["hardware"]
+
+[hardware]
+# Strix Point (Radeon 880M / 890M) and Krackan Point (840M / 860M): PSR2-SU
+# hangs their eDP panels (the Zenbook S 16, UM5606, on Linux 7). Strix
+# Halo isn't here: no report of it.
+pci = ["1002:150e", "1002:1114"]
+
+# amdgpu starts from the initramfs, which carries modprobe.d too (the
+# modconf hook): rebuilt, so it reads the option from the first frame.
+[[targets]]
+template = "amdgpu.conf.tmpl"
+output = "/etc/modprobe.d/mazapan-amd-strix-psr.conf"
+system = true
+reboot = true
+reload = "mkinitcpio -P"
+
+[[checks]]
+name = "{{ t \"check.option\" }}"
+# What amdgpu runs with (the initramfs it started from had it): until the
+# reboot, no. Both bits, whatever else the mask has.
+run = "v=$(cat /sys/module/amdgpu/parameters/dcdebugmask 2>/dev/null) && [ $(( v & 0x600 )) = $(( 0x600 )) ]"

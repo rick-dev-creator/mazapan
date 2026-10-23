@@ -132,6 +132,7 @@ says what each needs, what it can do, and its settings.
 
 | Plugin | What it does |
 |---|---|
+| [`hw-amd-strix-psr`](../plugins/hw-amd-strix-psr) | The screen of laptops on AMD Ryzen AI 300 (Strix and Krackan Point: the ASUS Zenbook S 16 and others) no longer freezes on its last frame, the mouse and keyboard seemingly dead: Panel Self Refresh, which their panels hang in, turned off |
 | [`hw-apple-brcmfmac-wpa`](../plugins/hw-apple-brcmfmac-wpa) | Macs whose Broadcom Wi-Fi runs on the brcmfmac driver (2015 on, T2 Macs too) join WPA2/WPA3 networks that otherwise turn the right password down: the handshake done by wpa_supplicant, not by the card's firmware |
 | [`hw-apple-fnkeys`](../plugins/hw-apple-fnkeys) | F1–F12 as function keys, media keys with Fn, on keyboards the hid_apple driver runs: Apple's, and others in Mac mode (Keychron…) |
 | [`hw-apple-nvme-suspend`](../plugins/hw-apple-nvme-suspend) | Keeps the NVMe drive of the 2015-2017 MacBook and MacBook Pro out of its deepest power state (D3cold), which it fails to wake from after sleep |
@@ -140,7 +141,6 @@ says what each needs, what it can do, and its settings.
 | [`hw-asus-ptl-backlight`](../plugins/hw-asus-ptl-backlight) | Screen brightness that really changes on the ASUS ExpertBook B9406 and Zenbook UX5406AA (Intel Panther Lake), not only full or off: the panel's backlight through DisplayPort AUX (DPCD) |
 | [`hw-asus-rog`](../plugins/hw-asus-rog) | asusctl on ASUS ROG laptops: performance profiles, fan curves, a battery charge limit and the keyboard's lighting |
 | [`hw-asus-rog-audio`](../plugins/hw-asus-rog-audio) | Volume on ASUS ROG laptops set in software (WirePlumber's soft mixer), away from the Realtek codec's hardware mixer quirks that muffle the speakers; and the ALC285's Master unmuted |
-| [`hw-asus-um5606-psr`](../plugins/hw-asus-um5606-psr) | The ASUS Zenbook S 16 (UM5606, AMD Ryzen AI) screen no longer freezes on its last frame, the mouse and keyboard seemingly dead: Panel Self Refresh, which its OLED panel hangs in, turned off |
 | [`hw-asus-z13-touchpad`](../plugins/hw-asus-z13-touchpad) | The touchpad of the ASUS ROG Flow Z13's (GZ302) detachable keyboard ignored while typing, as a built-in one is: no more stray taps that jump the cursor |
 | [`hw-broadcom-wl`](../plugins/hw-broadcom-wl) | Broadcom's wl driver for the BCM4360 and BCM4331 Wi-Fi chips (2012-2015 MacBooks, and other laptops), which the kernel's own drivers run poorly or not at all |
 | [`hw-fingerprint`](../plugins/hw-fingerprint) | A finger unlocks the screen and allows system changes (the password still works); fingers added and removed from the palette. With the lid closed, the password. Offered where there's a reader fprintd supports |
