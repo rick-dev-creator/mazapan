@@ -1,0 +1,3 @@
+"plugin.name" = "L'écran de l'ASUS Zenbook S 16 qui se met à jour"
+"plugin.description" = "L'écran de l'ASUS Zenbook S 16 (UM5606, AMD Ryzen AI) ne se fige plus sur sa dernière image, la souris et le clavier en apparence morts : Panel Self Refresh, où sa dalle OLED reste bloquée, désactivé"
+"check.option" = "Panel Self Refresh est désactivé pour le pilote amdgpu"

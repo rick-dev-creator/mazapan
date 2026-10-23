@@ -372,7 +372,12 @@ Item {
       zoneAsked = true
       detectZone()
     }
+    // The disks as they are now, not as they were when it opened (a probe
+    // that came back empty, a disk plugged in since).
+    if (step === "disk") disksProbe.running = true
   }
+  // A disk picked: what was said about none being picked goes.
+  onDiskChanged: if (step === "disk") problem = ""
   property bool zoneAsked: false
 
   readonly property var kbShown: {
@@ -500,6 +505,8 @@ Item {
     if (step === "review" && byKey) return
     if (!canGo()) {
       if (step === "account") problem = accountProblem
+      // Never nothing at all: why it doesn't move on.
+      if (step === "disk") problem = disks.length === 0 ? {{ tq "disk.none" }} : diskNow ? {{ tq "disk.small" }} : {{ tq "disk.pick" }}
       // Something changed since (the password is kept in memory only, a
       // disk went away): back to where it's asked.
       if (step === "review") {

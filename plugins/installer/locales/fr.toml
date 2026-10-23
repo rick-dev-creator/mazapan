@@ -47,6 +47,7 @@ tz_undetected = "Impossible de le savoir d'après la connexion : cherchez votre 
 "disk.used" = "Contient des partitions actuellement"
 "disk.empty" = "Vide"
 "disk.none" = "Aucun disque où installer"
+"disk.pick" = "Choisissez le disque où installer"
 "disk.erase" = "Tout ce qui se trouve sur %1 sera effacé."
 "disk.encrypt" = "Chiffrer le disque"
 "disk.encrypt_d" = "S'il est perdu ou volé, personne ne peut le lire. Votre mot de passe le déverrouille au démarrage de l'ordinateur."
