@@ -1,7 +1,7 @@
 # The Mazapan plugin registry: plugins from others, each in its own
 # repository, at the commit the registry looked at. Generated from
 # https://github.com/rick-dev-creator/mazapan-plugins; don't edit.
-# 2026-10-08T04:41:00+00:00
+# 2026-10-09T03:48:55+00:00
 
 [[plugin]]
 id = "dock"
@@ -44,6 +44,27 @@ translations.fr.name = "Marchés"
 translations.fr.description = "Cours des cryptos et des actions avec graphiques de tendance : une liste où chaque symbole a sa propre période (BTC 4H, BTC 1W, SOL 1D), le top 20 des cryptos, vos actions et un défilant dans la barre"
 translations.pt.name = "Mercados"
 translations.pt.description = "Preços de cripto e ações com gráficos de tendência: uma lista em que cada símbolo tem seu próprio período (BTC 4H, BTC 1W, SOL 1D), as 20 maiores moedas, suas ações e um ticker na barra"
+
+[[plugin]]
+id = "news"
+name = "News"
+description = "The news from where you're from and where you live, in the languages you read: Google News' editions by country and language, its sections (science, entertainment…) and your own topics (AI, crypto…), in a quiet icon in the bar and a panel made for reading"
+author = "RickDev"
+source = "https://github.com/rick-dev-creator/mazapan-news"
+ref = "v0.1.0"
+commit = "573219523adfa1226c28291b717916cceed8e9c7"
+version = "0.1.0"
+license = "MIT"
+homepage = "https://github.com/rick-dev-creator/mazapan-news"
+categories = ["panel", "bar"]
+translations.de.name = "Nachrichten"
+translations.de.description = "Nachrichten von dort, wo du herkommst, und dort, wo du lebst, in den Sprachen, die du liest: die Ausgaben von Google News nach Land und Sprache, ihre Rubriken (Wissenschaft, Unterhaltung…) und eigene Themen (KI, Krypto…), als dezentes Symbol in der Leiste und ein Panel zum Lesen"
+translations.es.name = "Noticias"
+translations.es.description = "Las noticias de donde eres y de donde vives, en los idiomas que lees: las ediciones de Google News por país e idioma, sus secciones (ciencia, espectáculos…) y tus propios temas (IA, crypto…), en un icono discreto en la barra y un panel hecho para leer"
+translations.fr.name = "Actualités"
+translations.fr.description = "Les actualités d'où vous venez et d'où vous vivez, dans les langues que vous lisez : les éditions de Google Actualités par pays et par langue, leurs rubriques (sciences, divertissement…) et vos propres sujets (IA, crypto…), dans une icône discrète de la barre et un panneau fait pour lire"
+translations.pt.name = "Notícias"
+translations.pt.description = "As notícias de onde você é e de onde você mora, nos idiomas que você lê: as edições do Google Notícias por país e idioma, suas seções (ciência, entretenimento…) e seus próprios temas (IA, cripto…), num ícone discreto na barra e num painel feito para ler"
 
 [[plugin]]
 id = "now-playing"

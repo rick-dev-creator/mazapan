@@ -4,8 +4,25 @@ What changed in each release, newest first. The updates panel shows what's
 new since the version a system has. Changes go under "Unreleased" until a
 release (a tag `vX.Y.Z`) names them.
 
-## Unreleased
+## 0.5.1 (2026-10-23)
 
+- A new release key: Mazapan's packages and ISOs are signed by
+  `42FC 5905 D9D6 A8C1 585E 082B DF87 9369 652B 55DB` from 0.5.1 on. The
+  first one was lost, and with it the way to bring a new one in by
+  itself, so a system installed before 0.5.1 takes it once, by hand,
+  then updates as before:
+
+  ```sh
+  curl -fsSLO https://raw.githubusercontent.com/rick-dev-creator/mazapan/main/pkg/keys/mazapan.gpg
+  sudo pacman-key --add mazapan.gpg
+  sudo pacman-key --lsign-key 42FC5905D9D6A8C1585E082BDF879369652B55DB
+  ```
+- News, a new plugin in the registry
+  ([mazapan-news](https://github.com/rick-dev-creator/mazapan-news)): the
+  news from where you're from and where you live, in the languages you
+  read, by country, section and your own topics, in a quiet icon in the
+  bar and a panel made for reading. `mazapan plugins add news`, or the
+  Plugins panel. The copy of the registry that ships lists it.
 - The ASUS Zenbook S 16 (UM5606) froze on its first frame, from the
   ISO's live session on: a black screen with the cursor in the middle,
   the keyboard seemingly dead. Panel Self Refresh, which its panel hangs
